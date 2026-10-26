@@ -2,5 +2,12 @@
   "global": {
     "Mod+y": "edit.redo",
     "F10": "app.focusMenu"
+  },
+  "hierarchy": {
+    "Mod+Space": "hierarchy.toggleSelect",
+    "Alt+ArrowUp": "arrange.moveUp",
+    "Alt+ArrowDown": "arrange.moveDown",
+    "Alt+ArrowRight": "arrange.moveInto",
+    "Alt+ArrowLeft": "arrange.moveOut"
   }
 }

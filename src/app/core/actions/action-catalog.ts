@@ -57,6 +57,14 @@ const VIEW = group('view');
 const ADD = group('add');
 const ARRANGE = group('arrange');
 const HELP = group('help');
+/** Keys of the tree (design 006 E5): context `hierarchy`, not in the palette. */
+const TREE = (id: string, label: string): ActionDef => ({
+  id,
+  label,
+  context: 'hierarchy',
+  group: 'edit',
+  palette: false,
+});
 
 /** Clipboard and editing keys stay with text fields (design 005 E4/E7). */
 const TEXT: Extra = { nativeInText: true };
@@ -88,11 +96,29 @@ export const ACTIONS: readonly ActionDef[] = [
   EDIT('edit.redo', 'Redo', TEXT),
   EDIT('edit.cut', 'Cut', TEXT),
   EDIT('edit.copy', 'Copy', TEXT),
-  EDIT('edit.paste', 'Paste', TEXT),
+  EDIT('edit.paste', 'Paste', {
+    ...TEXT,
+    // `text`: paste this markup instead of the clipboard's (AI, tests)
+    args: { type: 'object', properties: { text: { type: 'string', maxLength: 16 << 20 } } },
+  }),
+  EDIT('edit.copyXml', 'Copy XML'),
   EDIT('edit.duplicate', 'Duplicate'),
-  EDIT('edit.delete', 'Delete', TEXT),
+  EDIT('edit.delete', 'Delete', {
+    ...TEXT,
+    // `confirm`: ask first ("Delete…" of the context menu, design 006 E8)
+    args: { type: 'object', properties: { confirm: { type: 'boolean' } } },
+  }),
+  EDIT('edit.editSvg', 'Edit SVG…'),
+  EDIT('edit.toggleVisibility', 'Show/Hide', {
+    args: { type: 'object', properties: { recursive: { type: 'boolean' } } },
+  }),
   EDIT('edit.selectAll', 'Select All', TEXT),
   EDIT('edit.deselect', 'Deselect'),
+  // selection as JSON (AI, tests; design 006 E16): `{ nodes?: NodeRef[], items?: IconItem[] }`
+  EDIT('edit.select', 'Select', {
+    palette: false,
+    args: { type: 'object', properties: { nodes: { type: 'json' }, items: { type: 'json' } } },
+  }),
   EDIT('edit.runCommand', 'Run a document command', {
     palette: false,
     args: {
@@ -151,6 +177,10 @@ export const ACTIONS: readonly ActionDef[] = [
   // arrange (legacy §7.2, §7.3; prompt 006)
   ARRANGE('arrange.bringToFront', 'Bring to Front', TEXT),
   ARRANGE('arrange.sendToBack', 'Send to Back', TEXT),
+  ARRANGE('arrange.moveUp', 'Move Up', { context: 'hierarchy', repeat: true }),
+  ARRANGE('arrange.moveDown', 'Move Down', { context: 'hierarchy', repeat: true }),
+  ARRANGE('arrange.moveInto', 'Move Into Group', { context: 'hierarchy' }),
+  ARRANGE('arrange.moveOut', 'Move Out of Group', { context: 'hierarchy' }),
   ARRANGE('arrange.group', 'Group <g>'),
   ARRANGE('arrange.ungroup', 'Ungroup'),
   ARRANGE('arrange.align.left', 'Align Left'),
@@ -159,6 +189,22 @@ export const ACTIONS: readonly ActionDef[] = [
   ARRANGE('arrange.align.top', 'Align Top'),
   ARRANGE('arrange.align.middle', 'Align Centers Vertically'),
   ARRANGE('arrange.align.bottom', 'Align Bottom'),
+  // the tree (APG tree pattern, design 006 E5)
+  TREE('hierarchy.next', 'Next Row'),
+  TREE('hierarchy.prev', 'Previous Row'),
+  TREE('hierarchy.first', 'First Row'),
+  TREE('hierarchy.last', 'Last Row'),
+  TREE('hierarchy.expand', 'Expand or Go to Child'),
+  TREE('hierarchy.collapse', 'Collapse or Go to Parent'),
+  TREE('hierarchy.extendNext', 'Extend Selection Down'),
+  TREE('hierarchy.extendPrev', 'Extend Selection Up'),
+  TREE('hierarchy.extendFirst', 'Extend Selection to First'),
+  TREE('hierarchy.extendLast', 'Extend Selection to Last'),
+  TREE('hierarchy.focusNext', 'Move Focus Down'),
+  TREE('hierarchy.focusPrev', 'Move Focus Up'),
+  TREE('hierarchy.select', 'Select Row'),
+  TREE('hierarchy.toggleSelect', 'Add or Remove Row'),
+  TREE('hierarchy.menu', 'Row Menu'),
   // help
   HELP('app.shortcuts', 'Keyboard Shortcuts'),
 ];

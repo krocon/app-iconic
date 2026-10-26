@@ -163,10 +163,10 @@ test('first group on top, and equal ids in two assets resolve per layer', async 
   await waitForCanvas(page);
   await page.evaluate(() => window.__appIconic!.canvas.set('mask', 'none'));
   // both assets define <linearGradient id="g">; red covers the left 600, blue all of it
-  await importSvg(page, 'red.svg', gradientSvg('#ff0000', 0, 600));
   await importSvg(page, 'blue.svg', gradientSvg('#0000ff', 0, 1024));
+  await importSvg(page, 'red.svg', gradientSvg('#ff0000', 0, 600));
   await setView(page, 0.5, 20, 20);
-  // red was imported first → earlier group → on top of blue
+  // red was imported last → first group (imports go on top, design 006 E14) → over blue
   const [r1, g1, b1] = await docPixel(page, 300, 500);
   expect([r1 > 200, g1 < 60, b1 < 60]).toEqual([true, true, true]);
   // right side: only blue – its url(#g) must not resolve to red's gradient

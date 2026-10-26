@@ -40,6 +40,12 @@ export const UNDO_TEXTS = {
   addAsset: 'Add Asset',
   removeAsset: 'Remove Asset',
   importSvg: 'Import SVG',
+  // hierarchy (design 006 E17)
+  moveLayer: 'Move Layer',
+  bringToFront: 'Bring to Front',
+  sendToBack: 'Send to Back',
+  paste: 'Paste',
+  cut: 'Cut',
 } as const;
 
 /** Key of an action name (`label` of a command). */

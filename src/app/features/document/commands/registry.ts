@@ -4,15 +4,18 @@ import { UNDO_TEXTS, UndoLabel } from '../undo/undo-texts';
 import { AddAsset, RemoveAsset, ReplaceAssetMarkup } from './asset-commands';
 import { CommandError, CompositeCommand, DocCommand } from './command';
 import { CommandType } from './command-json';
+import { DROP_POSITIONS, DropPosition, TreeTarget } from '../model/selection';
 import {
   AddGroup,
   AddLayer,
   MoveGroup,
+  MoveLayer,
   RemoveGroup,
   RemoveLayer,
   SetIconJsonValue,
 } from './json-commands';
 import { InsertNode, MoveNode, RemoveAttribute, RemoveNode, SetAttribute } from './node-commands';
+import { GroupNodes, ReorderNode, Ungroup } from './tree-commands';
 
 /**
  * The registry `type → parse` of every document command (design 005 E15, AI rule): JSON from
@@ -28,6 +31,8 @@ export const MAX_JSON_VALUE = 1 << 20;
 export const MAX_COMPOSITE_DEPTH = 8;
 export const MAX_COMMANDS = 10_000;
 const MAX_NAME = 255;
+/** Most nodes one reorder / group command may name. */
+export const MAX_REFS = 10_000;
 const MAX_PATH = 32;
 
 type Obj = Record<string, unknown>;
@@ -107,6 +112,41 @@ function path(v: unknown): (string | number)[] {
   return v.map((k) => (typeof k === 'number' ? int(k, 'path') : str(k, 'path')));
 }
 
+/** `{ group, layer }` of a layer. */
+function layerPos(v: unknown, what: string): { group: number; layer: number } {
+  const o = obj(v, what);
+  keys(o, ['group', 'layer']);
+  return { group: int(o['group'], what), layer: int(o['layer'], what) };
+}
+
+function list<T>(v: unknown, what: string, item: (x: unknown) => T): T[] {
+  if (!Array.isArray(v) || v.length === 0 || v.length > MAX_REFS) fail(what);
+  return v.map(item);
+}
+
+/** A tree target (design 006 E6): group, layer or node. */
+function treeTarget(v: unknown, what: string): TreeTarget {
+  const o = obj(v, what);
+  switch (o['kind']) {
+    case 'group':
+      keys(o, ['kind', 'group']);
+      return { kind: 'group', group: int(o['group'], what) };
+    case 'layer':
+      keys(o, ['kind', 'group', 'layer']);
+      return { kind: 'layer', group: int(o['group'], what), layer: int(o['layer'], what) };
+    case 'node':
+      keys(o, ['kind', 'ref']);
+      return { kind: 'node', ref: ref(o['ref'], what) };
+    default:
+      fail(what);
+  }
+}
+
+function position(v: unknown): DropPosition {
+  if (typeof v !== 'string' || !DROP_POSITIONS.includes(v as DropPosition)) fail('position');
+  return v as DropPosition;
+}
+
 type Parser = (o: Obj, depth: number, count: { n: number }) => DocCommand;
 
 const PARSERS: Record<CommandType, Parser> = {
@@ -178,6 +218,26 @@ const PARSERS: Record<CommandType, Parser> = {
   removeLayer: (o) => {
     keys(o, ['group', 'index']);
     return new RemoveLayer(int(o['group'], 'group'), int(o['index'], 'index'));
+  },
+  moveLayer: (o) => {
+    keys(o, ['from', 'to']);
+    return new MoveLayer(layerPos(o['from'], 'from'), layerPos(o['to'], 'to'));
+  },
+  reorder: (o) => {
+    keys(o, ['sources', 'target', 'position']);
+    return new ReorderNode(
+      list(o['sources'], 'sources', (s) => treeTarget(s, 'sources')),
+      treeTarget(o['target'], 'target'),
+      position(o['position']),
+    );
+  },
+  groupNodes: (o) => {
+    keys(o, ['refs']);
+    return new GroupNodes(list(o['refs'], 'refs', (r) => ref(r, 'refs')));
+  },
+  ungroup: (o) => {
+    keys(o, ['ref']);
+    return new Ungroup(ref(o['ref'], 'ref'));
   },
   addAsset: (o) => {
     keys(o, ['name', 'markup']);

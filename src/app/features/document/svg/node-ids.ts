@@ -105,5 +105,12 @@ export function parseFragment(markup: string): Element | null {
   const wrapped = `<svg xmlns="${SVG_NS}" xmlns:xlink="http://www.w3.org/1999/xlink">${markup}</svg>`;
   const parsed = parseSvg(wrapped);
   const children = parsed ? Array.from(parsed.root.children) : [];
-  return children.length === 1 ? children[0] : null;
+  if (children.length !== 1) return null;
+  // declarations the wrapper already makes would otherwise stay as attributes in the file
+  const el = children[0];
+  if (el.getAttribute('xmlns') === SVG_NS) el.removeAttribute('xmlns');
+  if (el.getAttribute('xmlns:xlink') === 'http://www.w3.org/1999/xlink') {
+    el.removeAttributeNS('http://www.w3.org/2000/xmlns/', 'xlink');
+  }
+  return el;
 }

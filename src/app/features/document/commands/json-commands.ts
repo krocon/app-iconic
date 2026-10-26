@@ -199,3 +199,29 @@ export class RemoveLayer extends JsonCommand {
     return { type: 'removeLayer', group: this.group, index: this.index };
   }
 }
+
+/** Moves a layer to another place, also into another group (`to` = place in the result). */
+export class MoveLayer extends JsonCommand {
+  readonly label = 'moveLayer';
+  constructor(
+    readonly from: { group: number; layer: number },
+    readonly to: { group: number; layer: number },
+  ) {
+    super();
+  }
+
+  protected apply(json: IconJson): IconJson {
+    const { from, to } = this;
+    check(from.group >= 0 && from.group < groupCount(json), `group ${from.group}`);
+    check(to.group >= 0 && to.group < groupCount(json), `group ${to.group}`);
+    check(from.layer >= 0 && from.layer < layerCount(json, from.group), `layer ${from.layer}`);
+    const layer = getIn(json, ['groups', from.group, 'layers', from.layer]);
+    const without = removeIn(json, ['groups', from.group, 'layers', from.layer]);
+    check(to.layer >= 0 && to.layer <= layerCount(without, to.group), `layer index ${to.layer}`);
+    return insertAt(without, ['groups', to.group, 'layers'], to.layer, layer);
+  }
+
+  toJSON(): CommandJson {
+    return { type: 'moveLayer', from: { ...this.from }, to: { ...this.to } };
+  }
+}

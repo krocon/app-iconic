@@ -5,7 +5,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   selector: 'app-side-panel',
   template: `
     <h2 class="title">{{ heading() }}</h2>
-    <div class="body"><ng-content /></div>
+    <div class="body" [class.flush]="flush()"><ng-content /></div>
   `,
   styles: `
     :host {
@@ -29,6 +29,14 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       overflow: auto;
       padding: var(--space-3);
       color: var(--color-text-muted);
+
+      /* the content scrolls itself (the hierarchy tree) */
+      &.flush {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        padding: var(--space-1);
+      }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,4 +44,5 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 })
 export class SidePanel {
   readonly heading = input.required<string>();
+  readonly flush = input(false);
 }

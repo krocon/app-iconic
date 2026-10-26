@@ -59,13 +59,13 @@
 - [ ] Symbol-Picker mit freiem Icon-Set, Suche, Gewicht/Größe, Plugin-Schnittstelle (013)
 
 ## 6. Hierarchie
-- [ ] Baum Root → Gruppen → Layer → Nodes, Typ-Icon, Name, Swatches, Sichtbarkeit (006)
-- [ ] Auswahl synchron mit Canvas, Mehrfachauswahl (006)
-- [ ] Drag & Drop mit Einfügelinie vor/nach/hinein, Nachfahren-Schutz, über Assets (006)
-- [ ] Kontextmenü Duplicate, Group <g>, Bring to Front, Send to Back, Edit SVG…, Copy XML, Delete… (006)
-- [ ] Folge-Auswahl nach dem Löschen (006)
-- [ ] Ausrichten (≥ 2 Nodes, Vereinigungs-Box, inkl. Transforms) (006)
-- [ ] Copy/Paste als SVG-XML, auch zwischen Dokumenten (006)
+- [x] Baum Root → Gruppen → Layer → Nodes, Typ-Icon, Name, Swatches, Sichtbarkeit (006; „Definitions“-Knoten, ab 500 Zeilen virtualisiert)
+- [x] Auswahl synchron mit Canvas, Mehrfachauswahl (006; APG-Tree-Tastatur, Auswahlrahmen im Canvas; Auswahl per Klick im Canvas: 007)
+- [x] Drag & Drop mit Einfügelinie vor/nach/hinein, Nachfahren-Schutz, über Assets (006; Command „Reorder Node“, Move Up/Down/Into/Out per Tastatur)
+- [x] Kontextmenü Duplicate, Group <g>, Bring to Front, Send to Back, Edit SVG…, Copy XML, Delete… (006; „Edit SVG…“ aktiv ab 011)
+- [x] Folge-Auswahl nach dem Löschen (006)
+- [x] Ausrichten (≥ 2 Nodes, Vereinigungs-Box, inkl. Transforms) (006)
+- [x] Copy/Paste als SVG-XML, auch zwischen Dokumenten (006)
 
 ## 7. Properties
 - [ ] Leerzustand „Nothing selected – Select an element in the hierarchy…“ (009)

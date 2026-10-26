@@ -17,7 +17,7 @@ export interface SvgImport {
 
 /**
  * "Import SVG…" (design 003 E15, legacy `AppModel.importSVG`): the SVG becomes a new asset, a
- * layer and a group at the end – one undo step. Foreign markup is cleaned first, then its
+ * layer and a group on top (design 006 E14) – one undo step. Foreign markup is cleaned first, then its
  * styles are resolved into attributes (E5); the command carries the result as markup. `null` if the file is no SVG.
  */
 export function importSvg(doc: IconDocument, file: SvgFile, host?: HTMLElement): SvgImport | null {
@@ -31,7 +31,8 @@ export function importSvg(doc: IconDocument, file: SvgFile, host?: HTMLElement):
   const layerName = uniqueLayerName(layerNameFor(file.name), layerNames(doc.iconJson));
   const command = new CompositeCommand('importSvg', [
     new AddAsset(assetName, markup),
-    new AddGroup(newGroup(newLayer(assetName, layerName))),
+    // on top = in front, like Icon Composer (design 006 E14)
+    new AddGroup(newGroup(newLayer(assetName, layerName)), 0),
   ]);
   return { command, assetName, layerName, removed };
 }

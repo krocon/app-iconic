@@ -50,6 +50,13 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 005 E5–E8 | Ein Menümodell → natives macOS-Menü (Spec je Fenster, das fokussierte zeigt seins, Klicks nur an dieses Fenster) bzw. HTML-Menüleiste (Windows/Linux, immer sichtbar, F10/Alt) | mehrere Fenster (003); ohne vordefiniertes Edit-Menü (⌘Z nicht doppelt), aber Cut/Copy/Paste/Select All als vordefinierte Einträge, damit Textfelder kopieren/einfügen können |
 | 005 E13 | Quit fragt alle Fenster nacheinander (`QuitQueue` in Rust), Cancel bricht ab | macOS-Verhalten; kein Datenverlust beim Beenden |
 | 005 E15 | Dokument-Commands serialisierbar: `toJSON()` → `CommandJson`, Registry `commandFromJson` (prüft feindliche Eingaben), `DocumentStore.runCommand(json)`, Aktion `edit.runCommand` | KI-Regel (001 E8): MCP (018) nutzt dieselben Commands wie das UI; Roundtrip-Test je Command |
+| 006 E1/E2 | Baummodell rein aus dem Dokument (`buildTree` → `flatten`, `computed`), Asset-Wurzel ohne eigene Zeile (der Layer steht für sie), nicht darstellende Kinder unter „Definitions“; SVG-Nodes in Dokumentreihenfolge, Gruppen/Layer wie Icon Composer (erste = vorn); ab 500 Zeilen virtualisiert | eine Quelle der Wahrheit; feste Zeilenhöhe `--tree-row-height` |
+| 006 E5 | Auswahl: `DocumentStore.selection` (Nodes, auch für den Canvas) + `items` (Root/Gruppen/Layer), schließen sich aus, gleichartig; Tastatur nach APG Tree als Aktionen im Kontext `hierarchy` | Auswahl beidseitig synchron; Tastatur nur über Aktionen (CLAUDE.md §4) |
+| 006 E6 | Ein Command `reorder { sources, target, position: before/after/into }` (relative Position statt Index) mit den Regeln der Vorlage (`TreeReorderService`), dazu `moveLayer`, `groupNodes`, `ungroup` | Maus, Tastatur (Move Up/Down/Into/Out) und KI nutzen denselben serialisierbaren Weg |
+| 006 E7 | Drag & Drop mit Zeigerereignissen statt HTML5-Drag-API | Tauri fängt Drag&Drop für Datei-Drops ab (v. a. Windows) |
+| 006 E12 | Zwischenablage als SVG-Text über `ClipboardApi` (`navigator.clipboard`) plus DOM-Ereignisse `copy`/`cut`/`paste` (macOS-Menü) – kein Plugin, kein Rust | plattformübergreifend, zwischen Fenstern/Apps; Einfügen wird bereinigt, IDs eindeutig |
+| 006 E13 | Ausrichten über `nodeBoundsInDocument` (BBox + Screen-CTMs), Verschiebung als vorangestelltes `translate(A⁻¹·d)` im System des Elternelements | „Der Browser ist die Grafik-Engine“ – keine eigene Transform-Kette |
+| 006 E14 | Import/Paste legen neue Gruppen oben (Index 0) an | wie Icon Composer (004 E3) |
 
 ## Schichten
 
@@ -86,6 +93,7 @@ Angular (WebView)                                   Rust
 | `window_start_action()` | 005 | Aktion, die ein ohne Fenster gewählter Menüeintrag (macOS) im neuen Fenster ausführt |
 
 DTO-Ergänzung 003: `IconDocumentDto.name`, `SaveResult.name` (Dateiname fürs UI). Fehlercode 005: `invalid_menu`.
+006 bringt keinen Rust-Command: Hierarchie, Ausrichten und Zwischenablage laufen ganz im Frontend.
 
 Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `export_svg`,
 `export_png` (012), `list_fonts`, `text_to_path` (013), `load_settings`/`save_settings` (015).

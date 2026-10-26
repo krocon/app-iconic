@@ -11,7 +11,8 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { clientToDocument } from '../../shared/geometry/dom-geometry';
+import { clientToDocument, Rect } from '../../shared/geometry/dom-geometry';
+import { measurable } from '../hierarchy/align';
 import { CANVAS_SIZE, iconGuides } from '../../shared/geometry/icon-guides';
 import { squirclePath } from '../../shared/geometry/squircle';
 import { documentToView, Point } from '../../shared/geometry/view-transform';
@@ -105,6 +106,17 @@ const WHEEL_ZOOM = 0.01;
                 }
               </g>
             }
+            <g class="selection">
+              @for (r of selectionRects(); track $index) {
+                <rect
+                  [attr.x]="r.x"
+                  [attr.y]="r.y"
+                  [attr.width]="r.width"
+                  [attr.height]="r.height"
+                  vector-effect="non-scaling-stroke"
+                />
+              }
+            </g>
           </svg>
         </div>
         @if (opt().crossCursor && pointerView(); as p) {
@@ -160,6 +172,9 @@ export class CanvasView {
     return null;
   });
 
+  /** Bounds of the selected nodes (design 006 E5: the canvas shows the tree's selection). */
+  protected readonly selectionRects = signal<Rect[]>([]);
+
   private readonly viewportEl = viewChild.required<ElementRef<HTMLElement>>('vp');
   private readonly layersEl = viewChild.required<ElementRef<HTMLElement>>('layers');
   private readonly hostEl = viewChild.required<ElementRef<SVGSVGElement>>('host');
@@ -172,6 +187,22 @@ export class CanvasView {
       const box = this.layersEl().nativeElement;
       this.stack ??= new LayerStack(box);
       this.stack.update(this.store()?.document() ?? null, this.opt().appearance);
+    });
+    // selection frames: measured after the layers are painted (needs layout)
+    let frame = 0;
+    effect(() => {
+      const s = this.store();
+      const refs = s?.selection() ?? [];
+      // re-measure after changes, zoom/pan and appearance (other assets)
+      s?.revision();
+      this.view();
+      this.opt();
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const doc = s?.document();
+        const host = this.hostEl().nativeElement;
+        this.selectionRects.set(doc ? measurable(doc, host, refs).map((n) => n.rect) : []);
+      });
     });
     // the pointer stays on the same screen spot while zooming/panning: recompute its document point
     effect(() => {

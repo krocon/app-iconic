@@ -32,11 +32,29 @@
     "Mod+Shift+ArrowUp": "arrange.bringToFront",
     "Mod+Shift+ArrowDown": "arrange.sendToBack",
     "Mod+Shift+p": "app.palette",
-    "Mod+/": "app.shortcuts"
+    "Mod+/": "app.shortcuts",
+    "Mod+Shift+h": "edit.toggleVisibility"
   },
   "canvas": {
     "Space": "canvas.panHold"
   },
-  "hierarchy": {},
+  "hierarchy": {
+    "ArrowDown": "hierarchy.next",
+    "ArrowUp": "hierarchy.prev",
+    "Home": "hierarchy.first",
+    "End": "hierarchy.last",
+    "ArrowRight": "hierarchy.expand",
+    "ArrowLeft": "hierarchy.collapse",
+    "Shift+ArrowDown": "hierarchy.extendNext",
+    "Shift+ArrowUp": "hierarchy.extendPrev",
+    "Shift+Home": "hierarchy.extendFirst",
+    "Shift+End": "hierarchy.extendLast",
+    "Mod+ArrowDown": "hierarchy.focusNext",
+    "Mod+ArrowUp": "hierarchy.focusPrev",
+    "Space": "hierarchy.select",
+    "Enter": "hierarchy.select",
+    "Shift+F10": "hierarchy.menu",
+    "ContextMenu": "hierarchy.menu"
+  },
   "dialog": {}
 }

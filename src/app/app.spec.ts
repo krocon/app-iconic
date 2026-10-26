@@ -68,12 +68,12 @@ describe('App', () => {
     expect(el.querySelector('[role="dialog"]')?.textContent).toContain('0.0.0-test');
   });
 
-  it('shows groups, layers and assets of the open document and stacks the layers (first on top)', async () => {
+  it('shows the tree of the open document and stacks the layers (first on top)', async () => {
     const { el } = await app(FakeIconFileApi.CAMSCANNER);
-    const hierarchy = el.querySelector('app-hierarchy-list')!.textContent!;
-    expect(hierarchy).toContain('Group 1');
-    expect(hierarchy).toContain('logo-scanner 3');
-    expect(hierarchy).toContain('opacity 1');
+    const rows = [...el.querySelectorAll('app-hierarchy-tree [role="treeitem"]')].map((r) =>
+      r.querySelector('.label')!.textContent!.trim(),
+    );
+    expect(rows.slice(0, 3)).toEqual(['Icon', 'Group 1', 'logo-scanner 3']);
     const layers = [...el.querySelectorAll<HTMLElement>('app-canvas-view .layer')];
     // first group on top = last in paint order (design 004 E3)
     expect(layers.map((l) => l.dataset['asset'])).toEqual([

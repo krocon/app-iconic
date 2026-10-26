@@ -57,16 +57,14 @@ export async function toClient(page: Page, x: number, y: number) {
   return c!;
 }
 
-/** Imports SVG markup as a new group (at the end = bottom, design 004 E3). */
+/** Imports SVG markup as a new group (on top, design 006 E14). */
 export async function importSvg(page: Page, name: string, text: string): Promise<void> {
   await page.evaluate(
     ([name, text]) => window.__appIconic!.addSvgFile(`/in/${name}`, name, text),
     [name, text],
   );
   await menu(page, 'File', 'Import SVG…');
-  await expect(page.getByRole('list', { name: 'Groups and layers' })).toContainText(
-    name.replace('.svg', ''),
-  );
+  await expect(page.getByRole('tree')).toContainText(name.replace('.svg', ''));
 }
 
 /** RGBA of the screen pixel at a client position (decoded in the page, no PNG library). */

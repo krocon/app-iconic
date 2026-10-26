@@ -4,6 +4,8 @@ import { DocCommand } from './commands/command';
 import { CommandJson } from './commands/command-json';
 import { commandFromJson } from './commands/registry';
 import { IconDocument, NodeRef } from './icon-document';
+import { groups, layers } from './model/icon-json';
+import { IconItem } from './model/selection';
 import { UndoService } from './undo/undo.service';
 import { UndoLabel } from './undo/undo-texts';
 
@@ -25,7 +27,10 @@ export class DocumentStore {
     { equal: () => false },
   );
   readonly revision = this.rev.asReadonly();
+  /** Selected SVG nodes – the one selection of canvas and tree (design 003 E7, 006 E5). */
   readonly selection = signal<readonly NodeRef[]>([]);
+  /** Selected root / groups / layers (design 006 E5); excludes `selection` and vice versa. */
+  readonly items = signal<readonly IconItem[]>([]);
 
   readonly dirty: Signal<boolean>;
   readonly canUndo: Signal<boolean>;
@@ -57,6 +62,7 @@ export class DocumentStore {
 
   execute(command: DocCommand): void {
     this.undoService.execute(command);
+    this.pruneSelection();
   }
 
   /**
@@ -70,6 +76,23 @@ export class DocumentStore {
   /** The last undoable step as JSON (design 005 E15; the AI can see what happened). */
   lastCommandJson(): CommandJson | null {
     return this.undoService.top?.toJSON() ?? null;
+  }
+
+  /** Selects SVG nodes (and no icon items). */
+  select(refs: readonly NodeRef[]): void {
+    this.items.set([]);
+    this.selection.set(refs);
+  }
+
+  /** Selects icon items (and no nodes). */
+  selectItems(items: readonly IconItem[]): void {
+    this.selection.set([]);
+    this.items.set(items);
+  }
+
+  clearSelection(): void {
+    this.selection.set([]);
+    this.items.set([]);
   }
 
   undo(): void {
@@ -107,10 +130,18 @@ export class DocumentStore {
     this.rev.set(this.doc.revision);
   }
 
-  /** Refs to nodes that are gone after undo/redo leave the selection. */
+  /** Refs to nodes and items that are gone after undo/redo leave the selection. */
   private pruneSelection(): void {
     const sel = this.selection();
     const kept = sel.filter((r) => this.doc.node(r) !== null);
     if (kept.length !== sel.length) this.selection.set(kept);
+    const gs = groups(this.doc.iconJson);
+    const items = this.items();
+    const keptItems = items.filter(
+      (i) =>
+        i.kind === 'root' ||
+        (i.group < gs.length && (i.kind === 'group' || i.layer < layers(gs[i.group]).length)),
+    );
+    if (keptItems.length !== items.length) this.items.set(keptItems);
   }
 }

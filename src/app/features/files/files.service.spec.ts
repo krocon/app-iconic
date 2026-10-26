@@ -229,7 +229,8 @@ describe('FilesService', () => {
     const s = files.store()!;
     const doc = s.document();
     expect([...doc.assets.keys()]).toContain('logo-scanner 3 2.svg');
-    const group = doc.iconJson.groups!.at(-1)!;
+    // on top (design 006 E14)
+    const group = doc.iconJson.groups![0];
     expect(group.layers).toEqual([
       { 'image-name': 'logo-scanner 3 2.svg', name: 'logo-scanner 3 2' },
     ]);

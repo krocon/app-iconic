@@ -1,3 +1,10 @@
 {
-  "global": {}
+  "global": {},
+  "hierarchy": {
+    "Ctrl+Space": "hierarchy.toggleSelect",
+    "Mod+Alt+ArrowUp": "arrange.moveUp",
+    "Mod+Alt+ArrowDown": "arrange.moveDown",
+    "Mod+Alt+ArrowRight": "arrange.moveInto",
+    "Mod+Alt+ArrowLeft": "arrange.moveOut"
+  }
 }

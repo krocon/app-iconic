@@ -8,16 +8,20 @@ import {
   CompositeCommand,
   DocCommand,
   InsertNode,
+  GroupNodes,
   MoveGroup,
+  MoveLayer,
   MoveNode,
   RemoveAsset,
   RemoveAttribute,
   RemoveGroup,
   RemoveLayer,
   RemoveNode,
+  ReorderNode,
   ReplaceAssetMarkup,
   SetAttribute,
   SetIconJsonValue,
+  Ungroup,
 } from '../app/features/document/commands';
 import { smallDocument } from './documents';
 
@@ -63,6 +67,32 @@ export const CASES: [string, (doc: IconDocument) => DocCommand][] = [
   ['MoveGroup', () => new MoveGroup(1, 0)],
   ['AddLayer', () => new AddLayer(0, newLayer('a.svg', 'y'))],
   ['RemoveLayer', () => new RemoveLayer(0, 0)],
+  ['MoveLayer', () => new MoveLayer({ group: 0, layer: 0 }, { group: 1, layer: 0 })],
+  [
+    'ReorderNode (groups)',
+    () => new ReorderNode([{ kind: 'group', group: 1 }], { kind: 'group', group: 0 }, 'before'),
+  ],
+  [
+    'ReorderNode (layer into group)',
+    () =>
+      new ReorderNode([{ kind: 'layer', group: 0, layer: 0 }], { kind: 'group', group: 1 }, 'into'),
+  ],
+  [
+    'ReorderNode (nodes)',
+    () =>
+      new ReorderNode([{ kind: 'node', ref: a('n4') }], { kind: 'node', ref: a('n3') }, 'before'),
+  ],
+  [
+    'ReorderNode (node into another asset)',
+    () =>
+      new ReorderNode(
+        [{ kind: 'node', ref: a('n3') }],
+        { kind: 'layer', group: 1, layer: 0 },
+        'into',
+      ),
+  ],
+  ['GroupNodes', () => new GroupNodes([a('n3'), a('n4')])],
+  ['Ungroup', () => new Ungroup(a('n2'))],
   ['AddAsset', () => new AddAsset('c.svg', SVG)],
   ['RemoveAsset', () => new RemoveAsset('a.svg')],
   [

@@ -8,7 +8,9 @@ import { registerFileActions } from './features/files/file-actions';
 import { FILES_TEXTS } from './features/files/files-texts';
 import { FilesService } from './features/files/files.service';
 import { RecentFilesService } from './features/files/recent-files.service';
-import { HierarchyList } from './features/hierarchy/hierarchy-list';
+import { registerEditActions } from './features/hierarchy/edit-actions';
+import { EditService } from './features/hierarchy/edit.service';
+import { HierarchyTree } from './features/hierarchy/hierarchy-tree';
 import { registerAppActions } from './features/menus/app-actions';
 import { CommandPalette } from './features/menus/command-palette';
 import { MenuBar } from './features/menus/menu-bar';
@@ -33,7 +35,7 @@ import { DialogService } from './shared/dialog/dialog.service';
     AskDialog,
     CanvasView,
     CommandPalette,
-    HierarchyList,
+    HierarchyTree,
     MenuBar,
     ShortcutsDialog,
     SidePanel,
@@ -82,9 +84,9 @@ import { DialogService } from './shared/dialog/dialog.service';
         <app-side-panel class="commands" [heading]="t.commands">{{ t.comingSoon }}</app-side-panel>
       }
       @if (panels().hierarchy) {
-        <app-side-panel class="hierarchy" [heading]="t.hierarchy">
+        <app-side-panel class="hierarchy" [heading]="t.hierarchy" [flush]="!!store()">
           @if (store(); as s) {
-            <app-hierarchy-list [store]="s" />
+            <app-hierarchy-tree [store]="s" />
           } @else {
             {{ t.noDocument }}
           }
@@ -147,6 +149,7 @@ export class App implements OnInit {
       this.files,
       this.destroyRef,
     );
+    registerEditActions(this.actions, inject(EditService), this.dialogs, this.destroyRef);
     // where the keyboard is (design 005 E4): a dialog owns it; else hierarchy or canvas first
     this.dispatcher.setContextProvider((target) => {
       if (this.dialogs.open() !== null) return ['dialog'];

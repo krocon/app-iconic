@@ -20,6 +20,9 @@ async function openCamscanner(page: Page) {
   await expect(page).toHaveTitle('camscanner.icon');
 }
 
+const assetNames = (page: Page) =>
+  page.evaluate(() => [...window.__appIconic!.store()!.document().assets.keys()]);
+
 /** Runs `SetAttribute` on the root `<svg>` of an asset through the store. */
 async function setRootAttribute(page: Page, asset: string, name: string, value: string) {
   await page.evaluate(
@@ -37,13 +40,10 @@ const layerSvg = (page: Page, asset: string) =>
 
 test('opens camscanner.icon: hierarchy and stacked layers', async ({ page }) => {
   await openCamscanner(page);
-  const hierarchy = page.getByRole('region', { name: 'Hierarchy' });
-  await expect(hierarchy.getByRole('list', { name: 'Groups and layers' })).toContainText(
+  const tree = page.getByRole('region', { name: 'Hierarchy' }).getByRole('tree');
+  await expect(tree.locator('[role="treeitem"][data-kind="layer"]')).toHaveText([
     'logo-scanner 3',
-  );
-  await expect(hierarchy.getByRole('list', { name: 'Assets' }).getByRole('listitem')).toHaveText([
-    A3,
-    A2,
+    'logo-scanner-2 2',
   ]);
   await expect(page.locator('app-canvas-view .layer')).toHaveCount(2);
   await expect(layerSvg(page, A3).locator('polygon').first()).toBeVisible();
@@ -106,9 +106,10 @@ test('Import SVG resolves styles; one undo removes group, layer and asset', asyn
   );
   await menu(page, 'File', 'Import SVG…');
 
-  const groups = page.getByRole('list', { name: 'Groups and layers' });
-  await expect(groups).toContainText('Group 3');
-  await expect(groups).toContainText('drop');
+  const groups = page.getByRole('tree').locator('[role="treeitem"][data-kind="group"]');
+  await expect(groups).toHaveCount(3);
+  // on top (design 006 E14)
+  await expect(page.getByRole('tree').locator('[data-row="g0/l0"]')).toContainText('drop');
   await expect(page.locator('app-canvas-view .layer')).toHaveCount(3);
   await expect(page.getByRole('status')).toContainText('drop.svg: removed scripts');
   const text = await page.evaluate(() => window.__appIconic!.assetText('drop.svg'));
@@ -122,8 +123,8 @@ test('Import SVG resolves styles; one undo removes group, layer and asset', asyn
   await expect(page).toHaveTitle('• camscanner.icon');
 
   await page.getByRole('button', { name: 'Undo Import SVG' }).click();
-  await expect(groups).not.toContainText('Group 3');
-  await expect(page.getByRole('list', { name: 'Assets' }).getByRole('listitem')).toHaveCount(2);
+  await expect(groups).toHaveCount(2);
+  await expect.poll(() => assetNames(page)).toEqual([A3, A2]);
   await expect(page.locator('app-canvas-view .layer')).toHaveCount(2);
   await expect(page).toHaveTitle('camscanner.icon');
 });
@@ -178,7 +179,5 @@ test('New asks about unsaved changes and starts an untitled document', async ({ 
   await menu(page, 'File', 'New Document');
   await page.getByRole('alertdialog').getByRole('button', { name: 'Don’t Save' }).click();
   await expect(page).toHaveTitle('Untitled');
-  await expect(page.getByRole('list', { name: 'Assets' }).getByRole('listitem')).toHaveText([
-    'layer.svg',
-  ]);
+  await expect.poll(() => assetNames(page)).toEqual(['layer.svg']);
 });

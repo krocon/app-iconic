@@ -20,6 +20,7 @@
   --color-warning: #8a5a00;
   --color-backdrop: rgb(20 18 12 / 40%);
   --color-hover: #e9e6dd;
+  --color-selection: #d9e5fa;
   --shadow-popup: 0 12px 32px rgb(0 0 0 / 18%);
   --ai-workspace-bg: #e4e3de;
   --ai-artboard-shadow: 0 2px 12px rgb(0 0 0 / 18%);
@@ -51,6 +52,7 @@
   --toolbar-height: 38px;
   --ruler-size: 20px;
   --statusbar-height: 24px;
+  --tree-row-height: 24px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -69,6 +71,7 @@
     --color-warning: #f5b84a;
     --color-backdrop: rgb(0 0 0 / 60%);
     --color-hover: #2b2f37;
+    --color-selection: #233752;
     --shadow-popup: 0 12px 32px rgb(0 0 0 / 60%);
     --ai-workspace-bg: #121316;
     --ai-artboard-shadow: 0 2px 16px rgb(0 0 0 / 60%);
@@ -103,6 +106,7 @@
   --color-warning: #f5b84a;
   --color-backdrop: rgb(0 0 0 / 60%);
   --color-hover: #2b2f37;
+  --color-selection: #233752;
   --shadow-popup: 0 12px 32px rgb(0 0 0 / 60%);
   --ai-workspace-bg: #121316;
   --ai-artboard-shadow: 0 2px 16px rgb(0 0 0 / 60%);

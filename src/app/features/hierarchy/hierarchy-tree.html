@@ -1,0 +1,108 @@
+<!-- APG tree: flat treeitems with level / position; the keys are actions (tree-navigation.ts) -->
+<div
+  #list
+  class="list"
+  role="tree"
+  aria-multiselectable="true"
+  [attr.aria-label]="t.tree"
+  [class.dragging]="drag.active()"
+  [class.blocked]="drag.active() && !drag.indicator()"
+  (scroll)="onScroll($event)"
+  (pointermove)="drag.move($event)"
+  (pointerup)="drag.up($event)"
+  (pointercancel)="drag.cancel()"
+>
+  <div class="sheet" role="none" [style.height.px]="rows().length * rowHeight()">
+    @for (r of window().rows; track r.node.id; let i = $index) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
+      <div
+        class="row"
+        role="treeitem"
+        [attr.data-index]="rowIndex(i)"
+        [attr.data-row]="r.node.id"
+        [attr.data-kind]="r.node.kind"
+        [style.top.px]="rowIndex(i) * rowHeight()"
+        [style.padding-left.px]="(r.level - 1) * 14 + 4"
+        [attr.aria-level]="r.level"
+        [attr.aria-posinset]="r.posinset"
+        [attr.aria-setsize]="r.setsize"
+        [attr.aria-expanded]="r.expanded"
+        [attr.aria-selected]="r.node.kind === 'defs' ? null : selectedIds().has(r.node.id)"
+        [attr.tabindex]="tabRow() === r.node.id ? 0 : -1"
+        [class.selected]="selectedIds().has(r.node.id)"
+        [class.dimmed]="r.dimmed || r.node.hidden"
+        [class.definition]="r.node.definition"
+        (click)="onRowClick($event, r, rowIndex(i))"
+        (pointerdown)="drag.down($event, r)"
+        (contextmenu)="onContextMenu($event, r)"
+        (focus)="focusedId.set(r.node.id)"
+      >
+        <span class="twisty" aria-hidden="true" (click)="onTwisty($event, r)">
+          @if (r.expanded !== null) {
+            <svg viewBox="0 0 10 10" [class.open]="r.expanded"><path d="M3 2l4 3-4 3z" /></svg>
+          }
+        </span>
+        <svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
+          <path [attr.d]="icon(r.node)" />
+        </svg>
+        @if (r.node.fill || r.node.stroke) {
+          <span class="swatches">
+            @for (s of [r.node.fill, r.node.stroke]; track $index) {
+              @if (s) {
+                <span
+                  class="swatch"
+                  [class.stroke]="$index === 1"
+                  [attr.data-kind]="s.kind"
+                  [style.background]="swatchStyle(s)"
+                  [title]="($index === 0 ? t.fill : t.stroke) + ': ' + swatchText(s)"
+                ></span>
+              } @else {
+                <span class="swatch empty"></span>
+              }
+            }
+          </span>
+        }
+        <span class="label">{{ r.node.label }}</span>
+        @if (r.node.warning) {
+          <span class="warn">{{ r.node.warning }}</span>
+        }
+        @if (r.node.kind !== 'root' && r.node.kind !== 'defs') {
+          <button
+            type="button"
+            class="eye"
+            tabindex="-1"
+            [class.off]="r.node.hidden"
+            [attr.aria-label]="(r.node.hidden ? t.show : t.hide) + ' ' + r.node.label"
+            [title]="(r.node.hidden ? t.show : t.hide) + ' – ' + t.visibilityHint"
+            (pointerdown)="$event.stopPropagation()"
+            (click)="onEye($event, r)"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" />
+              <path d="M8 6a2 2 0 1 0 .01 0" />
+              @if (r.node.hidden) {
+                <path d="M2.5 13.5l11-11" />
+              }
+            </svg>
+          </button>
+        }
+      </div>
+    }
+    @if (drag.indicator(); as d) {
+      <div
+        class="drop"
+        [class.into]="d.position === 'into'"
+        [style.left.px]="(d.level - 1) * 14 + 4"
+        [style.top.px]="
+          d.position === 'into'
+            ? d.index * rowHeight()
+            : (d.index + (d.position === 'after' ? 1 : 0)) * rowHeight() - 1
+        "
+        [style.height.px]="d.position === 'into' ? rowHeight() : 2"
+      ></div>
+    }
+  </div>
+</div>
+@if (menu(); as m) {
+  <app-context-menu [at]="m" (chosen)="chooseMenu($event)" (closed)="closeMenu()" />
+}

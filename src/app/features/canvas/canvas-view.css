@@ -158,3 +158,10 @@
     flex: 1;
   }
 }
+
+.host .selection rect {
+  fill: none;
+  stroke: var(--ai-handle-position);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}

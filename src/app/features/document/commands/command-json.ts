@@ -1,5 +1,6 @@
 import { IconGroup, IconLayer } from '../../../core/icon-file/icon-file.models';
 import { NodeRef } from '../icon-document';
+import { DropPosition, TreeTarget } from '../model/selection';
 import { UndoLabel } from '../undo/undo-texts';
 
 /** A value that survives `JSON.stringify` / `JSON.parse` unchanged. */
@@ -31,6 +32,15 @@ export type CommandJson =
   | { type: 'moveGroup'; from: number; to: number }
   | { type: 'addLayer'; group: number; layer: IconLayer; index?: number }
   | { type: 'removeLayer'; group: number; index: number }
+  | {
+      type: 'moveLayer';
+      from: { group: number; layer: number };
+      to: { group: number; layer: number };
+    }
+  /** "Reorder Node" (design 006 E6): relative to a target, not by index. */
+  | { type: 'reorder'; sources: TreeTarget[]; target: TreeTarget; position: DropPosition }
+  | { type: 'groupNodes'; refs: NodeRef[] }
+  | { type: 'ungroup'; ref: NodeRef }
   | { type: 'addAsset'; name: string; markup: string }
   | { type: 'removeAsset'; name: string }
   | { type: 'composite'; label: UndoLabel; commands: CommandJson[] };

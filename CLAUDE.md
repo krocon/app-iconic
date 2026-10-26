@@ -50,26 +50,33 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/actions/           Aktionskatalog, Keymaps (base/mac/other.json), ActionService (run(id, args?)),
                               KeyboardDispatcher (einziger keydown-Listener), shortcut, action-args (005)
   app/core/menu/              MenuApi (natives Menü, menu-action), KeymapApi (keymap.json), MenuSpec (005)
+  app/core/clipboard/         ClipboardApi (Text der System-Zwischenablage über navigator.clipboard, 006)
   app/backend-providers.ts    Bindung der Fassaden; Dev-Build: backend-providers.dev.ts (Fakes im Browser, 003 E14)
   app/features/document/      IconDocument, DocumentStore (runCommand), UndoService (undo/), Commands (commands/:
-                              serialisierbar, command-json.ts + registry.ts commandFromJson, 005),
-                              model/ (icon-json, unique-names), svg/ (node-ids, sanitize-svg, resolve-styles) (003)
+                              serialisierbar, command-json.ts + registry.ts commandFromJson, 005; tree-commands:
+                              ReorderNode/GroupNodes/Ungroup, 006), model/ (icon-json, unique-names, selection,
+                              reorder-rules), svg/ (node-ids, sanitize-svg, resolve-styles, svg-references) (003, 006)
   app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster/Quit), Recent,
                               file-actions (Aktionen der Datei-Funktionen), Texte (003, 005)
   app/features/menus/         Menümodell (rein), MenuService (nativ/HTML), MenuBar (Windows/Linux), Befehlspalette,
                               Kürzel-Dialog, app-actions (005)
-  app/features/hierarchy/     HierarchyList (Platzhalter bis 006: Gruppen/Layer/Assets)
+  app/features/hierarchy/     Ebenenbaum (006): hierarchy-model (Baum rein aus dem Dokument), HierarchyTree (APG
+                              Tree, virtualisiert), tree-navigation/-selection/-drag, context-menu, swatch,
+                              node-label, tree-icons; EditService + edit-actions (Cut/Copy/Paste/Duplicate/
+                              Delete/Sichtbarkeit/Arrange/Align), edit-/arrange-operations, paste, align, visibility,
+                              follow-up (Folge-Auswahl)
   app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3), Texte der Fensterhülle
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
                               icon-color, asset-placement (004), canvas-actions, View-Options-Menü (005)
   app/features/about/         About-Dialog
-  app/shared/geometry/        Geometrie: icon-guides, view-transform, zoom-steps, ruler-ticks, squircle (rein);
+  app/shared/geometry/        Geometrie: icon-guides, view-transform, zoom-steps, ruler-ticks, squircle, align (rein);
                               dom-geometry (clientToDocument, nodeToDocument über Screen-CTMs, 004)
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)
   app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,
-                              command-cases.ts, browser-hook.ts = `window.__appIconic` für Playwright)
+                              command-cases.ts, tree-documents.ts, fake-clipboard-api.ts, browser-hook.ts =
+                              `window.__appIconic` für Playwright)
   testing/fixtures/           generiert aus testdata/ (camscanner.icon, svg/, unique-names.json; `pnpm fixtures`)
 e2e/                          Playwright-Tests gegen den Dev-Server
 public/                       icon.svg (App-Icon), favicon.png
