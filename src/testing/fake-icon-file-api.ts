@@ -103,6 +103,20 @@ export class FakeIconFileApi extends IconFileApi {
     this.files.set(FakeIconFileApi.CAMSCANNER, fromFixture(CAMSCANNER_ICON));
   }
 
+  /** Puts a one-layer `.icon` with the SVG `text` at `path` (browser mode: every SVG fixture). */
+  addSvgIcon(path: string, assetName: string, text: string): void {
+    const layer = assetName.replace(/\.svg$/i, '');
+    const iconJson: IconJson = {
+      ...NEW_ICON,
+      groups: [{ ...NEW_ICON.groups![0], layers: [{ 'image-name': assetName, name: layer }] }],
+    };
+    this.files.set(path, {
+      format: 'bundle',
+      iconJson: JSON.stringify(iconJson, null, 2),
+      assets: [{ name: assetName, kind: 'svg', text }],
+    });
+  }
+
   private fail(): void {
     const e = this.failNext;
     this.failNext = null;

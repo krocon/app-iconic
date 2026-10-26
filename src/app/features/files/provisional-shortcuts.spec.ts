@@ -27,4 +27,19 @@ describe('ProvisionalShortcuts', () => {
     expect(key({ key: 's', ctrlKey: true })).toBe(false);
     expect(save).toHaveBeenCalledTimes(1);
   });
+
+  it('runs registered entries of other features until they unregister (design 004 E15)', () => {
+    TestBed.configureTestingModule({ providers: fakeBackend().providers });
+    const keys = TestBed.inject(ProvisionalShortcuts);
+    const zoom = vi.fn();
+    const off = keys.register({ '=': zoom, s: zoom });
+    expect(keys.onKey(new KeyboardEvent('keydown', { key: '=', ctrlKey: true }))).toBe(true);
+    expect(zoom).toHaveBeenCalledTimes(1);
+    // the file table wins over registered entries
+    vi.spyOn(TestBed.inject(FilesService), 'save').mockResolvedValue(true);
+    keys.onKey(new KeyboardEvent('keydown', { key: 's', ctrlKey: true }));
+    expect(zoom).toHaveBeenCalledTimes(1);
+    off();
+    expect(keys.onKey(new KeyboardEvent('keydown', { key: '=', ctrlKey: true }))).toBe(false);
+  });
 });

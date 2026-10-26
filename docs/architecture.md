@@ -35,6 +35,16 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 003 E6/E7 | `UndoService` je Dokument (Save-Punkt, Tiefe 200, Gesten `begin/update/commit/cancel` mit `merge`), `DocumentStore` als einfache Klasse je Dokument | kein God-Object, Gesten für 007 vorbereitet |
 | 003 E8/E10 | Ein Dokument je Fenster (`main`, `doc-<n>`); Open ersetzt ein unberührtes neues Dokument, sonst neues Fenster; schon offene Datei → Fenster nach vorn; Schließen fragt über `close-requested`; macOS bleibt ohne Fenster offen | macOS-Dokumentverhalten, auf allen OS gleich bedienbar |
 | 003 E14 | Browser-Modus über `fileReplacements` (`backend-providers.dev.ts`): Fakes + Test-Hook `window.__appIconic` nur im Dev-Build ohne Tauri | Playwright prüft Öffnen/Bearbeiten/Speichern ohne Backend; Produktions-Build ohne Fakes |
+| 004 E1 | Asset-Wurzel lebt im Fenster-Dokument (`goLive` nach dem Bereinigen), die `XMLDocument` behält nur den Prolog; der Canvas zeigt dieselbe Instanz | keine Kopien pro Änderung, `getCTM`/`getBBox` an den Elementen der `NodeRef`s (007); Serialisierung byte-gleich |
+| 004 E2 | je Layer ein Shadow Root mit eigenem Host-`<svg viewBox="0 0 1024 1024">` | gleiche `id`s verschiedener Assets lösen `url(#id)` im eigenen Tree Scope auf; `<style>` der Assets bleibt eingeschlossen |
+| 004 E3 | erste Gruppe/erster Layer in `icon.json` = oben | wie die Seitenleiste in Icon Composer (Frage an Marc) |
+| 004 E4 | Assets anderer Größe zentriert, unskaliert (Platzierungs-`<svg>` gehört dem Canvas) | wie Icon Composer; das Asset bleibt unverändert |
+| 004 E8 | Maske als CSS `clip-path` (Squircle = „continuous corner“, 22,37 %; Kreis) | Hintergrund + Layer geschnitten, Guides darüber nicht |
+| 004 E9/E10 | Zoom stufig (Knöpfe, Kürzel) und stufenlos (Pinch/Ctrl+Rad) um den Zeiger; Pan per `translate()` ohne Scrollbalken | flüssig; SVGs werden bei jeder Zoomstufe scharf gerastert (Breite = 1024 · z) |
+| 004 E11 | `ViewTransform` rein; DOM-Geometrie nur über `getScreenCTM()` von Host und Element | `getCTM()` endet am nächsten Viewport (Asset-`<svg>`), keine eigene Transform-Kette |
+| 004 E12 | Lineale in `<canvas>` | ein Zeichenvorgang je Änderung statt Hunderter SVG-Elemente beim Pannen |
+| 004 E14 | `CanvasViewStore` als Root-Service | ein Canvas je Fenster (eigene WebView); Menüs (005) und Test-Hook brauchen ihn |
+| 004 E16 | Playwright ohne Pixel-Baselines: DOM-/Geometrie-Assertions und einzelne Pixelfarben | Schriftrasterung unterscheidet sich zwischen Container und CI |
 
 ## Schichten
 

@@ -28,6 +28,17 @@ export class ProvisionalShortcuts {
     y: () => (this.mac ? undefined : this.files.redo()),
   };
 
+  /** Entries of other features (canvas zoom, design 004 E15); returns the unregister function. */
+  private readonly extra = new Map<string, () => unknown>();
+
+  register(entries: Record<string, () => unknown>): () => void {
+    for (const [k, f] of Object.entries(entries)) this.extra.set(k, f);
+    return () => {
+      for (const [k, f] of Object.entries(entries))
+        if (this.extra.get(k) === f) this.extra.delete(k);
+    };
+  }
+
   install(): void {
     const handler = (e: KeyboardEvent) => this.onKey(e);
     document.addEventListener('keydown', handler);
@@ -38,7 +49,8 @@ export class ProvisionalShortcuts {
   onKey(e: KeyboardEvent): boolean {
     const mod = this.mac ? e.metaKey && !e.ctrlKey : e.ctrlKey && !e.metaKey;
     if (!mod || e.altKey || this.dialogs.open() !== null || typing(e.target)) return false;
-    const action = this.table[(e.shiftKey ? 'shift+' : '') + e.key.toLowerCase()];
+    const key = (e.shiftKey ? 'shift+' : '') + e.key.toLowerCase();
+    const action = this.table[key] ?? this.extra.get(key);
     if (!action) return false;
     e.preventDefault();
     void action();

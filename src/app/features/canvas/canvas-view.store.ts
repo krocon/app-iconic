@@ -1,0 +1,131 @@
+import { computed, Injectable, signal } from '@angular/core';
+import { CANVAS_SIZE } from '../../shared/geometry/icon-guides';
+import {
+  centered,
+  clampPan,
+  Point,
+  viewToDocument,
+  ViewTransform,
+  zoomAround,
+} from '../../shared/geometry/view-transform';
+import { clampZoom, fitZoom, nextZoomStep, prevZoomStep } from '../../shared/geometry/zoom-steps';
+import { Appearance } from './appearance';
+
+/** Platform mask of the preview (design 004 E8). */
+export type MaskShape = 'none' | 'squircle' | 'circle';
+
+/** View options of the canvas (design 004 E14; persisted in prompt 015). */
+export interface CanvasOptions {
+  rulers: boolean;
+  guides: boolean;
+  background: boolean;
+  crossCursor: boolean;
+  /** Used from prompt 007 on. */
+  handles: boolean;
+  mask: MaskShape;
+  appearance: Appearance;
+}
+
+export type CanvasToggle = 'rulers' | 'guides' | 'background' | 'crossCursor' | 'handles';
+
+function systemAppearance(): Appearance {
+  return globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+/**
+ * State of the canvas view of this window (design 004 E14): view transform, viewport size, pointer
+ * and options. Root-provided because every window is its own WebView with exactly one canvas, and
+ * the menus of 005 (View › Zoom …) and the browser test hook need it; the document state stays in
+ * the `DocumentStore`. Holds the overlay host for the DOM geometry (`dom-geometry.ts`).
+ */
+@Injectable({ providedIn: 'root' })
+export class CanvasViewStore {
+  readonly view = signal<ViewTransform>({ zoom: 1, panX: 0, panY: 0 });
+  readonly viewport = signal({ width: 0, height: 0 });
+  /** Pointer in document units, `null` outside the canvas. */
+  readonly pointer = signal<Point | null>(null);
+  readonly options = signal<CanvasOptions>({
+    rulers: true,
+    guides: true,
+    background: true,
+    crossCursor: false,
+    handles: true,
+    mask: 'squircle',
+    appearance: systemAppearance(),
+  });
+  readonly zoom = computed(() => this.view().zoom);
+  /** The overlay `<svg>` of the canvas (set by `CanvasView`). */
+  host: SVGSVGElement | null = null;
+  /** The user zoomed or panned – until then resizing keeps the artboard fitted and centred. */
+  private touched = false;
+
+  setViewport(width: number, height: number): void {
+    this.viewport.set({ width, height });
+    if (width <= 0 || height <= 0) return;
+    if (this.touched) this.view.update((v) => clampPan(v, width, height));
+    else this.view.set(centered(width, height, fitZoom(width, height)));
+  }
+
+  /** Zooms to `zoom` (clamped) around `anchor` (viewport pixels; default the middle). */
+  zoomTo(zoom: number, anchor?: Point): void {
+    const { width, height } = this.viewport();
+    const at = anchor ?? { x: width / 2, y: height / 2 };
+    this.touched = true;
+    this.view.update((v) => clampPan(zoomAround(v, clampZoom(zoom), at), width, height));
+  }
+
+  zoomIn(anchor?: Point): void {
+    this.zoomTo(nextZoomStep(this.zoom()), anchor);
+  }
+
+  zoomOut(anchor?: Point): void {
+    this.zoomTo(prevZoomStep(this.zoom()), anchor);
+  }
+
+  /** 100 % (⌘0). */
+  actualSize(): void {
+    this.zoomTo(1);
+  }
+
+  /** Continuous zoom (pinch, Ctrl+wheel). */
+  zoomBy(factor: number, anchor: Point): void {
+    this.zoomTo(this.zoom() * factor, anchor);
+  }
+
+  /** Largest step that fits, centred; resizing keeps it fitted again. */
+  fit(): void {
+    const { width, height } = this.viewport();
+    this.touched = false;
+    this.view.set(centered(width, height, fitZoom(width, height)));
+  }
+
+  /** "Center Canvas": centred at the current zoom. */
+  center(): void {
+    const { width, height } = this.viewport();
+    this.view.set(centered(width, height, this.zoom()));
+  }
+
+  panBy(dx: number, dy: number): void {
+    const { width, height } = this.viewport();
+    this.touched = true;
+    this.view.update((v) =>
+      clampPan({ ...v, panX: v.panX + dx, panY: v.panY + dy }, width, height),
+    );
+  }
+
+  toggle(key: CanvasToggle): void {
+    this.options.update((o) => ({ ...o, [key]: !o[key] }));
+  }
+
+  set<K extends keyof CanvasOptions>(key: K, value: CanvasOptions[K]): void {
+    this.options.update((o) => ({ ...o, [key]: value }));
+  }
+
+  /** Document point under a viewport pixel (pure, from the view transform). */
+  toDocument(p: Point): Point {
+    return viewToDocument(this.view(), p);
+  }
+
+  /** Size of the artboard on screen. */
+  readonly artboardPx = computed(() => CANVAS_SIZE * this.zoom());
+}

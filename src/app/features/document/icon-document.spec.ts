@@ -10,7 +10,7 @@ describe('IconDocument', () => {
     expect(doc.iconJson.groups?.[0].layers?.[0].opacity).toBe(1);
     expect([...doc.assets.keys()]).toEqual(CAMSCANNER_ICON.assets.map((a) => a.name));
     const svg = doc.assets.get('logo-scanner 3.svg')!.svg!;
-    expect(svg.doc.documentElement.getAttribute('data-ai-id')).toBe('n1');
+    expect(svg.root.getAttribute('data-ai-id')).toBe('n1');
     expect(doc.notices).toEqual([]);
   });
 
@@ -90,10 +90,27 @@ describe('IconDocument', () => {
     expect(serializeAsset(doc.assets.get('evil.svg')!.svg!)).not.toContain('script');
   });
 
+  it('keeps the asset roots live in the window document (design 004 E1)', () => {
+    const doc = camscannerDocument();
+    const a = doc.assets.get('logo-scanner 3.svg')!.svg!;
+    expect(a.root.ownerDocument).toBe(document);
+    expect(
+      doc.node({ asset: a.root.getAttribute('data-ai-id') ? 'logo-scanner 3.svg' : '', id: 'n1' }),
+    ).toBe(a.root);
+    const poly = a.root.querySelector('polygon')!;
+    expect(doc.refOf(poly)).toEqual({
+      asset: 'logo-scanner 3.svg',
+      id: poly.getAttribute('data-ai-id'),
+    });
+    expect(doc.refOf(poly.cloneNode() as Element)).toBeNull();
+  });
+
   it('ids are unique across assets', () => {
     const doc = camscannerDocument();
     const ids = [...doc.assets.values()].flatMap((a) =>
-      [...a.svg!.doc.querySelectorAll('[data-ai-id]')].map((e) => e.getAttribute('data-ai-id')),
+      [a.svg!.root, ...a.svg!.root.querySelectorAll('[data-ai-id]')].map((e) =>
+        e.getAttribute('data-ai-id'),
+      ),
     );
     expect(new Set(ids).size).toBe(ids.length);
   });

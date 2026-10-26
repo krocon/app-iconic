@@ -9,7 +9,7 @@ import {
   SaveIconRequest,
   SaveResult,
 } from '../../core/icon-file/icon-file.models';
-import { assignIds, ID_ATTR, parseSvg, serializeAsset, SvgText } from './svg/node-ids';
+import { assignIds, goLive, ID_ATTR, parseSvg, serializeAsset, SvgText } from './svg/node-ids';
 import { SanitizeKind, sanitizeSvg } from './svg/sanitize-svg';
 
 /** Addresses one element: asset name + `data-ai-id` (design 003 E2). Never a DOM reference. */
@@ -84,7 +84,7 @@ export class IconDocument {
       this.notices.push({ code: 'unparsable_svg', name });
       return { name, kind, text: content.text, saved: content.text };
     }
-    for (const code of this.prepare(svg.doc.documentElement)) this.notices.push({ code, name });
+    for (const code of this.prepareSvg(svg)) this.notices.push({ code, name });
     // the base line is taken after cleaning: an asset nobody edits keeps its bytes (E4)
     return { name, kind, svg, saved: serializeAsset(svg) };
   }
@@ -93,6 +93,13 @@ export class IconDocument {
   prepare(root: Element): SanitizeKind[] {
     const found = sanitizeSvg(root);
     assignIds(root, () => this.nextId());
+    return found;
+  }
+
+  /** `prepare` for a whole parsed asset, then its root goes live (design 004 E1). */
+  prepareSvg(svg: SvgText): SanitizeKind[] {
+    const found = this.prepare(svg.root);
+    goLive(svg);
     return found;
   }
 
@@ -107,9 +114,10 @@ export class IconDocument {
 
   /** The element `ref` points to, `null` if it is gone. */
   node(ref: NodeRef): Element | null {
-    const svg = this.assets.get(ref.asset)?.svg;
-    if (!svg || !/^n\d+$/.test(ref.id)) return null;
-    return svg.doc.querySelector(`[${ID_ATTR}="${ref.id}"]`);
+    const root = this.assets.get(ref.asset)?.svg?.root;
+    if (!root || !/^n\d+$/.test(ref.id)) return null;
+    if (root.getAttribute(ID_ATTR) === ref.id) return root;
+    return root.querySelector(`[${ID_ATTR}="${ref.id}"]`);
   }
 
   /** The ref of an element of one of the assets. */
@@ -117,7 +125,7 @@ export class IconDocument {
     const id = el.getAttribute(ID_ATTR);
     if (!id) return null;
     for (const a of this.assets.values()) {
-      if (a.svg && a.svg.doc === el.ownerDocument) return { asset: a.name, id };
+      if (a.svg && (a.svg.root === el || a.svg.root.contains(el))) return { asset: a.name, id };
     }
     return null;
   }
@@ -172,10 +180,9 @@ export class IconDocument {
 
   /** Everything that makes up the document, ids included (tests: "identical after undo"). */
   snapshot(): string {
-    const xml = new XMLSerializer();
     const assets = [...this.assets.values()].map((a) => [
       a.name,
-      a.svg ? xml.serializeToString(a.svg.doc) : (a.text ?? a.dataUrl ?? ''),
+      a.svg ? serializeAsset(a.svg, true) : (a.text ?? a.dataUrl ?? ''),
     ]);
     return JSON.stringify({ iconJson: this.iconJson, assets });
   }

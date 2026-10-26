@@ -37,18 +37,19 @@ describe('App', () => {
     expect(el.querySelector('[role="dialog"]')?.textContent).toContain('0.0.0-test');
   });
 
-  it('shows groups, layers and assets of the open document and stacks the layers', async () => {
+  it('shows groups, layers and assets of the open document and stacks the layers (first on top)', async () => {
     const { el } = await app(FakeIconFileApi.CAMSCANNER);
     const hierarchy = el.querySelector('app-hierarchy-list')!.textContent!;
     expect(hierarchy).toContain('Group 1');
     expect(hierarchy).toContain('logo-scanner 3');
     expect(hierarchy).toContain('opacity 1');
     const layers = [...el.querySelectorAll<HTMLElement>('app-canvas-view .layer')];
+    // first group on top = last in paint order (design 004 E3)
     expect(layers.map((l) => l.dataset['asset'])).toEqual([
-      'logo-scanner 3.svg',
       'logo-scanner-2 2.svg',
+      'logo-scanner 3.svg',
     ]);
-    expect(layers[0].shadowRoot!.querySelector('svg polygon')).not.toBeNull();
+    expect(layers[1].shadowRoot!.querySelector('svg polygon')).not.toBeNull();
   });
 
   it('undo and redo buttons follow the document', async () => {

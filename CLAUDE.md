@@ -54,9 +54,12 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               Kürzel (bis 005), Texte (003)
   app/features/hierarchy/     HierarchyList (Platzhalter bis 006: Gruppen/Layer/Assets)
   app/features/shell/         SidePanel, Texte der Fensterhülle
-  app/features/canvas/        CanvasView (Platzhalter bis 004: Layer übereinander je Shadow Root + Icon-Guides)
+  app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
+                              Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
+                              icon-color, asset-placement (004)
   app/features/about/         About-Dialog
-  app/shared/geometry/        reine Geometrie (icon-guides; später Matrizen, Snapping, Bounds)
+  app/shared/geometry/        Geometrie: icon-guides, view-transform, zoom-steps, ruler-ticks, squircle (rein);
+                              dom-geometry (clientToDocument, nodeToDocument über Screen-CTMs, 004)
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)
   app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,

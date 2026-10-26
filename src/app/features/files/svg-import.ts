@@ -23,10 +23,9 @@ export interface SvgImport {
 export function importSvg(doc: IconDocument, file: SvgFile, host?: HTMLElement): SvgImport | null {
   const svg = parseSvg(file.text);
   if (!svg) return null;
-  const root = svg.doc.documentElement;
-  const removed = sanitizeSvg(root);
-  resolveStyles(root, host);
-  doc.prepare(root);
+  const removed = sanitizeSvg(svg.root);
+  resolveStyles(svg.root, host);
+  doc.prepareSvg(svg);
   const assetName = uniqueAssetName(file.name, [...doc.assets.keys()]);
   const layerName = uniqueLayerName(layerNameFor(file.name), layerNames(doc.iconJson));
   const command = new CompositeCommand('importSvg', [

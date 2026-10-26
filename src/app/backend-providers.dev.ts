@@ -8,15 +8,21 @@ import { FakeIconFileApi } from '../testing/fake-icon-file-api';
 import { FakeRecentFilesApi } from '../testing/fake-recent-files-api';
 import { FakeWindowApi } from '../testing/fake-window-api';
 import { installTestHook } from '../testing/browser-hook';
+import { SVG_FIXTURES } from '../testing/fixtures/svg-fixtures';
 
 /**
  * DEVELOPMENT ONLY (design 003 E14) – replaces `backend-providers.ts` via `fileReplacements` in
  * the `development` configuration. Under Tauri (`tauri dev`) the real facades; in a plain
  * browser (`pnpm start`, Playwright) the fakes from `src/testing/` with `camscanner.icon` in
- * memory and the test hook `window.__appIconic`. Never part of the production build.
+ * memory (plus every SVG fixture as `/fixtures/svg/<name>.icon`) and the test hook
+ * `window.__appIconic`. Never part of the production build.
  */
 function browserFiles(): IconFileApi {
   const fake = new FakeIconFileApi();
+  // every SVG fixture as a one-layer document (design 004 E16)
+  for (const f of SVG_FIXTURES) {
+    fake.addSvgIcon(`/fixtures/svg/${f.name.replace(/\.svg$/, '')}.icon`, f.name, f.text);
+  }
   fake.fallbackPick = (kind, name) =>
     kind === 'open' ? FakeIconFileApi.CAMSCANNER : kind === 'save' ? `/browser/${name}` : null;
   return fake;

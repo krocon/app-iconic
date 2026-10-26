@@ -24,14 +24,15 @@
 - [ ] Deutsch/Englisch zur Laufzeit *(neu)* (015)
 
 ## 3. Canvas
-- [ ] Zoom 25/33/50/66/75/100/125/150/200 %, Anzeige, Pinch, ⌘+/⌘−/⌘0, Center Canvas (004)
-- [ ] Pan (Scroll / Space+Drag) (004)
-- [ ] Lineale mit Haupt-/Nebenteilung, zoomabhängig (004)
-- [ ] Mauskoordinaten im Dokumentraum (004)
-- [ ] Cross Cursor (004)
-- [ ] Icon-Guides (Diagonalen, Raster 128…896, Kreise Ø 820/512/204, #0A84FF) (004)
-- [ ] Hintergrund nach Icon-Fill, Light/Dark umschaltbar (004, 010)
-- [ ] Plattform-Vorschau Squircle / Kreis als Maske (004)
+- [x] Zoom 25/33/50/66/75/100/125/150/200 %, Anzeige, Pinch, ⌘+/⌘−/⌘0, Center Canvas (004; Kürzel provisorisch bis 005, dazu „Fit“)
+- [x] Pan (Scroll / Space+Drag / mittlere Maustaste) (004)
+- [x] Lineale mit Haupt-/Nebenteilung, zoomabhängig (004)
+- [x] Mauskoordinaten im Dokumentraum (004)
+- [x] Cross Cursor (004)
+- [x] Icon-Guides (Diagonalen, Raster 128…896, Kreise Ø 820/512/204, #0A84FF) (004)
+- [x] Hintergrund nach Icon-Fill, Light/Dark umschaltbar (004 Vorschau; Bearbeiten 010)
+- [x] Plattform-Vorschau Squircle / Kreis als Maske (004)
+- [x] Assets lebendig im DOM, Reihenfolge wie Icon Composer (erste Gruppe oben), Layer-/Gruppen-Opacity, hidden, eindeutige IDs je Layer *(neu)* (004)
 - [ ] Gruppen-Schatten und Transluzenz als Vorschau-Annäherung *(neu)* (010)
 - [ ] BoundsGuard (Punkte, Pfade, Translationen klemmen) (007)
 

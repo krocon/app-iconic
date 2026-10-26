@@ -15,7 +15,7 @@ describe('resolve-styles', () => {
     const svg = parseSvg(
       '<svg xmlns="http://www.w3.org/2000/svg"><rect width="10px" height="2em" x="5%"/></svg>',
     )!;
-    expect(resolveStyles(svg.doc.documentElement)).toBe(false);
+    expect(resolveStyles(svg.root)).toBe(false);
     expect(serializeAsset(svg)).toContain('<rect width="10" height="32" x="5%"/>');
   });
 });

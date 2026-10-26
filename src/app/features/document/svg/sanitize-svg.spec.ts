@@ -6,7 +6,7 @@ const S = 'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/199
 
 function clean(markup: string) {
   const svg = parseSvg(`<svg ${S}>${markup}</svg>`)!;
-  const found = sanitizeSvg(svg.doc.documentElement);
+  const found = sanitizeSvg(svg.root);
   return { found, out: serializeAsset(svg) };
 }
 
@@ -60,7 +60,7 @@ describe('sanitizeSvg', () => {
   it.each(SVG_FIXTURES.map((f) => [f.name, f.text]))('cleans the fixture %s', (name, text) => {
     const svg = parseSvg(text)!;
     const before = serializeAsset(svg);
-    expect(sanitizeSvg(svg.doc.documentElement)).toEqual(EXPECTED[name] ?? []);
+    expect(sanitizeSvg(svg.root)).toEqual(EXPECTED[name] ?? []);
     if (!EXPECTED[name]) expect(serializeAsset(svg)).toBe(before);
   });
 });

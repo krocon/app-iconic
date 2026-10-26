@@ -29,7 +29,7 @@ function freshSvg(
   text = '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0"/></svg>',
 ) {
   const svg = parseSvg(text)!;
-  doc.prepare(svg.doc.documentElement);
+  doc.prepare(svg.root);
   return svg;
 }
 
@@ -72,7 +72,7 @@ const CASES: [string, (doc: IconDocument) => DocCommand][] = [
 ];
 
 function firstId(doc: IconDocument, asset: string): string {
-  return doc.assets.get(asset)!.svg!.doc.documentElement.getAttribute('data-ai-id')!;
+  return doc.assets.get(asset)!.svg!.root.getAttribute('data-ai-id')!;
 }
 
 function document(): IconDocument {

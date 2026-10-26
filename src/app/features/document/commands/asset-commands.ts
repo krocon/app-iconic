@@ -22,7 +22,7 @@ export class ReplaceAssetMarkup implements DocCommand {
     if (!this.next) {
       const parsed = parseSvg(this.markup);
       if (!parsed) throw new CommandError('invalid SVG');
-      doc.prepare(parsed.doc.documentElement);
+      doc.prepareSvg(parsed);
       this.next = parsed;
     }
     this.old = a.svg;

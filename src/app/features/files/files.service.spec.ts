@@ -39,7 +39,7 @@ describe('FilesService', () => {
   function edit() {
     const s = files.store()!;
     const asset = [...s.document().assets.keys()][0];
-    const id = s.document().assets.get(asset)!.svg!.doc.documentElement.getAttribute('data-ai-id')!;
+    const id = s.document().assets.get(asset)!.svg!.root.getAttribute('data-ai-id')!;
     s.execute(new SetAttribute({ asset, id }, 'opacity', '0.5'));
     TestBed.tick();
   }

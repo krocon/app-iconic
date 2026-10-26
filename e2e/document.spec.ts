@@ -30,8 +30,9 @@ async function setRootAttribute(page: Page, asset: string, name: string, value: 
   );
 }
 
+/** The live root `<svg>` of an asset in the canvas (the only `<svg>` there with an id, 004 E1). */
 const layerSvg = (page: Page, asset: string) =>
-  page.locator(`app-canvas-view .layer[data-asset="${asset}"] svg`).first();
+  page.locator(`app-canvas-view .layer[data-asset="${asset}"] svg[data-ai-id]`).first();
 
 test('opens camscanner.icon: hierarchy and stacked layers', async ({ page }) => {
   await openCamscanner(page);
