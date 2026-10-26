@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" style="background:#111;">
+    <rect x="0" y="0" width="1024" height="1024" fill="black"/>
+    <!-- Level 1 (translate) -->
+    <g transform="translate(50,50)" fill="#e6194B">
+        <text x="0" y="0" font-size="18" fill="#e6194B">Pos (50.00,50.00)</text>
+        <!-- Level 2 (translate) -->
+        <g transform="translate(100,0)" fill="#f58231">
+            <text x="0" y="0" font-size="18" fill="#f58231">Pos (150.00,50.00)</text>
+            <!-- Level 3 (translate) -->
+            <g transform="translate(0,100)" fill="#ffe119">
+                <text x="0" y="0" font-size="18" fill="#ffe119">Pos (150.00,150.00)</text>
+                <!-- Level 4 (translate) -->
+                <g transform="translate(200,0)" fill="#bfef45">
+                    <text x="0" y="0" font-size="18" fill="#bfef45">Pos (350.00,150.00)</text>
+                    <!-- Level 5 (translate) -->
+                    <g transform="translate(0,100)" fill="#42d4f4">
+                        <text x="0" y="0" font-size="18" fill="#42d4f4">Pos (350.00,250.00)</text>
+                        <!-- Level 6 (translate) -->
+                        <g transform="translate(150,0)" fill="#4363d8">
+                            <text x="0" y="0" font-size="18" fill="#4363d8">Pos (500.00,250.00)</text>
+                            <!-- Level 7 (translate+scale) -->
+                            <g transform="translate(0,150) scale(1.2,1.0)" fill="#f032e6">
+                                <text x="0" y="0" font-size="18" fill="#f032e6">Pos (500.00,400.00)</text>
+                                <!-- Level 8 (translate+scale) -->
+                                <g transform="translate(100,0) scale(1.0,1.5)" fill="#fabebe">
+                                    <text x="0" y="0" font-size="18" fill="#fabebe">Pos (620.00,400.00)</text>
+                                    <!-- Level 9 (translate+scale) -->
+                                    <g transform="translate(0,120) scale(0.8,0.8)" fill="#469990">
+                                        <text x="0" y="0" font-size="18" fill="#469990">Pos (620.00,580.00)</text>
+                                        <!-- Level 10 (translate+scale) -->
+                                        <g transform="translate(80,0) scale(1.1,1.1)" fill="#e6beff">
+                                            <text x="0" y="0" font-size="18" fill="#e6beff">Pos (696.80,580.00)</text>
+                                            <!-- Level 11 (translate+scale) -->
+                                            <g transform="translate(60,40) scale(1.0,1.0)" fill="#9A6324">
+                                                <text x="0" y="0" font-size="18" fill="#9A6324">Pos (760.16,632.80)</text>
+                                                <!-- Level 12 (translate+scale) -->
+                                                <g transform="translate(-50,50) scale(0.9,1.2)" fill="#fffac8">
+                                                    <text x="0" y="0" font-size="18" fill="#fffac8">Pos (707.36,698.80)</text>
+                                                    <!-- Level 13 (matrix no rotation) -->
+                                                    <g transform="matrix(1.0,0,0,1.0,30,-20)" fill="#800000">
+                                                        <text x="0" y="0" font-size="18" fill="#800000">Pos (735.87,667.12)</text>
+                                                        <!-- Level 14 (matrix no rotation) -->
+                                                        <g transform="matrix(1.2,0,0,0.9,10,40)" fill="#aaffc3">
+                                                            <text x="0" y="0" font-size="18" fill="#aaffc3">Pos (745.38,730.48)</text>
+                                                            <!-- Level 15 (matrix no rotation) -->
+                                                            <g transform="matrix(0.8,0,0,1.1,-20,0)" fill="#000075">
+                                                                <text x="0" y="0" font-size="18" fill="#000075">Pos (722.57,730.48)</text>
+                                                                <!-- Level 16 (matrix no rotation) -->
+                                                                <g transform="matrix(1.0,0,0,1.3,0,60)" fill="#a9a9a9">
+                                                                    <text x="0" y="0" font-size="18" fill="#a9a9a9">Pos (722.57,824.57)</text>
+                                                                    <!-- Level 17 (matrix no rotation) -->
+                                                                    <g transform="matrix(1.5,0,0,1.0,25,-30)" fill="#ffd8b1">
+                                                                        <text x="0" y="0" font-size="18" fill="#ffd8b1">Pos (745.38,763.41)</text>
+                                                                        <!-- Level 18 (matrix no rotation) -->
+                                                                        <g transform="matrix(0.7,0,0,0.7,40,40)" fill="#dcbeff">
+                                                                            <text x="0" y="0" font-size="18" fill="#dcbeff">Pos (800.12,844.96)</text>
+                                                                            <!-- Level 19 (rotate+translate) -->
+                                                                            <g transform="rotate(10) translate(40,30)" fill="#000000">
+                                                                                <text x="0" y="0" font-size="18" fill="#000000">Pos (832.87,897.03)</text>
+                                                                                <!-- Level 20 (rotate+translate) -->
+                                                                                <g transform="rotate(-20) translate(-60,50)" fill="#ffe4e1">
+                                                                                    <text x="0" y="0" font-size="18" fill="#ffe4e1">Pos (784.58,982.16)</text>
+                                                                                    <!-- Level 21 (rotate+translate) -->
+                                                                                    <g transform="rotate(30) translate(120,-40)" fill="#ff9da7">
+                                                                                        <text x="0" y="0" font-size="18" fill="#ff9da7">Pos (905.71,987.09)</text>
+                                                                                        <!-- Level 22 (rotate+translate) -->
+                                                                                        <g transform="rotate(45) translate(0,80)" fill="#bada55">
+                                                                                            <text x="0" y="0" font-size="18" fill="#bada55">Pos (836.25,1035.34)</text>
+                                                                                            <!-- Level 23 (rotate+translate) -->
+                                                                                            <g transform="rotate(-15) translate(90,0)" fill="#7df9ff">
+                                                                                                <text x="0" y="0" font-size="18" fill="#7df9ff">Pos (891.67,1133.73)</text>
+                                                                                                <!-- Level 24 (rotate+translate) -->
+                                                                                                <g transform="rotate(60) translate(-70,-70)" fill="#ffb347">
+                                                                                                    <text x="0" y="0" font-size="18" fill="#ffb347">Pos (977.62,1074.02)</text>
+                                                                                                </g>
+                                                                                            </g>
+                                                                                        </g>
+                                                                                    </g>
+                                                                                </g>
+                                                                            </g>
+                                                                        </g>
+                                                                    </g>
+                                                                </g>
+                                                            </g>
+                                                        </g>
+                                                    </g>
+                                                </g>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

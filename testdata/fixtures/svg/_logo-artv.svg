@@ -1,0 +1,37 @@
+
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 1024 1024"
+     width="1024"
+     height="1024">
+
+<style>
+    @font-face {
+        font-family: 'SF Pro';
+        src: url('SF-Pro.ttf') format('truetype');
+    }
+    @font-face {
+        font-family: 'SF Symbols';
+        src: url('SF-Symbols.ttf') format('truetype');
+    }
+
+    .sf-symbol {
+        font-family: 'SF Symbols';
+    }
+</style>
+    <rect x="112" y="287" width="800" height="450" fill="rgb(0,0,255)"/>
+    <rect x="112" y="377" width="640" height="360" fill="rgba(173,216,230,0.5)"/>
+    <rect x="112" y="467" width="480" height="270" fill="rgba(173,216,230,0.5)"/>
+    <rect x="112" y="557" width="320" height="180" fill="rgb(173,216,230)"/>
+    <line x1="112" y1="737" x2="912" y2="287" stroke="rgb(0,255,0)" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="512" cy="512" r="462" fill="none" stroke="rgba(255,0,0,0.3)" stroke-width="6"/>
+    <!-- Circles around the three rects -->
+    <!-- Rect 640x360 at (112,377): center (432,557), radius sqrt((640/2)^2+(360/2)^2)=368.78 -->
+    <circle cx="432" cy="557" r="370" fill="none" stroke="rgba(255,0,0,0.3)" stroke-width="6"/>
+    <!-- Rect 480x270 at (112,467): center (352,602), radius sqrt(240^2+135^2)=275.54 -->
+    <circle cx="352" cy="602" r="277" fill="none" stroke="rgba(255,0,0,0.3)" stroke-width="6"/>
+    <!-- Rect 320x180 at (112,557): center (272,647), radius sqrt(160^2+90^2)=184.39 -->
+    <circle cx="272" cy="647" r="186" fill="none" stroke="rgba(255,0,0,0.3)" stroke-width="6"/>
+
+    <text class='sf-symbol' data-symbol='star.fill' x='384.0' y='640.0' font-family='SF Pro' font-size='256.0' fill='currentColor' font-weight='400'>star.fill</text>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 1024 1024"
+     width="1024"
+     height="1024">
+
+ 
+    <g transform="scale(0.8) translate(136, 160)">
+
+<!--        blue-->
+        <polygon points="60,440 450,440 860,640 320,640" fill="#009bb4" stroke="#00000044" stroke-width="1"/>
+
+<!--        green-->
+        <polygon points="60,440 450,440 860,120 320,120" fill="#94c11c" stroke="#00000044" stroke-width="1"/>
+
+<!--        red-->
+<!--        <polygon points=" 320,640 860,640 860,860  320,860 " fill="#e3000f" stroke="#00000044" stroke-width="1"/>-->
+
+<!--        yellow-->
+        <polygon points="60,440 320,640 320,860 69,620" fill="#fcbc00" stroke="#00000044" stroke-width="1"/>
+    </g>
+
+</svg>

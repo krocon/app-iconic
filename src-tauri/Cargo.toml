@@ -1,0 +1,33 @@
+[workspace]
+members = ["core"]
+
+[package]
+name = "app-iconic"
+version = "0.1.0"
+description = "Editor for Apple .icon app icons with SVG layers (Tauri 2 + Angular)"
+authors = ["krocon"]
+license = "MIT"
+repository = "https://github.com/krocon/app-iconic"
+edition = "2024"
+rust-version = "1.93"
+
+[lib]
+name = "ai_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.3", features = [] }
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tauri = { version = "2.12.4", features = [] }
+# only the Rust API (open/save dialogs) – the WebView gets no `dialog:` permission (architecture E4)
+tauri-plugin-dialog = "2"
+# window size/position per window label; no WebView permission needed
+tauri-plugin-window-state = "2"
+# 001 E2: the icon engine (icon.json, bundle/ZIP, export, fonts) – Tauri-free, testable without GTK
+ai-core = { path = "core" }
+
+[dev-dependencies]
+tempfile = "3"

@@ -1,0 +1,201 @@
+/*
+ * Design tokens – the only place for colours, sizes and fonts.
+ * Without `html[data-theme]` the scheme follows the system (`prefers-color-scheme`);
+ * `data-theme="light"|"dark"` forces one (settings, prompt 015).
+ * New tokens go into ALL THREE blocks (light, dark via media query, dark forced).
+ * Canvas colours (`--ai-*`): workspace, rulers, icon guides and handles (legacy colours, prompt 007).
+ */
+:root {
+  color-scheme: light;
+  --color-bg: #f7f6f2;
+  --color-surface: #ffffff;
+  --color-surface-2: #eeece6;
+  --color-text: #22252b;
+  --color-text-muted: #6b6f78;
+  --color-border: #d9d6cc;
+  --color-accent: #2f6fdf;
+  --color-accent-text: #ffffff;
+  --color-focus: #2f6fdf;
+  --color-error: #b42318;
+  --color-warning: #8a5a00;
+  --color-backdrop: rgb(20 18 12 / 40%);
+  --color-hover: #e9e6dd;
+  --shadow-popup: 0 12px 32px rgb(0 0 0 / 18%);
+  --ai-workspace-bg: #e4e3de;
+  --ai-artboard-shadow: 0 2px 12px rgb(0 0 0 / 18%);
+  --ai-ruler-bg: #f1f0ec;
+  --ai-ruler-text: #7a7e86;
+  --ai-ruler-tick: #b9b6ad;
+  --ai-guide: #0a84ff;
+  --ai-handle-position: #0a84ff;
+  --ai-handle-size: #30d158;
+  --ai-handle-control: #ff9f0a;
+  --ai-handle-anchor: #bf5af2;
+  --ai-handle-midpoint: #ffd60a;
+  --ai-handle-pivot: #ff453a;
+
+  --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, sans-serif;
+  --font-size: 14px;
+  --font-size-small: 12px;
+  --font-mono:
+    ui-monospace, 'SF Mono', Menlo, 'Cascadia Mono', Consolas, 'DejaVu Sans Mono', monospace;
+  --radius: 6px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --control-height: 30px;
+  --toolbar-height: 38px;
+  --ruler-size: 20px;
+  --statusbar-height: 24px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --color-bg: #17191d;
+    --color-surface: #1f2228;
+    --color-surface-2: #282c33;
+    --color-text: #e4e5e8;
+    --color-text-muted: #969ba5;
+    --color-border: #343841;
+    --color-accent: #6aa8ff;
+    --color-accent-text: #0b1220;
+    --color-focus: #8fbcff;
+    --color-error: #f97066;
+    --color-warning: #f5b84a;
+    --color-backdrop: rgb(0 0 0 / 60%);
+    --color-hover: #2b2f37;
+    --shadow-popup: 0 12px 32px rgb(0 0 0 / 60%);
+    --ai-workspace-bg: #121316;
+    --ai-artboard-shadow: 0 2px 16px rgb(0 0 0 / 60%);
+    --ai-ruler-bg: #1f2228;
+    --ai-ruler-text: #8a8f99;
+    --ai-ruler-tick: #3d424c;
+    --ai-guide: #0a84ff;
+    --ai-handle-position: #0a84ff;
+    --ai-handle-size: #30d158;
+    --ai-handle-control: #ff9f0a;
+    --ai-handle-anchor: #bf5af2;
+    --ai-handle-midpoint: #ffd60a;
+    --ai-handle-pivot: #ff453a;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: #17191d;
+  --color-surface: #1f2228;
+  --color-surface-2: #282c33;
+  --color-text: #e4e5e8;
+  --color-text-muted: #969ba5;
+  --color-border: #343841;
+  --color-accent: #6aa8ff;
+  --color-accent-text: #0b1220;
+  --color-focus: #8fbcff;
+  --color-error: #f97066;
+  --color-warning: #f5b84a;
+  --color-backdrop: rgb(0 0 0 / 60%);
+  --color-hover: #2b2f37;
+  --shadow-popup: 0 12px 32px rgb(0 0 0 / 60%);
+  --ai-workspace-bg: #121316;
+  --ai-artboard-shadow: 0 2px 16px rgb(0 0 0 / 60%);
+  --ai-ruler-bg: #1f2228;
+  --ai-ruler-text: #8a8f99;
+  --ai-ruler-tick: #3d424c;
+  --ai-guide: #0a84ff;
+  --ai-handle-position: #0a84ff;
+  --ai-handle-size: #30d158;
+  --ai-handle-control: #ff9f0a;
+  --ai-handle-anchor: #bf5af2;
+  --ai-handle-midpoint: #ffd60a;
+  --ai-handle-pivot: #ff453a;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  font-family: var(--font-ui);
+  font-size: var(--font-size);
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.btn {
+  height: var(--control-height);
+  padding: 0 var(--space-3);
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--color-hover);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  &.primary {
+    color: var(--color-accent-text);
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  &.quiet {
+    background: transparent;
+    border-color: transparent;
+  }
+}
+
+.input {
+  height: var(--control-height);
+  padding: 0 var(--space-2);
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+kbd {
+  padding: 1px 5px;
+  font-family: var(--font-ui);
+  font-size: var(--font-size-small);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

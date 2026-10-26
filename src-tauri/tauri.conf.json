@@ -1,0 +1,72 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "AppIconic",
+  "version": "../package.json",
+  "identifier": "io.github.krocon.appiconic",
+  "build": {
+    "frontendDist": "../dist/app-iconic/browser",
+    "devUrl": "http://localhost:1450",
+    "beforeDevCommand": "pnpm start",
+    "beforeBuildCommand": "pnpm build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "AppIconic",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 900,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "backgroundColor": "#1c1d21"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src ipc: http://ipc.localhost",
+      "devCsp": null,
+      "dangerousDisableAssetCspModification": ["style-src"]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "license": "MIT",
+    "licenseFile": "../LICENSE",
+    "targets": ["deb", "rpm", "appimage", "dmg", "app", "msi", "nsis"],
+    "publisher": "Marc Kronberg",
+    "copyright": "© 2026 Marc Kronberg",
+    "homepage": "https://github.com/krocon/app-iconic",
+    "category": "GraphicsAndDesign",
+    "shortDescription": "Editor for Apple .icon app icons",
+    "longDescription": "AppIconic edits app icons in Apple's Icon Composer format (.icon): groups and layers of SVG artwork, background fills, shadows and translucency, with export to SVG and PNG – on macOS, Windows and Linux.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "12.0",
+      "hardenedRuntime": true,
+      "signingIdentity": null
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "http://timestamp.digicert.com",
+      "webviewInstallMode": { "type": "downloadBootstrapper" },
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["English", "German"],
+        "displayLanguageSelector": false
+      }
+    },
+    "linux": {
+      "deb": { "section": "graphics" },
+      "rpm": { "release": "1" },
+      "appimage": { "bundleMediaFramework": false }
+    }
+  }
+}
