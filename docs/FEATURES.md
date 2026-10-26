@@ -4,15 +4,15 @@
 > Abhaken, sobald es Ende-zu-Ende funktioniert und getestet ist. Neu gegenüber der Vorlage: *(neu)*.
 
 ## 1. Dokument & Dateien
-- [ ] New Window ⇧⌘N, New Document ⌘N mit Dirty-Abfrage Save / Don't Save / Cancel (003)
-- [ ] Open… ⌘O für `.icon` (Bundle und ZIP) (002, 003)
-- [ ] Open Recent mit Validierung und „Clear Menu“ (003)
-- [ ] Import SVG… ⇧⌘I als neue Gruppe/Layer/Asset (003)
-- [ ] Save ⌘S (nur wenn dirty), Save As… ⇧⌘S, Close ⌘W mit Dirty-Abfrage (003)
-- [x] Speichern im gelesenen Format (Bundle bleibt Bundle, ZIP bleibt ZIP), atomar *(neu)* (002 – Backend + Fassade; Menü/Dialoge 003)
-- [x] Verlustfreier Roundtrip von `icon.json` inkl. unbekannter Felder und Layer-`opacity` *(neu)* (002 – Backend + Fassade; Dokumentmodell 003)
-- [ ] Dirty-Tracking, Fenstertitel = Dateiname + Marker (003)
-- [ ] Mehrere Fenster/Dokumente (003)
+- [x] New Window ⇧⌘N, New Document ⌘N mit Dirty-Abfrage Save / Don't Save / Cancel (003 – Toolbar + provisorische Kürzel; Menü 005)
+- [x] Open… ⌘O für `.icon` (Bundle und ZIP) (002, 003)
+- [x] Open Recent mit Validierung und „Clear Menu“ (003 – Toolbar-Menü; natives Menü 005)
+- [x] Import SVG… ⇧⌘I als neue Gruppe/Layer/Asset (003)
+- [x] Save ⌘S (nur wenn dirty), Save As… ⇧⌘S (Format Bundle/ZIP), Close ⌘W mit Dirty-Abfrage (003)
+- [x] Speichern im gelesenen Format (Bundle bleibt Bundle, ZIP bleibt ZIP), atomar *(neu)* (002, 003)
+- [x] Verlustfreier Roundtrip von `icon.json` inkl. unbekannter Felder und Layer-`opacity` *(neu)* (002, 003)
+- [x] Dirty-Tracking, Fenstertitel = Dateiname + Marker (003; macOS-Punkt im Schließknopf auf dem Mac prüfen)
+- [x] Mehrere Fenster/Dokumente (003; macOS: App bleibt ohne Fenster offen – auf dem Mac prüfen)
 - [ ] `.icon` als Dateizuordnung / Öffnen per Doppelklick *(neu)* (016)
 
 ## 2. Layout & Einstellungen
@@ -87,9 +87,9 @@
 
 ## 10. SVG-Unterstützung
 - [ ] Elemente aus legacy §10 + `use`, `defs`, Verläufe rendern und bearbeiten (004, 009)
-- [ ] Inline-`<style>`/Klassen beim Import in Attribute auflösen, Einheiten (003)
-- [ ] Unbekannte Attribute/Elemente bleiben erhalten (002 ✓ unveränderte Assets byte-genau; bearbeitete SVGs 003)
-- [ ] Fremdes SVG wird bereinigt (Skripte, Event-Handler, externe Referenzen) *(neu)* (003)
+- [x] Inline-`<style>`/Klassen beim Import in Attribute auflösen, Einheiten (003)
+- [x] Unbekannte Attribute/Elemente bleiben erhalten (002 unveränderte Assets byte-genau; 003 bearbeitete SVGs über DOM-Serialisierung)
+- [x] Fremdes SVG wird bereinigt (Skripte, Event-Handler, externe Referenzen) *(neu)* (003)
 
 ## 11. Export
 - [ ] Export SVG je Appearance (Light/Dark) inkl. Hintergrund, Gruppen, Layer, Layer-Opacity (012)
@@ -98,6 +98,6 @@
 - [ ] Share Export (macOS, optional) (016)
 
 ## 12. Undo/Redo
-- [ ] Benannte Aktionen im Menü („Undo Move“ …), ⌘Z / ⇧⌘Z (003, 005)
-- [ ] Gesten-Coalescing und zusammengesetzte Aktionen (003, 007)
-- [ ] Undo-Stack je Dokument, Dirty am Save-Punkt (003)
+- [ ] Benannte Aktionen im Menü („Undo Move“ …), ⌘Z / ⇧⌘Z (003 ✓ Namen, Toolbar, provisorische Kürzel; Menü 005)
+- [ ] Gesten-Coalescing und zusammengesetzte Aktionen (003 ✓ UndoService; Gesten im UI 007)
+- [x] Undo-Stack je Dokument, Dirty am Save-Punkt (003)

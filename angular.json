@@ -56,7 +56,13 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/app/backend-providers.ts",
+                  "with": "src/app/backend-providers.dev.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"

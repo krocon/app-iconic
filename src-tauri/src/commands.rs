@@ -5,14 +5,17 @@
 
 use crate::about;
 use crate::error::{FsError, FsErrorCode};
-use crate::model::{AppInfo, IconDocumentDto, SaveAssetDto, SaveResult};
+use crate::model::{AppInfo, IconDocumentDto, RecentFileDto, SaveAssetDto, SaveResult};
 use crate::sessions::IconSessions;
+use crate::windows::{DocWindows, window_title};
 use ai_core::icon::save::{AssetInput, assemble};
 use ai_core::icon::svg_file::SvgFile;
 use ai_core::icon::{self, IconFormat, Limits};
+use ai_core::recent;
 use serde_json::Value;
-use std::path::PathBuf;
-use tauri::{AppHandle, State};
+use std::path::{Path, PathBuf};
+use std::sync::Mutex;
+use tauri::{AppHandle, Manager, State, WebviewWindow};
 use tauri_plugin_dialog::DialogExt;
 
 /// Runs blocking work off the async runtime.
@@ -92,7 +95,11 @@ pub async fn save_icon(
     })
     .await?;
     sessions.put(&path, file);
-    Ok(SaveResult { path, format })
+    Ok(SaveResult {
+        name: recent::display_name(&path),
+        path,
+        format,
+    })
 }
 
 /// Forgets the session of a closed document.
@@ -166,6 +173,186 @@ pub async fn pick_svg_file(app: AppHandle) -> Result<Option<String>, FsError> {
     .await
 }
 
+// ---- prompt 003: recent files, windows ----
+
+/// Serialises read-modify-write of `recent.json` across windows (design 003 E12).
+#[derive(Default)]
+pub struct RecentLock(Mutex<()>);
+
+fn recent_file(app: &AppHandle) -> Result<PathBuf, FsError> {
+    app.path()
+        .app_config_dir()
+        .map(|d| d.join(recent::FILE_NAME))
+        .map_err(|e| FsError::new(FsErrorCode::Io, e.to_string(), None))
+}
+
+fn exists(p: &str) -> bool {
+    Path::new(p).exists()
+}
+
+/// "Open Recent": the entries whose file still exists, newest first.
+#[tauri::command]
+pub async fn recent_files(app: AppHandle) -> Result<Vec<RecentFileDto>, FsError> {
+    let file = recent_file(&app)?;
+    blocking(move || {
+        let list = recent::load(&file).value;
+        Ok(RecentFileDto::list(&recent::existing(&list, exists)))
+    })
+    .await
+}
+
+/// Puts `path` in front of the recent files (after open/save) and returns the new list.
+#[tauri::command]
+pub async fn add_recent_file(app: AppHandle, path: String) -> Result<Vec<RecentFileDto>, FsError> {
+    file_path(&path)?;
+    let file = recent_file(&app)?;
+    blocking(move || {
+        let lock = app.state::<RecentLock>();
+        let _guard = lock.0.lock().unwrap_or_else(|e| e.into_inner());
+        let loaded = recent::load(&file);
+        let list = recent::add(&loaded.value, &path, exists);
+        // a file we could not read stays untouched (config_file `persist`)
+        if loaded.persist {
+            recent::save(&file, &list)?;
+        }
+        Ok(RecentFileDto::list(&list))
+    })
+    .await
+}
+
+/// "Clear Menu".
+#[tauri::command]
+pub async fn clear_recent_files(app: AppHandle) -> Result<(), FsError> {
+    let file = recent_file(&app)?;
+    blocking(move || {
+        let lock = app.state::<RecentLock>();
+        let _guard = lock.0.lock().unwrap_or_else(|e| e.into_inner());
+        recent::save(&file, &[])
+    })
+    .await
+}
+
+fn window_error(e: tauri::Error) -> FsError {
+    FsError::new(FsErrorCode::Io, e.to_string(), None)
+}
+
+/// Title of the calling window (`• ` marker, macOS: dot in the close button) and the path it
+/// shows (to find a file that is already open, design 003 E10/E11).
+#[tauri::command]
+pub async fn set_window_title(
+    window: WebviewWindow,
+    windows: State<'_, DocWindows>,
+    title: String,
+    edited: bool,
+    path: Option<String>,
+) -> Result<(), FsError> {
+    windows.set_shows(window.label(), path);
+    let mac = cfg!(target_os = "macos");
+    window
+        .set_title(&window_title(&title, edited, mac))
+        .map_err(window_error)?;
+    #[cfg(target_os = "macos")]
+    set_document_edited(&window, edited);
+    Ok(())
+}
+
+/// `-[NSWindow setDocumentEdited:]` – Tauri has no API for it (design 003 E11). Runs on the main
+/// thread (`with_webview`).
+#[cfg(target_os = "macos")]
+#[allow(clippy::let_unit_value)] // objc2's documented form: the unit return type drives `msg_send!`
+fn set_document_edited(window: &WebviewWindow, edited: bool) {
+    let _ = window.with_webview(move |webview| {
+        let ns_window = webview.ns_window().cast::<objc2::runtime::AnyObject>();
+        if !ns_window.is_null() {
+            // SAFETY: tauri hands out the live NSWindow of this webview on the main thread.
+            unsafe {
+                let _: () = objc2::msg_send![&*ns_window, setDocumentEdited: edited];
+            }
+        }
+    });
+}
+
+/// Creates the window `label` (same size limits as `main` in `tauri.conf.json`).
+pub fn build_document_window(app: &AppHandle, label: &str) -> Result<WebviewWindow, FsError> {
+    tauri::WebviewWindowBuilder::new(app, label, tauri::WebviewUrl::App("index.html".into()))
+        .title("AppIconic")
+        .inner_size(1280.0, 820.0)
+        .min_inner_size(900.0, 600.0)
+        .background_color(tauri::window::Color(0x1c, 0x1d, 0x21, 0xff))
+        .build()
+        .map_err(window_error)
+}
+
+fn focus(app: &AppHandle, label: &str) -> bool {
+    match app.get_webview_window(label) {
+        Some(w) => {
+            let _ = w.unminimize();
+            let _ = w.set_focus();
+            true
+        }
+        None => false,
+    }
+}
+
+/// "New Window" (`path` = `None`) or a file in a new window; a window that already shows `path`
+/// comes to the front instead. Returns the window's label.
+#[tauri::command]
+pub async fn open_document_window(
+    app: AppHandle,
+    windows: State<'_, DocWindows>,
+    path: Option<String>,
+) -> Result<String, FsError> {
+    if let Some(p) = &path {
+        file_path(p)?;
+        if let Some(label) = windows.showing(p, None)
+            && focus(&app, &label)
+        {
+            return Ok(label);
+        }
+    }
+    let label = windows.new_label(path);
+    build_document_window(&app, &label)?;
+    Ok(label)
+}
+
+/// Brings another window that shows `path` to the front; `false` if there is none.
+#[tauri::command]
+pub async fn focus_document_window(
+    app: AppHandle,
+    window: WebviewWindow,
+    windows: State<'_, DocWindows>,
+    path: String,
+) -> Result<bool, FsError> {
+    Ok(windows
+        .showing(&path, Some(window.label()))
+        .is_some_and(|label| focus(&app, &label)))
+}
+
+/// The file the calling window was opened for (once); `None`: start with a new document.
+#[tauri::command]
+pub async fn window_start_path(
+    window: WebviewWindow,
+    windows: State<'_, DocWindows>,
+) -> Result<Option<String>, FsError> {
+    Ok(windows.take_start_path(window.label()))
+}
+
+/// From now on the close button of the calling window sends `close-requested` (design 003 E10).
+#[tauri::command]
+pub async fn take_over_close(
+    window: WebviewWindow,
+    windows: State<'_, DocWindows>,
+) -> Result<(), FsError> {
+    windows.take_over_close(window.label());
+    Ok(())
+}
+
+/// Closes the calling window after the frontend dealt with unsaved changes.
+#[tauri::command]
+pub async fn close_window(window: WebviewWindow) -> Result<(), FsError> {
+    window.destroy().map_err(window_error)
+}
+
 #[cfg(test)]
 mod path_rules {
     use super::*;
@@ -200,6 +387,6 @@ mod command_rules {
                 count += 1;
             }
         }
-        assert!(count >= 9, "found {count} commands");
+        assert!(count >= 18, "found {count} commands");
     }
 }

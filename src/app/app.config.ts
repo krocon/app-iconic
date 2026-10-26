@@ -1,15 +1,11 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { AboutApi, TauriAboutApi } from './core/about/about-api';
-import { IconFileApi, TauriIconFileApi } from './core/icon-file/icon-file-api';
+import { BACKEND_PROVIDERS } from './backend-providers';
 
 /**
- * Zoneless (Angular 22 default, no zone.js). Every backend facade is bound here; tests
- * replace them with the fakes from `src/testing/`.
+ * Zoneless (Angular 22 default, no zone.js). The backend facades come from
+ * `backend-providers.ts` (dev build: `backend-providers.dev.ts`, design 003 E14); tests replace
+ * them with the fakes from `src/testing/`.
  */
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideBrowserGlobalErrorListeners(),
-    { provide: AboutApi, useClass: TauriAboutApi },
-    { provide: IconFileApi, useClass: TauriIconFileApi },
-  ],
+  providers: [provideBrowserGlobalErrorListeners(), ...BACKEND_PROVIDERS],
 };

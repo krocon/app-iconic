@@ -19,7 +19,7 @@ Requirements: Node ≥ 22.22.3, pnpm 10, Rust stable ≥ 1.93, and the
 ```sh
 pnpm install
 pnpm tauri dev      # app with hot reload (dev server on port 1450)
-pnpm start          # frontend only, in the browser (no backend)
+pnpm start          # frontend only, in the browser (fake backend with a sample .icon in memory)
 pnpm test           # unit tests (Vitest)
 pnpm e2e            # end-to-end tests (Playwright; once: pnpm e2e:install)
 pnpm check          # format, lint, tests, build, cargo fmt/clippy/test

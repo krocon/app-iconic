@@ -29,6 +29,12 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 002 E6 | Bundle speichern: neues Bundle daneben, altes wegbenennen, neues an den Namen, altes löschen | Rename über einen bestehenden Ordner geht weder unter Windows noch unter Unix; gleiche Strategie auf allen OS |
 | 002 E7/E8 | Grenzen für ZIP und Bundle (2 000 Einträge, 64 MiB je Datei, 256 MiB gesamt, Tiefe 16), Zip-Slip und verschlüsselte Einträge abgelehnt, Symlinks ignoriert | fremde Dateien sind feindlich |
 | 002 E16 | Fixtures fürs Frontend als generiertes TS-Modul (`scripts/fixtures.mjs`, `pnpm fixtures:check`) | gleicher Weg für `ng test`, `ng serve` und Playwright, ohne Loader-Tricks |
+| 003 E1/E2 | `IconDocument`: `icon.json` als unveränderlicher Wert (Helfer behalten Schlüsselreihenfolge), je Asset eine eigene `XMLDocument` mit `data-ai-id` an jedem Element; Stores halten nur `NodeRef { asset, id }` | exaktes Undo (alter Wurzelwert), stabile IDs über Undo/Redo, keine DOM-Referenzen in Stores |
+| 003 E3/E4 | Unverändert = Serialisierung gleich der beim Öffnen/Speichern → `unchanged`, Rust schreibt Originalbytes; Bereinigung (Skripte, Handler, `foreignObject`, externe Referenzen) beim Öffnen, Import, Einfügen, Basis nach dem Bereinigen | byte-gleicher Roundtrip nicht bearbeiteter Assets, die WebView sieht nur Bereinigtes |
+| 003 E5 | Stile beim Import auflösen über `CSSStyleSheet.replaceSync` + Shadow Root + `getComputedStyle` (mit/ohne Stile) | kein eigener CSS-Parser; Stile wirken nicht auf die App |
+| 003 E6/E7 | `UndoService` je Dokument (Save-Punkt, Tiefe 200, Gesten `begin/update/commit/cancel` mit `merge`), `DocumentStore` als einfache Klasse je Dokument | kein God-Object, Gesten für 007 vorbereitet |
+| 003 E8/E10 | Ein Dokument je Fenster (`main`, `doc-<n>`); Open ersetzt ein unberührtes neues Dokument, sonst neues Fenster; schon offene Datei → Fenster nach vorn; Schließen fragt über `close-requested`; macOS bleibt ohne Fenster offen | macOS-Dokumentverhalten, auf allen OS gleich bedienbar |
+| 003 E14 | Browser-Modus über `fileReplacements` (`backend-providers.dev.ts`): Fakes + Test-Hook `window.__appIconic` nur im Dev-Build ohne Tauri | Playwright prüft Öffnen/Bearbeiten/Speichern ohne Backend; Produktions-Build ohne Fakes |
 
 ## Schichten
 
@@ -55,9 +61,14 @@ Angular (WebView)                                   Rust
 | `close_icon(path)` | 002 | Sitzung freigeben |
 | `read_svg_file(path)` | 002 | SVG als Text (≤ 16 MiB) für „Import SVG…“ |
 | `pick_open_icon(folder)`, `pick_save_icon(suggestedName, format)`, `pick_svg_file()` | 002 | native Dialoge (Rust-API), `null` bei Abbruch |
+| `recent_files()`, `add_recent_file(path)`, `clear_recent_files()` | 003 | „Open Recent“: `recent.json` (max. 10, nur vorhandene) → `RecentFileDto[] { path, name }` |
+| `set_window_title(title, edited, path?)` | 003 | Titel des aufrufenden Fensters (`• ` bzw. macOS `setDocumentEdited:`), merkt den gezeigten Pfad |
+| `open_document_window(path?)`, `focus_document_window(path)` | 003 | neues Fenster `doc-<n>` (mit Startpfad) bzw. das Fenster, das `path` zeigt, nach vorn |
+| `window_start_path()`, `take_over_close()`, `close_window()` | 003 | Start des Fensters, Schließknopf → Ereignis `close-requested`, Fenster schließen |
 
-Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt):
-`recent_files_*` (003), `export_svg`,
+DTO-Ergänzung 003: `IconDocumentDto.name`, `SaveResult.name` (Dateiname fürs UI).
+
+Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `export_svg`,
 `export_png` (012), `list_fonts`, `text_to_path` (013), `set_app_menu` (005), `load_settings`/`save_settings` (015).
 
 ## Abhängigkeiten
@@ -76,4 +87,5 @@ Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts f
 | `zip` 8.6 (nur Deflate über `flate2`/zlib-rs) | Rust (`ai-core`) | `.icon` als ZIP lesen/schreiben (002); ersetzt `/usr/bin/zip` der Vorlage; ohne AES/bzip2/lzma/zstd → kleinere Angriffsfläche |
 | `unicode-normalization` | Rust (`ai-core`) | Asset-Namen NFC vergleichen (HFS+ speichert NFD, 002 E11/E12) |
 | `base64` | Rust (`ai-core`) | PNG-Assets als Data-URL ans Frontend (002 E9) |
+| `objc2` 0.6 (nur macOS) | Rust | `-[NSWindow setDocumentEdited:]` für den Änderungspunkt im Schließknopf (003 E11); Tauri hat dafür keine API, die Crate ist über tao ohnehin im Baum |
 | `tempfile` | Rust (Dev) | Dateisystem-Tests |

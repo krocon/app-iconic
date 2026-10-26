@@ -16,6 +16,7 @@ pub struct AppInfo {
 // ---- prompt 002: `.icon` files (`src/app/core/icon-file/icon-file.models.ts`) ----
 
 use ai_core::icon::{AssetKind, IconFile, IconFormat, IconWarning};
+use ai_core::recent::display_name;
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -37,6 +38,8 @@ pub struct IconAssetDto {
 pub struct IconDocumentDto {
     /// `None` for a new, unsaved document.
     pub path: Option<String>,
+    /// File name shown in the title (design 003 E13); `None` with `path`.
+    pub name: Option<String>,
     pub format: IconFormat,
     /// `icon.json` as is – unknown fields included, key order kept.
     pub icon_json: Value,
@@ -47,6 +50,7 @@ pub struct IconDocumentDto {
 impl IconDocumentDto {
     pub fn from_file(path: Option<String>, file: &IconFile) -> Self {
         Self {
+            name: path.as_deref().map(display_name),
             path,
             format: file.format,
             icon_json: file.json.clone(),
@@ -80,7 +84,31 @@ pub struct SaveAssetDto {
 #[serde(rename_all = "camelCase")]
 pub struct SaveResult {
     pub path: String,
+    /// File name shown in the title (design 003 E13).
+    pub name: String,
     pub format: IconFormat,
+}
+
+// ---- prompt 003: recent files (`src/app/core/recent/recent.models.ts`) ----
+
+/// One entry of "Open Recent".
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RecentFileDto {
+    pub path: String,
+    pub name: String,
+}
+
+impl RecentFileDto {
+    pub fn list(paths: &[String]) -> Vec<Self> {
+        paths
+            .iter()
+            .map(|p| Self {
+                path: p.clone(),
+                name: display_name(p),
+            })
+            .collect()
+    }
 }
 
 #[cfg(test)]
@@ -96,6 +124,7 @@ mod tests {
         file.assets.push(IconAsset::new("x.bin", vec![1]));
         let v = serde_json::to_value(IconDocumentDto::from_file(None, &file)).unwrap();
         assert_eq!(v["path"], Value::Null);
+        assert_eq!(v["name"], Value::Null);
         assert_eq!(v["format"], "bundle");
         assert_eq!(v["iconJson"]["fill"], "automatic");
         assert_eq!(v["assets"][0]["kind"], "svg");
@@ -111,9 +140,24 @@ mod tests {
         assert_eq!((a.text, a.unchanged), (None, false));
         let r = serde_json::to_value(SaveResult {
             path: "/a.icon".into(),
+            name: "a.icon".into(),
             format: IconFormat::Zip,
         })
         .unwrap();
-        assert_eq!(r, json!({ "path": "/a.icon", "format": "zip" }));
+        assert_eq!(
+            r,
+            json!({ "path": "/a.icon", "name": "a.icon", "format": "zip" })
+        );
+    }
+
+    #[test]
+    fn opened_documents_and_recent_files_carry_the_file_name() {
+        let path = std::env::temp_dir().join("Mein Icon.icon");
+        let path = path.to_string_lossy().into_owned();
+        let v = serde_json::to_value(IconDocumentDto::from_file(Some(path.clone()), &new_icon()))
+            .unwrap();
+        assert_eq!(v["name"], "Mein Icon.icon");
+        let r = serde_json::to_value(RecentFileDto::list(std::slice::from_ref(&path))).unwrap();
+        assert_eq!(r, json!([{ "path": path, "name": "Mein Icon.icon" }]));
     }
 }

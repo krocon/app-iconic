@@ -24,7 +24,7 @@
 |---|---|
 | Install | `pnpm install` |
 | App starten (Dev) | `pnpm tauri dev` (Angular-Dev-Server auf **Port 1450** + Fenster) |
-| Nur Frontend im Browser | `pnpm start` (kein Backend → Hinweis „desktop backend not available“) |
+| Nur Frontend im Browser | `pnpm start` (Fakes mit `camscanner.icon` im Speicher, Test-Hook `window.__appIconic`) |
 | Frontend-Tests | `pnpm test` (Vitest + jsdom über `ng test`), `pnpm test:watch` |
 | E2E (Browser) | `pnpm e2e` (Playwright gegen den Dev-Server); einmalig `pnpm e2e:install` |
 | Lint / Format | `pnpm lint`, `pnpm format`, `pnpm format:check` |
@@ -45,27 +45,39 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/errors/            FsError, toFsError, describeFsError (Codes = Rust ai-core error.rs)
   app/core/about/             AppInfo, AboutApi
   app/core/icon-file/         IconFileApi (open/save/new/close .icon, read SVG, Dialoge), DTOs, findAsset (002)
+  app/core/window/            WindowApi (Titel, Fenster, Schließen-Frage, 003)
+  app/core/recent/            RecentFilesApi („Open Recent“, 003)
+  app/backend-providers.ts    Bindung der Fassaden; Dev-Build: backend-providers.dev.ts (Fakes im Browser, 003 E14)
+  app/features/document/      IconDocument, DocumentStore, UndoService (undo/), Commands (commands/),
+                              model/ (icon-json, unique-names), svg/ (node-ids, sanitize-svg, resolve-styles) (003)
+  app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster), Recent, provisorische
+                              Kürzel (bis 005), Texte (003)
+  app/features/hierarchy/     HierarchyList (Platzhalter bis 006: Gruppen/Layer/Assets)
   app/features/shell/         SidePanel, Texte der Fensterhülle
-  app/features/canvas/        CanvasView (Platzhalter: Zeichenfläche 1024 × 1024 mit Icon-Guides)
+  app/features/canvas/        CanvasView (Platzhalter bis 004: Layer übereinander je Shadow Root + Icon-Guides)
   app/features/about/         About-Dialog
   app/shared/geometry/        reine Geometrie (icon-guides; später Matrizen, Snapping, Bounds)
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)
-  testing/                    Fakes – nie im Produktivcode importieren (FakeIconFileApi mit camscanner.icon)
-  testing/fixtures/           generiert aus testdata/fixtures (`pnpm fixtures`, geprüft von `pnpm fixtures:check`)
+  app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)
+  testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,
+                              browser-hook.ts = `window.__appIconic` für Playwright)
+  testing/fixtures/           generiert aus testdata/ (camscanner.icon, svg/, unique-names.json; `pnpm fixtures`)
 e2e/                          Playwright-Tests gegen den Dev-Server
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
   src/commands.rs             dünne Command-Schicht, Test command_rules
   src/sessions.rs             IconSessions: zuletzt geöffnete/gespeicherte .icon je Pfad (002 E5)
+  src/windows.rs              DocWindows: Labels doc-<n>, Startpfade, Pfad je Fenster, Schließen-Übernahme (003)
   src/about.rs, model.rs      AppInfo, DTOs (serde camelCase)
   core/                       Crate `ai-core` (Workspace-Mitglied): Engine ohne Tauri
     src/error.rs              FsError { code, message, path }
     src/fs_atomic.rs, config_file.rs  atomar schreiben / Konfig laden (aus files-and-folders)
     src/icon/                 .icon: model (Sicht), json_format, names, bundle, zip_io, save, svg_file (002)
+    src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
   icons/source/app-icon.svg   Quelle des App-Icons
 testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverändert)
-testdata/unique-names.json    Tabelle der eindeutigen Asset-/Layer-Namen (Rust-Test, später TS)
+testdata/unique-names.json    Tabelle der eindeutigen Asset-/Layer-Namen (Rust `names.rs` und TS `unique-names.ts`)
 scripts/                      fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test
 docs/                         architecture.md (Entscheidungen, Commands, Abhängigkeiten), legacy-analysis.md, legacy/,
                               FEATURES.md (Checkliste)

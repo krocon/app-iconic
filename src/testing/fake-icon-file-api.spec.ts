@@ -15,6 +15,7 @@ describe('FakeIconFileApi', () => {
   it('opens the camscanner fixture with layer opacity and both SVG assets', async () => {
     const doc = await api.openIcon(PATH);
     expect(doc.path).toBe(PATH);
+    expect(doc.name).toBe('camscanner.icon');
     expect(doc.format).toBe('bundle');
     expect(doc.iconJson.groups?.[0].layers?.[0].opacity).toBe(1);
     expect(doc.assets.map((a) => [a.name, a.kind])).toEqual([
@@ -49,6 +50,7 @@ describe('FakeIconFileApi', () => {
       ],
       from: PATH,
     });
+    expect(api.saved[0].path).toBe('/out/new.icon');
     const saved = api.files.get('/out/new.icon')!;
     expect(saved.format).toBe('zip');
     expect(JSON.parse(saved.iconJson)['x-future']).toEqual({ a: 1 });
@@ -91,6 +93,7 @@ describe('FakeIconFileApi', () => {
   it('creates a new document like the backend and answers dialogs in order', async () => {
     const doc = await api.newIcon();
     expect(doc.path).toBeNull();
+    expect(doc.name).toBeNull();
     expect(doc.iconJson['supported-platforms']).toEqual({
       circles: ['watchOS'],
       squares: 'shared',
@@ -100,6 +103,9 @@ describe('FakeIconFileApi', () => {
     expect(await api.pickOpenIcon()).toBe('/a.icon');
     expect(await api.pickSaveIcon()).toBeNull();
     expect(await api.pickSvgFile()).toBeNull();
+    api.fallbackPick = (kind, name) => (kind === 'save' ? `/browser/${name}` : null);
+    expect(await api.pickSaveIcon('x.icon')).toBe('/browser/x.icon');
+    expect(await api.pickOpenIcon()).toBeNull();
     api.svgFiles.set('/x.svg', { name: 'x.svg', text: '<svg/>' });
     expect(await api.readSvgFile('/x.svg')).toEqual({ name: 'x.svg', text: '<svg/>' });
   });

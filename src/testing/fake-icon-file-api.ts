@@ -46,6 +46,11 @@ function fromFixture(f: FixtureIcon): FakeIconFile {
   };
 }
 
+/** Last path component – fine in a fake (the app itself never splits paths). */
+export function fakeName(path: string): string {
+  return path.split(/[/\\]/).filter(Boolean).pop() ?? path;
+}
+
 function error(code: FsError['code'], message: string, path?: string): FsError {
   return { code, message, path: path ?? null };
 }
@@ -84,6 +89,12 @@ export class FakeIconFileApi extends IconFileApi {
   readonly saved: SaveIconRequest[] = [];
   /** The next call fails with this error. */
   failNext: FsError | null = null;
+  /**
+   * Answer of a dialog when `picks` is empty (default: cancelled). The browser mode sets it so
+   * that `pnpm start` can be used by hand (design 003 E14).
+   */
+  fallbackPick: ((kind: 'open' | 'save' | 'svg', suggestedName?: string) => string | null) | null =
+    null;
 
   private readonly sessions = new Map<string, FakeIconFile>();
 
@@ -105,6 +116,7 @@ export class FakeIconFileApi extends IconFileApi {
       .map((name) => ({ code: 'missing_asset', name }));
     return {
       path,
+      name: path === null ? null : fakeName(path),
       format: f.format,
       iconJson,
       assets: f.assets.map((a) => ({ ...a })),
@@ -164,7 +176,7 @@ export class FakeIconFileApi extends IconFileApi {
     const file: FakeIconFile = { format: r.format, iconJson, assets };
     this.files.set(r.path, file);
     this.sessions.set(r.path, file);
-    return { path: r.path, format: r.format };
+    return { path: r.path, name: fakeName(r.path), format: r.format };
   }
 
   async closeIcon(path: string): Promise<void> {
@@ -179,18 +191,21 @@ export class FakeIconFileApi extends IconFileApi {
     return { ...f };
   }
 
-  async pickOpenIcon(): Promise<string | null> {
+  private pick(kind: 'open' | 'save' | 'svg', suggestedName?: string): string | null {
     this.fail();
-    return this.picks.shift() ?? null;
+    if (this.picks.length) return this.picks.shift() ?? null;
+    return this.fallbackPick?.(kind, suggestedName) ?? null;
   }
 
-  async pickSaveIcon(): Promise<string | null> {
-    this.fail();
-    return this.picks.shift() ?? null;
+  async pickOpenIcon(): Promise<string | null> {
+    return this.pick('open');
+  }
+
+  async pickSaveIcon(suggestedName?: string): Promise<string | null> {
+    return this.pick('save', suggestedName);
   }
 
   async pickSvgFile(): Promise<string | null> {
-    this.fail();
-    return this.picks.shift() ?? null;
+    return this.pick('svg');
   }
 }

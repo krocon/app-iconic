@@ -34,3 +34,15 @@ test('a changed fixture is reported', async () => {
   writeFileSync(json, readFileSync(json, 'utf8') + ' ');
   assert.deepEqual(await outdated(root), [MODULES[0].out]);
 });
+
+test('the SVG fixtures and the name table are carried as is', async () => {
+  const svg = await render(ROOT, MODULES[1]);
+  const names = await render(ROOT, MODULES[2]);
+  const literal = (src) =>
+    Function(`return (${src.slice(src.lastIndexOf('= ') + 2, src.lastIndexOf(';'))});`)();
+  const files = literal(svg);
+  const nested = files.find((f) => f.name === 'nested_g.svg');
+  assert.equal(nested.text, readFileSync(join(ROOT, 'testdata/fixtures/svg/nested_g.svg'), 'utf8'));
+  const table = JSON.parse(readFileSync(join(ROOT, 'testdata/unique-names.json'), 'utf8'));
+  assert.deepEqual(literal(names), { asset: table.asset, layer: table.layer });
+});

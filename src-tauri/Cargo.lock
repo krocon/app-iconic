@@ -64,6 +64,7 @@ name = "app-iconic"
 version = "0.1.0"
 dependencies = [
  "ai-core",
+ "objc2",
  "serde",
  "serde_json",
  "tauri",

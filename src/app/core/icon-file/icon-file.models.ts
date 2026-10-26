@@ -66,6 +66,8 @@ export interface IconWarning {
 export interface IconDocumentDto {
   /** `null` for a new, unsaved document. */
   path: string | null;
+  /** File name for the title (from the backend, design 003 E13); `null` with `path`. */
+  name: string | null;
   format: IconFormat;
   iconJson: IconJson;
   assets: IconAssetDto[];
@@ -93,6 +95,8 @@ export interface SaveIconRequest {
 
 export interface SaveResult {
   path: string;
+  /** File name for the title (design 003 E13). */
+  name: string;
   format: IconFormat;
 }
 

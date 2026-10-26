@@ -1,0 +1,156 @@
+import { signal } from '@angular/core';
+import { CompositeCommand, DocCommand } from '../commands/command';
+import { IconDocument } from '../icon-document';
+import { UNDO_TEXTS, UndoLabel } from './undo-texts';
+
+/** What menus and buttons show (design 003 E6). */
+export interface UndoState {
+  canUndo: boolean;
+  canRedo: boolean;
+  /** "Undo Change Attribute" – or just "Undo". */
+  undoLabel: string;
+  redoLabel: string;
+  /** Not at the save point. */
+  dirty: boolean;
+}
+
+interface Entry {
+  id: number;
+  command: DocCommand;
+}
+
+/** Steps kept; older ones fall out (the document then stays dirty until saved). */
+export const UNDO_DEPTH = 200;
+
+/**
+ * Undo/redo of one document (design 003 E6): named commands, composite commands, gestures
+ * (`begin` → `update`* → `commit`/`cancel`) that become one step, and a save point for dirty.
+ * Not injectable – each `DocumentStore` has its own.
+ */
+export class UndoService {
+  private done: Entry[] = [];
+  private undone: Entry[] = [];
+  private seq = 0;
+  /** Id of the top entry when saved (0 = the empty stack, -1 = no longer reachable). */
+  private savePoint = 0;
+  private gesture: { label: UndoLabel; commands: DocCommand[] } | null = null;
+  private readonly _state = signal<UndoState>(this.compute());
+  readonly state = this._state.asReadonly();
+
+  constructor(
+    private readonly doc: IconDocument,
+    private readonly changed: () => void = () => undefined,
+    private readonly depth = UNDO_DEPTH,
+  ) {}
+
+  /** Runs `command` as a new step (inside a gesture: as part of it). Throws if it fails. */
+  execute(command: DocCommand): void {
+    if (this.gesture) {
+      this.update(command);
+      return;
+    }
+    command.do(this.doc);
+    this.push(command);
+    this.publish();
+  }
+
+  /** Starts a gesture (drag, slider): the following updates become one step (prompt 007). */
+  begin(label: UndoLabel): void {
+    if (this.gesture) this.commit();
+    this.gesture = { label, commands: [] };
+  }
+
+  /** One change of the running gesture; merged into the previous one when it has the same target. */
+  update(command: DocCommand): void {
+    if (!this.gesture) {
+      this.execute(command);
+      return;
+    }
+    command.do(this.doc);
+    const last = this.gesture.commands.at(-1);
+    if (!last?.merge?.(command)) this.gesture.commands.push(command);
+    this.changed();
+  }
+
+  /** Ends the gesture as one step (nothing if it changed nothing). */
+  commit(): void {
+    const g = this.gesture;
+    this.gesture = null;
+    if (!g || g.commands.length === 0) return;
+    const command =
+      g.commands.length === 1 && g.commands[0].label === g.label
+        ? g.commands[0]
+        : new CompositeCommand(g.label, g.commands);
+    this.push(command);
+    this.publish();
+  }
+
+  /** Takes the gesture back (Escape). */
+  cancel(): void {
+    const g = this.gesture;
+    this.gesture = null;
+    if (!g) return;
+    for (const c of [...g.commands].reverse()) c.undo(this.doc);
+    if (g.commands.length) this.changed();
+  }
+
+  get inGesture(): boolean {
+    return this.gesture !== null;
+  }
+
+  undo(): boolean {
+    this.commit();
+    const e = this.done.pop();
+    if (!e) return false;
+    e.command.undo(this.doc);
+    this.undone.push(e);
+    this.publish();
+    return true;
+  }
+
+  redo(): boolean {
+    this.commit();
+    const e = this.undone.pop();
+    if (!e) return false;
+    e.command.do(this.doc);
+    this.done.push(e);
+    this.publish();
+    return true;
+  }
+
+  /** The document was saved in its current state. */
+  markSaved(): void {
+    this.commit();
+    this.savePoint = this.done.at(-1)?.id ?? 0;
+    this.publish();
+  }
+
+  private push(command: DocCommand): void {
+    this.done.push({ id: ++this.seq, command });
+    this.undone = [];
+    if (this.done.length > this.depth) {
+      const dropped = this.done.splice(0, this.done.length - this.depth);
+      // the state below the oldest step is no longer reachable – neither is a save point there
+      if (this.savePoint <= dropped[dropped.length - 1].id) this.savePoint = -1;
+    }
+  }
+
+  private compute(): UndoState {
+    const top = this.done?.at(-1);
+    const next = this.undone?.at(-1);
+    const name = (e: Entry | undefined, verb: string) =>
+      e ? `${verb} ${UNDO_TEXTS[e.command.label]}` : verb;
+    return {
+      canUndo: !!top,
+      canRedo: !!next,
+      undoLabel: name(top, UNDO_TEXTS.undo),
+      redoLabel: name(next, UNDO_TEXTS.redo),
+      dirty: (top?.id ?? 0) !== (this.savePoint ?? 0),
+    };
+  }
+
+  private publish(): void {
+    this._state.set(this.compute());
+    this.changed();
+  }
+}

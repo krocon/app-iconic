@@ -29,5 +29,9 @@ tauri-plugin-window-state = "2"
 # 001 E2: the icon engine (icon.json, bundle/ZIP, export, fonts) – Tauri-free, testable without GTK
 ai-core = { path = "core" }
 
+# 003 E11: `-[NSWindow setDocumentEdited:]` (Tauri has no API); already in the tree via tao
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"
+
 [dev-dependencies]
 tempfile = "3"
