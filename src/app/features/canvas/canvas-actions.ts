@@ -1,12 +1,14 @@
 import { ActionHandler } from '../../core/actions/action.service';
 import { CanvasToggle, CanvasViewStore, MaskShape } from './canvas-view.store';
+import { GridOrigin } from '../../shared/geometry/snapping';
 import { Appearance } from './appearance';
+import { SelectionMode } from './selection-measure';
 
 /**
  * The view actions of the canvas (design 005 E17): zoom, centre, the View options, appearance and
  * mask – the same for menu, keyboard, the View Options menu, the toolbar and the AI.
- * Registered by `CanvasView` (with its `DestroyRef`). Snap to Grid / Magic Snap are states now
- * and work from prompt 007 on.
+ * Registered by `CanvasView` (with its `DestroyRef`). Snapping and the selection mode act in the
+ * canvas gestures (design 007).
  */
 export function canvasActions(view: CanvasViewStore): Record<string, ActionHandler> {
   const toggle = (key: CanvasToggle): ActionHandler => ({
@@ -20,6 +22,14 @@ export function canvasActions(view: CanvasViewStore): Record<string, ActionHandl
   const mask = (value: MaskShape): ActionHandler => ({
     run: () => view.set('mask', value),
     checked: () => view.options().mask === value,
+  });
+  const selectionMode = (value: SelectionMode): ActionHandler => ({
+    run: () => view.set('selectionMode', value),
+    checked: () => view.options().selectionMode === value,
+  });
+  const gridOrigin = (value: GridOrigin): ActionHandler => ({
+    run: () => view.set('gridOrigin', value),
+    checked: () => view.options().gridOrigin === value,
   });
   return {
     'view.zoomIn': { run: () => view.zoomIn() },
@@ -40,5 +50,10 @@ export function canvasActions(view: CanvasViewStore): Record<string, ActionHandl
     'view.mask.squircle': mask('squircle'),
     'view.mask.circle': mask('circle'),
     'view.mask.none': mask('none'),
+    'view.selectionMode.point': selectionMode('point'),
+    'view.selectionMode.boxed': selectionMode('boxed'),
+    'view.selectionMode.none': selectionMode('none'),
+    'view.gridOrigin.worldZero': gridOrigin('worldZero'),
+    'view.gridOrigin.svgCenter': gridOrigin('svgCenter'),
   };
 }

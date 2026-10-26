@@ -54,8 +54,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/backend-providers.ts    Bindung der Fassaden; Dev-Build: backend-providers.dev.ts (Fakes im Browser, 003 E14)
   app/features/document/      IconDocument, DocumentStore (runCommand), UndoService (undo/), Commands (commands/:
                               serialisierbar, command-json.ts + registry.ts commandFromJson, 005; tree-commands:
-                              ReorderNode/GroupNodes/Ungroup, 006), model/ (icon-json, unique-names, selection,
-                              reorder-rules), svg/ (node-ids, sanitize-svg, resolve-styles, svg-references) (003, 006)
+                              ReorderNode/GroupNodes/Ungroup, 006; set-attributes: Ergebnis einer Geste, 007),
+                              model/ (icon-json, unique-names, selection, reorder-rules), svg/ (node-ids,
+                              sanitize-svg, resolve-styles, svg-references) (003, 006)
   app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster/Quit), Recent,
                               file-actions (Aktionen der Datei-Funktionen), Texte (003, 005)
   app/features/menus/         Menümodell (rein), MenuService (nativ/HTML), MenuBar (Windows/Linux), Befehlspalette,
@@ -68,10 +69,17 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3), Texte der Fensterhülle
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
-                              icon-color, asset-placement (004), canvas-actions, View-Options-Menü (005)
+                              icon-color, asset-placement (004), canvas-actions, View-Options-Menü (005);
+                              Auswahl/Handles (007): CanvasEditStore (Kontext, Punkt, Rahmen, Snap), canvas-pointer
+                              (Klick/Rahmen/Ziehen), canvas-gesture (Geste je Ziehen), hit-test, selection-measure
+                              (Rahmen + Handle-Sets über CTM), selection-overlay, magic-points, edit-ops (rein),
+                              canvas-edit-actions (Esc, Punkt löschen, Pfeiltasten, moveBy); handles/ (rein:
+                              node-geometry, node-handles, handle-edit, handle-types)
   app/features/about/         About-Dialog
   app/shared/geometry/        Geometrie: icon-guides, view-transform, zoom-steps, ruler-ticks, squircle, align (rein);
-                              dom-geometry (clientToDocument, nodeToDocument über Screen-CTMs, 004)
+                              dom-geometry (clientToDocument, nodeToDocument über Screen-CTMs, 004); 007 (rein):
+                              matrix, snapping, bounds-guard, box-math, box-selection, transform-text,
+                              path-data (Tokenizer für `d`), path-edit
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)
   app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,

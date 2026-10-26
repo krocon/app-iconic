@@ -84,6 +84,15 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     sep,
     a('view.snapToGrid'),
     a('view.magicSnap'),
+    sub(t.gridOrigin, [
+      a('view.gridOrigin.worldZero', t.gridWorldZero),
+      a('view.gridOrigin.svgCenter', t.gridSvgCenter),
+    ]),
+    sub(t.selectionMode, [
+      a('view.selectionMode.point', t.selectionPoint),
+      a('view.selectionMode.boxed', t.selectionBoxed),
+      a('view.selectionMode.none', t.selectionNone),
+    ]),
     sep,
     a('view.zoomIn'),
     a('view.zoomOut'),
@@ -240,5 +249,10 @@ export function menuChord(chords: readonly string[]): string {
 
 /** Items that exclude each other are radio items. */
 export function isRadio(id: string): boolean {
-  return id.startsWith('view.appearance.') || id.startsWith('view.mask.');
+  return (
+    id.startsWith('view.appearance.') ||
+    id.startsWith('view.mask.') ||
+    id.startsWith('view.selectionMode.') ||
+    id.startsWith('view.gridOrigin.')
+  );
 }

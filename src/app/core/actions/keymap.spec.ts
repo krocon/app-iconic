@@ -22,11 +22,19 @@ describe('keymap (design 005 E2)', () => {
     }
   });
 
+  /**
+   * Deliberate exceptions (design 007 E15): these canvas actions are enabled only while there is
+   * something to do (a drag to cancel, a chosen point) – otherwise the key falls through to the
+   * global action (dispatcher, design 005 E4).
+   */
+  const FALLS_THROUGH = new Set(['canvas.escape', 'canvas.deletePoint']);
+
   it('a context shortcut does not hide a global one', () => {
     for (const os of ['mac', 'other'] as const) {
       const k = buildKeymap(os);
       for (const ctx of ['canvas', 'hierarchy', 'dialog'] as const) {
-        for (const chord of k.byContext[ctx].keys()) {
+        for (const [chord, id] of k.byContext[ctx]) {
+          if (FALLS_THROUGH.has(id)) continue;
           expect(k.byContext.global.has(chord), `${ctx} ${chord}`).toBe(false);
         }
       }

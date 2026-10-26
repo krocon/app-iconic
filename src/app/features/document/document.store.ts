@@ -17,6 +17,8 @@ import { UndoLabel } from './undo/undo-texts';
 export class DocumentStore {
   private readonly rev = signal(0);
   private readonly undoService: UndoService;
+  /** The last command of a coalescing series (design 007 E12). */
+  private series: { key: string; at: number; command: DocCommand } | null = null;
 
   /** The document; notifies on every change (`revision`). */
   readonly document = computed(
@@ -63,6 +65,23 @@ export class DocumentStore {
   execute(command: DocCommand): void {
     this.undoService.execute(command);
     this.pruneSelection();
+  }
+
+  /**
+   * Runs `command`; a command of the same series (`key`, e.g. nudges of the same selection) within
+   * `windowMs` of the previous one joins its undo step (design 007 E12: arrow keys, ~500 ms).
+   */
+  executeCoalescing(command: DocCommand, key: string, windowMs = 500, now = Date.now()): void {
+    const s = this.series;
+    const into = s && s.key === key && now - s.at < windowMs ? s.command : null;
+    const merged = this.undoService.executeInto(command, into);
+    this.series = { key, at: now, command: merged && s ? s.command : command };
+    this.pruneSelection();
+  }
+
+  /** A gesture is running (between `begin` and `commit`/`cancel`). */
+  get inGesture(): boolean {
+    return this.undoService.inGesture;
   }
 
   /**

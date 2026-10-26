@@ -66,6 +66,18 @@ const TREE = (id: string, label: string): ActionDef => ({
   palette: false,
 });
 
+/** Arrow keys on the canvas (design 007 E12): 1 document unit, with ⇧ 10. */
+export const NUDGES: readonly [string, string, number, number][] = [
+  ['arrange.nudge.left', 'Nudge Left', -1, 0],
+  ['arrange.nudge.right', 'Nudge Right', 1, 0],
+  ['arrange.nudge.up', 'Nudge Up', 0, -1],
+  ['arrange.nudge.down', 'Nudge Down', 0, 1],
+  ['arrange.nudge.leftBig', 'Nudge Left ×10', -10, 0],
+  ['arrange.nudge.rightBig', 'Nudge Right ×10', 10, 0],
+  ['arrange.nudge.upBig', 'Nudge Up ×10', 0, -10],
+  ['arrange.nudge.downBig', 'Nudge Down ×10', 0, 10],
+];
+
 /** Clipboard and editing keys stay with text fields (design 005 E4/E7). */
 const TEXT: Extra = { nativeInText: true };
 
@@ -156,8 +168,17 @@ export const ACTIONS: readonly ActionDef[] = [
   VIEW('view.mask.squircle', 'Platform Mask: iOS / macOS'),
   VIEW('view.mask.circle', 'Platform Mask: watchOS'),
   VIEW('view.mask.none', 'Platform Mask: None'),
+  // selection and snapping (design 007 E4, E13)
+  VIEW('view.selectionMode.point', 'Selection Mode: Point'),
+  VIEW('view.selectionMode.boxed', 'Selection Mode: Boxed'),
+  VIEW('view.selectionMode.none', 'Selection Mode: None'),
+  VIEW('view.gridOrigin.worldZero', 'Grid Origin: World Zero'),
+  VIEW('view.gridOrigin.svgCenter', 'Grid Origin: SVG Center'),
   // canvas keys (not in menus)
   VIEW('canvas.panHold', 'Pan (hold)', { context: 'canvas', hold: true, palette: false }),
+  // canvas editing (design 007 E12, E15): Esc and Delete fall through when there is nothing to do
+  EDIT('canvas.escape', 'Cancel / Leave Group', { context: 'canvas', palette: false }),
+  EDIT('canvas.deletePoint', 'Delete Point', { context: 'canvas' }),
   // add (legacy §8; prompts 008, 013)
   ADD('add.iconGroup', 'Group (SVG)'),
   ADD('add.container', 'Container <g>'),
@@ -181,6 +202,21 @@ export const ACTIONS: readonly ActionDef[] = [
   ARRANGE('arrange.moveDown', 'Move Down', { context: 'hierarchy', repeat: true }),
   ARRANGE('arrange.moveInto', 'Move Into Group', { context: 'hierarchy' }),
   ARRANGE('arrange.moveOut', 'Move Out of Group', { context: 'hierarchy' }),
+  ...NUDGES.map(([id, label]) =>
+    ARRANGE(id, label, { context: 'canvas', repeat: true, palette: false }),
+  ),
+  // move the selection by a document delta (AI, tests; design 007 E12)
+  ARRANGE('arrange.moveBy', 'Move By', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['dx', 'dy'],
+      properties: {
+        dx: { type: 'number', minimum: -10000, maximum: 10000 },
+        dy: { type: 'number', minimum: -10000, maximum: 10000 },
+      },
+    },
+  }),
   ARRANGE('arrange.group', 'Group <g>'),
   ARRANGE('arrange.ungroup', 'Ungroup'),
   ARRANGE('arrange.align.left', 'Align Left'),

@@ -15,6 +15,12 @@ export type JsonValue =
  */
 export type CommandJson =
   | { type: 'setAttribute'; ref: NodeRef; name: string; value: string; label?: UndoLabel }
+  /** Several attributes as one step – the result of a canvas gesture (design 007 E10). */
+  | {
+      type: 'setAttributes';
+      changes: { ref: NodeRef; name: string; value: string }[];
+      label?: UndoLabel;
+    }
   | { type: 'removeAttribute'; ref: NodeRef; name: string }
   | { type: 'insertNode'; parent: NodeRef; markup: string; index?: number; label?: UndoLabel }
   | { type: 'removeNode'; ref: NodeRef }

@@ -57,6 +57,15 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 006 E12 | Zwischenablage als SVG-Text über `ClipboardApi` (`navigator.clipboard`) plus DOM-Ereignisse `copy`/`cut`/`paste` (macOS-Menü) – kein Plugin, kein Rust | plattformübergreifend, zwischen Fenstern/Apps; Einfügen wird bereinigt, IDs eindeutig |
 | 006 E13 | Ausrichten über `nodeBoundsInDocument` (BBox + Screen-CTMs), Verschiebung als vorangestelltes `translate(A⁻¹·d)` im System des Elternelements | „Der Browser ist die Grafik-Engine“ – keine eigene Transform-Kette |
 | 006 E14 | Import/Paste legen neue Gruppen oben (Index 0) an | wie Icon Composer (004 E3) |
+| 007 E1/E2 | Handles und Treffer nur über Browser-Matrizen: Punkte im Benutzerraum der Node, abgebildet mit `nodeToDocument`; Treffer über `isPointInFill`/`isPointInStroke` (Toleranz 4 Bildschirm-px) bzw. BBox je gerendertem Layer von oben | die Layer-Hosts nehmen keine Zeigerereignisse (004); keine eigene Transform-Kette, exakt bei verschachtelten transformierten Gruppen |
+| 007 E3/E4 | Klick wählt das Kind des Gruppen-Kontexts (Standard: oberstes Element im Layer), Doppelklick geht hinein, Esc heraus; Selection Modes `point` (Punkt-Handles) / `boxed` (Box-Handles) / `none`; Rahmenauswahl schneidet Bounds im Dokumentraum | wie die Vorlage (`CanvasSelectionOverlay`) und gängige Editoren |
+| 007 E5 | Overlay als eigenes SVG in Viewport-Pixeln (nie im Dokument-DOM), Handles in Bildschirmgröße | konstante Größe bei jedem Zoom, Handles sind die einzigen Ereignisziele |
+| 007 E8 | Pfaddaten über einen kleinen Tokenizer (`path-data.ts`); unveränderte Segmente bleiben Zeichen für Zeichen, geänderte behalten relativ/absolut | Chromium und WebKit haben kein `getPathData`; minimale Änderung am Quelltext |
+| 007 E9/E10 | Ziehen = Geste (`begin` ab 3 px, ein `update` je Frame, `commit`/`cancel`), Ergebnis ist **ein** Command `setAttributes { changes }` | KI-Regel: jede Geste als ein serialisierbarer Command; Esc stellt her |
+| 007 E11 | Verschieben setzt ein `translate` vorn an `transform` (mit vorhandenem `translate`/`matrix` verrechnet), Box-Skalierung hängt `matrix(…)` an | einheitlich für alle Node-Arten, keine wachsende Kette beim Nudgen |
+| 007 E12 | Pfeiltasten 1 / ⇧ 10 Dokumenteinheiten; eine Folge innerhalb 500 ms ist ein Undo-Schritt (`executeCoalescing`, faltet in den obersten Schritt, nie in den Save-Punkt) | kein offenes Gesten-Fenster, das fremde Befehle verschlucken könnte |
+| 007 E13/E14 | Snapping rein (`snapping.ts`): Grid 10 (Ursprung `worldZero`/`svgCenter`), Magic Snap auf markante Punkte aller sichtbaren Nodes, 20 Bildschirm-px, Magic vor Grid; BoundsGuard klemmt Punkte/Verschiebungen auf die Leinwand (außer was schon draußen liegt) | Algorithmen der Vorlage (`SnappingService`, `BoundsGuard`) mit ihren Testfällen |
+| 007 E15 | Esc (`canvas.escape`) und Entf (`canvas.deletePoint`) im Kontext `canvas` sind nur aktiv, wenn es etwas zu tun gibt, sonst fällt die Taste zu Deselect/Delete durch | bewusste Ausnahme im Keymap-Test „Kontext verdeckt kein globales Kürzel“ |
 
 ## Schichten
 
@@ -93,7 +102,8 @@ Angular (WebView)                                   Rust
 | `window_start_action()` | 005 | Aktion, die ein ohne Fenster gewählter Menüeintrag (macOS) im neuen Fenster ausführt |
 
 DTO-Ergänzung 003: `IconDocumentDto.name`, `SaveResult.name` (Dateiname fürs UI). Fehlercode 005: `invalid_menu`.
-006 bringt keinen Rust-Command: Hierarchie, Ausrichten und Zwischenablage laufen ganz im Frontend.
+006 bringt keinen Rust-Command: Hierarchie, Ausrichten und Zwischenablage laufen ganz im Frontend. 007 ebenso
+(Auswahl, Handles, Snapping, BoundsGuard nur im Frontend; neuer Dokument-Command `setAttributes`).
 
 Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `export_svg`,
 `export_png` (012), `list_fonts`, `text_to_path` (013), `load_settings`/`save_settings` (015).

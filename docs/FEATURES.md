@@ -18,7 +18,7 @@
 ## 2. Layout & Einstellungen
 - [ ] Drei ein-/ausblendbare Seitenleisten ⌘1/⌘2/⌘3 (005 ✓), Breite 160–480 px, Defaults 260/260/300 (015)
 - [ ] View Options: Command Sidebar, Hierarchy, Properties, Rulers, Guides, Background, Cross Cursor, Show Handles,
-      Snap to Grid, Magic Snap (005 ✓ Menü View + „View Options“ im Canvas; persistent 015; Snap wirkt ab 007)
+      Snap to Grid, Magic Snap (005 ✓ Menü View + „View Options“ im Canvas, Snap wirkt seit 007; persistent 015)
 - [x] Menüs File/Edit/View/Add/Arrange/Help aus einem Modell: natives macOS-Menü, HTML-Menüleiste Windows/Linux (005; macOS auf dem Mac prüfen)
 - [x] Befehlspalette ⇧⌘P, Übersicht „Keyboard Shortcuts“, eigene Kürzel in `keymap.json` *(neu)* (005)
 - [x] Quit ⌘Q fragt alle Fenster mit ungespeicherten Änderungen nacheinander (005; auf dem Mac prüfen)
@@ -37,17 +37,17 @@
 - [x] Plattform-Vorschau Squircle / Kreis als Maske (004)
 - [x] Assets lebendig im DOM, Reihenfolge wie Icon Composer (erste Gruppe oben), Layer-/Gruppen-Opacity, hidden, eindeutige IDs je Layer *(neu)* (004)
 - [ ] Gruppen-Schatten und Transluzenz als Vorschau-Annäherung *(neu)* (010)
-- [ ] BoundsGuard (Punkte, Pfade, Translationen klemmen) (007)
+- [x] BoundsGuard (Punkte, Pfade, Translationen klemmen) (007)
 
 ## 4. Auswahl & Manipulation
-- [ ] Selection Modes none / point / boxed, Mehrfachauswahl ⇧/⌘ (007)
-- [ ] Hit-Testing, Klick ins Leere hebt Auswahl auf, Doppelklick in Gruppe (007)
-- [ ] Handles position/size/control/anchor/midpoint/pivot mit Farben/Größen der Vorlage (007)
-- [ ] Punktbearbeitung Polyline/Polygon/Pfad (line & cubic), Punkt einfügen über Mitte (007)
-- [ ] Pfeiltasten 1 px / ⇧ 10 px (007)
-- [ ] Snapping Grid (10, worldZero/svgCenter) und Magic Snap (20 Bildschirm-px, Magic vor Grid) (007)
-- [ ] Gesten = eine Undo-Gruppe, Esc bricht ab (007)
-- [ ] Handles korrekt bei verschachtelten, transformierten Gruppen und Zoom 50/100/150 % (007)
+- [x] Selection Modes none / point / boxed, Mehrfachauswahl ⇧/⌘, Rahmenauswahl (007)
+- [x] Hit-Testing, Klick ins Leere hebt Auswahl auf, Doppelklick in Gruppe, Esc heraus (007)
+- [x] Handles position/size/control/anchor/midpoint/pivot mit Farben/Größen der Vorlage, Box-Handles (007)
+- [x] Punktbearbeitung Polyline/Polygon/Pfad (alle Befehle, relativ bleibt relativ), Punkt einfügen über Mitte, löschen mit ⌥-Klick/Entf (007)
+- [x] Pfeiltasten 1 px / ⇧ 10 px, eine Undo-Aktion je Folge (007)
+- [x] Snapping Grid (10, worldZero/svgCenter) und Magic Snap (20 Bildschirm-px, Magic vor Grid), Snap-Hinweis (007)
+- [x] Gesten = eine Undo-Gruppe (ein Command `setAttributes`), Esc bricht ab (007)
+- [x] Handles korrekt bei verschachtelten, transformierten Gruppen und Zoom 50/100/150 % (007, Playwright ± 0,5 px)
 
 ## 5. Elemente hinzufügen
 - [ ] Group (Icon-Gruppe + Layer + Asset) und Container `<g>` (008)
@@ -103,5 +103,5 @@
 
 ## 12. Undo/Redo
 - [x] Benannte Aktionen im Menü („Undo Move“ …), ⌘Z / ⇧⌘Z (003 Namen, 005 Menü und Kürzel)
-- [ ] Gesten-Coalescing und zusammengesetzte Aktionen (003 ✓ UndoService; Gesten im UI 007)
+- [x] Gesten-Coalescing und zusammengesetzte Aktionen (003 UndoService; Gesten im UI und Pfeiltasten-Folgen 007)
 - [x] Undo-Stack je Dokument, Dirty am Save-Punkt (003)

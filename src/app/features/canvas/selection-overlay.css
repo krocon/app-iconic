@@ -1,0 +1,84 @@
+:host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.frame {
+  fill: none;
+  stroke: var(--ai-handle-position);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+.tie {
+  stroke: var(--ai-handle-control);
+  stroke-width: 1;
+}
+
+.handle {
+  pointer-events: all;
+  cursor: pointer;
+  stroke: var(--ai-handle-stroke);
+  stroke-width: 1;
+
+  &.position {
+    fill: var(--ai-handle-position);
+    cursor: move;
+  }
+
+  &.size {
+    fill: var(--ai-handle-size);
+    cursor: nwse-resize;
+  }
+
+  &.control {
+    fill: var(--ai-handle-control);
+  }
+
+  &.anchor {
+    fill: var(--ai-handle-anchor);
+  }
+
+  &.midpoint {
+    fill: var(--ai-handle-midpoint);
+    cursor: copy;
+  }
+
+  &.pivot {
+    fill: var(--ai-handle-pivot);
+  }
+
+  &.active {
+    stroke: var(--ai-handle-active);
+    stroke-width: 2;
+  }
+}
+
+.marquee {
+  fill: var(--ai-marquee-fill);
+  stroke: var(--ai-handle-position);
+  stroke-width: 1;
+}
+
+.snap {
+  fill: none;
+  stroke-width: 1.5;
+
+  &.magic {
+    stroke: var(--ai-snap-magic);
+  }
+
+  &.grid {
+    stroke: var(--ai-snap-grid);
+  }
+}

@@ -54,6 +54,28 @@ export class UndoService {
     this.publish();
   }
 
+  /**
+   * Runs `command` and folds it into the top step when that step is `into` and takes it over
+   * (`merge`) – a series of nudges is one step (design 007 E12) without an open gesture that could
+   * swallow other commands. Never folds into the save point (dirty stays right). `true` = folded.
+   */
+  executeInto(command: DocCommand, into: DocCommand | null): boolean {
+    if (this.gesture) {
+      this.update(command);
+      return false;
+    }
+    command.do(this.doc);
+    const top = this.done.at(-1);
+    if (into && top && top.command === into && top.id !== this.savePoint && into.merge?.(command)) {
+      this.undone = [];
+      this.publish();
+      return true;
+    }
+    this.push(command);
+    this.publish();
+    return false;
+  }
+
   /** Starts a gesture (drag, slider): the following updates become one step (prompt 007). */
   begin(label: UndoLabel): void {
     if (this.gesture) this.commit();

@@ -9,10 +9,11 @@ import {
   inject,
   input,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
-import { clientToDocument, Rect } from '../../shared/geometry/dom-geometry';
-import { measurable } from '../hierarchy/align';
+import { clientToDocument } from '../../shared/geometry/dom-geometry';
+import { fromDom, IDENTITY, Matrix, multiply, translation } from '../../shared/geometry/matrix';
 import { CANVAS_SIZE, iconGuides } from '../../shared/geometry/icon-guides';
 import { squirclePath } from '../../shared/geometry/squircle';
 import { documentToView, Point } from '../../shared/geometry/view-transform';
@@ -27,6 +28,11 @@ import { CanvasToolbar } from './canvas-toolbar';
 import { CanvasViewStore } from './canvas-view.store';
 import { fillPreview } from './fill-preview';
 import { LayerStack } from './layer-stack';
+import { CanvasEditStore } from './canvas-edit.store';
+import { registerCanvasEditActions } from './canvas-edit-actions';
+import { CanvasInteraction } from './canvas-pointer';
+import { EMPTY_MODEL, measureSelection } from './selection-measure';
+import { SelectionOverlay } from './selection-overlay';
 
 /** Ctrl+wheel / pinch: zoom factor per wheel pixel (design 004 E9). */
 const WHEEL_ZOOM = 0.01;
@@ -38,7 +44,7 @@ const WHEEL_ZOOM = 0.01;
  */
 @Component({
   selector: 'app-canvas-view',
-  imports: [CanvasBackground, CanvasRuler, CanvasToolbar],
+  imports: [CanvasBackground, CanvasRuler, CanvasToolbar, SelectionOverlay],
   template: `
     <app-canvas-toolbar />
     <div class="frame" [class.rulers]="opt().rulers">
@@ -71,8 +77,9 @@ const WHEEL_ZOOM = 0.01;
         (wheel)="onWheel($event)"
         (pointerdown)="onPointerDown($event)"
         (pointermove)="onPointerMove($event)"
-        (pointerup)="endPan($event)"
-        (pointercancel)="endPan($event)"
+        (pointerup)="onPointerUp($event)"
+        (pointercancel)="onPointerCancel($event)"
+        (dblclick)="onDblClick($event)"
         (pointerleave)="onPointerLeave()"
         (auxclick)="$event.preventDefault()"
       >
@@ -106,19 +113,15 @@ const WHEEL_ZOOM = 0.01;
                 }
               </g>
             }
-            <g class="selection">
-              @for (r of selectionRects(); track $index) {
-                <rect
-                  [attr.x]="r.x"
-                  [attr.y]="r.y"
-                  [attr.width]="r.width"
-                  [attr.height]="r.height"
-                  vector-effect="non-scaling-stroke"
-                />
-              }
-            </g>
           </svg>
         </div>
+        <app-selection-overlay
+          [model]="edit.model()"
+          [toView]="toView()"
+          [marquee]="edit.marquee()"
+          [snap]="edit.snap()"
+          [active]="edit.activePoint()"
+        />
         @if (opt().crossCursor && pointerView(); as p) {
           <div class="cross-h" [style.top.px]="p.y"></div>
           <div class="cross-v" [style.left.px]="p.x"></div>
@@ -172,8 +175,10 @@ export class CanvasView {
     return null;
   });
 
-  /** Bounds of the selected nodes (design 006 E5: the canvas shows the tree's selection). */
-  protected readonly selectionRects = signal<Rect[]>([]);
+  /** Editing state: selection model, marquee, snap, context (design 007 E15). */
+  protected readonly edit = inject(CanvasEditStore);
+  /** Document → viewport pixels, measured with the host's screen CTM (design 007 E5). */
+  protected readonly toView = signal<Matrix>(IDENTITY);
 
   private readonly viewportEl = viewChild.required<ElementRef<HTMLElement>>('vp');
   private readonly layersEl = viewChild.required<ElementRef<HTMLElement>>('layers');
@@ -181,6 +186,7 @@ export class CanvasView {
   private stack: LayerStack | null = null;
   private pan: { id: number; x: number; y: number } | null = null;
   private lastClient: { clientX: number; clientY: number } | null = null;
+  private readonly interaction: CanvasInteraction;
 
   constructor() {
     effect(() => {
@@ -188,21 +194,41 @@ export class CanvasView {
       this.stack ??= new LayerStack(box);
       this.stack.update(this.store()?.document() ?? null, this.opt().appearance);
     });
-    // selection frames: measured after the layers are painted (needs layout)
+    // the selection (frames, handles): measured after the layers are painted (needs layout)
     let frame = 0;
     effect(() => {
       const s = this.store();
       const refs = s?.selection() ?? [];
-      // re-measure after changes, zoom/pan and appearance (other assets)
+      // re-measure after changes, zoom/pan, options and the viewport size
       s?.revision();
       this.view();
-      this.opt();
+      this.viewport();
+      const o = this.opt();
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const doc = s?.document();
         const host = this.hostEl().nativeElement;
-        this.selectionRects.set(doc ? measurable(doc, host, refs).map((n) => n.rect) : []);
+        this.toView.set(this.measureView());
+        this.edit.model.set(
+          doc ? measureSelection(doc, host, refs, o.selectionMode, o.handles) : EMPTY_MODEL,
+        );
       });
+    });
+    // a selection made elsewhere (tree, AI) outside the group context leaves it; the chosen
+    // point goes with its node
+    effect(() => {
+      const s = this.store();
+      const refs = s?.selection() ?? [];
+      const p = untracked(() => this.edit.activePoint());
+      if (p && !refs.some((r) => r.asset === p.ref.asset && r.id === p.ref.id)) {
+        this.edit.activePoint.set(null);
+      }
+      const ctx = this.edit.context();
+      if (!ctx) return;
+      const el = s?.document().node(ctx);
+      const inside =
+        !!el && refs.every((r) => r.asset === ctx.asset && el.contains(s!.document().node(r)));
+      if (!inside) this.edit.context.set(null);
     });
     // the pointer stays on the same screen spot while zooming/panning: recompute its document point
     effect(() => {
@@ -213,6 +239,22 @@ export class CanvasView {
     // zoom, view options … and Space held = pan (design 005 E16: actions instead of listeners)
     const actions = inject(ActionService);
     actions.registerAll(canvasActions(this.canvas), destroy);
+    registerCanvasEditActions(
+      actions,
+      () => this.store(),
+      this.edit,
+      () => this.canvas.host,
+      destroy,
+    );
+    this.interaction = new CanvasInteraction(
+      () => this.store(),
+      this.canvas,
+      this.edit,
+      () => this.hostEl().nativeElement,
+      () => this.layersEl().nativeElement,
+      actions.os === 'mac',
+    );
+    destroy.onDestroy(() => this.edit.gesture.cancel());
     actions.register(
       'canvas.panHold',
       {
@@ -226,6 +268,7 @@ export class CanvasView {
     afterNextRender(() => {
       const el = this.viewportEl().nativeElement;
       this.canvas.host = this.hostEl().nativeElement;
+      this.canvas.layers = this.layersEl().nativeElement;
       const ro = new ResizeObserver(([e]) =>
         this.canvas.setViewport(e.contentRect.width, e.contentRect.height),
       );
@@ -233,6 +276,7 @@ export class CanvasView {
       destroy.onDestroy(() => {
         ro.disconnect();
         if (this.canvas.host === this.hostEl().nativeElement) this.canvas.host = null;
+        if (this.canvas.layers === this.layersEl().nativeElement) this.canvas.layers = null;
       });
     });
   }
@@ -264,15 +308,48 @@ export class CanvasView {
   }
 
   protected onPointerDown(e: PointerEvent): void {
+    const vp = this.viewportEl().nativeElement;
+    if (e.button === 0 && !this.space()) {
+      // select, drag a handle, move, marquee (design 007)
+      vp.focus({ preventScroll: true });
+      if (this.interaction.down(e, e.target instanceof Element ? e.target : null)) {
+        e.preventDefault();
+        vp.setPointerCapture?.(e.pointerId);
+      }
+      return;
+    }
     if (e.button !== 1 && !(e.button === 0 && this.space())) return;
     e.preventDefault();
-    this.viewportEl().nativeElement.setPointerCapture?.(e.pointerId);
+    vp.setPointerCapture?.(e.pointerId);
     this.pan = { id: e.pointerId, x: e.clientX, y: e.clientY };
     this.panning.set(true);
   }
 
+  protected onPointerUp(e: PointerEvent): void {
+    this.interaction.up(e);
+    this.endPan(e);
+  }
+
+  protected onPointerCancel(e: PointerEvent): void {
+    this.edit.gesture.cancel();
+    this.endPan(e);
+  }
+
+  protected onDblClick(e: MouseEvent): void {
+    this.interaction.dblclick({ ...pointerOf(e), pointerId: 0 });
+  }
+
+  /** Document → viewport pixels from the browser's matrix of the host. */
+  private measureView(): Matrix {
+    const m = this.hostEl().nativeElement.getScreenCTM?.();
+    if (!m) return IDENTITY;
+    const r = this.viewportEl().nativeElement.getBoundingClientRect();
+    return multiply(translation(-r.left, -r.top), fromDom(m));
+  }
+
   protected onPointerMove(e: PointerEvent): void {
     this.lastClient = { clientX: e.clientX, clientY: e.clientY };
+    this.interaction.move(e);
     if (this.pan && this.pan.id === e.pointerId) {
       this.canvas.panBy(e.clientX - this.pan.x, e.clientY - this.pan.y);
       this.pan = { id: e.pointerId, x: e.clientX, y: e.clientY };
@@ -298,4 +375,15 @@ export class CanvasView {
     const el = this.viewportEl().nativeElement;
     return el.ownerDocument.activeElement === el;
   }
+}
+
+function pointerOf(e: MouseEvent) {
+  return {
+    clientX: e.clientX,
+    clientY: e.clientY,
+    altKey: e.altKey,
+    shiftKey: e.shiftKey,
+    metaKey: e.metaKey,
+    ctrlKey: e.ctrlKey,
+  };
 }

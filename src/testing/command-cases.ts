@@ -20,6 +20,7 @@ import {
   ReorderNode,
   ReplaceAssetMarkup,
   SetAttribute,
+  SetAttributes,
   SetIconJsonValue,
   Ungroup,
 } from '../app/features/document/commands';
@@ -46,6 +47,18 @@ export const CASES: [string, (doc: IconDocument) => DocCommand][] = [
   ['SetAttribute (new)', () => new SetAttribute(a('n3'), 'stroke', 'blue')],
   ['SetAttribute (existing)', () => new SetAttribute(a('n3'), 'fill', 'blue', 'changeFill')],
   ['SetAttribute (xlink)', () => new SetAttribute(a('n4'), 'xlink:href', '#x')],
+  [
+    'SetAttributes (gesture result, design 007 E10)',
+    () =>
+      new SetAttributes(
+        [
+          { ref: a('n3'), name: 'transform', value: 'translate(1 2)' },
+          { ref: a('n3'), name: 'fill', value: 'blue' },
+          { ref: a('n4'), name: 'cx', value: '7' },
+        ],
+        'moveNode',
+      ),
+  ],
   ['RemoveAttribute', () => new RemoveAttribute(a('n3'), 'fill')],
   ['InsertNode', () => new InsertNode(a('n2'), '<ellipse rx="1" onclick="x()"/>', 0)],
   ['InsertNode (end)', () => new InsertNode(a('n1'), '<rect/>')],

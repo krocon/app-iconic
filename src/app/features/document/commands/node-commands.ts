@@ -6,24 +6,24 @@ import { CommandJson, opt } from './command-json';
 
 const XLINK_NS = 'http://www.w3.org/1999/xlink';
 
-function target(doc: IconDocument, ref: NodeRef): Element {
+export function target(doc: IconDocument, ref: NodeRef): Element {
   const el = doc.node(ref);
   if (!el) throw new CommandError(`no node ${ref.asset}#${ref.id}`);
   return el;
 }
 
-function sameRef(a: NodeRef, b: NodeRef): boolean {
+export function sameRef(a: NodeRef, b: NodeRef): boolean {
   return a.asset === b.asset && a.id === b.id;
 }
 
 /** `xlink:href` lives in its own namespace; everything else is a plain attribute. */
-function readAttr(el: Element, name: string): string | null {
+export function readAttr(el: Element, name: string): string | null {
   return name.startsWith('xlink:')
     ? el.getAttributeNS(XLINK_NS, name.slice(6))
     : el.getAttribute(name);
 }
 
-function writeAttr(el: Element, name: string, value: string | null): void {
+export function writeAttr(el: Element, name: string, value: string | null): void {
   if (name.startsWith('xlink:')) {
     if (value === null) el.removeAttributeNS(XLINK_NS, name.slice(6));
     else el.setAttributeNS(XLINK_NS, name, value);
@@ -34,7 +34,7 @@ function writeAttr(el: Element, name: string, value: string | null): void {
   }
 }
 
-function checkName(name: string): void {
+export function checkName(name: string): void {
   // internal ids are never changed by commands; handlers never get in (design 003 E4)
   if (!name || name.startsWith('data-ai-') || /^on/i.test(name)) {
     throw new CommandError(`attribute ${name} cannot be set`);

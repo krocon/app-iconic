@@ -37,6 +37,11 @@
   --ai-handle-anchor: #bf5af2;
   --ai-handle-midpoint: #ffd60a;
   --ai-handle-pivot: #ff453a;
+  --ai-handle-stroke: #ffffff;
+  --ai-handle-active: #1c1c1e;
+  --ai-marquee-fill: rgb(10 132 255 / 12%);
+  --ai-snap-magic: #ff375f;
+  --ai-snap-grid: #64d2ff;
 
   --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, sans-serif;
   --font-size: 14px;
@@ -88,6 +93,11 @@
     --ai-handle-anchor: #bf5af2;
     --ai-handle-midpoint: #ffd60a;
     --ai-handle-pivot: #ff453a;
+    --ai-handle-stroke: #000000;
+    --ai-handle-active: #ffffff;
+    --ai-marquee-fill: rgb(10 132 255 / 12%);
+    --ai-snap-magic: #ff375f;
+    --ai-snap-grid: #64d2ff;
   }
 }
 
@@ -123,6 +133,11 @@
   --ai-handle-anchor: #bf5af2;
   --ai-handle-midpoint: #ffd60a;
   --ai-handle-pivot: #ff453a;
+  --ai-handle-stroke: #000000;
+  --ai-handle-active: #ffffff;
+  --ai-marquee-fill: rgb(10 132 255 / 12%);
+  --ai-snap-magic: #ff375f;
+  --ai-snap-grid: #64d2ff;
 }
 
 *,

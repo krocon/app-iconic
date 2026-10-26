@@ -10,6 +10,7 @@ import { DocumentStore } from '../app/features/document/document.store';
 import { serializeAsset } from '../app/features/document/svg/node-ids';
 import { FilesService } from '../app/features/files/files.service';
 import { CanvasViewStore } from '../app/features/canvas/canvas-view.store';
+import { Hit, hitTest } from '../app/features/canvas/hit-test';
 import {
   clientToDocument,
   documentToClient,
@@ -54,6 +55,8 @@ export interface AppIconicHook {
   /** `nodeToDocument` of the node `id` of `asset` as `[a, b, c, d, e, f]`. */
   nodeToDocument(asset: string, id: string): number[] | null;
   nodeBounds(asset: string, id: string): Rect | null;
+  /** The painted element under a client point (`hitTest`, design 007 E2). */
+  hit(clientX: number, clientY: number): Hit | null;
   /** Runs an action like menu, keyboard or the AI (design 005 E18); `true` = it ran. */
   run(id: string, args?: unknown): boolean;
   /** Every action with its state (`ActionService.describe`). */
@@ -117,6 +120,8 @@ export function installTestHook(): void {
       const el = node(asset, id);
       return el && canvas.host ? nodeBoundsInDocument(canvas.host, el) : null;
     },
+    hit: (clientX, clientY) =>
+      canvas.layers ? hitTest(canvas.layers, { clientX, clientY }) : null,
     run: (id, args) => actions.run(id, args),
     actions: () => actions.describe(),
     runCommand: (json) => {

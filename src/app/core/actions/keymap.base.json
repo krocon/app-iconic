@@ -36,7 +36,18 @@
     "Mod+Shift+h": "edit.toggleVisibility"
   },
   "canvas": {
-    "Space": "canvas.panHold"
+    "Space": "canvas.panHold",
+    "Escape": "canvas.escape",
+    "Delete": "canvas.deletePoint",
+    "Backspace": "canvas.deletePoint",
+    "ArrowLeft": "arrange.nudge.left",
+    "ArrowRight": "arrange.nudge.right",
+    "ArrowUp": "arrange.nudge.up",
+    "ArrowDown": "arrange.nudge.down",
+    "Shift+ArrowLeft": "arrange.nudge.leftBig",
+    "Shift+ArrowRight": "arrange.nudge.rightBig",
+    "Shift+ArrowUp": "arrange.nudge.upBig",
+    "Shift+ArrowDown": "arrange.nudge.downBig"
   },
   "hierarchy": {
     "ArrowDown": "hierarchy.next",

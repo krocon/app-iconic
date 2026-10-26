@@ -9,7 +9,9 @@ import {
   zoomAround,
 } from '../../shared/geometry/view-transform';
 import { clampZoom, fitZoom, nextZoomStep, prevZoomStep } from '../../shared/geometry/zoom-steps';
+import { GridOrigin } from '../../shared/geometry/snapping';
 import { Appearance } from './appearance';
+import { SelectionMode } from './selection-measure';
 
 /** Platform mask of the preview (design 004 E8). */
 export type MaskShape = 'none' | 'squircle' | 'circle';
@@ -20,11 +22,14 @@ export interface CanvasOptions {
   guides: boolean;
   background: boolean;
   crossCursor: boolean;
-  /** Used from prompt 007 on. */
+  /** Handles of the selection (design 007 E5). */
   handles: boolean;
-  /** Snapping (legacy §6: grid off, magic on) – state from 005, used from prompt 007 on. */
+  /** Snapping (legacy §6: grid off, magic on; design 007 E13). */
   snapToGrid: boolean;
   magicSnap: boolean;
+  gridOrigin: GridOrigin;
+  /** none / point / boxed (design 007 E4). */
+  selectionMode: SelectionMode;
   mask: MaskShape;
   appearance: Appearance;
 }
@@ -56,12 +61,16 @@ export class CanvasViewStore {
     handles: true,
     snapToGrid: false,
     magicSnap: true,
+    gridOrigin: 'worldZero',
+    selectionMode: 'point',
     mask: 'squircle',
     appearance: systemAppearance(),
   });
   readonly zoom = computed(() => this.view().zoom);
   /** The overlay `<svg>` of the canvas (set by `CanvasView`). */
   host: SVGSVGElement | null = null;
+  /** The box with the painted layers (set by `CanvasView`; hit testing, design 007 E2). */
+  layers: HTMLElement | null = null;
   /** The user zoomed or panned – until then resizing keeps the artboard fitted and centred. */
   private touched = false;
 
