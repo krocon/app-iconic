@@ -9,6 +9,10 @@ Feature-Checkliste: [../docs/FEATURES.md](../docs/FEATURES.md). Fachliche Vorlag
 (CTM/`DOMMatrix`). Rust (`ai-core`) liest und schreibt `.icon`-Bundles/ZIP verlustfrei, exportiert PNG und liefert
 Schriften. Mutationen nur über benannte Commands im `DocumentStore` (Undo/Redo).
 
+**KI-fähig (Marc, 26.10.2026):** Logik und Geometrie bleiben im Frontend, aber jeder Dokument-Command ist
+serialisierbar (`{ type, …args }`) und jede Funktion eine Aktion mit Id – damit eine KI über MCP (Prompt 018)
+dieselben Wege nutzt wie Menü und Tastatur.
+
 **Arbeitsweise:** Prompts nacheinander abarbeiten, je Prompt Design-Dokument, Tests, `pnpm check` + `pnpm e2e`
 grün, Commit + Push auf `main`, Prompt samt Design nach [`done/`](done/).
 
@@ -37,6 +41,7 @@ Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 je
 | 014 | [014-clip-paths.md](014-clip-paths.md) | Clip Paths fertig: Picker, Anlegen je Layer, Bearbeitungsmodus, Vererbung Layer → Node, `clipPathUnits`, nicht selektierbar | 009 | M | offen |
 | 015 | [015-einstellungen-layout-i18n.md](015-einstellungen-layout-i18n.md) | `settings.json` (Schema, Migration, Reset), Seitenleisten ein-/ausblendbar und in der Breite ziehbar, View-Options persistent, Settings-Dialog, Deutsch/Englisch zur Laufzeit, Hell/Dunkel | 005 | M | offen |
 | 016 | [016-release-distribution.md](016-release-distribution.md) | Version aus einer Quelle, Lizenzhinweise, Pakete je OS, Dateizuordnung `.icon`, Release-Workflow (Probelauf), Signierung/Notarisierung vorbereitet, Share (macOS) | 012 | M | offen |
+| 018 | [018-mcp-server.md](018-mcp-server.md) | MCP-Server: KI steuert den laufenden AppIconic über serialisierbare Commands und Aktionen (Sidecar + lokale Brücke wie editlicious), Lesen, Ändern, Vorschau, Export; Standard aus | 005, 009, 012 | M–L | erst nach Freigabe |
 | 017 | [017-haertung-paritaet.md](017-haertung-paritaet.md) | Parität gegen `docs/FEATURES.md`, Review durch separaten Agenten, feindliche Dateien, Performance großer SVGs, Barrierefreiheit, Doku | 002–016 | M | offen |
 
 ## Folge-Ideen (noch ohne Prompt)
@@ -45,4 +50,3 @@ Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 je
 - Weitere Icon-Sets im Symbol-Picker; eigene Bibliothek wiederverwendbarer Formen.
 - Boolesche Pfad-Operationen (Vereinigen, Schneiden), Konturen in Pfade umwandeln.
 - Import von Icon-Composer-Projekten mit PNG-Assets bearbeiten (heute nur durchreichen).
-- KI-Steuerung über MCP wie in editlicious.

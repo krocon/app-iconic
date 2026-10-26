@@ -116,6 +116,9 @@ prompts/                      Feature-Prompts (Index README.md), done/
   Einfügen in die WebView von Skripten/Event-Handlern/externen Referenzen befreien.
 - **Sicherheit** (001 E4): keine Tauri-Plugins mit Dateisystem-, Shell-, Store- oder Clipboard-Rechten für die
   WebView; Dialoge nur über die Rust-API; CSP strikt (`style-src 'unsafe-inline'` wegen Angulars Laufzeit-Styles).
+- **KI-fähig** (Marc, 26.10.2026; Prompt 018): jeder Dokument-Command ist serialisierbar (`{ type, …args }`, reines
+  JSON mit NodeRefs, Registry `type → Factory`, `runCommand(json)`), jede Funktion eine Aktion mit Id und
+  serialisierbaren Argumenten. Keine Logik, die nur über Maus/DOM-Ereignisse erreichbar ist.
 - **Tastatur nur über Aktionen** (ab 005): jede Funktion ist eine Aktion im Aktionskatalog, Kürzel in Keymaps je OS,
   ein einziger globaler `keydown`-Listener (`KeyboardDispatcher`).
 - **Neue Abhängigkeiten** (npm oder crates) nur mit kurzer Begründung in `docs/architecture.md`. Keine

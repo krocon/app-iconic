@@ -41,6 +41,8 @@ erhalten) und als Frage im Bericht aufgeführt.
   zoneless. Tastatur nur über das Aktionssystem (ab 005). Texte zentral in `*-texts.ts`. Styling nur über Tokens aus
   `src/styles.css`. Barrierefreiheit: sichtbarer Fokus, alles per Tastatur, Dialoge mit Fokusfalle.
 - **Dokument-Mutationen** nur über benannte Commands im `DocumentStore` (ab 003) – nie das SVG-DOM direkt ändern.
+  Jeder Command ist **serialisierbar** (`{ type, …args }`, Test: JSON hin und zurück ergibt dasselbe Ergebnis) und
+  jede Funktion eine Aktion mit Id – Grundlage für die KI-Steuerung über MCP (018).
 - **Geometrie** immer über `DOMMatrix`/CTM des echten DOM (CLAUDE.md §4); reine Rechnungen in `shared/geometry/`
   mit Unit-Tests, alles mit Layout in Playwright.
 - Dateien höchstens ~400 Zeilen; wächst etwas darüber, wird es geteilt.
