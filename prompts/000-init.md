@@ -2,6 +2,11 @@
 
 > Diesen Prompt einem Coding-Agent (z. B. Claude Code) im leeren Repo geben.
 > Ziel: Projekt aufsetzen und schrittweise Feature-Parität mit der alten SwiftUI-App erreichen.
+>
+> **Überarbeitet am 26.10.2026** nach erneuter Analyse der Vorlage (`docs/legacy-analysis.md`): Korrekturen sind mit
+> *(korrigiert)* markiert. Die Umsetzung ist in Feature-Prompts zerlegt: [README.md](README.md) (Reihenfolge, Status),
+> Regeln: [000-arbeitsweise.md](000-arbeitsweise.md), Checkliste: `docs/FEATURES.md`. Meilenstein 1 ist erledigt
+> (`done/001-grundgeruest.md`).
 
 ---
 
@@ -13,11 +18,12 @@ Plattformen: zuerst macOS (Apple Silicon), Windows und Linux sollen ohne Mehrauf
 
 ## Tech-Stack (Versionen vor dem Setup verifizieren, jeweils aktuelle stabile nehmen)
 
-- **Tauri 2** (`create-tauri-app` bzw. `@tauri-apps/cli`), Plugins: `dialog`, `fs`, `store`, `window-state`, `clipboard-manager`, `shell` (nur falls nötig)
+- **Tauri 2** (`@tauri-apps/cli`), Plugins *(korrigiert, 001 E4)*: nur `dialog` (über die Rust-API) und `window-state`. **Keine** WebView-Rechte für `fs`, `store`, `shell`, `clipboard-manager` – Dateizugriff nur über schmale, typisierte Rust-Commands, Einstellungen als eigene `settings.json`, Zwischenablage über `navigator.clipboard` bzw. einen schmalen Command (Sicherheitsregel der Schwesterprojekte)
 - **Angular 22**: Standalone Components, **Signals** für den gesamten State, zoneless Change Detection, neue Control-Flow-Syntax (`@if`, `@for`), `OnPush` überall, strict TypeScript
 - **Rust**: `serde`/`serde_json`, `zip`, `resvg`/`usvg`/`tiny-skia` (PNG-Export), `fontdb` + `ttf-parser` (Text→Pfad, Systemschriften), `thiserror`, `anyhow`
 - Code-Editor: **CodeMirror 6** (XML/SVG-Modus)
-- Tests: Vitest (oder der Angular-22-Default) für TS, `cargo test` für Rust, Playwright für E2E gegen den Angular-Dev-Server
+- Tests: Vitest (über `ng test`) für TS, `cargo test` für Rust, Playwright 1.63 für E2E gegen den Angular-Dev-Server (auch alle Geometrie-Tests mit echtem Layout – jsdom kennt kein `getBBox`/`getCTM`)
+- Versionen geprüft am 26.10.2026: Angular 22.2, TypeScript ~6.0, Tauri 2.12, Rust ≥ 1.93 (Edition 2024), pnpm 10. TypeScript 7 und Tauri 3 (alpha) bewusst noch nicht.
 - Lint/Format: ESLint + Prettier, `cargo fmt` + `clippy`
 - Paketmanager: pnpm (falls nicht anders vorhanden)
 
@@ -25,7 +31,10 @@ Plattformen: zuerst macOS (Apple Silicon), Windows und Linux sollen ohne Mehrauf
 
 - /Users/marckronberg/WebstormProjects/editlicious
 - /Users/marckronberg/WebstormProjects/files-and-folders-tauri
-- /Users/marckronberg/WebstormProjects/comic-commander-tauri/Users/marckronberg/WebstormProjects/AppIconic/AppIconic
+- /Users/marckronberg/WebstormProjects/comic-commander-tauri
+
+Gerüst, Skripte, CI, `call.ts`/`FsError`, Dialoge, Aktionssystem und Release-Skripte werden von dort übernommen
+(MIT, gleicher Autor, mit Herkunftsvermerk).
 
 ### Folgendes Projekt ist fachliche Vorlage:
 
@@ -34,7 +43,8 @@ Plattformen: zuerst macOS (Apple Silicon), Windows und Linux sollen ohne Mehrauf
 ## Architektur-Vorgaben
 
 ```
-/src-tauri          Rust: commands/ (icon_file, export, fonts), model/ (icon.json serde), tests/
+/src-tauri          Rust: App-Crate (dünne Commands, Menü, Fenster) + Workspace-Crate core/ = `ai-core`
+                    ohne Tauri: icon/ (icon.json verlustfrei, Bundle/ZIP), export/ (resvg), fonts/ (fontdb)
 /src/app
   core/             DocumentStore (Signals), UndoService (Command-Pattern), Settings, Shortcuts, RecentFiles
   model/            TS-Typen für icon.json, IconFill, Node-Wrapper über SVG-DOM
@@ -60,6 +70,10 @@ Regeln:
 ## Dateiformat `.icon` (Apple Icon Composer)
 
 Ein `.icon` ist ein **Ordner-Bundle** (unter macOS ein Package) bzw. beim Austausch ein ZIP mit:
+*(korrigiert)* Die Vorlage schreibt immer ZIP (über `/usr/bin/zip`), verliert unbekannte Felder **und die
+Layer-`opacity`** und schreibt `fill` in einem eigenen, nicht Apple-kompatiblen Schema (`{"mode": …}`) zurück
+(legacy §2, §3). Die Neuauflage behält das Format der Quelle bei (Bundle bleibt Bundle) und schreibt nur
+Apples Schema.
 ```
 icon.json
 Assets/<name>.svg  (auch PNG möglich)
@@ -78,7 +92,7 @@ Beispiel `icon.json`:
   "supported-platforms": { "circles": ["watchOS"], "squares": "shared" }
 }
 ```
-- `fill`: `"automatic"`, `"system-light"`, `"system-dark"` oder Objekt mit `solid`, `automatic-gradient`, `linear-gradient`, `radial-gradient` (siehe IconFill unten). Unbekannte Felder **beim Speichern verlustfrei durchreichen** (Roundtrip-Garantie).
+- `fill`: `"automatic"`, `"system-light"`, `"system-dark"` oder Objekt mit `solid`, `automatic-gradient`, `linear-gradient`, `radial-gradient`. Farben als `extended-srgb:r,g,b,a` (auch `srgb`, `display-p3`, `gray`). Unbekannte Felder **auf jeder Ebene beim Speichern verlustfrei durchreichen** (Roundtrip-Garantie). Weitere Felder von Icon Composer (Specializations je Appearance, Blend-Mode, Glass, Hidden, Position …) erst nach Beleg bearbeitbar machen (Prompt 010).
 - Lesen und Schreiben sowohl als Bundle-Ordner als auch als ZIP. Asset-Namen eindeutig halten (`makeUniqueAssetName`), Layer-Namen ebenfalls.
 - Leinwand: 1024 × 1024.
 
@@ -90,8 +104,8 @@ Beispiel `icon.json`:
 - [ ] Open Recent mit Validierung (nicht mehr existierende Dateien ausblenden) und „Clear Menu“
 - [ ] Import SVG… (⇧⌘I): SVG als neue Ebene/Asset ins Dokument
 - [ ] Export SVG…: pro Variante (Light/Dark) ein komplettes SVG inkl. Hintergrund-Fill, Gruppen und Ebenen
-- [ ] Export PNG…: aus den exportierten SVGs rasterisiert (in Rust mit resvg; zusätzlich Größen-Set 1024/512/256/128/64/32/16 anbieten)
-- [ ] Share Export (macOS-Share-Sheet, optional / später)
+- [ ] Export PNG…: aus den exportierten SVGs rasterisiert (in Rust mit resvg; zusätzlich Größen-Set 1024/512/256/128/64/32/16 anbieten – *(korrigiert)* die Vorlage kann nur eine Größe)
+- [ ] Share Export (macOS-Share-Sheet, optional / später – *(korrigiert)* in der Vorlage nicht vorhanden)
 - [ ] Save (⌘S, nur aktiv wenn dirty), Save As… (⇧⌘S), Close Document (⌘W, mit Dirty-Abfrage)
 - [ ] Dirty-Tracking, Fenstertitel = Dateiname (+ Änderungsmarker)
 - [ ] Mehrere Fenster bzw. Dokumente
@@ -109,7 +123,7 @@ Beispiel `icon.json`:
 - [ ] Mauskoordinaten-Anzeige (x/y im Dokumentraum)
 - [ ] Cross Cursor (Fadenkreuz über die ganze Leinwand)
 - [ ] **Icon-Guides** (Apple-Raster): beide Diagonalen, Linien bei 128/256/…/896 horizontal und vertikal, Kreise mit Ø 820, 512 und 204 um (512, 512); Farbe #0A84FF
-- [ ] Hintergrund-Darstellung gemäß Icon-Fill, umschaltbar
+- [ ] Hintergrund-Darstellung gemäß Icon-Fill, umschaltbar (Light/Dark)
 - [ ] Zielplattform-Vorschau (Squares/Circles: iOS/macOS-Squircle vs. watchOS-Kreis als Maske)
 - [ ] Inhalte auf Workspace-Grenzen beschränken (BoundsGuard: Punkte, Pfade, Translationen clampen)
 
@@ -145,7 +159,7 @@ Alle Befehle fügen ins aktuell gewählte Layer/Container ein (oder ins erste pa
 - [ ] **Drag & Drop** mit Einfügelinie: vor, nach, hinein; Gruppen und Nodes; Schutz gegen Einfügen in eigene Nachfahren; Verschieben über Asset-Grenzen hinweg
 - [ ] Kontextmenü: Duplicate, Group `<g>` (Surround with Group), Bring to Front, Send to Back, Edit SVG…, Copy XML, Delete… (mit Bestätigung „removes the node and its children“)
 - [ ] Nach dem Löschen sinnvolle Folge-Auswahl (nächster/vorheriger Sibling)
-- [ ] Ausrichten der Auswahl: links, horizontal zentriert, rechts, oben, vertikal zentriert, unten (Bounding-Box inkl. Transforms)
+- [ ] Ausrichten der Auswahl (≥ 2 Nodes, Bezug = Vereinigung der Bounding-Boxes, nicht die Leinwand): links, horizontal zentriert, rechts, oben, vertikal zentriert, unten (Bounding-Box inkl. Transforms)
 - [ ] Copy/Paste von Nodes über die Zwischenablage als SVG-XML (auch zwischen Dokumenten)
 
 ### 7. Properties-Panel
@@ -160,9 +174,9 @@ Alle Befehle fügen ins aktuell gewählte Layer/Container ein (oder ins erste pa
 - [ ] **Clip Path** (in der alten App unfertig, hier fertig bauen): Picker „None / Inherit from Layer / <vorhandene clipPaths>“, „Create Clip Path“ (pro Layer, in `<defs>`), „Edit Clip Path“ (eigener Bearbeitungsmodus auf dem Canvas, Formen darin bearbeiten), Zuweisen/Entfernen pro Node, Vererbung Layer → Node mit Override und Opt-out `none`; `clipPathUnits`; ClipPath-Definitionen sind nicht hit-testbar und nicht selektierbar
 
 ### 8. Icon-spezifische Eigenschaften (icon.json)
-- [ ] **Icon Background Fill** (Root): Modi `solid`, `gradient` (linear/radial mit Stops), `auto` (automatic-gradient; Varianten light/dark, accent, monochrome, complementary), `system` (system-light / system-dark), plus Fallback-Farbe, Opacity, Blend-Modes (normal, multiply, screen, overlay, softLight, hardLight …)
+- [ ] **Icon Background Fill** (Root) *(korrigiert)*: die Fill-Arten **des Apple-Formats** (`automatic`, `system-light`, `system-dark`, `solid`, `automatic-gradient`, `linear-gradient`, `radial-gradient`, Specializations je Appearance). Das Modell der Vorlage (`mode: solid|gradient|auto|system`, Strategien accent/monochrome/complementary, Fallback-Farbe, Blend-Modes) ist eine Erfindung der Vorlage und wird **nicht** nach `icon.json` geschrieben
 - [ ] Pro Gruppe: Shadow (`kind`: neutral/chromatic/none, `opacity`), Translucency (`enabled`, `value`)
-- [ ] Pro Layer: Name, Opacity, Asset-Zuordnung
+- [ ] Pro Layer: Name, Opacity (*korrigiert:* geht in der Vorlage verloren), Asset-Zuordnung
 - [ ] Supported Platforms (`squares`, `circles`)
 - [ ] „icon.json Preview“: Live-Ansicht des generierten JSON (read-only, kopierbar)
 - [ ] Export berücksichtigt Light- und Dark-Variante (Hintergrund je Appearance)
@@ -190,6 +204,9 @@ Alle Befehle fügen ins aktuell gewählte Layer/Container ein (oder ins erste pa
 
 ## Vorgehen (Meilensteine, nach jedem Meilenstein lauffähig + Tests grün + Commit)
 
+*(korrigiert)* Die Meilensteine sind als Prompts 001–017 ausgearbeitet ([README.md](README.md)). Zuordnung: 1 → 001,
+2 → 002/003, 3 → 003/004/005, 4 → 007, 5 → 006/008, 6 → 009/010, 7 → 012, 8 → 011/013/014, 9 → 015/016, Abschluss → 017.
+
 1. **Setup**: Tauri-2-App mit Angular 22 (zoneless, Signals, strict), Lint/Format, Vitest, Playwright, `cargo test`, GitHub Actions (Build macOS/Windows/Linux, Tests). README mit Dev-Befehlen. Ein `AGENTS.md`/`CLAUDE.md` mit Architekturregeln anlegen.
 2. **Datei-Kern (Rust)**: `open_icon`, `save_icon` (Bundle + ZIP), `import_svg`, Roundtrip-Tests mit den Fixtures; Recent Files; Dirty-Tracking.
 3. **DocumentStore + Undo** im Frontend, Hierarchie read-only, Canvas-Rendering mit Zoom/Pan/Linealen/Guides.
@@ -201,9 +218,9 @@ Alle Befehle fügen ins aktuell gewählte Layer/Container ein (oder ins erste pa
 9. **Feinschliff**: Settings, Fensterzustand, Tastaturkürzel, Menüleiste (Tauri-Menü), Signierung/Notarisierung für macOS vorbereiten (Platzhalter für Secrets), App-Icon.
 
 ## Test-Fixtures
-Aus dem alten Repo `AppIconic/docs/svg/*.svg` und `AppIconic/docs/camscanner.icon/` nach `tests/fixtures/` kopieren (ich lege sie bereit; falls sie fehlen, nachfragen). Jedes Fixture muss importierbar sein, korrekt rendern (Snapshot) und verlustarm zurückgeschrieben werden.
+*(erledigt in 001)* Aus dem alten Repo `AppIconic/docs/svg/*.svg` und `AppIconic/docs/camscanner.icon/` nach `testdata/fixtures/` kopiert (Repo-Wurzel, damit Rust und Playwright sie teilen). Jedes Fixture muss importierbar sein, korrekt rendern (Snapshot) und verlustarm zurückgeschrieben werden.
 
 ## Arbeitsweise
-- Vor dem ersten Code: kurzen Architekturplan und die Liste der Rust-Commands mit Signaturen vorschlagen und auf mein OK warten.
-- Danach Meilenstein für Meilenstein; am Ende jedes Meilensteins: was fertig ist, was offen ist, abgehakte Checkboxen dieser Liste in `docs/FEATURES.md` pflegen.
+- Vor dem ersten Code: kurzen Architekturplan und die Liste der Rust-Commands mit Signaturen vorschlagen und auf mein OK warten. *(korrigiert)* Der Plan steht in `docs/architecture.md`; die Signaturen legt das Design-Dokument jedes Prompts fest (s. `000-arbeitsweise.md` „Freigaben“).
+- Danach Prompt für Prompt; am Ende jedes Prompts: was fertig ist, was offen ist, abgehakte Checkboxen in `docs/FEATURES.md` pflegen.
 - Bei Unklarheiten zum `.icon`-Format: konservativ sein, unbekannte Daten erhalten, nachfragen statt raten.

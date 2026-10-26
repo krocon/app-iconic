@@ -59,7 +59,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
     src/error.rs              FsError { code, message, path }
     src/fs_atomic.rs, config_file.rs  atomar schreiben / Konfig laden (aus files-and-folders)
   icons/source/app-icon.svg   Quelle des App-Icons
-docs/                         architecture.md (Entscheidungen, Commands, Abhängigkeiten), legacy-analysis.md,
+testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverändert)
+docs/                         architecture.md (Entscheidungen, Commands, Abhängigkeiten), legacy-analysis.md, legacy/,
                               FEATURES.md (Checkliste)
 prompts/                      Feature-Prompts (Index README.md), done/
 ```
@@ -104,7 +105,7 @@ prompts/                      Feature-Prompts (Index README.md), done/
 ## 5. Tests & Verifikation
 
 - **Rust**: Unit-Tests neben dem Code (`#[cfg(test)]`), Dateisystem mit `tempfile`; Fixtures unter
-  `src-tauri/core/testdata/` (aus der Vorlage `AppIconic/docs/`), Roundtrip-Tests für jedes Fixture.
+  `testdata/fixtures/` (aus der Vorlage `AppIconic/docs/`), Roundtrip-Tests für jedes Fixture.
 - **Angular**: Vitest (`*.spec.ts` neben dem Code) für reine Logik, Stores, Komponenten mit Fakes.
 - **Geometrie mit DOM** (CTM, BBox, Handles, Snapping bei Zoom 50/100/150 %, verschachtelte transformierte Gruppen):
   Playwright (`e2e/`), weil jsdom kein Layout kennt.
