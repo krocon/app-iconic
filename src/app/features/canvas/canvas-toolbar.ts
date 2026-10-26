@@ -1,25 +1,26 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ActionService } from '../../core/actions/action.service';
 import { ZOOM_STEPS, zoomPercent } from '../../shared/geometry/zoom-steps';
-import { platformHint } from '../files/files-texts';
-import { Appearance } from './appearance';
 import { CANVAS_TEXTS } from './canvas-texts';
-import { CanvasToggle, CanvasViewStore, MaskShape } from './canvas-view.store';
+import { CanvasViewStore } from './canvas-view.store';
+import { ViewOptionsMenu } from './view-options-menu';
 
 /**
- * Toolbar of the canvas (design 004 E9/E14): zoom out / level / in, 100 %, Fit, Center, the view
- * toggles, platform mask and appearance. Until the menus of prompt 005.
+ * Toolbar of the canvas (design 004 E9/E14, 005 E10): zoom out / level / in, 100 %, Fit, Center –
+ * all as actions – and the "View Options" menu with the view toggles, appearance and mask.
  */
 @Component({
   selector: 'app-canvas-toolbar',
+  imports: [ViewOptionsMenu],
   template: `
     <div class="bar" role="toolbar" [attr.aria-label]="t.toolbar">
       <div class="cluster">
         <button
           type="button"
           class="btn quiet icon zoom-out"
-          [title]="t.zoomOut + ' ' + hint(t.zoomOutHint)"
+          [title]="actions.tooltip('view.zoomOut')"
           [attr.aria-label]="t.zoomOut"
-          (click)="view.zoomOut()"
+          (click)="actions.run('view.zoomOut')"
         >
           −
         </button>
@@ -34,73 +35,42 @@ import { CanvasToggle, CanvasViewStore, MaskShape } from './canvas-view.store';
         <button
           type="button"
           class="btn quiet icon zoom-in"
-          [title]="t.zoomIn + ' ' + hint(t.zoomInHint)"
+          [title]="actions.tooltip('view.zoomIn')"
           [attr.aria-label]="t.zoomIn"
-          (click)="view.zoomIn()"
+          (click)="actions.run('view.zoomIn')"
         >
           +
         </button>
         <button
           type="button"
           class="btn quiet"
-          [title]="t.actualSize + ' ' + hint(t.actualSizeHint)"
+          [title]="actions.tooltip('view.actualSize')"
           [attr.aria-label]="t.actualSize"
-          (click)="view.actualSize()"
+          (click)="actions.run('view.actualSize')"
         >
           {{ t.actualSizeShort }}
         </button>
         <button
           type="button"
           class="btn quiet"
-          [title]="t.fit"
+          [title]="actions.tooltip('view.zoomToFit')"
           [attr.aria-label]="t.fit"
-          (click)="view.fit()"
+          (click)="actions.run('view.zoomToFit')"
         >
           {{ t.fitShort }}
         </button>
         <button
           type="button"
           class="btn quiet"
-          [title]="t.center"
+          [title]="actions.tooltip('view.centerCanvas')"
           [attr.aria-label]="t.center"
-          (click)="view.center()"
+          (click)="actions.run('view.centerCanvas')"
         >
           {{ t.centerShort }}
         </button>
       </div>
-      <div class="cluster">
-        @for (o of toggles; track o.key) {
-          <button
-            type="button"
-            class="btn quiet toggle"
-            [attr.aria-pressed]="opt()[o.key]"
-            (click)="view.toggle(o.key)"
-          >
-            {{ o.label }}
-          </button>
-        }
-      </div>
-      <div class="cluster">
-        <select
-          class="input"
-          [attr.aria-label]="t.mask"
-          [title]="t.mask"
-          (change)="view.set('mask', value($event))"
-        >
-          @for (m of masks; track m.value) {
-            <option [value]="m.value" [selected]="opt().mask === m.value">{{ m.label }}</option>
-          }
-        </select>
-        <select
-          class="input"
-          [attr.aria-label]="t.appearance"
-          [title]="t.appearance"
-          (change)="view.set('appearance', value($event))"
-        >
-          <option value="light" [selected]="opt().appearance === 'light'">{{ t.light }}</option>
-          <option value="dark" [selected]="opt().appearance === 'dark'">{{ t.dark }}</option>
-        </select>
-      </div>
+      <span class="spacer"></span>
+      <app-view-options-menu />
     </div>
   `,
   styles: `
@@ -130,9 +100,8 @@ import { CanvasToggle, CanvasViewStore, MaskShape } from './canvas-view.store';
       min-width: 26px;
       font-size: var(--font-size);
     }
-    .toggle[aria-pressed='true'] {
-      color: var(--color-accent);
-      background: var(--color-surface-2);
+    .spacer {
+      flex: 1;
     }
     .zoom {
       width: 6.5em;
@@ -142,24 +111,13 @@ import { CanvasToggle, CanvasViewStore, MaskShape } from './canvas-view.store';
 })
 export class CanvasToolbar {
   protected readonly view = inject(CanvasViewStore);
+  protected readonly actions = inject(ActionService);
   protected readonly t = CANVAS_TEXTS;
   protected readonly steps = ZOOM_STEPS;
   protected readonly opt = this.view.options;
-  protected readonly toggles: { key: CanvasToggle; label: string }[] = [
-    { key: 'rulers', label: CANVAS_TEXTS.rulers },
-    { key: 'guides', label: CANVAS_TEXTS.guides },
-    { key: 'background', label: CANVAS_TEXTS.background },
-    { key: 'crossCursor', label: CANVAS_TEXTS.crossCursor },
-  ];
-  protected readonly masks: { value: MaskShape; label: string }[] = [
-    { value: 'squircle', label: CANVAS_TEXTS.maskSquircle },
-    { value: 'circle', label: CANVAS_TEXTS.maskCircle },
-    { value: 'none', label: CANVAS_TEXTS.maskNone },
-  ];
   protected readonly onStep = computed(() => ZOOM_STEPS.some((s) => this.isZoom(s)));
   protected readonly zoomValue = computed(() => String(this.view.zoom()));
   protected readonly percent = computed(() => zoomPercent(this.view.zoom()));
-  private readonly mac = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform ?? '');
 
   protected isZoom(s: number): boolean {
     return Math.abs(s - this.view.zoom()) < 1e-6;
@@ -169,15 +127,7 @@ export class CanvasToolbar {
     return zoomPercent(z);
   }
 
-  protected hint(text: string): string {
-    return platformHint(text, this.mac);
-  }
-
-  protected value<T extends MaskShape | Appearance>(e: Event): T {
-    return (e.target as HTMLSelectElement).value as T;
-  }
-
   protected onZoom(e: Event): void {
-    this.view.zoomTo(Number((e.target as HTMLSelectElement).value));
+    this.actions.run('view.zoomTo', { zoom: Number((e.target as HTMLSelectElement).value) });
   }
 }

@@ -2,6 +2,7 @@ import { EnvironmentProviders, Provider } from '@angular/core';
 import { AboutApi, TauriAboutApi } from './core/about/about-api';
 import { IconFileApi, TauriIconFileApi } from './core/icon-file/icon-file-api';
 import { RecentFilesApi, TauriRecentFilesApi } from './core/recent/recent-files-api';
+import { KeymapApi, MenuApi, TauriKeymapApi, TauriMenuApi } from './core/menu/menu-api';
 import { TauriWindowApi, WindowApi } from './core/window/window-api';
 
 /**
@@ -13,4 +14,6 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = [
   { provide: IconFileApi, useClass: TauriIconFileApi },
   { provide: RecentFilesApi, useClass: TauriRecentFilesApi },
   { provide: WindowApi, useClass: TauriWindowApi },
+  { provide: MenuApi, useClass: TauriMenuApi },
+  { provide: KeymapApi, useClass: TauriKeymapApi },
 ];

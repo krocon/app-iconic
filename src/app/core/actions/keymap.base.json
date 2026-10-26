@@ -1,0 +1,42 @@
+{
+  "global": {
+    "Mod+Shift+n": "file.newWindow",
+    "Mod+n": "file.new",
+    "Mod+o": "file.open",
+    "Mod+Shift+i": "file.importSvg",
+    "Mod+s": "file.save",
+    "Mod+Shift+s": "file.saveAs",
+    "Mod+w": "file.close",
+    "Mod+q": "app.quit",
+    "Mod+z": "edit.undo",
+    "Mod+Shift+z": "edit.redo",
+    "Mod+x": "edit.cut",
+    "Mod+c": "edit.copy",
+    "Mod+v": "edit.paste",
+    "Mod+d": "edit.duplicate",
+    "Delete": "edit.delete",
+    "Backspace": "edit.delete",
+    "Mod+a": "edit.selectAll",
+    "Mod+Shift+a": "edit.deselect",
+    "Escape": "edit.deselect",
+    "Mod+1": "view.commandSidebar",
+    "Mod+2": "view.hierarchy",
+    "Mod+3": "view.properties",
+    "Mod+=": "view.zoomIn",
+    "Mod++": "view.zoomIn",
+    "Mod+-": "view.zoomOut",
+    "Mod+0": "view.actualSize",
+    "Mod+i": "add.image",
+    "Mod+g": "arrange.group",
+    "Mod+Shift+g": "arrange.ungroup",
+    "Mod+Shift+ArrowUp": "arrange.bringToFront",
+    "Mod+Shift+ArrowDown": "arrange.sendToBack",
+    "Mod+Shift+p": "app.palette",
+    "Mod+/": "app.shortcuts"
+  },
+  "canvas": {
+    "Space": "canvas.panHold"
+  },
+  "hierarchy": {},
+  "dialog": {}
+}

@@ -1,4 +1,5 @@
 import { expect, Page } from '@playwright/test';
+import { menu } from './menu-helpers';
 
 /** Helpers of the canvas tests (prompt 004, browser mode with fakes – design 004 E16). */
 
@@ -29,7 +30,7 @@ export async function openIcon(page: Page, path?: string): Promise<void> {
   await page.goto('/');
   await expect(page).toHaveTitle('Untitled');
   if (path) await page.evaluate((p) => window.__appIconic!.pick(p), path);
-  await page.getByRole('button', { name: 'Open…' }).click();
+  await menu(page, 'File', 'Open…');
   await expect(page).not.toHaveTitle('Untitled');
   await waitForCanvas(page);
 }
@@ -62,7 +63,7 @@ export async function importSvg(page: Page, name: string, text: string): Promise
     ([name, text]) => window.__appIconic!.addSvgFile(`/in/${name}`, name, text),
     [name, text],
   );
-  await page.getByRole('button', { name: 'Import SVG…' }).click();
+  await menu(page, 'File', 'Import SVG…');
   await expect(page.getByRole('list', { name: 'Groups and layers' })).toContainText(
     name.replace('.svg', ''),
   );

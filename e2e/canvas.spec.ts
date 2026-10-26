@@ -10,6 +10,7 @@ import {
   toClient,
   waitForCanvas,
 } from './canvas-helpers';
+import { menu } from './menu-helpers';
 
 /**
  * Prompt 004 – the canvas with real layout (Chromium). No pixel baselines (design 004 E16): DOM,
@@ -185,14 +186,14 @@ test('platform mask cuts the corners; background and appearance switch', async (
   const corner = () => docPixel(page, 6, 6);
   const open = await corner();
   expect(open.slice(0, 3).every((v) => v > 240)).toBe(true); // automatic light: white at the top
-  await page.getByRole('combobox', { name: 'Platform mask' }).selectOption('squircle');
+  await menu(page, 'View', 'iOS / macOS');
   const masked = await corner();
   expect(masked.slice(0, 3)).not.toEqual(open.slice(0, 3));
   expect(await docPixel(page, 512, 6)).toEqual(open); // the edge middle is inside the mask
-  await page.getByRole('combobox', { name: 'Platform mask' }).selectOption('circle');
+  await menu(page, 'View', 'watchOS');
   expect(await docPixel(page, 512, 6)).toEqual(open);
   expect(await docPixel(page, 100, 100)).toEqual(masked);
-  await page.getByRole('combobox', { name: 'Appearance' }).selectOption('dark');
+  await menu(page, 'View', 'Dark');
   const dark = await docPixel(page, 512, 20);
   expect(dark.slice(0, 3).every((v) => v < 90)).toBe(true);
 });
@@ -248,11 +249,20 @@ test('rulers, guides and cross cursor follow their toggles', async ({ page }) =>
   const width = await page.evaluate(() => window.__appIconic!.canvas.viewport().width);
   const px = await rulers.first().evaluate((c: HTMLCanvasElement) => c.width);
   expect(px).toBe(Math.round(width * (await page.evaluate(() => devicePixelRatio))));
-  await page.getByRole('button', { name: 'Rulers' }).click();
+  await menu(page, 'View', 'Rulers');
   await expect(rulers).toHaveCount(0);
-  await page.getByRole('button', { name: 'Guides' }).click();
+  // the same toggles in the View Options menu of the canvas toolbar (design 005 E10)
+  await page.getByRole('button', { name: 'View Options' }).click();
+  const options = page.getByRole('menu', { name: 'View Options' });
+  await expect(options.getByRole('menuitemcheckbox', { name: 'Rulers' })).toHaveAttribute(
+    'aria-checked',
+    'false',
+  );
+  await options.getByRole('menuitemcheckbox', { name: 'Guides' }).click();
   await expect(page.locator('app-canvas-view svg.host .guides')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Cross Cursor' }).click();
+  await page.keyboard.press('Escape');
+  await expect(options).toBeHidden();
+  await menu(page, 'View', 'Cross Cursor');
   const c = await toClient(page, 300, 400);
   await page.mouse.move(c.clientX, c.clientY);
   const cross = page.locator('app-canvas-view .cross-v');

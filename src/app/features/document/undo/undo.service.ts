@@ -94,6 +94,11 @@ export class UndoService {
     if (g.commands.length) this.changed();
   }
 
+  /** The step `undo` would take back (after a gesture: the committed one). */
+  get top(): DocCommand | null {
+    return this.done.at(-1)?.command ?? null;
+  }
+
   get inGesture(): boolean {
     return this.gesture !== null;
   }

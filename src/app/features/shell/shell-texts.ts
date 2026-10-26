@@ -5,7 +5,6 @@
 export const SHELL_TEXTS = {
   appName: 'AppIconic',
   tagline: 'Editor for Apple .icon app icons',
-  about: 'About',
   commands: 'Commands',
   hierarchy: 'Hierarchy',
   properties: 'Properties',
@@ -13,7 +12,6 @@ export const SHELL_TEXTS = {
   noDocument: 'No document open',
   nothingSelected: 'Nothing selected',
   comingSoon: 'Coming with the next prompts.',
-  fileActions: 'File',
   undo: 'Undo',
   redo: 'Redo',
 } as const;

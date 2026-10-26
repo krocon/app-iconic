@@ -2,7 +2,10 @@ import { inject } from '@angular/core';
 import { IconFileApi } from '../app/core/icon-file/icon-file-api';
 import { RecentFilesApi } from '../app/core/recent/recent-files-api';
 import { WindowApi } from '../app/core/window/window-api';
-import { SetAttribute } from '../app/features/document/commands';
+import { ActionInfo, ActionService } from '../app/core/actions/action.service';
+import { MenuSpec } from '../app/core/menu/menu.models';
+import { CommandJson, SetAttribute } from '../app/features/document/commands';
+import { MenuService } from '../app/features/menus/menu.service';
 import { DocumentStore } from '../app/features/document/document.store';
 import { serializeAsset } from '../app/features/document/svg/node-ids';
 import { FilesService } from '../app/features/files/files.service';
@@ -51,6 +54,16 @@ export interface AppIconicHook {
   /** `nodeToDocument` of the node `id` of `asset` as `[a, b, c, d, e, f]`. */
   nodeToDocument(asset: string, id: string): number[] | null;
   nodeBounds(asset: string, id: string): Rect | null;
+  /** Runs an action like menu, keyboard or the AI (design 005 E18); `true` = it ran. */
+  run(id: string, args?: unknown): boolean;
+  /** Every action with its state (`ActionService.describe`). */
+  actions(): ActionInfo[];
+  /** Runs a serialised document command; the error text if it was refused. */
+  runCommand(json: unknown): string | null;
+  /** The last undoable step as JSON. */
+  lastCommand(): CommandJson | null;
+  /** The spec the native menu would get. */
+  menuSpec(): MenuSpec;
 }
 
 declare global {
@@ -67,6 +80,8 @@ export function installTestHook(): void {
   const store = () => service.store();
   const svgOf = (asset: string) => store()?.document().assets.get(asset)?.svg ?? null;
   const canvas = inject(CanvasViewStore);
+  const actions = inject(ActionService);
+  const menus = inject(MenuService);
   const node = (asset: string, id: string) =>
     (store()?.document().node({ asset, id }) as SVGGraphicsElement | null) ?? null;
   window.__appIconic = {
@@ -102,5 +117,17 @@ export function installTestHook(): void {
       const el = node(asset, id);
       return el && canvas.host ? nodeBoundsInDocument(canvas.host, el) : null;
     },
+    run: (id, args) => actions.run(id, args),
+    actions: () => actions.describe(),
+    runCommand: (json) => {
+      try {
+        store()?.runCommand(json);
+        return null;
+      } catch (e) {
+        return e instanceof Error ? e.message : String(e);
+      }
+    },
+    lastCommand: () => store()?.lastCommandJson() ?? null,
+    menuSpec: () => menus.spec(),
   };
 }

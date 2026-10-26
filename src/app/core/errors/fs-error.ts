@@ -19,6 +19,8 @@ export type FsErrorCode =
   | 'missing_asset'
   /** An SVG file that is not UTF-8 text (prompt 002). */
   | 'invalid_svg'
+  /** A menu spec the backend refused (prompt 005). */
+  | 'invalid_menu'
   /** Frontend only: no Tauri backend (e.g. `pnpm start` in a browser). */
   | 'backend_unavailable'
   /** Frontend only: something that is no `FsError` was thrown. */
@@ -42,6 +44,7 @@ const KNOWN: readonly FsErrorCode[] = [
   'too_large',
   'missing_asset',
   'invalid_svg',
+  'invalid_menu',
   'backend_unavailable',
   'unknown',
 ];
@@ -86,6 +89,8 @@ export function describeFsError(error: FsError): string {
       return 'An image of the document is missing.';
     case 'invalid_svg':
       return 'The SVG file could not be read as text.';
+    case 'invalid_menu':
+      return 'The menu could not be built.';
     case 'backend_unavailable':
       return 'The desktop backend is not available (running in a browser?).';
     case 'unknown':

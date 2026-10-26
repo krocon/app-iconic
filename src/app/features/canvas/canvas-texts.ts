@@ -25,7 +25,4 @@ export const CANVAS_TEXTS = {
   position: 'Pointer position',
   outside: '–',
   unknownFill: 'This background is not known yet – shown as Automatic.',
-  zoomInHint: '⌘+',
-  zoomOutHint: '⌘−',
-  actualSizeHint: '⌘0',
 } as const;

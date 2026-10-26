@@ -17,7 +17,8 @@ import { squirclePath } from '../../shared/geometry/squircle';
 import { documentToView, Point } from '../../shared/geometry/view-transform';
 import { zoomPercent } from '../../shared/geometry/zoom-steps';
 import { DocumentStore } from '../document/document.store';
-import { ProvisionalShortcuts } from '../files/provisional-shortcuts';
+import { ActionService } from '../../core/actions/action.service';
+import { canvasActions } from './canvas-actions';
 import { CanvasBackground } from './canvas-background';
 import { CanvasRuler } from './canvas-ruler';
 import { CANVAS_TEXTS } from './canvas-texts';
@@ -178,16 +179,19 @@ export class CanvasView {
       if (this.lastClient) queueMicrotask(() => this.track(this.lastClient));
     });
     const destroy = inject(DestroyRef);
-    const unregister = inject(ProvisionalShortcuts).register({
-      '=': () => this.canvas.zoomIn(),
-      '+': () => this.canvas.zoomIn(),
-      'shift+=': () => this.canvas.zoomIn(),
-      'shift++': () => this.canvas.zoomIn(),
-      '-': () => this.canvas.zoomOut(),
-      'shift+-': () => this.canvas.zoomOut(),
-      '0': () => this.canvas.actualSize(),
-    });
-    destroy.onDestroy(unregister);
+    // zoom, view options … and Space held = pan (design 005 E16: actions instead of listeners)
+    const actions = inject(ActionService);
+    actions.registerAll(canvasActions(this.canvas), destroy);
+    actions.register(
+      'canvas.panHold',
+      {
+        // over the canvas or with the focus on it
+        enabled: () => this.lastClient !== null || this.focused(),
+        run: () => this.space.set(true),
+        release: () => this.space.set(false),
+      },
+      destroy,
+    );
     afterNextRender(() => {
       const el = this.viewportEl().nativeElement;
       this.canvas.host = this.hostEl().nativeElement;
@@ -195,13 +199,8 @@ export class CanvasView {
         this.canvas.setViewport(e.contentRect.width, e.contentRect.height),
       );
       ro.observe(el);
-      const key = (e: KeyboardEvent) => this.onSpace(e);
-      document.addEventListener('keydown', key);
-      document.addEventListener('keyup', key);
       destroy.onDestroy(() => {
         ro.disconnect();
-        document.removeEventListener('keydown', key);
-        document.removeEventListener('keyup', key);
         if (this.canvas.host === this.hostEl().nativeElement) this.canvas.host = null;
       });
     });
@@ -263,26 +262,9 @@ export class CanvasView {
     this.track(null);
   }
 
-  /**
-   * Space held = pan with the left button (provisional until 005, design 004 E15) – while the
-   * pointer is over the canvas or the canvas has the focus, not while typing in a field.
-   */
-  private onSpace(e: KeyboardEvent): void {
-    if (e.key !== ' ' || e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return;
-    if (e.type === 'keydown') {
-      if (!this.lastClient && e.target !== this.viewportEl().nativeElement) return;
-      e.preventDefault();
-      this.space.set(true);
-    } else if (this.space()) {
-      e.preventDefault();
-      this.space.set(false);
-    }
+  /** The viewport has the keyboard focus (Space pans then too). */
+  private focused(): boolean {
+    const el = this.viewportEl().nativeElement;
+    return el.ownerDocument.activeElement === el;
   }
-}
-
-function typing(target: EventTarget | null): boolean {
-  return (
-    target instanceof HTMLElement &&
-    (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
-  );
 }

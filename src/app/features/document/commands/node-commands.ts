@@ -2,6 +2,7 @@ import { IconDocument, NodeRef } from '../icon-document';
 import { ID_ATTR, parseFragment } from '../svg/node-ids';
 import { UndoLabel } from '../undo/undo-texts';
 import { CommandError, DocCommand } from './command';
+import { CommandJson, opt } from './command-json';
 
 const XLINK_NS = 'http://www.w3.org/1999/xlink';
 
@@ -74,6 +75,12 @@ export class SetAttribute implements DocCommand {
     this.value = next.value;
     return true;
   }
+
+  toJSON(): CommandJson {
+    const { ref, name, value } = this;
+    const label = this.label === 'changeAttribute' ? undefined : this.label;
+    return { type: 'setAttribute', ref: { ...ref }, name, value, ...opt('label', label) };
+  }
 }
 
 /** All attributes in order – undo of a removal puts the attribute back at its place. */
@@ -109,6 +116,10 @@ export class RemoveAttribute implements DocCommand {
 
   undo(doc: IconDocument): void {
     restoreAttributes(target(doc, this.ref), this.old);
+  }
+
+  toJSON(): CommandJson {
+    return { type: 'removeAttribute', ref: { ...this.ref }, name: this.name };
   }
 }
 
@@ -162,6 +173,17 @@ export class InsertNode implements DocCommand {
   undo(): void {
     this.el?.remove();
   }
+
+  toJSON(): CommandJson {
+    const label = this.label === 'insertNode' ? undefined : this.label;
+    return {
+      type: 'insertNode',
+      parent: { ...this.parent },
+      markup: this.markup,
+      ...opt('index', this.index),
+      ...opt('label', label),
+    };
+  }
 }
 
 /** Removes a node (legacy "Delete"); undo puts it back where it was. */
@@ -182,6 +204,10 @@ export class RemoveNode implements DocCommand {
 
   undo(): void {
     if (this.el && this.place) this.place.parent.insertBefore(this.el, this.place.next);
+  }
+
+  toJSON(): CommandJson {
+    return { type: 'removeNode', ref: { ...this.ref } };
   }
 }
 
@@ -218,5 +244,16 @@ export class MoveNode implements DocCommand {
     if (!el || !this.from) return;
     el.remove();
     this.from.parent.insertBefore(this.from.parent.ownerDocument.adoptNode(el), this.from.next);
+  }
+
+  toJSON(): CommandJson {
+    const label = this.label === 'moveNode' ? undefined : this.label;
+    return {
+      type: 'moveNode',
+      ref: { ...this.ref },
+      parent: { ...this.parent },
+      index: this.index,
+      ...opt('label', label),
+    };
   }
 }

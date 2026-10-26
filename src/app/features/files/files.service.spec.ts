@@ -181,6 +181,35 @@ describe('FilesService', () => {
     expect(backend.window.closed).toBe(true);
   });
 
+  it('Quit asks like Close; Cancel tells the backend so that Quit stops (design 005 E13)', async () => {
+    await started(CAM);
+    edit();
+    await files.quit();
+    await flush();
+    expect(backend.window.quits).toBe(1);
+    expect(asked).toHaveLength(1);
+    expect(backend.window.closed).toBe(false);
+    expect(backend.window.cancelledQuits).toBe(1);
+    answers.push('discard');
+    await files.quit();
+    await flush();
+    expect(backend.window.closed).toBe(true);
+    expect(backend.window.cancelledQuits).toBe(1);
+  });
+
+  it('a close request while another question is open cancels Quit', async () => {
+    await started(CAM);
+    edit();
+    let answer: (id: string) => void = () => undefined;
+    vi.spyOn(ask, 'ask').mockImplementation(() => new Promise((r) => (answer = r)));
+    const busy = files.newDocument();
+    await flush();
+    await files.closeRequested();
+    expect(backend.window.cancelledQuits).toBe(1);
+    answer('cancel');
+    await busy;
+  });
+
   it('Close without changes does not ask', async () => {
     await started();
     await files.close();

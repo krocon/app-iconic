@@ -47,23 +47,29 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/icon-file/         IconFileApi (open/save/new/close .icon, read SVG, Dialoge), DTOs, findAsset (002)
   app/core/window/            WindowApi (Titel, Fenster, Schließen-Frage, 003)
   app/core/recent/            RecentFilesApi („Open Recent“, 003)
+  app/core/actions/           Aktionskatalog, Keymaps (base/mac/other.json), ActionService (run(id, args?)),
+                              KeyboardDispatcher (einziger keydown-Listener), shortcut, action-args (005)
+  app/core/menu/              MenuApi (natives Menü, menu-action), KeymapApi (keymap.json), MenuSpec (005)
   app/backend-providers.ts    Bindung der Fassaden; Dev-Build: backend-providers.dev.ts (Fakes im Browser, 003 E14)
-  app/features/document/      IconDocument, DocumentStore, UndoService (undo/), Commands (commands/),
+  app/features/document/      IconDocument, DocumentStore (runCommand), UndoService (undo/), Commands (commands/:
+                              serialisierbar, command-json.ts + registry.ts commandFromJson, 005),
                               model/ (icon-json, unique-names), svg/ (node-ids, sanitize-svg, resolve-styles) (003)
-  app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster), Recent, provisorische
-                              Kürzel (bis 005), Texte (003)
+  app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster/Quit), Recent,
+                              file-actions (Aktionen der Datei-Funktionen), Texte (003, 005)
+  app/features/menus/         Menümodell (rein), MenuService (nativ/HTML), MenuBar (Windows/Linux), Befehlspalette,
+                              Kürzel-Dialog, app-actions (005)
   app/features/hierarchy/     HierarchyList (Platzhalter bis 006: Gruppen/Layer/Assets)
-  app/features/shell/         SidePanel, Texte der Fensterhülle
+  app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3), Texte der Fensterhülle
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
-                              icon-color, asset-placement (004)
+                              icon-color, asset-placement (004), canvas-actions, View-Options-Menü (005)
   app/features/about/         About-Dialog
   app/shared/geometry/        Geometrie: icon-guides, view-transform, zoom-steps, ruler-ticks, squircle (rein);
                               dom-geometry (clientToDocument, nodeToDocument über Screen-CTMs, 004)
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)
   app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,
-                              browser-hook.ts = `window.__appIconic` für Playwright)
+                              command-cases.ts, browser-hook.ts = `window.__appIconic` für Playwright)
   testing/fixtures/           generiert aus testdata/ (camscanner.icon, svg/, unique-names.json; `pnpm fixtures`)
 e2e/                          Playwright-Tests gegen den Dev-Server
 public/                       icon.svg (App-Icon), favicon.png
@@ -71,17 +77,21 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
   src/commands.rs             dünne Command-Schicht, Test command_rules
   src/sessions.rs             IconSessions: zuletzt geöffnete/gespeicherte .icon je Pfad (002 E5)
-  src/windows.rs              DocWindows: Labels doc-<n>, Startpfade, Pfad je Fenster, Schließen-Übernahme (003)
+  src/windows.rs              DocWindows: Labels doc-<n>, Startpfade/-aktionen, Pfad je Fenster, Schließen-Übernahme
+                              (003), QuitQueue (005)
+  src/app_menu.rs             natives macOS-Menü: Spec je Fenster, fokussiertes zeigt seins, Klicks routen (005)
   src/about.rs, model.rs      AppInfo, DTOs (serde camelCase)
   core/                       Crate `ai-core` (Workspace-Mitglied): Engine ohne Tauri
     src/error.rs              FsError { code, message, path }
     src/fs_atomic.rs, config_file.rs  atomar schreiben / Konfig laden (aus files-and-folders)
     src/icon/                 .icon: model (Sicht), json_format, names, bundle, zip_io, save, svg_file (002)
     src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
+    src/menu_spec.rs          MenuSpec prüfen, Accelerators, Menü ohne Fenster (005)
+    src/keymap_file.rs        keymap.json laden (005)
   icons/source/app-icon.svg   Quelle des App-Icons
 testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverändert)
 testdata/unique-names.json    Tabelle der eindeutigen Asset-/Layer-Namen (Rust `names.rs` und TS `unique-names.ts`)
-scripts/                      fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test
+scripts/                      fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test, keymaps.test.mjs
 docs/                         architecture.md (Entscheidungen, Commands, Abhängigkeiten), legacy-analysis.md, legacy/,
                               FEATURES.md (Checkliste)
 prompts/                      Feature-Prompts (Index README.md), done/

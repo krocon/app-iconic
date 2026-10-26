@@ -4,6 +4,7 @@ import { fakeBackend } from '../../../testing/providers';
 import { DocumentStore } from '../document/document.store';
 import { CanvasView } from './canvas-view';
 import { CanvasViewStore } from './canvas-view.store';
+import { ActionService } from '../../core/actions/action.service';
 
 describe('CanvasView', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: fakeBackend().providers }));
@@ -65,12 +66,51 @@ describe('CanvasView', () => {
     select.value = '1.5';
     select.dispatchEvent(new Event('change'));
     expect(view.zoom()).toBe(1.5);
-    const cross = button('Cross Cursor');
-    expect(cross.getAttribute('aria-pressed')).toBe('false');
+    // View Options: a menu button with checkbox / radio items running the same actions (005 E10)
+    const options = button('View Options ▾');
+    expect(options.getAttribute('aria-expanded')).toBe('false');
+    options.click();
+    await new Promise((r) => setTimeout(r));
+    await fixture.whenStable();
+    const item = (label: string) =>
+      [...el.querySelectorAll<HTMLElement>('[role="menu"] li[tabindex]')].find((li) =>
+        li.textContent?.trim().endsWith(label),
+      )!;
+    expect(document.activeElement).toBe(item('Rulers'));
+    const cross = item('Cross Cursor');
+    expect(cross.getAttribute('role')).toBe('menuitemcheckbox');
+    expect(cross.getAttribute('aria-checked')).toBe('false');
     cross.click();
     await fixture.whenStable();
-    expect(cross.getAttribute('aria-pressed')).toBe('true');
+    expect(item('Cross Cursor').getAttribute('aria-checked')).toBe('true');
     expect(el.querySelector('.viewport')!.classList).toContain('cross');
+    expect(item('Magic Snap').getAttribute('aria-checked')).toBe('true');
+    expect(item('Snap to Grid').getAttribute('aria-checked')).toBe('false');
+    const watch = item('watchOS');
+    expect(watch.getAttribute('role')).toBe('menuitemradio');
+    watch.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await fixture.whenStable();
+    expect(view.options().mask).toBe('circle');
+    item('watchOS').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+    expect(el.querySelector('[role="menu"]')).toBeNull();
+    expect(document.activeElement).toBe(options);
+  });
+
+  it('registers its actions while it lives (zoom, toggles, zoomTo with arguments)', async () => {
+    const { fixture, view } = await render();
+    const actions = TestBed.inject(ActionService);
+    view.setViewport(800, 800);
+    expect(actions.run('view.zoomTo', { zoom: 1.25 })).toBe(true);
+    expect(view.zoom()).toBe(1.25);
+    expect(actions.run('view.zoomTo', { zoom: 9 })).toBe(false);
+    expect(actions.run('view.zoomTo')).toBe(false);
+    expect(actions.checked('view.rulers')).toBe(true);
+    actions.run('view.rulers');
+    expect(view.options().rulers).toBe(false);
+    expect(actions.checked('view.appearance.dark')).toBe(view.options().appearance === 'dark');
+    fixture.destroy();
+    expect(actions.available('view.zoomIn')).toBe(false);
   });
 
   it('dark appearance switches the automatic background', async () => {

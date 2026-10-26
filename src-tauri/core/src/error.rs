@@ -27,6 +27,8 @@ pub enum FsErrorCode {
     MissingAsset,
     /// An SVG file that is not UTF-8 text (prompt 002 E15).
     InvalidSvg,
+    /// A menu spec from the frontend over the limits or with bad ids/texts (prompt 005 E6).
+    InvalidMenu,
 }
 
 /// The one error type every command returns.
@@ -100,6 +102,7 @@ mod tests {
             (FsErrorCode::TooLarge, "too_large"),
             (FsErrorCode::MissingAsset, "missing_asset"),
             (FsErrorCode::InvalidSvg, "invalid_svg"),
+            (FsErrorCode::InvalidMenu, "invalid_menu"),
         ] {
             assert_eq!(serde_json::to_value(code).unwrap(), text);
         }

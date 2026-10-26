@@ -17,6 +17,11 @@ export class FakeWindowApi extends WindowApi {
   start: string | null = null;
   tookOverClose = false;
   closed = false;
+  /** `quit()` / `cancelQuit()` calls. */
+  quits = 0;
+  cancelledQuits = 0;
+  /** Answer of `startAction()` (once). */
+  action: string | null = null;
   /** Mirror `setTitle` into `document.title` (browser mode). */
   setDocumentTitle = false;
   private closeHandler: (() => void) | null = null;
@@ -58,6 +63,22 @@ export class FakeWindowApi extends WindowApi {
   async onCloseRequested(fn: () => void): Promise<() => void> {
     this.closeHandler = fn;
     return () => (this.closeHandler = null);
+  }
+
+  /** Quit of a single window (the backend's sequence, design 005 E13): ask this window. */
+  async quit(): Promise<void> {
+    this.quits++;
+    this.requestClose();
+  }
+
+  async cancelQuit(): Promise<void> {
+    this.cancelledQuits++;
+  }
+
+  async startAction(): Promise<string | null> {
+    const a = this.action;
+    this.action = null;
+    return a;
   }
 
   /** Plays the window's close button. */

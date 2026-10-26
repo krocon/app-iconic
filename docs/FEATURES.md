@@ -4,9 +4,9 @@
 > Abhaken, sobald es Ende-zu-Ende funktioniert und getestet ist. Neu gegenüber der Vorlage: *(neu)*.
 
 ## 1. Dokument & Dateien
-- [x] New Window ⇧⌘N, New Document ⌘N mit Dirty-Abfrage Save / Don't Save / Cancel (003 – Toolbar + provisorische Kürzel; Menü 005)
+- [x] New Window ⇧⌘N, New Document ⌘N mit Dirty-Abfrage Save / Don't Save / Cancel (003, Menü und Kürzel 005)
 - [x] Open… ⌘O für `.icon` (Bundle und ZIP) (002, 003)
-- [x] Open Recent mit Validierung und „Clear Menu“ (003 – Toolbar-Menü; natives Menü 005)
+- [x] Open Recent mit Validierung und „Clear Menu“ (003, Menü 005; natives macOS-Menü auf dem Mac prüfen)
 - [x] Import SVG… ⇧⌘I als neue Gruppe/Layer/Asset (003)
 - [x] Save ⌘S (nur wenn dirty), Save As… ⇧⌘S (Format Bundle/ZIP), Close ⌘W mit Dirty-Abfrage (003)
 - [x] Speichern im gelesenen Format (Bundle bleibt Bundle, ZIP bleibt ZIP), atomar *(neu)* (002, 003)
@@ -16,15 +16,18 @@
 - [ ] `.icon` als Dateizuordnung / Öffnen per Doppelklick *(neu)* (016)
 
 ## 2. Layout & Einstellungen
-- [ ] Drei ein-/ausblendbare Seitenleisten ⌘1/⌘2/⌘3, Breite 160–480 px, Defaults 260/260/300 (015)
+- [ ] Drei ein-/ausblendbare Seitenleisten ⌘1/⌘2/⌘3 (005 ✓), Breite 160–480 px, Defaults 260/260/300 (015)
 - [ ] View Options: Command Sidebar, Hierarchy, Properties, Rulers, Guides, Background, Cross Cursor, Show Handles,
-      Snap to Grid, Magic Snap (005, 015)
+      Snap to Grid, Magic Snap (005 ✓ Menü View + „View Options“ im Canvas; persistent 015; Snap wirkt ab 007)
+- [x] Menüs File/Edit/View/Add/Arrange/Help aus einem Modell: natives macOS-Menü, HTML-Menüleiste Windows/Linux (005; macOS auf dem Mac prüfen)
+- [x] Befehlspalette ⇧⌘P, Übersicht „Keyboard Shortcuts“, eigene Kürzel in `keymap.json` *(neu)* (005)
+- [x] Quit ⌘Q fragt alle Fenster mit ungespeicherten Änderungen nacheinander (005; auf dem Mac prüfen)
 - [ ] `settings.json` mit Schema-Version und Migration; „Reset to Default“ mit Bestätigung (015)
 - [ ] Settings-Dialog inkl. Debug „Log Undo Grouping“ (015)
 - [ ] Deutsch/Englisch zur Laufzeit *(neu)* (015)
 
 ## 3. Canvas
-- [x] Zoom 25/33/50/66/75/100/125/150/200 %, Anzeige, Pinch, ⌘+/⌘−/⌘0, Center Canvas (004; Kürzel provisorisch bis 005, dazu „Fit“)
+- [x] Zoom 25/33/50/66/75/100/125/150/200 %, Anzeige, Pinch, ⌘+/⌘−/⌘0, Center Canvas (004, dazu „Fit“; Kürzel als Aktionen 005)
 - [x] Pan (Scroll / Space+Drag / mittlere Maustaste) (004)
 - [x] Lineale mit Haupt-/Nebenteilung, zoomabhängig (004)
 - [x] Mauskoordinaten im Dokumentraum (004)
@@ -99,6 +102,6 @@
 - [ ] Share Export (macOS, optional) (016)
 
 ## 12. Undo/Redo
-- [ ] Benannte Aktionen im Menü („Undo Move“ …), ⌘Z / ⇧⌘Z (003 ✓ Namen, Toolbar, provisorische Kürzel; Menü 005)
+- [x] Benannte Aktionen im Menü („Undo Move“ …), ⌘Z / ⇧⌘Z (003 Namen, 005 Menü und Kürzel)
 - [ ] Gesten-Coalescing und zusammengesetzte Aktionen (003 ✓ UndoService; Gesten im UI 007)
 - [x] Undo-Stack je Dokument, Dirty am Save-Punkt (003)

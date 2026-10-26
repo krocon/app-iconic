@@ -1,99 +1,51 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { ActionService } from './core/actions/action.service';
+import { KeyboardDispatcher } from './core/actions/keyboard-dispatcher';
+import { WindowApi } from './core/window/window-api';
 import { AboutDialog } from './features/about/about-dialog';
 import { CanvasView } from './features/canvas/canvas-view';
-import { FILES_TEXTS, platformHint } from './features/files/files-texts';
+import { registerFileActions } from './features/files/file-actions';
+import { FILES_TEXTS } from './features/files/files-texts';
 import { FilesService } from './features/files/files.service';
-import { ProvisionalShortcuts } from './features/files/provisional-shortcuts';
-import { RecentMenu } from './features/files/recent-menu';
+import { RecentFilesService } from './features/files/recent-files.service';
 import { HierarchyList } from './features/hierarchy/hierarchy-list';
+import { registerAppActions } from './features/menus/app-actions';
+import { CommandPalette } from './features/menus/command-palette';
+import { MenuBar } from './features/menus/menu-bar';
+import { MenuService } from './features/menus/menu.service';
+import { ShortcutsDialog } from './features/menus/shortcuts-dialog';
+import { LayoutStore } from './features/shell/layout.store';
 import { SHELL_TEXTS } from './features/shell/shell-texts';
 import { SidePanel } from './features/shell/side-panel';
 import { AskDialog } from './shared/ask/ask-dialog';
 import { DialogService } from './shared/dialog/dialog.service';
 
 /**
- * Root: toolbar with the file actions (until the menus of prompt 005), the three side panels
- * (legacy defaults 260 / 260 / 300 px; 006/009 fill them, 015 makes them resizable), the canvas
- * and the one modal dialog of the moment. One document per window (design 003 E8).
+ * Root (design 005 E11): one header row – the HTML menu bar (Windows/Linux; macOS has the native
+ * menu), the document title and Undo/Redo –, the three side panels (⌘1/⌘2/⌘3; legacy defaults
+ * 260 / 260 / 300 px), the canvas and the one modal dialog of the moment. One document per window
+ * (design 003 E8). Every function is an action (design 005 E17); this component only wires them.
  */
 @Component({
   selector: 'app-root',
-  imports: [AboutDialog, AskDialog, CanvasView, HierarchyList, RecentMenu, SidePanel],
+  imports: [
+    AboutDialog,
+    AskDialog,
+    CanvasView,
+    CommandPalette,
+    HierarchyList,
+    MenuBar,
+    ShortcutsDialog,
+    SidePanel,
+  ],
   template: `
     <header class="toolbar">
       <img class="mark" src="icon.svg" alt="" />
-      <span class="name">{{ t.appName }}</span>
-      <nav class="actions" [attr.aria-label]="t.fileActions">
-        <button
-          type="button"
-          class="btn quiet"
-          [title]="hint(f.newDocumentHint)"
-          (click)="files.newDocument()"
-        >
-          {{ f.newDocument }}
-        </button>
-        <button type="button" class="btn quiet" [title]="hint(f.openHint)" (click)="files.open()">
-          {{ f.open }}
-        </button>
-        <app-recent-menu />
-        <button
-          type="button"
-          class="btn quiet"
-          [title]="hint(f.importSvgHint)"
-          (click)="files.importSvg()"
-        >
-          {{ f.importSvg }}
-        </button>
-        <button
-          type="button"
-          class="btn quiet"
-          [title]="hint(f.saveHint)"
-          [disabled]="!canSave()"
-          (click)="files.save()"
-        >
-          {{ f.save }}
-        </button>
-        <button
-          type="button"
-          class="btn quiet"
-          [title]="hint(f.saveAsHint)"
-          (click)="files.saveAs()"
-        >
-          {{ f.saveAs }}
-        </button>
-        <button type="button" class="btn quiet" [title]="hint(f.closeHint)" (click)="files.close()">
-          {{ f.close }}
-        </button>
-        <button
-          type="button"
-          class="btn quiet"
-          [title]="hint(f.newWindowHint)"
-          (click)="files.newWindow()"
-        >
-          {{ f.newWindow }}
-        </button>
-        <span class="sep" aria-hidden="true"></span>
-        <button
-          type="button"
-          class="btn quiet undo"
-          [title]="(store()?.undoLabel() ?? t.undo) + ' ' + hint(f.undoHint)"
-          [attr.aria-label]="store()?.undoLabel() ?? t.undo"
-          [disabled]="!store()?.canUndo()"
-          (click)="files.undo()"
-        >
-          {{ t.undo }}
-        </button>
-        <button
-          type="button"
-          class="btn quiet redo"
-          [title]="(store()?.redoLabel() ?? t.redo) + ' ' + hint(f.redoHint)"
-          [attr.aria-label]="store()?.redoLabel() ?? t.redo"
-          [disabled]="!store()?.canRedo()"
-          (click)="files.redo()"
-        >
-          {{ t.redo }}
-        </button>
-      </nav>
+      @if (mac) {
+        <span class="name">{{ t.appName }}</span>
+      } @else {
+        <app-menu-bar class="menus" />
+      }
       <span class="spacer"></span>
       <span class="doc" data-testid="doc-title">
         {{ files.title() }}
@@ -103,23 +55,47 @@ import { DialogService } from './shared/dialog/dialog.service';
           >
         }
       </span>
-      <button type="button" class="btn quiet about" (click)="dialogs.show('about')">
-        {{ t.about }}
+      <span class="sep" aria-hidden="true"></span>
+      <button
+        type="button"
+        class="btn quiet undo"
+        [title]="actions.tooltip('edit.undo')"
+        [attr.aria-label]="actions.label('edit.undo')"
+        [disabled]="!actions.enabled('edit.undo')"
+        (click)="actions.run('edit.undo')"
+      >
+        {{ t.undo }}
+      </button>
+      <button
+        type="button"
+        class="btn quiet redo"
+        [title]="actions.tooltip('edit.redo')"
+        [attr.aria-label]="actions.label('edit.redo')"
+        [disabled]="!actions.enabled('edit.redo')"
+        (click)="actions.run('edit.redo')"
+      >
+        {{ t.redo }}
       </button>
     </header>
     <div class="workspace">
-      <app-side-panel class="commands" [heading]="t.commands">{{ t.comingSoon }}</app-side-panel>
-      <app-side-panel class="hierarchy" [heading]="t.hierarchy">
-        @if (store(); as s) {
-          <app-hierarchy-list [store]="s" />
-        } @else {
-          {{ t.noDocument }}
-        }
-      </app-side-panel>
+      @if (panels().commands) {
+        <app-side-panel class="commands" [heading]="t.commands">{{ t.comingSoon }}</app-side-panel>
+      }
+      @if (panels().hierarchy) {
+        <app-side-panel class="hierarchy" [heading]="t.hierarchy">
+          @if (store(); as s) {
+            <app-hierarchy-list [store]="s" />
+          } @else {
+            {{ t.noDocument }}
+          }
+        </app-side-panel>
+      }
       <app-canvas-view [store]="store()" />
-      <app-side-panel class="properties" [heading]="t.properties">{{
-        t.nothingSelected
-      }}</app-side-panel>
+      @if (panels().properties) {
+        <app-side-panel class="properties" [heading]="t.properties">{{
+          t.nothingSelected
+        }}</app-side-panel>
+      }
     </div>
     @if (files.notice(); as n) {
       <div class="status" role="status">
@@ -136,6 +112,12 @@ import { DialogService } from './shared/dialog/dialog.service';
       @case ('ask') {
         <app-ask-dialog />
       }
+      @case ('palette') {
+        <app-command-palette />
+      }
+      @case ('shortcuts') {
+        <app-shortcuts-dialog />
+      }
     }
   `,
   styleUrl: './app.css',
@@ -144,24 +126,51 @@ import { DialogService } from './shared/dialog/dialog.service';
 export class App implements OnInit {
   protected readonly dialogs = inject(DialogService);
   protected readonly files = inject(FilesService);
-  private readonly shortcuts = inject(ProvisionalShortcuts);
+  protected readonly actions = inject(ActionService);
+  private readonly dispatcher = inject(KeyboardDispatcher);
+  private readonly menus = inject(MenuService);
+  private readonly recent = inject(RecentFilesService);
+  private readonly win = inject(WindowApi);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly t = SHELL_TEXTS;
   protected readonly f = FILES_TEXTS;
   protected readonly store = this.files.store;
+  protected readonly panels = inject(LayoutStore).panels;
+  protected readonly mac = this.actions.os === 'mac';
 
-  private readonly mac = /Mac|iPhone|iPad/.test(globalThis.navigator?.platform ?? '');
-
-  protected hint(text: string): string {
-    return platformHint(text, this.mac);
-  }
-
-  protected canSave(): boolean {
-    const s = this.store();
-    return !!s && (s.dirty() || s.document().path === null);
+  constructor() {
+    registerFileActions(this.actions, this.files, this.recent, this.destroyRef);
+    registerAppActions(
+      this.actions,
+      this.dialogs,
+      inject(LayoutStore),
+      this.files,
+      this.destroyRef,
+    );
+    // where the keyboard is (design 005 E4): a dialog owns it; else hierarchy or canvas first
+    this.dispatcher.setContextProvider((target) => {
+      if (this.dialogs.open() !== null) return ['dialog'];
+      if (target?.closest('app-side-panel.hierarchy')) return ['hierarchy', 'global'];
+      return ['canvas', 'global'];
+    });
   }
 
   ngOnInit(): void {
-    this.shortcuts.install();
-    void this.files.start();
+    this.dispatcher.attach(document);
+    this.menus.start();
+    void this.actions.loadOverrides();
+    void this.recent.refresh();
+    // other windows may have opened files: "Open Recent" is checked when the window comes back
+    const refresh = () => void this.recent.refresh();
+    window.addEventListener('focus', refresh);
+    this.destroyRef.onDestroy(() => window.removeEventListener('focus', refresh));
+    void this.start();
+  }
+
+  /** Document first, then the action this window was opened for (design 005 E6). */
+  private async start(): Promise<void> {
+    await this.files.start();
+    const action = await this.win.startAction().catch(() => null);
+    if (action) this.actions.run(action);
   }
 }

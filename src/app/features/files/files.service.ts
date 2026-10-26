@@ -48,13 +48,13 @@ export class FilesService {
   /** Window start: take over the close button, then the start file or a new document. */
   async start(): Promise<void> {
     await this.win.takeOverClose().catch(() => undefined);
-    await this.win.onCloseRequested(() => void this.close()).catch(() => undefined);
+    await this.win.onCloseRequested(() => void this.closeRequested()).catch(() => undefined);
     const path = await this.win.startPath().catch(() => null);
     if (path && (await this.load(path))) return;
     await this.replaceWithNew();
   }
 
-  // ---- actions (toolbar now, action catalogue in 005) ----
+  // ---- actions (registered in `file-actions.ts`, design 005 E17) ----
 
   newDocument(): Promise<void> {
     return this.exclusive(async () => {
@@ -111,14 +111,28 @@ export class FilesService {
     return this.exclusive(() => this.saveAsNow(), false);
   }
 
-  /** Close the window (asks about unsaved changes). Also the window's close button. */
-  close(): Promise<void> {
+  /** Close the window (asks about unsaved changes); `false` if it stays open. */
+  close(): Promise<boolean> {
     return this.exclusive(async () => {
-      if (!(await this.confirmDiscard())) return;
+      if (!(await this.confirmDiscard())) return false;
       const path = this.store()?.document().path;
       if (path) await this.api.closeIcon(path).catch(() => undefined);
       await this.win.closeWindow().catch(() => undefined);
-    });
+      return true;
+    }, false);
+  }
+
+  /**
+   * The close button or Quit (design 005 E13) asks this window: close it, or – cancelled or busy
+   * with another question – tell the backend, so that an ongoing Quit stops.
+   */
+  async closeRequested(): Promise<void> {
+    if (!(await this.close())) await this.win.cancelQuit().catch(() => undefined);
+  }
+
+  /** Quit the app: the backend asks every window in turn (design 005 E13). */
+  quit(): Promise<void> {
+    return this.win.quit().catch(() => undefined);
   }
 
   undo(): void {

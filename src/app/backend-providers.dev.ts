@@ -3,7 +3,9 @@ import { isTauri } from '@tauri-apps/api/core';
 import { AboutApi, TauriAboutApi } from './core/about/about-api';
 import { IconFileApi, TauriIconFileApi } from './core/icon-file/icon-file-api';
 import { RecentFilesApi, TauriRecentFilesApi } from './core/recent/recent-files-api';
+import { KeymapApi, MenuApi, TauriKeymapApi, TauriMenuApi } from './core/menu/menu-api';
 import { TauriWindowApi, WindowApi } from './core/window/window-api';
+import { FakeKeymapApi, FakeMenuApi } from '../testing/fake-menu-api';
 import { FakeIconFileApi } from '../testing/fake-icon-file-api';
 import { FakeRecentFilesApi } from '../testing/fake-recent-files-api';
 import { FakeWindowApi } from '../testing/fake-window-api';
@@ -40,6 +42,8 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
       { provide: IconFileApi, useClass: TauriIconFileApi },
       { provide: RecentFilesApi, useClass: TauriRecentFilesApi },
       { provide: WindowApi, useClass: TauriWindowApi },
+      { provide: MenuApi, useClass: TauriMenuApi },
+      { provide: KeymapApi, useClass: TauriKeymapApi },
     ]
   : [
       // About keeps the real facade: it shows "desktop backend not available" (e2e/shell)
@@ -47,5 +51,7 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
       { provide: IconFileApi, useFactory: browserFiles },
       { provide: RecentFilesApi, useClass: FakeRecentFilesApi },
       { provide: WindowApi, useFactory: browserWindow },
+      { provide: MenuApi, useClass: FakeMenuApi },
+      { provide: KeymapApi, useClass: FakeKeymapApi },
       provideAppInitializer(installTestHook),
     ];

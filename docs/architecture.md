@@ -46,6 +46,10 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 004 E12 | Lineale in `<canvas>` | ein Zeichenvorgang je Änderung statt Hunderter SVG-Elemente beim Pannen |
 | 004 E14 | `CanvasViewStore` als Root-Service | ein Canvas je Fenster (eigene WebView); Menüs (005) und Test-Hook brauchen ihn |
 | 004 E16 | Playwright ohne Pixel-Baselines: DOM-/Geometrie-Assertions und einzelne Pixelfarben | Schriftrasterung unterscheidet sich zwischen Container und CI |
+| 005 E1–E4 | Aktionskatalog (Id, Text, Kontext `global`/`canvas`/`hierarchy`/`dialog`, Gruppe, optionale Argumente), Keymaps je OS (`Mod`), `ActionService.run(id, args?)`, ein `KeyboardDispatcher` (ruht in Textfeldern und Dialogen, deaktivierte Aktionen fallen durch, Halte-Aktionen wie Space) | aus editlicious 005 übernommen; eine Stelle für Menü, Palette, Tastatur und die KI (018) |
+| 005 E5–E8 | Ein Menümodell → natives macOS-Menü (Spec je Fenster, das fokussierte zeigt seins, Klicks nur an dieses Fenster) bzw. HTML-Menüleiste (Windows/Linux, immer sichtbar, F10/Alt) | mehrere Fenster (003); ohne vordefiniertes Edit-Menü (⌘Z nicht doppelt), aber Cut/Copy/Paste/Select All als vordefinierte Einträge, damit Textfelder kopieren/einfügen können |
+| 005 E13 | Quit fragt alle Fenster nacheinander (`QuitQueue` in Rust), Cancel bricht ab | macOS-Verhalten; kein Datenverlust beim Beenden |
+| 005 E15 | Dokument-Commands serialisierbar: `toJSON()` → `CommandJson`, Registry `commandFromJson` (prüft feindliche Eingaben), `DocumentStore.runCommand(json)`, Aktion `edit.runCommand` | KI-Regel (001 E8): MCP (018) nutzt dieselben Commands wie das UI; Roundtrip-Test je Command |
 
 ## Schichten
 
@@ -76,11 +80,15 @@ Angular (WebView)                                   Rust
 | `set_window_title(title, edited, path?)` | 003 | Titel des aufrufenden Fensters (`• ` bzw. macOS `setDocumentEdited:`), merkt den gezeigten Pfad |
 | `open_document_window(path?)`, `focus_document_window(path)` | 003 | neues Fenster `doc-<n>` (mit Startpfad) bzw. das Fenster, das `path` zeigt, nach vorn |
 | `window_start_path()`, `take_over_close()`, `close_window()` | 003 | Start des Fensters, Schließknopf → Ereignis `close-requested`, Fenster schließen |
+| `set_app_menu(spec)` | 005 | Menümodell des Fensters (geprüft in `ai-core::menu_spec`), auf macOS gesetzt, wenn das Fenster vorn ist; Klick → Ereignis `menu-action { id }` an das fokussierte Fenster |
+| `load_keymap_overrides()` | 005 | `keymap.json` im Config-Ordner → `KeymapOverrides { bindings, warning }` |
+| `quit_app()`, `cancel_quit()` | 005 | Quit-Folge über alle Fenster (`close-requested` nacheinander) bzw. Abbruch durch das gefragte Fenster |
+| `window_start_action()` | 005 | Aktion, die ein ohne Fenster gewählter Menüeintrag (macOS) im neuen Fenster ausführt |
 
-DTO-Ergänzung 003: `IconDocumentDto.name`, `SaveResult.name` (Dateiname fürs UI).
+DTO-Ergänzung 003: `IconDocumentDto.name`, `SaveResult.name` (Dateiname fürs UI). Fehlercode 005: `invalid_menu`.
 
 Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `export_svg`,
-`export_png` (012), `list_fonts`, `text_to_path` (013), `set_app_menu` (005), `load_settings`/`save_settings` (015).
+`export_png` (012), `list_fonts`, `text_to_path` (013), `load_settings`/`save_settings` (015).
 
 ## Abhängigkeiten
 

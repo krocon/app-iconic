@@ -25,6 +25,12 @@ export abstract class WindowApi {
   /** Closes this window (after unsaved changes were dealt with). */
   abstract closeWindow(): Promise<void>;
   abstract onCloseRequested(fn: () => void): Promise<() => void>;
+  /** Quit: the backend asks every window in turn about unsaved changes (design 005 E13). */
+  abstract quit(): Promise<void>;
+  /** This window will not close (Cancel): an ongoing Quit stops. */
+  abstract cancelQuit(): Promise<void>;
+  /** The action this window was opened for (a menu click without a window, design 005 E6). */
+  abstract startAction(): Promise<string | null>;
 }
 
 @Injectable()
@@ -58,5 +64,17 @@ export class TauriWindowApi extends WindowApi {
 
   onCloseRequested(fn: () => void): Promise<() => void> {
     return getCurrentWebviewWindow().listen(CLOSE_REQUESTED, () => fn());
+  }
+
+  quit(): Promise<void> {
+    return this.backend<void>('quit_app');
+  }
+
+  cancelQuit(): Promise<void> {
+    return this.backend<void>('cancel_quit');
+  }
+
+  startAction(): Promise<string | null> {
+    return this.backend<string | null>('window_start_action');
   }
 }

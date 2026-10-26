@@ -5,12 +5,15 @@
 //! - [`about`]         data for the About dialog (version, platform)
 //! - [`commands`]      thin Tauri command layer (validate, `spawn_blocking`, never synchronous)
 //! - [`sessions`]      last opened/saved `.icon` per path (unchanged assets stay in Rust, 002 E5)
-//! - [`windows`]       document windows: labels, start paths, close takeover, titles (003)
+//! - [`windows`]       document windows: labels, start paths, close takeover, titles (003),
+//!   start actions and the quit sequence (005)
+//! - [`app_menu`]      native macOS menu bar from the menu model of the focused window (005)
 //!
 //! The engine (icon documents, file I/O, export, fonts) lives in the Tauri-free crate
 //! `ai-core` (`src-tauri/core`); `error` is re-exported from there.
 
 pub mod about;
+pub mod app_menu;
 pub mod commands;
 pub mod model;
 pub mod sessions;
@@ -27,10 +30,15 @@ pub fn run() {
         .manage(sessions::IconSessions::default())
         .manage(windows::DocWindows::default())
         .manage(commands::RecentLock::default())
+        .manage(app_menu::MenuSpecs::default())
+        // native menu (macOS): a click is an action of the focused window; Quit asks every
+        // window (design 005 E6, E13)
+        .on_menu_event(|app, event| app_menu::route(app, event.id().0.clone()))
         // unsaved changes: a window that took over closing asks the user first (design 003 E10)
         .on_window_event(|window, event| {
             use tauri::{Emitter, Manager};
-            let docs = window.app_handle().state::<windows::DocWindows>();
+            let app = window.app_handle();
+            let docs = app.state::<windows::DocWindows>();
             match event {
                 tauri::WindowEvent::CloseRequested { api, .. }
                     if docs.takes_close(window.label()) =>
@@ -38,7 +46,14 @@ pub fn run() {
                     api.prevent_close();
                     let _ = window.emit_to(window.label(), windows::CLOSE_REQUESTED, ());
                 }
-                tauri::WindowEvent::Destroyed => docs.forget(window.label()),
+                tauri::WindowEvent::Focused(true) => app_menu::on_focus(app, window.label()),
+                tauri::WindowEvent::Destroyed => {
+                    docs.forget(window.label());
+                    app_menu::on_destroyed(app, window.label());
+                    if docs.quit(|q| q.closed(window.label())) {
+                        commands::advance_quit(app);
+                    }
+                }
                 _ => {}
             }
         })
@@ -61,6 +76,11 @@ pub fn run() {
             commands::window_start_path,
             commands::take_over_close,
             commands::close_window,
+            commands::window_start_action,
+            commands::set_app_menu,
+            commands::load_keymap_overrides,
+            commands::quit_app,
+            commands::cancel_quit,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

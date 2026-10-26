@@ -1,6 +1,7 @@
 import { expect, Page, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { menu, menuItem, openMenu } from './menu-helpers';
 
 /**
  * Prompt 003 in the browser mode (fakes with camscanner.icon in memory, test hook
@@ -15,7 +16,7 @@ const fixture = (name: string) =>
 async function openCamscanner(page: Page) {
   await page.goto('/');
   await expect(page).toHaveTitle('Untitled');
-  await page.getByRole('button', { name: 'Open…' }).click();
+  await menu(page, 'File', 'Open…');
   await expect(page).toHaveTitle('camscanner.icon');
 }
 
@@ -70,10 +71,11 @@ test('an attribute change marks the title, undo/redo by button and shortcut', as
 
 test('Save writes only the changed asset; the other stays byte-equal', async ({ page }) => {
   await openCamscanner(page);
-  const save = page.getByRole('button', { name: 'Save', exact: true });
-  await expect(save).toBeDisabled();
+  await openMenu(page, 'File');
+  await expect(menuItem(page, 'Save')).toHaveAttribute('aria-disabled', 'true');
+  await page.keyboard.press('Escape');
   await setRootAttribute(page, A3, 'opacity', '0.5');
-  await save.click();
+  await menu(page, 'File', 'Save');
   await expect(page).toHaveTitle('camscanner.icon');
   const [changed, unchanged, request] = await page.evaluate(
     ([path, a3, a2]) => {
@@ -102,7 +104,7 @@ test('Import SVG resolves styles; one undo removes group, layer and asset', asyn
     (text) => window.__appIconic!.addSvgFile('/in/drop.svg', 'drop.svg', text),
     svg,
   );
-  await page.getByRole('button', { name: 'Import SVG…' }).click();
+  await menu(page, 'File', 'Import SVG…');
 
   const groups = page.getByRole('list', { name: 'Groups and layers' });
   await expect(groups).toContainText('Group 3');
@@ -129,7 +131,7 @@ test('Import SVG resolves styles; one undo removes group, layer and asset', asyn
 test('closing with changes asks: Cancel keeps the window, Don’t Save closes', async ({ page }) => {
   await openCamscanner(page);
   await setRootAttribute(page, A2, 'opacity', '0.1');
-  await page.getByRole('button', { name: 'Close', exact: true }).click();
+  await menu(page, 'File', 'Close');
   const question = page.getByRole('alertdialog', { name: /save the changes to “camscanner.icon”/ });
   await expect(question).toBeVisible();
   await question.getByRole('button', { name: 'Cancel' }).click();
@@ -142,7 +144,7 @@ test('closing with changes asks: Cancel keeps the window, Don’t Save closes', 
   await page.keyboard.press('Escape');
   await expect(question).toBeHidden();
 
-  await page.getByRole('button', { name: 'Close', exact: true }).click();
+  await page.keyboard.press('Control+W');
   await question.getByRole('button', { name: 'Don’t Save' }).click();
   await expect.poll(() => page.evaluate(() => window.__appIconic!.window.closed)).toBe(true);
   expect(await page.evaluate(() => window.__appIconic!.files.saved.length)).toBe(0);
@@ -151,31 +153,29 @@ test('closing with changes asks: Cancel keeps the window, Don’t Save closes', 
 test('Save As ZIP and Open Recent', async ({ page }) => {
   await openCamscanner(page);
   await setRootAttribute(page, A3, 'opacity', '0.5');
-  await page.getByRole('button', { name: 'Save As…' }).click();
+  await menu(page, 'File', 'Save As…');
   const format = page.getByRole('alertdialog', { name: 'Save As' });
   await format.getByRole('button', { name: 'ZIP' }).click();
   await expect(page).toHaveTitle('camscanner.icon');
   const saved = await page.evaluate(() => window.__appIconic!.files.saved.at(-1));
   expect(saved).toMatchObject({ path: '/browser/camscanner.icon', format: 'zip', from: CAM });
 
-  await page.getByRole('button', { name: 'Open Recent' }).click();
-  const menu = page.getByRole('menu', { name: 'Open Recent' });
-  await expect(menu.getByRole('menuitem')).toHaveText([
-    'camscanner.icon',
-    'camscanner.icon',
-    'Clear Menu',
-  ]);
-  await menu.getByRole('menuitem', { name: 'Clear Menu' }).click();
-  await page.getByRole('button', { name: 'Open Recent' }).click();
-  await expect(menu.getByRole('menuitem', { name: 'No Recent Items' })).toBeDisabled();
+  // "Open Recent" is a labelled group of the File menu in the HTML bar (design 005 E8)
+  await openMenu(page, 'File');
+  const labels = page.getByRole('menu').locator('li[tabindex] .label');
+  await expect(labels.filter({ hasText: 'camscanner.icon' })).toHaveCount(2);
+  await menuItem(page, 'Clear Menu').click();
+  await openMenu(page, 'File');
+  await expect(menuItem(page, 'No Recent Items')).toHaveAttribute('aria-disabled', 'true');
+  await expect(menuItem(page, 'Clear Menu')).toHaveAttribute('aria-disabled', 'true');
   await page.keyboard.press('Escape');
-  await expect(menu).toBeHidden();
+  await expect(page.getByRole('menu')).toBeHidden();
 });
 
 test('New asks about unsaved changes and starts an untitled document', async ({ page }) => {
   await openCamscanner(page);
   await setRootAttribute(page, A3, 'opacity', '0.5');
-  await page.getByRole('button', { name: 'New', exact: true }).click();
+  await menu(page, 'File', 'New Document');
   await page.getByRole('alertdialog').getByRole('button', { name: 'Don’t Save' }).click();
   await expect(page).toHaveTitle('Untitled');
   await expect(page.getByRole('list', { name: 'Assets' }).getByRole('listitem')).toHaveText([

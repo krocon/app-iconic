@@ -1,6 +1,8 @@
 import { computed, Signal, signal } from '@angular/core';
 import { SaveResult } from '../../core/icon-file/icon-file.models';
 import { DocCommand } from './commands/command';
+import { CommandJson } from './commands/command-json';
+import { commandFromJson } from './commands/registry';
 import { IconDocument, NodeRef } from './icon-document';
 import { UndoService } from './undo/undo.service';
 import { UndoLabel } from './undo/undo-texts';
@@ -55,6 +57,19 @@ export class DocumentStore {
 
   execute(command: DocCommand): void {
     this.undoService.execute(command);
+  }
+
+  /**
+   * Runs a command given as JSON (design 005 E15 – the AI path of prompt 018, `edit.runCommand`).
+   * Throws `CommandError` for invalid JSON or a missing target; nothing is changed then.
+   */
+  runCommand(json: unknown): void {
+    this.execute(commandFromJson(json));
+  }
+
+  /** The last undoable step as JSON (design 005 E15; the AI can see what happened). */
+  lastCommandJson(): CommandJson | null {
+    return this.undoService.top?.toJSON() ?? null;
   }
 
   undo(): void {

@@ -22,11 +22,15 @@ export interface CanvasOptions {
   crossCursor: boolean;
   /** Used from prompt 007 on. */
   handles: boolean;
+  /** Snapping (legacy §6: grid off, magic on) – state from 005, used from prompt 007 on. */
+  snapToGrid: boolean;
+  magicSnap: boolean;
   mask: MaskShape;
   appearance: Appearance;
 }
 
-export type CanvasToggle = 'rulers' | 'guides' | 'background' | 'crossCursor' | 'handles';
+export type CanvasToggle =
+  'rulers' | 'guides' | 'background' | 'crossCursor' | 'handles' | 'snapToGrid' | 'magicSnap';
 
 function systemAppearance(): Appearance {
   return globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -50,6 +54,8 @@ export class CanvasViewStore {
     background: true,
     crossCursor: false,
     handles: true,
+    snapToGrid: false,
+    magicSnap: true,
     mask: 'squircle',
     appearance: systemAppearance(),
   });

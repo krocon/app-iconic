@@ -25,11 +25,9 @@
   font-weight: 600;
 }
 
-.actions {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  margin-left: var(--space-2);
+.menus {
+  align-self: stretch;
+  margin-left: var(--space-1);
 }
 
 .sep {

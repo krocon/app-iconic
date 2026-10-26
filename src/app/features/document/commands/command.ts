@@ -1,5 +1,6 @@
 import { IconDocument } from '../icon-document';
 import { UndoLabel } from '../undo/undo-texts';
+import { CommandJson } from './command-json';
 
 /**
  * A named, undoable change of the document (design 003 E6). `do` may run again after `undo`
@@ -15,6 +16,9 @@ export interface DocCommand {
    * target) and return `true`, so that undo goes back to before this command in one step.
    */
   merge?(next: DocCommand): boolean;
+  /** The command as plain JSON (design 005 E15); `commandFromJson` makes it again. After a
+   * `merge` it describes the merged result, so a gesture is one serialisable command. */
+  toJSON(): CommandJson;
 }
 
 /** Several commands as one undo step; if one fails, the done ones are undone. */
@@ -39,6 +43,10 @@ export class CompositeCommand implements DocCommand {
 
   undo(doc: IconDocument): void {
     for (const c of [...this.commands].reverse()) c.undo(doc);
+  }
+
+  toJSON(): CommandJson {
+    return { type: 'composite', label: this.label, commands: this.commands.map((c) => c.toJSON()) };
   }
 }
 

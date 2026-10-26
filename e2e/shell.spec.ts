@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { menu } from './menu-helpers';
 
 test('the window shell shows panels, canvas and a working About dialog', async ({ page }) => {
   await page.goto('/');
@@ -7,7 +8,7 @@ test('the window shell shows panels, canvas and a working About dialog', async (
   await expect(page.getByRole('region', { name: 'Properties' })).toBeVisible();
   await expect(page.getByRole('img', { name: /1024 × 1024 canvas/ })).toBeVisible();
 
-  await page.getByRole('button', { name: 'About' }).click();
+  await menu(page, 'Help', 'About AppIconic');
   const dialog = page.getByRole('dialog', { name: 'About AppIconic' });
   await expect(dialog).toContainText('desktop backend not available');
   await page.keyboard.press('Escape');

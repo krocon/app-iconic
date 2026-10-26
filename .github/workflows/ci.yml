@@ -41,10 +41,14 @@ jobs:
       - run: pnpm test
       - run: pnpm build
 
+  # E2E hung on 26.10.2026 in `playwright install --with-deps` (apt download of the system
+  # packages) until the 20-minute limit. Now: the browser comes from the GitHub cache, the system
+  # packages from the Ubuntu archive with retries and a short step limit – and only if the runner
+  # image lacks them (it ships Chrome and its libraries); the tests themselves are unchanged.
   e2e:
     name: E2E (Playwright, dev server)
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
@@ -53,8 +57,44 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm e2e
+      - name: Playwright version
+        id: pw
+        run: echo "version=$(pnpm exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - name: Cache of the Playwright browser
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}-chromium
+      - name: Playwright browser (Chromium, download only)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 8
+        run: |
+          for i in 1 2 3; do pnpm exec playwright install chromium && exit 0; echo "retry $i"; sleep 10; done
+          exit 1
+      - name: System libraries of Chromium (only what is missing)
+        timeout-minutes: 10 # a stuck mirror fails here instead of eating the job ("Re-run failed jobs")
+        run: |
+          # the runner image normally has them; then `install-deps` is not needed at all
+          missing=$(find ~/.cache/ms-playwright -name 'chrome-headless-shell*' -type f \
+            -exec ldd {} \; 2>/dev/null | grep 'not found' | sort -u || true)
+          if [ -z "$missing" ]; then echo "all libraries present"; exit 0; fi
+          echo "$missing"
+          # GitHub's Azure mirror was very slow on 26.10.2026: use the Ubuntu archive instead
+          sudo sed -i 's#http://azure.archive.ubuntu.com/ubuntu#http://archive.ubuntu.com/ubuntu#g' \
+            /etc/apt/sources.list /etc/apt/sources.list.d/*.sources 2>/dev/null || true
+          printf 'Acquire::Retries "3";\nAcquire::http::Timeout "30";\n' | sudo tee /etc/apt/apt.conf.d/99ci-net
+          sudo -E env "PATH=$PATH" pnpm exec playwright install-deps chromium
+      - name: Playwright tests
+        timeout-minutes: 12
+        run: pnpm e2e
+      - name: Test results of failed tests
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: test-results/
+          retention-days: 7
 
   rust:
     name: Rust (${{ matrix.label }})

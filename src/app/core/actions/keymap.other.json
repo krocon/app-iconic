@@ -1,0 +1,6 @@
+{
+  "global": {
+    "Mod+y": "edit.redo",
+    "F10": "app.focusMenu"
+  }
+}

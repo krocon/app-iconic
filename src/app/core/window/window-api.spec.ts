@@ -1,5 +1,6 @@
 import { TauriWindowApi } from './window-api';
 import { TauriRecentFilesApi } from '../recent/recent-files-api';
+import { TauriKeymapApi, TauriMenuApi } from '../menu/menu-api';
 
 type Calls = [string, Record<string, unknown> | undefined][];
 
@@ -26,6 +27,9 @@ describe('TauriWindowApi / TauriRecentFilesApi', () => {
     await win.startPath();
     await win.takeOverClose();
     await win.closeWindow();
+    await win.quit();
+    await win.cancelQuit();
+    await win.startAction();
     const r = recording(new TauriRecentFilesApi() as unknown as { backend: unknown }, calls);
     const recent = r as unknown as TauriRecentFilesApi;
     await recent.list();
@@ -38,9 +42,25 @@ describe('TauriWindowApi / TauriRecentFilesApi', () => {
       ['window_start_path', undefined],
       ['take_over_close', undefined],
       ['close_window', undefined],
+      ['quit_app', undefined],
+      ['cancel_quit', undefined],
+      ['window_start_action', undefined],
       ['recent_files', undefined],
       ['add_recent_file', { path: '/a.icon' }],
       ['clear_recent_files', undefined],
+    ]);
+  });
+
+  it('menu and keymap facades pass the arguments the commands expect', async () => {
+    const calls: Calls = [];
+    const m = recording(new TauriMenuApi() as unknown as { backend: unknown }, calls);
+    const spec = { menus: [{ label: 'File', items: [] }] };
+    await (m as unknown as TauriMenuApi).setAppMenu(spec);
+    const k = recording(new TauriKeymapApi() as unknown as { backend: unknown }, calls);
+    await (k as unknown as TauriKeymapApi).loadOverrides();
+    expect(calls).toEqual([
+      ['set_app_menu', { spec }],
+      ['load_keymap_overrides', undefined],
     ]);
   });
 
