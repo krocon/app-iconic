@@ -6,3 +6,5 @@ src-tauri/testdata/** -text
 *.webp binary
 *.jpg binary
 *.psd binary
+# fixtures are compared byte for byte (Windows CI checked them out with CRLF)
+testdata/** -text
