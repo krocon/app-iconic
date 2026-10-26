@@ -12,3 +12,108 @@ pub struct AppInfo {
     pub os: String,
     pub arch: String,
 }
+
+// ---- prompt 002: `.icon` files (`src/app/core/icon-file/icon-file.models.ts`) ----
+
+use ai_core::icon::{AssetKind, IconFile, IconFormat, IconWarning};
+use serde::Deserialize;
+use serde_json::Value;
+
+/// One asset of an opened document. SVG comes as text, PNG as data URL, others by name only.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct IconAssetDto {
+    pub name: String,
+    pub kind: AssetKind,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data_url: Option<String>,
+}
+
+/// An opened (or new) `.icon` document.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct IconDocumentDto {
+    /// `None` for a new, unsaved document.
+    pub path: Option<String>,
+    pub format: IconFormat,
+    /// `icon.json` as is – unknown fields included, key order kept.
+    pub icon_json: Value,
+    pub assets: Vec<IconAssetDto>,
+    pub warnings: Vec<IconWarning>,
+}
+
+impl IconDocumentDto {
+    pub fn from_file(path: Option<String>, file: &IconFile) -> Self {
+        Self {
+            path,
+            format: file.format,
+            icon_json: file.json.clone(),
+            assets: file
+                .assets
+                .iter()
+                .map(|a| IconAssetDto {
+                    name: a.name.clone(),
+                    kind: a.kind,
+                    text: a.text().map(str::to_owned),
+                    data_url: a.data_url(),
+                })
+                .collect(),
+            warnings: file.warnings.clone(),
+        }
+    }
+}
+
+/// One asset in `save_icon`: changed/new ones carry `text`, unchanged ones only the name.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SaveAssetDto {
+    pub name: String,
+    #[serde(default)]
+    pub text: Option<String>,
+    #[serde(default)]
+    pub unchanged: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SaveResult {
+    pub path: String,
+    pub format: IconFormat,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ai_core::icon::{IconAsset, new_icon};
+    use serde_json::json;
+
+    #[test]
+    fn document_dto_is_camel_case_and_skips_missing_content() {
+        let mut file = new_icon();
+        file.assets.push(IconAsset::new("p.png", vec![1, 2, 3]));
+        file.assets.push(IconAsset::new("x.bin", vec![1]));
+        let v = serde_json::to_value(IconDocumentDto::from_file(None, &file)).unwrap();
+        assert_eq!(v["path"], Value::Null);
+        assert_eq!(v["format"], "bundle");
+        assert_eq!(v["iconJson"]["fill"], "automatic");
+        assert_eq!(v["assets"][0]["kind"], "svg");
+        assert!(v["assets"][0]["text"].as_str().unwrap().starts_with("<svg"));
+        assert_eq!(v["assets"][1]["dataUrl"], "data:image/png;base64,AQID");
+        assert_eq!(v["assets"][2], json!({ "name": "x.bin", "kind": "other" }));
+        assert_eq!(v["warnings"], json!([]));
+    }
+
+    #[test]
+    fn save_asset_defaults() {
+        let a: SaveAssetDto = serde_json::from_value(json!({ "name": "a.svg" })).unwrap();
+        assert_eq!((a.text, a.unchanged), (None, false));
+        let r = serde_json::to_value(SaveResult {
+            path: "/a.icon".into(),
+            format: IconFormat::Zip,
+        })
+        .unwrap();
+        assert_eq!(r, json!({ "path": "/a.icon", "format": "zip" }));
+    }
+}

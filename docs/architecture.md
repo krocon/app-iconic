@@ -23,6 +23,12 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 001 E5 | Port **1450**, Identifier `io.github.krocon.appiconic`, Fenster-Labels `main` und `doc-*` | eigener Port neben 1420/1430/1440 der Schwesterprojekte; mehrere Dokumentfenster ab Prompt 003 |
 | 001 E6 | E2E: Playwright gegen den Angular-Dev-Server (Browser-Modus ohne Backend) + Sichtprüfung der echten App unter Xvfb | Geometrie braucht echtes Layout – jsdom kennt kein `getBBox`/`getCTM`. Geometrie-Tests mit DOM laufen deshalb in Playwright |
 | 001 E7 | Arbeitsweise über Feature-Prompts (`prompts/`), Design-Dokument je Prompt, Commit + Push auf `main` | wie editlicious |
+| 002 E1 | `icon.json` bleibt `serde_json::Value` (mit `preserve_order`); `IconJson` ist nur eine typisierte Sicht mit `extra` auf jeder Ebene | verlustfrei: unbekannte Felder (Specializations, `glass`, `position` …) werden durchgereicht, nie über die Sicht geschrieben |
+| 002 E2/E3 | Ausgabe wie Icon Composer (2 Leerzeichen, `" : "`, kein Zeilenumbruch am Ende); unverändertes `icon.json` → Originalbytes | belegt an `camscanner.icon` und einer zweiten echten Datei; byte-genauer Roundtrip |
+| 002 E5 | Sitzung je Pfad in Rust (`IconSessions`): unveränderte Assets kommen nicht über die Brücke | große Assets nicht doppelt serialisieren; Bytes bleiben exakt |
+| 002 E6 | Bundle speichern: neues Bundle daneben, altes wegbenennen, neues an den Namen, altes löschen | Rename über einen bestehenden Ordner geht weder unter Windows noch unter Unix; gleiche Strategie auf allen OS |
+| 002 E7/E8 | Grenzen für ZIP und Bundle (2 000 Einträge, 64 MiB je Datei, 256 MiB gesamt, Tiefe 16), Zip-Slip und verschlüsselte Einträge abgelehnt, Symlinks ignoriert | fremde Dateien sind feindlich |
+| 002 E16 | Fixtures fürs Frontend als generiertes TS-Modul (`scripts/fixtures.mjs`, `pnpm fixtures:check`) | gleicher Weg für `ng test`, `ng serve` und Playwright, ohne Loader-Tricks |
 
 ## Schichten
 
@@ -43,9 +49,15 @@ Angular (WebView)                                   Rust
 | Command | Prompt | Zweck |
 |---|---|---|
 | `get_app_info` | 001 | Name, Version (aus `package.json`), OS, Architektur |
+| `open_icon(path)` | 002 | `.icon` (Ordner oder ZIP) lesen → `IconDocumentDto { path, format, iconJson, assets, warnings }`, Sitzung anlegen |
+| `new_icon()` | 002 | neues Dokument (eine Gruppe, ein Layer, leeres SVG), ohne Pfad |
+| `save_icon(path, format, iconJson, assets, from?)` | 002 | speichern; unveränderte Assets aus der Sitzung von `from`/`path` → `SaveResult { path, format }` |
+| `close_icon(path)` | 002 | Sitzung freigeben |
+| `read_svg_file(path)` | 002 | SVG als Text (≤ 16 MiB) für „Import SVG…“ |
+| `pick_open_icon(folder)`, `pick_save_icon(suggestedName, format)`, `pick_svg_file()` | 002 | native Dialoge (Rust-API), `null` bei Abbruch |
 
 Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt):
-`open_icon`, `save_icon`, `read_svg_file`, `pick_*` (Dialoge), `recent_files_*` (002/003), `export_svg`,
+`recent_files_*` (003), `export_svg`,
 `export_png` (012), `list_fonts`, `text_to_path` (013), `set_app_menu` (005), `load_settings`/`save_settings` (015).
 
 ## Abhängigkeiten
@@ -60,5 +72,8 @@ Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts f
 | `tauri` 2, `tauri-build` | Rust | Desktop-Hülle |
 | `tauri-plugin-dialog` | Rust | Datei-Dialoge über die Rust-API (001 E4) |
 | `tauri-plugin-window-state` | Rust | Fenstergröße/-position je Label (001 E4) |
-| `serde`, `serde_json` | Rust | DTOs, `icon.json` |
+| `serde`, `serde_json` (Feature `preserve_order`) | Rust | DTOs, `icon.json` mit stabiler Schlüsselreihenfolge (002 E4) |
+| `zip` 8.6 (nur Deflate über `flate2`/zlib-rs) | Rust (`ai-core`) | `.icon` als ZIP lesen/schreiben (002); ersetzt `/usr/bin/zip` der Vorlage; ohne AES/bzip2/lzma/zstd → kleinere Angriffsfläche |
+| `unicode-normalization` | Rust (`ai-core`) | Asset-Namen NFC vergleichen (HFS+ speichert NFD, 002 E11/E12) |
+| `base64` | Rust (`ai-core`) | PNG-Assets als Data-URL ans Frontend (002 E9) |
 | `tempfile` | Rust (Dev) | Dateisystem-Tests |

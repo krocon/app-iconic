@@ -30,6 +30,7 @@
 | Lint / Format | `pnpm lint`, `pnpm format`, `pnpm format:check` |
 | Frontend-Build | `pnpm build` |
 | Rust | `pnpm rust:fmt`, `pnpm rust:lint` (clippy `-D warnings`), `pnpm rust:test` (ganzer Workspace inkl. `ai-core`) |
+| Fixture-Module | `pnpm fixtures` (neu erzeugen), `pnpm fixtures:check`, `pnpm scripts:test` |
 | Alles prüfen | `pnpm check` (+ `pnpm e2e`) |
 | Debug-App ohne Bundle | `pnpm tauri build --debug --no-bundle` → `src-tauri/target/debug/app-iconic` |
 | Icons neu erzeugen | `pnpm tauri icon src-tauri/icons/source/app-icon.svg -o src-tauri/icons` (danach `android/`, `ios/` löschen; `public/icon.svg` = Quelle, `public/favicon.png` = `32x32.png`) |
@@ -43,23 +44,29 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/backend/call.ts    einzige Stelle mit invoke() (+ isTauri-Prüfung, Fehler → FsError)
   app/core/errors/            FsError, toFsError, describeFsError (Codes = Rust ai-core error.rs)
   app/core/about/             AppInfo, AboutApi
+  app/core/icon-file/         IconFileApi (open/save/new/close .icon, read SVG, Dialoge), DTOs, findAsset (002)
   app/features/shell/         SidePanel, Texte der Fensterhülle
   app/features/canvas/        CanvasView (Platzhalter: Zeichenfläche 1024 × 1024 mit Icon-Guides)
   app/features/about/         About-Dialog
   app/shared/geometry/        reine Geometrie (icon-guides; später Matrizen, Snapping, Bounds)
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)
-  testing/                    Fakes – nie im Produktivcode importieren
+  testing/                    Fakes – nie im Produktivcode importieren (FakeIconFileApi mit camscanner.icon)
+  testing/fixtures/           generiert aus testdata/fixtures (`pnpm fixtures`, geprüft von `pnpm fixtures:check`)
 e2e/                          Playwright-Tests gegen den Dev-Server
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
   src/commands.rs             dünne Command-Schicht, Test command_rules
+  src/sessions.rs             IconSessions: zuletzt geöffnete/gespeicherte .icon je Pfad (002 E5)
   src/about.rs, model.rs      AppInfo, DTOs (serde camelCase)
   core/                       Crate `ai-core` (Workspace-Mitglied): Engine ohne Tauri
     src/error.rs              FsError { code, message, path }
     src/fs_atomic.rs, config_file.rs  atomar schreiben / Konfig laden (aus files-and-folders)
+    src/icon/                 .icon: model (Sicht), json_format, names, bundle, zip_io, save, svg_file (002)
   icons/source/app-icon.svg   Quelle des App-Icons
 testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverändert)
+testdata/unique-names.json    Tabelle der eindeutigen Asset-/Layer-Namen (Rust-Test, später TS)
+scripts/                      fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test
 docs/                         architecture.md (Entscheidungen, Commands, Abhängigkeiten), legacy-analysis.md, legacy/,
                               FEATURES.md (Checkliste)
 prompts/                      Feature-Prompts (Index README.md), done/

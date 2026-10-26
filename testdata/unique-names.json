@@ -1,0 +1,29 @@
+{
+  "_comment": "Unique asset and layer names (design 002 E12, legacy §3). Shared by the Rust tests and a later TypeScript twin. existing = names already in the document.",
+  "asset": [
+    { "base": "logo.svg", "existing": [], "expected": "logo.svg" },
+    { "base": "logo.svg", "existing": ["logo.svg"], "expected": "logo 2.svg" },
+    { "base": "logo.svg", "existing": ["logo.svg", "logo 2.svg"], "expected": "logo 3.svg" },
+    { "base": "logo.svg", "existing": ["LOGO.SVG"], "expected": "logo 2.svg" },
+    { "base": "logo", "existing": [], "expected": "logo" },
+    { "base": "logo", "existing": ["logo"], "expected": "logo 2.svg" },
+    { "base": "logo.png", "existing": ["logo.png"], "expected": "logo 2.png" },
+    { "base": "logo-scanner 3.svg", "existing": ["logo-scanner 3.svg"], "expected": "logo-scanner 3 2.svg" },
+    { "base": "", "existing": [], "expected": "layer.svg" },
+    { "base": "   ", "existing": ["layer.svg"], "expected": "layer 2.svg" },
+    { "base": "a/b:c.svg", "existing": [], "expected": "a-b-c.svg" },
+    { "base": "Größe.svg", "existing": ["Größe.svg"], "expected": "Größe 2.svg" },
+    { "base": "Ä 😀.svg", "existing": ["ä 😀.svg"], "expected": "Ä 😀 2.svg" },
+    { "base": ".svg", "existing": [], "expected": "svg" },
+    { "base": "..", "existing": [], "expected": "layer.svg" }
+  ],
+  "layer": [
+    { "base": "logo", "existing": [], "expected": "logo" },
+    { "base": "logo", "existing": ["logo"], "expected": "logo 2" },
+    { "base": "logo", "existing": ["logo", "Logo 2"], "expected": "logo 3" },
+    { "base": "  logo  ", "existing": [], "expected": "logo" },
+    { "base": "", "existing": [], "expected": "layer" },
+    { "base": " \n ", "existing": ["layer"], "expected": "layer 2" },
+    { "base": "Über", "existing": ["Über"], "expected": "Über 2" }
+  ]
+}

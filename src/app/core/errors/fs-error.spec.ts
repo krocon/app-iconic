@@ -11,6 +11,21 @@ describe('fs-error', () => {
     expect(toFsError('plain').message).toBe('plain');
   });
 
+  it('knows the .icon codes of prompt 002', () => {
+    for (const code of [
+      'invalid_icon',
+      'unsupported_icon',
+      'too_large',
+      'missing_asset',
+      'invalid_svg',
+    ] as const) {
+      const e = toFsError({ code, message: 'rust text' });
+      expect(e.code).toBe(code);
+      expect(describeFsError(e)).not.toContain('rust text');
+      expect(describeFsError(e)).not.toBe(describeFsError({ code: 'unknown', message: '' }));
+    }
+  });
+
   it('describes every code without Rust messages', () => {
     const text = describeFsError({ code: 'io', message: 'os error 5' });
     expect(text).not.toContain('os error');

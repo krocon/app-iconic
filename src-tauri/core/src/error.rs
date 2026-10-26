@@ -17,6 +17,16 @@ pub enum FsErrorCode {
     InvalidPath,
     /// Any other I/O error (message carries the details).
     Io,
+    /// No or broken `icon.json`, unsafe entry names (prompt 002).
+    InvalidIcon,
+    /// A valid file we cannot read, e.g. an encrypted ZIP or unknown compression (prompt 002).
+    UnsupportedIcon,
+    /// Over the limits for files, entries or the whole archive (prompt 002 E7).
+    TooLarge,
+    /// An asset that should be taken over unchanged is not known (prompt 002 E5).
+    MissingAsset,
+    /// An SVG file that is not UTF-8 text (prompt 002 E15).
+    InvalidSvg,
 }
 
 /// The one error type every command returns.
@@ -80,5 +90,18 @@ mod tests {
         assert_eq!(FsError::from_io(&pd, p).code, FsErrorCode::PermissionDenied);
         let other = io::Error::other("boom");
         assert_eq!(FsError::from_io(&other, p).code, FsErrorCode::Io);
+    }
+
+    #[test]
+    fn icon_codes_serialise_as_snake_case() {
+        for (code, text) in [
+            (FsErrorCode::InvalidIcon, "invalid_icon"),
+            (FsErrorCode::UnsupportedIcon, "unsupported_icon"),
+            (FsErrorCode::TooLarge, "too_large"),
+            (FsErrorCode::MissingAsset, "missing_asset"),
+            (FsErrorCode::InvalidSvg, "invalid_svg"),
+        ] {
+            assert_eq!(serde_json::to_value(code).unwrap(), text);
+        }
     }
 }

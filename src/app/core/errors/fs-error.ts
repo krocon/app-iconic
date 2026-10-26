@@ -9,6 +9,16 @@ export type FsErrorCode =
   | 'is_a_directory'
   | 'invalid_path'
   | 'io'
+  /** No or broken `icon.json`, unsafe entry names (prompt 002). */
+  | 'invalid_icon'
+  /** E.g. an encrypted ZIP or unknown compression (prompt 002). */
+  | 'unsupported_icon'
+  /** Over the limits for files, entries or the whole archive (prompt 002). */
+  | 'too_large'
+  /** Saving: an asset marked unchanged is not known to the backend (prompt 002). */
+  | 'missing_asset'
+  /** An SVG file that is not UTF-8 text (prompt 002). */
+  | 'invalid_svg'
   /** Frontend only: no Tauri backend (e.g. `pnpm start` in a browser). */
   | 'backend_unavailable'
   /** Frontend only: something that is no `FsError` was thrown. */
@@ -27,6 +37,11 @@ const KNOWN: readonly FsErrorCode[] = [
   'is_a_directory',
   'invalid_path',
   'io',
+  'invalid_icon',
+  'unsupported_icon',
+  'too_large',
+  'missing_asset',
+  'invalid_svg',
   'backend_unavailable',
   'unknown',
 ];
@@ -61,6 +76,16 @@ export function describeFsError(error: FsError): string {
       return 'The path is not valid.';
     case 'io':
       return 'The file could not be read or written.';
+    case 'invalid_icon':
+      return 'This is not a valid .icon file.';
+    case 'unsupported_icon':
+      return 'This .icon file uses a format that is not supported (e.g. an encrypted ZIP).';
+    case 'too_large':
+      return 'The file is too large.';
+    case 'missing_asset':
+      return 'An image of the document is missing.';
+    case 'invalid_svg':
+      return 'The SVG file could not be read as text.';
     case 'backend_unavailable':
       return 'The desktop backend is not available (running in a browser?).';
     case 'unknown':

@@ -9,8 +9,8 @@
 - [ ] Open Recent mit Validierung und „Clear Menu“ (003)
 - [ ] Import SVG… ⇧⌘I als neue Gruppe/Layer/Asset (003)
 - [ ] Save ⌘S (nur wenn dirty), Save As… ⇧⌘S, Close ⌘W mit Dirty-Abfrage (003)
-- [ ] Speichern im gelesenen Format (Bundle bleibt Bundle, ZIP bleibt ZIP), atomar *(neu)* (002)
-- [ ] Verlustfreier Roundtrip von `icon.json` inkl. unbekannter Felder und Layer-`opacity` *(neu)* (002)
+- [x] Speichern im gelesenen Format (Bundle bleibt Bundle, ZIP bleibt ZIP), atomar *(neu)* (002 – Backend + Fassade; Menü/Dialoge 003)
+- [x] Verlustfreier Roundtrip von `icon.json` inkl. unbekannter Felder und Layer-`opacity` *(neu)* (002 – Backend + Fassade; Dokumentmodell 003)
 - [ ] Dirty-Tracking, Fenstertitel = Dateiname + Marker (003)
 - [ ] Mehrere Fenster/Dokumente (003)
 - [ ] `.icon` als Dateizuordnung / Öffnen per Doppelklick *(neu)* (016)
@@ -88,7 +88,7 @@
 ## 10. SVG-Unterstützung
 - [ ] Elemente aus legacy §10 + `use`, `defs`, Verläufe rendern und bearbeiten (004, 009)
 - [ ] Inline-`<style>`/Klassen beim Import in Attribute auflösen, Einheiten (003)
-- [ ] Unbekannte Attribute/Elemente bleiben erhalten (002, 003)
+- [ ] Unbekannte Attribute/Elemente bleiben erhalten (002 ✓ unveränderte Assets byte-genau; bearbeitete SVGs 003)
 - [ ] Fremdes SVG wird bereinigt (Skripte, Event-Handler, externe Referenzen) *(neu)* (003)
 
 ## 11. Export

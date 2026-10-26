@@ -9,7 +9,14 @@ rust-version = "1.93"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+# 002 E4: keep the key order of icon.json (lossless round trip)
+serde_json = { version = "1.0", features = ["preserve_order"] }
+# 002 E17: read/write zipped .icon files; only Deflate (no AES/bzip2/lzma/zstd → unsupported_icon)
+zip = { version = "8.6.0", default-features = false, features = ["deflate-flate2-zlib-rs"] }
+# 002 E11/E12: NFC comparison of asset names (HFS+ stores NFD)
+unicode-normalization = "0.1.25"
+# 002 E9: PNG assets as data URLs
+base64 = "0.23"
 
 [dev-dependencies]
 tempfile = "3"

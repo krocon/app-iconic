@@ -1,10 +1,15 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { AboutApi, TauriAboutApi } from './core/about/about-api';
+import { IconFileApi, TauriIconFileApi } from './core/icon-file/icon-file-api';
 
 /**
  * Zoneless (Angular 22 default, no zone.js). Every backend facade is bound here; tests
  * replace them with the fakes from `src/testing/`.
  */
 export const appConfig: ApplicationConfig = {
-  providers: [provideBrowserGlobalErrorListeners(), { provide: AboutApi, useClass: TauriAboutApi }],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    { provide: AboutApi, useClass: TauriAboutApi },
+    { provide: IconFileApi, useClass: TauriIconFileApi },
+  ],
 };
