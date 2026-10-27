@@ -170,6 +170,11 @@ export class LayerStack {
     const el = d.createElement('div');
     el.className = 'group';
     el.dataset['group'] = String(g.group);
+    // Sized here, not in canvas-view.css: its emulated encapsulation does not reach elements built
+    // at run time. A static group is 0 px high, and WebKit (WKWebView, WebKitGTK) then masks the
+    // whole group away under the translucency mask (bug from 010; Chromium painted it anyway).
+    el.style.position = 'absolute';
+    el.style.inset = '0';
     if (g.opacity !== null) el.style.opacity = String(g.opacity);
     if (g.blend) el.style.mixBlendMode = g.blend;
     if (g.layers.some((l) => l.blend)) el.style.isolation = 'isolate';

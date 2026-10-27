@@ -79,12 +79,6 @@
 .layers {
   position: absolute;
   inset: 0;
-
-  & .group,
-  & .layer {
-    position: absolute;
-    inset: 0;
-  }
 }
 
 .host {

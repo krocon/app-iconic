@@ -129,6 +129,16 @@ describe('LayerStack', () => {
     expect(copy.querySelector('rect')!.getAttribute('width')).toBe('77');
   });
 
+  it('sizes group containers itself (translucency mask needs a box; WebKit fix)', () => {
+    // the canvas CSS cannot reach these dynamically built elements (emulated encapsulation):
+    // a static, 0 px high group made WebKit mask the whole group away (bug from 010)
+    new LayerStack(box).update(camscannerDocument(), 'light');
+    for (const g of box.querySelectorAll<HTMLElement>('.group')) {
+      expect(g.style.position).toBe('absolute');
+      expect(g.style.inset).toBe('0px');
+    }
+  });
+
   it('shows PNG assets as <image>', () => {
     const d = doc([{ layers: [L('p.png')] }]);
     new LayerStack(box).update(d, 'light');

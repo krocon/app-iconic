@@ -176,6 +176,29 @@ test('first group on top, and equal ids in two assets resolve per layer', async 
   expect([r2 < 60, g2 < 60, b2 > 200]).toEqual([true, true, true]);
 });
 
+test('group containers fill the canvas – the translucency mask has a box (WebKit fix)', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await waitForCanvas(page);
+  await page.evaluate(() => window.__appIconic!.run('add.circle'));
+  const boxes = await page.evaluate(() => {
+    const layers = document.querySelector('app-canvas-view .layers')!.getBoundingClientRect();
+    const group = document.querySelector<HTMLElement>('app-canvas-view .group')!;
+    const g = group.getBoundingClientRect();
+    return {
+      lw: layers.width,
+      lh: layers.height,
+      gw: g.width,
+      gh: g.height,
+      t: group.dataset['translucency'],
+    };
+  });
+  expect(boxes.t).toBe('0.5');
+  expect(boxes.gh).toBeCloseTo(boxes.lh, 0);
+  expect(boxes.gw).toBeCloseTo(boxes.lw, 0);
+});
+
 test('platform mask cuts the corners; background and appearance switch', async ({ page }) => {
   await openIcon(page);
   await page.evaluate(() => {

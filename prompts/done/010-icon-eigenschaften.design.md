@@ -15,15 +15,15 @@ Apple dokumentiert `icon.json` nicht. Belegt wird mit echten Icon-Composer-Datei
 
 Auswertung aller Dateien (Skript im Bericht, nicht im Repo):
 
-| Ebene | Feld | Werte (belegt) |
-|---|---|---|
-| Root | `fill` | `"automatic"`, `"system-light"`, `"system-dark"`, `"none"` (= automatic, `New.icon`), `{ "solid": C }`, `{ "automatic-gradient": C }`, `{ "linear-gradient": [C, C], "orientation"?: { start: {x,y}, stop: {x,y} } }` (erste Farbe = `start`, Icon-Composer-Standard `start (0.5, 0)`, `stop (0.5, 0.7)`) |
-| Root | `fill-specializations` | `[{ appearance?, idiom?, value }]` |
-| Root | `supported-platforms` | `squares`: `"shared"` (belegt) oder Liste aus `iOS`/`macOS`/`shared` (nur Schema); `circles`: `["watchOS"]` |
-| Root | `color-space-for-untagged-svg-colors` | `display-p3`, `srgb`, `extended-gray` |
-| Gruppe | `name`, `hidden`, `opacity` (0…1), `blend-mode`, `lighting` (`combined`/`individual`), `specular` (bool), `blur-material` (`null` = aus, 0…1), `shadow { kind: neutral/layer-color/none, opacity }`, `translucency { enabled, value }`, `position { scale, translation-in-points: [x, y] }`, `layers` | |
-| Layer | `name`, `image-name`, `hidden`, `opacity`, `blend-mode`, `glass` (bool), `fill` (wie Root; färbt das Asset), `position` | |
-| beide | `<feld>-specializations` für jedes Feld außer `name`/`layers` (Layer zusätzlich `image-name-specializations`) | `appearance`: `dark`, `tinted` (einmal auch `light`); `idiom`: `square`, `watchOS` |
+| Ebene  | Feld                                                                                                                                                                                                                                                                                                  | Werte (belegt)                                                                                                                                                                                                                                                                                            |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Root   | `fill`                                                                                                                                                                                                                                                                                                | `"automatic"`, `"system-light"`, `"system-dark"`, `"none"` (= automatic, `New.icon`), `{ "solid": C }`, `{ "automatic-gradient": C }`, `{ "linear-gradient": [C, C], "orientation"?: { start: {x,y}, stop: {x,y} } }` (erste Farbe = `start`, Icon-Composer-Standard `start (0.5, 0)`, `stop (0.5, 0.7)`) |
+| Root   | `fill-specializations`                                                                                                                                                                                                                                                                                | `[{ appearance?, idiom?, value }]`                                                                                                                                                                                                                                                                        |
+| Root   | `supported-platforms`                                                                                                                                                                                                                                                                                 | `squares`: `"shared"` (belegt) oder Liste aus `iOS`/`macOS`/`shared` (nur Schema); `circles`: `["watchOS"]`                                                                                                                                                                                               |
+| Root   | `color-space-for-untagged-svg-colors`                                                                                                                                                                                                                                                                 | `display-p3`, `srgb`, `extended-gray`                                                                                                                                                                                                                                                                     |
+| Gruppe | `name`, `hidden`, `opacity` (0…1), `blend-mode`, `lighting` (`combined`/`individual`), `specular` (bool), `blur-material` (`null` = aus, 0…1), `shadow { kind: neutral/layer-color/none, opacity }`, `translucency { enabled, value }`, `position { scale, translation-in-points: [x, y] }`, `layers` |                                                                                                                                                                                                                                                                                                           |
+| Layer  | `name`, `image-name`, `hidden`, `opacity`, `blend-mode`, `glass` (bool), `fill` (wie Root; färbt das Asset), `position`                                                                                                                                                                               |                                                                                                                                                                                                                                                                                                           |
+| beide  | `<feld>-specializations` für jedes Feld außer `name`/`layers` (Layer zusätzlich `image-name-specializations`)                                                                                                                                                                                         | `appearance`: `dark`, `tinted` (einmal auch `light`); `idiom`: `square`, `watchOS`                                                                                                                                                                                                                        |
 
 Blend-Modes: `normal, multiply, screen, overlay, darken, lighten, color-dodge, color-burn, soft-light, hard-light,
 difference, exclusion, plus-darker, plus-lighter`. Farben: `display-p3:r,g,b,a` (häufigst), `extended-gray:w,a`,
@@ -103,7 +103,7 @@ Beobachtete Regeln (in **allen** Dateien):
   unbekannter Wert wird gezeigt und bleibt, bis man ihn ändert.
 - **E11 Rust:** (a) `SaveAssetDto.source?` (E9) → `AssetInput.source`; (b) leere Listen wie Icon Composer
   `[\n\n<indent>]` (Regel 3; leere Objekte bleiben `{}` – nicht belegt); (c) Fixture `testdata/fixtures/
-  all-fields.icon` mit allen belegten Feldern auf jeder Ebene, Specializations mit `idiom`, `appearance: light` und
+all-fields.icon` mit allen belegten Feldern auf jeder Ebene, Specializations mit `idiom`, `appearance: light` und
   Zusatzfeldern (`x-future`); Test: lesen → ein Feld ändern → speichern → alles andere gleich, Format wie Icon
   Composer, und unverändert = bytegleich.
 - **E12 icon.json Preview** (`inspector/json-preview.ts`): der ganze `icon.json`-Text im Icon-Composer-Format
@@ -226,3 +226,19 @@ Rust: `SaveAssetDto { name, text?, unchanged, source? }`, `AssetInput { …, sou
 - Die Farbraum-Angabe neben dem Hex-Feld ist kurz (P3, sRGB, Gray; `+` = extended), der volle Name im Tooltip.
 - Bestehende E2E-Pixeltests mit Farbvergleich laufen mit `effects` aus (`canvas.spec` „first group on top“),
   weil die Transluzenz-Annäherung die Farben aufhellt.
+
+## Nachtrag 27.10.2026: Bugfix WebKit (vor Prompt 012)
+
+- **Symptom:** In der echten App (WebKitGTK; WKWebView auf macOS ebenso WebKit) blieben bei eingeschalteter
+  Ansichtsoption „Effects Preview“ die Layer-Inhalte unsichtbar (z. B. ein neu eingefügter Kreis); Chromium zeigte
+  alles.
+- **Ursache:** Die Regel `.layers .group { position: absolute; inset: 0 }` in `canvas-view.css` griff nie – Angulars
+  emulierte Kapselung erreicht die zur Laufzeit gebauten Elemente des `LayerStack` nicht. Der Gruppen-Container war
+  statisch und **0 px hoch**; die Transluzenz-Maske (`mask-image` auf der Gruppe, E13) hatte damit keine Fläche, und
+  WebKit maskierte die ganze Gruppe weg (Chromium malte den Überlauf trotzdem). Filter (Schatten) und Blend-Modi
+  waren unschuldig.
+- **Fix:** `LayerStack` setzt `position: absolute; inset: 0` inline auf jede Gruppe; die tote CSS-Regel ist entfernt.
+- **Tests:** Vitest (`layer-stack.spec.ts`: Gruppen sind inline positioniert) und Playwright (`canvas.spec.ts`:
+  Gruppen-Box = Layer-Box bei aktiver Transluzenz) – beide vorher rot. Playwright-WebKit ist im Container nicht
+  installiert (`/opt/pw-browsers` enthält nur Chromium); nachgewiesen per WebKitGTK-Screenshot des Dev-Servers
+  (Kreis vorher unsichtbar, danach mit Schatten und Transluzenz sichtbar).
