@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { SVG_FIXTURES } from '../../../../testing/fixtures/svg-fixtures';
-import { formatElement, formatPathData, formatSvg, roundNumbers } from './svg-format';
+import {
+  formatElement,
+  formatFragment,
+  formatPathData,
+  formatSvg,
+  roundNumbers,
+} from './svg-format';
 
 const NS = 'xmlns="http://www.w3.org/2000/svg"';
 
@@ -114,5 +120,14 @@ describe('formatElement', () => {
     );
     const g = doc.querySelector('g')!;
     expect(formatElement(g)).toBe(`<g ${NS}>\n  <circle cx="1" r="5.556"/>\n</g>\n`);
+  });
+});
+
+describe('formatFragment', () => {
+  it('formats a node with xlink but without declarations', () => {
+    expect(formatFragment('<g><use xlink:href="#a" x="1.23456"/></g>', { precision: 2 })).toBe(
+      '<g>\n  <use x="1.23" xlink:href="#a"/>\n</g>',
+    );
+    expect(formatFragment('<g>')).toBeNull();
   });
 });

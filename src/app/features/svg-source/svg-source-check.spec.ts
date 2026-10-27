@@ -7,7 +7,7 @@ describe('parseErrorPosition', () => {
   it('reads the messages of Chromium / WebKit, Firefox and jsdom', () => {
     expect(
       parseErrorPosition(
-        'This page contains the following errors:error on line 3 at column 7: Opening and ending tag mismatch: g line 2 and svg\nBelow is a rendering',
+        'This page contains the following errors:error on line 3 at column 7: Opening and ending tag mismatch: g line 2 and svg Below is a rendering of the page up to the first error.',
       ),
     ).toEqual({ line: 3, column: 7, detail: 'Opening and ending tag mismatch: g line 2 and svg' });
     expect(

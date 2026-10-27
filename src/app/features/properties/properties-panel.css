@@ -125,3 +125,12 @@ svg {
     color: var(--color-text);
   }
 }
+
+/* "Edit SVG…" / "Optimize Path…" (design 011 E13) */
+.source-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}

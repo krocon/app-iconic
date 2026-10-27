@@ -145,11 +145,13 @@ describe('HierarchyTree', () => {
       'Bring to Front',
       'Send to Back',
       'Edit SVG…',
+      'Optimize Path…',
       'Copy XML',
       'Delete…',
     ]);
+    // registered by the window (svg-source-actions, 011) – not in this test
     expect(items[4].getAttribute('aria-disabled')).toBe('true');
-    items[6].click();
+    items[7].click();
     await fixture.whenStable();
     const ask = TestBed.inject(AskService);
     await new Promise((r) => setTimeout(r));

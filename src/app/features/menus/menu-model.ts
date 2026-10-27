@@ -67,6 +67,7 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     sep,
     a('edit.toggleVisibility'),
     a('edit.editSvg'),
+    a('path.optimize'),
     sep,
     a('edit.selectAll'),
     a('edit.deselect'),

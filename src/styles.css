@@ -42,6 +42,13 @@
   --ai-marquee-fill: rgb(10 132 255 / 12%);
   --ai-snap-magic: #ff375f;
   --ai-snap-grid: #64d2ff;
+  /* SVG source editor (prompt 011): syntax colours, contrast ≥ 4.5:1 on --color-surface */
+  --code-tag: #1d5fbf;
+  --code-attr: #8a4b00;
+  --code-string: #1b7a3a;
+  --code-comment: #6b6f78;
+  --code-punct: #5b5f68;
+  --code-active-line: rgb(47 111 223 / 6%);
 
   --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, Ubuntu, sans-serif;
   --font-size: 14px;
@@ -98,6 +105,12 @@
     --ai-marquee-fill: rgb(10 132 255 / 12%);
     --ai-snap-magic: #ff375f;
     --ai-snap-grid: #64d2ff;
+    --code-tag: #7cb4ff;
+    --code-attr: #f0b46a;
+    --code-string: #8fd99c;
+    --code-comment: #969ba5;
+    --code-punct: #aeb3bc;
+    --code-active-line: rgb(106 168 255 / 8%);
   }
 }
 
@@ -138,6 +151,12 @@
   --ai-marquee-fill: rgb(10 132 255 / 12%);
   --ai-snap-magic: #ff375f;
   --ai-snap-grid: #64d2ff;
+  --code-tag: #7cb4ff;
+  --code-attr: #f0b46a;
+  --code-string: #8fd99c;
+  --code-comment: #969ba5;
+  --code-punct: #aeb3bc;
+  --code-active-line: rgb(106 168 255 / 8%);
 }
 
 *,

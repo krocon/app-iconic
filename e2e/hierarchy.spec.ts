@@ -212,7 +212,8 @@ test('keyboard: arrows, expand/collapse, range, context menu and Delete… with 
   await page.keyboard.press('Shift+F10');
   const cm = page.getByRole('menu', { name: 'Node actions' });
   await expect(cm.getByRole('menuitem').first()).toBeFocused();
-  await expect(cm.getByRole('menuitem', { name: 'Edit SVG…' })).toHaveAttribute(
+  // one node: "Edit SVG…" is there since prompt 011
+  await expect(cm.getByRole('menuitem', { name: 'Edit SVG…' })).not.toHaveAttribute(
     'aria-disabled',
     'true',
   );

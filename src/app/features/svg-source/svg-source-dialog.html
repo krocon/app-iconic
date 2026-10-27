@@ -1,0 +1,96 @@
+<app-modal
+  [heading]="t.editTitle"
+  width="min(64rem, 94vw)"
+  height="min(48rem, 86vh)"
+  (closed)="requestClose()"
+>
+  <p class="subtitle" data-testid="svg-source-subtitle">{{ subtitle }}</p>
+  <div class="editor" #editorHost [class.hidden]="state() === 'fallback'">
+    @if (state() === 'loading') {
+      <p class="loading">{{ t.loading }}</p>
+    }
+  </div>
+  @if (state() === 'fallback') {
+    <p class="note">{{ t.editorFailed }}</p>
+    <textarea
+      class="input fallback"
+      spellcheck="false"
+      data-autofocus
+      data-testid="svg-source-fallback"
+      [attr.aria-label]="t.editorLabel"
+      [attr.aria-invalid]="!!problem()"
+      aria-describedby="svg-source-status"
+      [value]="text()"
+      (input)="onFallbackInput($event)"
+    ></textarea>
+  }
+  <p
+    id="svg-source-status"
+    class="status"
+    data-testid="svg-source-status"
+    [class.error]="!!problem() || failed()"
+    [attr.role]="problem() || failed() ? 'alert' : 'status'"
+  >
+    {{ message() }}
+  </p>
+  @if (confirming()) {
+    <div
+      class="confirm"
+      role="group"
+      aria-labelledby="svg-source-discard"
+      data-testid="svg-source-confirm"
+    >
+      <p id="svg-source-discard" class="question">{{ t.discardQuestion }}</p>
+      <button type="button" class="btn" #keepButton (click)="keepEditing()">
+        {{ t.keepEditing }}
+      </button>
+      <button
+        type="button"
+        class="btn primary"
+        data-testid="svg-source-discard"
+        (click)="discard()"
+      >
+        {{ t.discard }}
+      </button>
+    </div>
+  }
+  <div class="actions">
+    <label class="precision" [title]="t.formatHint">
+      <span>{{ t.precision }}</span>
+      <input
+        class="input"
+        type="number"
+        min="0"
+        max="6"
+        step="1"
+        data-testid="svg-source-precision"
+        [value]="precision()"
+        (change)="onPrecision($event)"
+      />
+    </label>
+    <button
+      type="button"
+      class="btn"
+      data-testid="svg-source-format"
+      [title]="t.formatHint"
+      [disabled]="state() === 'loading' || !!problem()"
+      (click)="format()"
+    >
+      {{ t.format }}
+    </button>
+    <span class="spacer"></span>
+    <button type="button" class="btn" data-testid="svg-source-cancel" (click)="requestClose()">
+      {{ t.cancel }}
+    </button>
+    <button
+      type="button"
+      class="btn primary"
+      data-testid="svg-source-apply"
+      [title]="applyTitle"
+      [disabled]="!canApply()"
+      (click)="apply()"
+    >
+      {{ t.apply }}
+    </button>
+  </div>
+</app-modal>

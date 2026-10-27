@@ -71,6 +71,8 @@ export class Modal {
   }
 
   protected onKeydown(evt: KeyboardEvent): void {
+    // a key the content already used (CodeMirror closing its search panel, design 011 E7)
+    if (evt.defaultPrevented) return;
     if (evt.key === 'Escape') {
       evt.preventDefault();
       evt.stopPropagation();

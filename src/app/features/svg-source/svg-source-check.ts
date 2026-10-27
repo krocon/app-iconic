@@ -36,7 +36,9 @@ export function parseErrorPosition(message: string): {
   for (const re of PATTERNS) {
     const m = re.exec(message);
     if (m) {
-      const detail = (m[3] ?? /XML Parsing Error:\s*([^\n]*)/i.exec(message)?.[1] ?? '').trim();
+      const raw = m[3] ?? /XML Parsing Error:\s*([^\n]*)/i.exec(message)?.[1] ?? '';
+      // Chromium's `textContent` runs on into its next heading
+      const detail = raw.replace(/Below is a rendering of the page.*$/i, '').trim();
       return { line: Number(m[1]), column: Math.max(1, Number(m[2])), detail };
     }
   }

@@ -10,6 +10,7 @@ import { groups, layers } from '../document/model/icon-json';
 import { isDefinitionTag } from '../document/model/reorder-rules';
 import { DropPosition, IconItem, TreeTarget } from '../document/model/selection';
 import { serializeAsset, serializeElement, SvgText } from '../document/svg/node-ids';
+import { formatElement, formatSvg } from '../document/svg/svg-format';
 import { brokenReferences } from '../document/svg/svg-references';
 import { FilesService } from '../files/files.service';
 import { alignCommand, measurable } from './align';
@@ -145,17 +146,29 @@ export class EditService {
     return this.copySource() !== null;
   }
 
-  /** The selection as SVG markup (design 006 E12), `null` if there is nothing to copy. */
-  copyText(): string | null {
+  /**
+   * The selection as SVG markup (design 006 E12), `null` if there is nothing to copy.
+   * `formatted`: through the formatter ("Copy XML", design 011 E9); else the text as it is.
+   */
+  copyText(formatted = false): string | null {
     const src = this.copySource();
     if (!src) return null;
-    return 'els' in src
-      ? src.els.map((e) => serializeElement(e)).join('\n')
-      : serializeAsset(src.svg);
+    if ('els' in src) {
+      return formatted
+        ? src.els.map((e) => formatElement(e)).join('')
+        : src.els.map((e) => serializeElement(e)).join('\n');
+    }
+    const text = serializeAsset(src.svg);
+    return formatted ? (formatSvg(text) ?? text) : text;
   }
 
-  async copy(): Promise<boolean> {
-    const text = this.copyText();
+  /** "Copy XML": the formatted markup (design 011 E9). */
+  copyXml(): Promise<boolean> {
+    return this.copy(true);
+  }
+
+  async copy(formatted = false): Promise<boolean> {
+    const text = this.copyText(formatted);
     if (text === null) return false;
     try {
       await this.clipboard.writeText(text);

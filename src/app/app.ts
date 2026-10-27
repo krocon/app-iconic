@@ -30,6 +30,10 @@ import { SHELL_TEXTS } from './features/shell/shell-texts';
 import { SidePanel } from './features/shell/side-panel';
 import { AskDialog } from './shared/ask/ask-dialog';
 import { DialogService } from './shared/dialog/dialog.service';
+import { OptimizePathDialog } from './features/svg-source/optimize-path-dialog';
+import { registerSvgSourceActions } from './features/svg-source/svg-source-actions';
+import { SvgSourceDialog } from './features/svg-source/svg-source-dialog';
+import { SvgSourceService } from './features/svg-source/svg-source.service';
 
 /**
  * Root (design 005 E11): one header row – the HTML menu bar (Windows/Linux; macOS has the native
@@ -47,10 +51,12 @@ import { DialogService } from './shared/dialog/dialog.service';
     CommandSidebar,
     HierarchyTree,
     MenuBar,
+    OptimizePathDialog,
     PropertiesPanel,
     ShortcutsDialog,
     SidePanel,
     SvgSnippetDialog,
+    SvgSourceDialog,
   ],
   template: `
     <header class="toolbar">
@@ -137,6 +143,12 @@ import { DialogService } from './shared/dialog/dialog.service';
       @case ('svgSnippet') {
         <app-svg-snippet-dialog />
       }
+      @case ('svgSource') {
+        <app-svg-source-dialog />
+      }
+      @case ('optimizePath') {
+        <app-optimize-path-dialog />
+      }
     }
   `,
   styleUrl: './app.css',
@@ -170,6 +182,7 @@ export class App implements OnInit {
     registerAddActions(this.actions, inject(AddService), this.destroyRef);
     registerPropertiesActions(this.actions, inject(PropertiesService), this.destroyRef);
     registerIconActions(this.actions, inject(IconInspectorService), this.destroyRef);
+    registerSvgSourceActions(this.actions, inject(SvgSourceService), this.destroyRef);
     // where the keyboard is (design 005 E4): a dialog owns it; else hierarchy or canvas first
     this.dispatcher.setContextProvider((target) => {
       if (this.dialogs.open() !== null) return ['dialog'];

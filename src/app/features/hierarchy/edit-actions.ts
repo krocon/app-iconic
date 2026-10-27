@@ -12,7 +12,7 @@ import { Selection } from './follow-up';
  * The edit and arrange actions of the selection (design 006 E15, E16): Cut / Copy / Paste / Copy
  * XML / Duplicate / Delete / Show-Hide / Select All / Deselect / Select, Bring to Front / Send to
  * Back / Move Up / Down / Into / Out / Group / Ungroup / Align. Registered by the window (they work
- * with the hierarchy panel hidden, too). `edit.editSvg` stays without handler until prompt 011.
+ * with the hierarchy panel hidden, too). `edit.editSvg` and `path.optimize`: `svg-source-actions.ts` (011).
  */
 
 const MAX_SELECT = 10_000;
@@ -69,7 +69,7 @@ export function registerEditActions(
   actions.registerAll(
     {
       'edit.copy': { run: () => void edit.copy(), enabled: () => edit.canCopy() },
-      'edit.copyXml': { run: () => void edit.copy(), enabled: () => edit.canCopy() },
+      'edit.copyXml': { run: () => void edit.copyXml(), enabled: () => edit.canCopy() },
       'edit.cut': { run: () => void edit.cut(), enabled: () => edit.canDelete() },
       'edit.paste': {
         run: (a) => void edit.paste((a as { text?: string } | undefined)?.text),

@@ -127,7 +127,20 @@ export const ACTIONS: readonly ActionDef[] = [
     // `confirm`: ask first ("Delete…" of the context menu, design 006 E8)
     args: { type: 'object', properties: { confirm: { type: 'boolean' } } },
   }),
-  EDIT('edit.editSvg', 'Edit SVG…'),
+  // without `markup` the dialog opens; with it the target is replaced directly (AI, design 011 E13)
+  EDIT('edit.editSvg', 'Edit SVG…', {
+    args: { type: 'object', properties: { markup: { type: 'string', maxLength: 32 << 20 } } },
+  }),
+  // without arguments the preview dialog opens (design 011 E12)
+  EDIT('path.optimize', 'Optimize Path…', {
+    args: {
+      type: 'object',
+      properties: {
+        epsilon: { type: 'number', minimum: 0, maximum: 100 },
+        precision: { type: 'integer', minimum: 0, maximum: 6 },
+      },
+    },
+  }),
   EDIT('edit.toggleVisibility', 'Show/Hide', {
     args: { type: 'object', properties: { recursive: { type: 'boolean' } } },
   }),

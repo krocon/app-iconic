@@ -1,6 +1,6 @@
 import { parsePath } from '../../../shared/geometry/path-data';
 import { formatNumber, writeKeepingForm } from '../../../shared/geometry/path-write';
-import { serializeElement } from './node-ids';
+import { serializeElement, SVG_NS } from './node-ids';
 
 /**
  * The SVG formatter (design 011 E8): XML in, readable text out – indent 2, one element per line,
@@ -211,4 +211,22 @@ export function formatSvg(markup: string, opts: FormatOptions = {}): string | nu
 export function formatElement(el: Element, opts: FormatOptions = {}): string {
   const markup = serializeElement(el);
   return formatSvg(markup, opts) ?? markup;
+}
+
+/**
+ * Formats a fragment (the text of one node in "Edit SVG…"): parsed inside an `<svg>` that declares
+ * the SVG and xlink namespaces, like `parseFragment`; `null` if it is not well-formed.
+ */
+export function formatFragment(markup: string, opts: FormatOptions = {}): string | null {
+  const unit = ' '.repeat(opts.indent ?? 2);
+  const wrapped = `<svg xmlns="${SVG_NS}" xmlns:xlink="http://www.w3.org/1999/xlink">${markup}</svg>`;
+  const out = formatSvg(wrapped, opts);
+  if (out === null) return null;
+  const lines = out.replace(/\n$/, '').split('\n');
+  // `<svg …/>` alone: an empty fragment
+  if (lines.length < 3) return '';
+  return lines
+    .slice(1, -1)
+    .map((l) => (l.startsWith(unit) ? l.slice(unit.length) : l))
+    .join('\n');
 }

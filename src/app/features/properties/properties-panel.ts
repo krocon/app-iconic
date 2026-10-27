@@ -110,6 +110,23 @@ import { itemTitle } from '../inspector/inspector-title';
           <p>{{ t.nothingSelectedHint }}</p>
         </div>
       }
+      @if (actions.enabled('edit.editSvg') || actions.enabled('path.optimize')) {
+        <div class="source-tools">
+          @for (id of sourceActions; track id) {
+            @if (actions.enabled(id)) {
+              <button
+                type="button"
+                class="btn"
+                [attr.data-testid]="'properties-' + id"
+                [title]="actions.tooltip(id)"
+                (click)="actions.run(id)"
+              >
+                {{ actions.label(id) }}
+              </button>
+            }
+          }
+        </div>
+      }
     </div>
   `,
   styleUrl: './properties-panel.css',
@@ -120,6 +137,8 @@ export class PropertiesPanel {
   protected readonly actions = inject(ActionService);
   protected readonly props = inject(PropertiesService);
   protected readonly t = PROPERTIES_TEXTS;
+  /** "Edit SVG…" and "Optimize Path…" (design 011 E13). */
+  protected readonly sourceActions = ['edit.editSvg', 'path.optimize'] as const;
   private readonly open = signal<Record<SectionId, boolean>>({
     geometry: true,
     appearance: true,

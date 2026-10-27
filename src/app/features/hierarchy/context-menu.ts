@@ -26,6 +26,7 @@ export const TREE_MENU: readonly ContextEntry[] = [
   { id: 'arrange.bringToFront', separatorBefore: true },
   { id: 'arrange.sendToBack' },
   { id: 'edit.editSvg', separatorBefore: true },
+  { id: 'path.optimize' },
   { id: 'edit.copyXml' },
   { id: 'edit.delete', args: { confirm: true }, label: T.deleteMenu, separatorBefore: true },
 ];
