@@ -15,6 +15,7 @@ import {
   SetIconJsonValue,
 } from './json-commands';
 import { InsertNode, MoveNode, RemoveAttribute, RemoveNode, SetAttribute } from './node-commands';
+import { ReplaceNode } from './replace-node';
 import { MAX_CHANGES, SetAttributes } from './set-attributes';
 import { SetText } from './set-text';
 import { GroupNodes, ReorderNode, Ungroup } from './tree-commands';
@@ -222,6 +223,10 @@ const PARSERS: Record<CommandType, Parser> = {
       name(o['asset'], 'asset'),
       str(o['markup'], 'markup', MAX_MARKUP),
     );
+  },
+  replaceNode: (o) => {
+    keys(o, ['ref', 'markup']);
+    return new ReplaceNode(ref(o['ref'], 'ref'), str(o['markup'], 'markup', MAX_NODE_MARKUP));
   },
   setIconJsonValue: (o) => {
     keys(o, ['path', 'value', 'label']);

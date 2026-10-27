@@ -20,6 +20,7 @@ import {
   RemoveNode,
   ReorderNode,
   ReplaceAssetMarkup,
+  ReplaceNode,
   SetAttribute,
   SetAttributes,
   SetIconJsonValue,
@@ -87,6 +88,10 @@ export const CASES: [string, (doc: IconDocument) => DocCommand][] = [
     'ReplaceAssetMarkup',
     () =>
       new ReplaceAssetMarkup('a.svg', '<svg xmlns="http://www.w3.org/2000/svg"><circle/></svg>'),
+  ],
+  [
+    'ReplaceNode (design 011 E5)',
+    () => new ReplaceNode(a('n3'), '<ellipse rx="2" onclick="x()"/>'),
   ],
   ['SetIconJsonValue', () => new SetIconJsonValue(['groups', 0, 'shadow', 'opacity'], 0.2)],
   ['SetIconJsonValue (remove)', () => new SetIconJsonValue(['fill'], undefined)],

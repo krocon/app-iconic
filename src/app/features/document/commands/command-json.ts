@@ -29,6 +29,8 @@ export type CommandJson =
   | { type: 'removeNode'; ref: NodeRef }
   | { type: 'moveNode'; ref: NodeRef; parent: NodeRef; index: number; label?: UndoLabel }
   | { type: 'replaceAssetMarkup'; asset: string; markup: string }
+  /** One node replaced by new markup ("Edit SVG…", design 011 E5). */
+  | { type: 'replaceNode'; ref: NodeRef; markup: string }
   /** Without `value` the key is removed. */
   | {
       type: 'setIconJsonValue';

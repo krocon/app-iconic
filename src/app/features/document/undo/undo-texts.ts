@@ -79,6 +79,8 @@ export const UNDO_TEXTS = {
   changePlatforms: 'Change Platforms',
   changeColorSpace: 'Change Color Space',
   removeVariant: 'Remove Appearance Variant',
+  // SVG source (design 011 E12)
+  optimizePath: 'Optimize Path',
 } as const;
 
 /** Key of an action name (`label` of a command). */

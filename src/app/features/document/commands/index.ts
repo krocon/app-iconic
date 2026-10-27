@@ -4,6 +4,7 @@ export * from './node-commands';
 export * from './set-attributes';
 export * from './set-text';
 export * from './asset-commands';
+export * from './replace-node';
 export * from './tree-commands';
 export * from './command-json';
 export * from './registry';
