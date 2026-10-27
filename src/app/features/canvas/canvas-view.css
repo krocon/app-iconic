@@ -80,6 +80,34 @@
 .layers {
   position: absolute;
   inset: 0;
+
+  /* clip path edit mode (design 014 E7): the content dimmed, the clip shapes on top */
+  &.clip-editing {
+    opacity: var(--ai-clip-dim);
+  }
+}
+
+.clip-banner {
+  position: absolute;
+  top: var(--space-2);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+  border: 1px solid var(--ai-clip-stroke);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--ai-artboard-shadow);
+  font-size: var(--font-size-small);
+  white-space: nowrap;
+
+  .muted {
+    color: var(--color-text-muted);
+  }
 }
 
 .host {

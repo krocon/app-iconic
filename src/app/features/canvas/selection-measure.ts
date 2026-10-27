@@ -78,15 +78,23 @@ function bboxOf(el: SVGGraphicsElement): Rect | null {
   }
 }
 
-/** The painted, rendered nodes of `refs` with their matrices (nodes inside selected ones left out). */
-function measure(doc: IconDocument, host: SVGSVGElement, refs: readonly NodeRef[]): Measured[] {
-  const els = paintedNodes(doc, refs);
+/**
+ * The painted, rendered nodes of `refs` with their matrices (nodes inside selected ones left out).
+ * `scope` = the clip path being edited: its shapes count as painted (design 014 E7).
+ */
+function measure(
+  doc: IconDocument,
+  host: SVGSVGElement,
+  refs: readonly NodeRef[],
+  scope: Element | null,
+): Measured[] {
+  const els = paintedNodes(doc, refs, scope);
   return els.flatMap((el) => {
     if (!(el instanceof SVGGraphicsElement) || !el.isConnected) return [];
     if (els.some((o) => o !== el && o.contains(el))) return [];
     const ref = doc.refOf(el);
     const root = ref ? doc.asset(ref.asset)?.svg?.root : null;
-    if (root && !isRendered(el, root)) return [];
+    if (root && !isRendered(el, root, scope)) return [];
     const m = nodeToDocument(host, el);
     const bbox = bboxOf(el);
     return m && bbox && ref ? [{ ref, el, toDoc: fromDom(m), bbox }] : [];
@@ -138,9 +146,10 @@ export function measureSelection(
   refs: readonly NodeRef[],
   mode: SelectionMode,
   showHandles: boolean,
+  scope: Element | null = null,
 ): SelectionModel {
   if (!host || refs.length === 0) return EMPTY_MODEL;
-  const nodes = measure(doc, host, refs);
+  const nodes = measure(doc, host, refs, scope);
   if (nodes.length === 0) return EMPTY_MODEL;
   const frames = nodes.map((n) => corners(n.bbox, n.toDoc));
   const xs = frames.flat().map((p) => p.x);
@@ -192,11 +201,16 @@ export function nodeSnaps(
   doc: IconDocument,
   host: SVGSVGElement | null,
   refs: readonly NodeRef[],
+  scope: Element | null = null,
 ): NodeSnap[] {
   if (!host) return [];
-  return measure(doc, host, refs).flatMap((n) => {
+  return measure(doc, host, refs, scope).flatMap((n) => {
     const parent = n.el.parentElement;
-    const m = parent instanceof SVGGraphicsElement ? nodeToDocument(host, parent) : null;
+    // the parent of a clip shape is its <clipPath> (no SVGGraphicsElement, mapped by the clip)
+    const m =
+      parent instanceof SVGGraphicsElement || parent?.localName === 'clipPath'
+        ? nodeToDocument(host, parent as unknown as SVGGraphicsElement)
+        : null;
     return m ? [{ ref: n.ref, transform: n.el.getAttribute('transform'), parent: fromDom(m) }] : [];
   });
 }
@@ -206,9 +220,10 @@ export function unionBounds(
   doc: IconDocument,
   host: SVGSVGElement | null,
   refs: readonly NodeRef[],
+  scope: Element | null = null,
 ): Rect | null {
   if (!host) return null;
-  const rects = measure(doc, host, refs).flatMap((n) => {
+  const rects = measure(doc, host, refs, scope).flatMap((n) => {
     const r = nodeBoundsInDocument(host, n.el);
     return r ? [r] : [];
   });

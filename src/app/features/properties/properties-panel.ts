@@ -10,6 +10,7 @@ import { SectionId } from './property-spec';
 import { TransformEditor } from './transform-editor';
 import { IconInspector } from '../inspector/icon-inspector';
 import { itemTitle } from '../inspector/inspector-title';
+import { ClipPathSection } from '../clip/clip-path-section';
 
 /**
  * The properties panel (design 009 E9): header with the kind of the selection, Undo / Redo and
@@ -19,7 +20,7 @@ import { itemTitle } from '../inspector/inspector-title';
  */
 @Component({
   selector: 'app-properties-panel',
-  imports: [IconInspector, PropertyRow, TransformEditor],
+  imports: [ClipPathSection, IconInspector, PropertyRow, TransformEditor],
   template: `
     <div class="head">
       <span class="kind" data-testid="properties-kind">{{ title() }}</span>
@@ -110,6 +111,7 @@ import { itemTitle } from '../inspector/inspector-title';
           <p>{{ t.nothingSelectedHint }}</p>
         </div>
       }
+      <app-clip-path-section />
       @if (actions.enabled('edit.editSvg') || actions.enabled('path.optimize')) {
         <div class="source-tools">
           @for (id of sourceActions; track id) {

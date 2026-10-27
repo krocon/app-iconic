@@ -29,6 +29,9 @@ import { isImageDataUrl, svgDataUrlSize } from './image-size';
 import { toLocal, visibleCenter } from './insert-center';
 import { InsertTarget, insertTarget } from './insert-target';
 import { measureInDom, SnippetError, snippetElements, snippetMarkups } from './svg-snippet';
+import { ClipEditStore } from '../clip/clip-edit.store';
+import { clipSpaceToDocument } from '../../shared/geometry/clip-geometry';
+import { parseFragment } from '../document/svg/node-ids';
 
 /** Undo label of each shape (design 008 E1). */
 const LABELS: Record<ShapeKind, UndoLabel> = {
@@ -51,6 +54,17 @@ interface Place {
   center: Point;
   /** A document point in the user space of the target's parent (design 008 E3). */
   local: (p: Point) => Point;
+  /** Put in front of every new element's `transform` (a bounding-box clip, design 014 E7). */
+  transform?: string;
+}
+
+/** `markup` (one element) with `transform` in front of its own. */
+function withTransform(markup: string, transform: string): string {
+  const el = parseFragment(markup);
+  if (!el) return markup;
+  const own = el.getAttribute('transform');
+  el.setAttribute('transform', own ? `${transform} ${own}` : transform);
+  return new XMLSerializer().serializeToString(el);
 }
 
 /** Builds the markup of what is added around `center` (`local` maps document points). */
@@ -77,6 +91,7 @@ export class AddService {
   private readonly canvasEdit = inject(CanvasEditStore);
   private readonly api = inject(IconFileApi);
   private readonly dialogs = inject(DialogService);
+  private readonly clipEdit = inject(ClipEditStore);
 
   /** Adding works when no file action is running. */
   canAdd(): boolean {
@@ -104,6 +119,8 @@ export class AddService {
         parent,
         index: typeof index === 'number' ? index : el.children.length,
       };
+    } else if (this.clipEdit.scope(doc)) {
+      return this.clipPlace(doc.refOf(this.clipEdit.scope(doc)!)!, this.clipEdit.scope(doc)!);
     } else {
       target = insertTarget(doc, this.edit.selection(), this.canvasEdit.context());
     }
@@ -117,13 +134,39 @@ export class AddService {
     };
   }
 
+  /**
+   * The clip path edit mode (design 014 E7): new shapes go into the clip, around the visible centre
+   * in clip space. In bounding-box units the defaults are document sized: a `transform` maps them.
+   */
+  private clipPlace(ref: NodeRef, clip: Element): Place {
+    const docCenter = visibleCenter(this.canvas.view(), this.canvas.viewport());
+    const target: InsertTarget = { kind: 'node', parent: ref, index: clip.children.length };
+    const host = this.canvas.host;
+    const m = host ? clipSpaceToDocument(host, clip) : null;
+    if (!m || Math.abs(m.a * m.d - m.b * m.c) < 1e-12)
+      return { target, center: docCenter, local: (p) => p };
+    const inv = m.inverse();
+    const local = (p: Point) => {
+      const q = new DOMPoint(p.x, p.y).matrixTransform(inv);
+      return { x: q.x, y: q.y };
+    };
+    if (clip.getAttribute('clipPathUnits')?.trim() !== 'objectBoundingBox') {
+      return { target, center: local(docCenter), local };
+    }
+    const t = `matrix(${[inv.a, inv.b, inv.c, inv.d, inv.e, inv.f].map((v) => Number(v.toPrecision(10))).join(' ')})`;
+    return { target, center: docCenter, local: (p) => p, transform: t };
+  }
+
   /** Runs the insertion of `markups` at `place` as one step; selects the new nodes. */
   private insert(store: DocumentStore, label: UndoLabel, place: Place, markups: string[]): boolean {
     const doc = store.document();
     try {
       if (place.target.kind === 'node') {
         const { parent, index } = place.target;
-        const inserts = markups.map((m, k) => new InsertNode(parent, m, index + k, label));
+        const t = place.transform;
+        const inserts = markups.map(
+          (m, k) => new InsertNode(parent, t ? withTransform(m, t) : m, index + k, label),
+        );
         store.execute(new CompositeCommand(label, inserts));
         const refs = inserts.flatMap((i) => (i.ref ? [i.ref] : []));
         this.selectPainted(store, refs);

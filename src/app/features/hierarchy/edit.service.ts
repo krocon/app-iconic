@@ -5,11 +5,12 @@ import { AlignMode } from '../../shared/geometry/align';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { CommandError, CompositeCommand, DocCommand, ReorderNode } from '../document/commands';
 import { DocumentStore } from '../document/document.store';
-import { NodeRef } from '../document/icon-document';
+import { IconDocument, NodeRef } from '../document/icon-document';
 import { groups, layers } from '../document/model/icon-json';
 import { isDefinitionTag } from '../document/model/reorder-rules';
 import { DropPosition, IconItem, TreeTarget } from '../document/model/selection';
-import { serializeAsset, serializeElement, SvgText } from '../document/svg/node-ids';
+import { parseFragment, serializeAsset, serializeElement, SvgText } from '../document/svg/node-ids';
+import { clipDefsMarkup } from '../clip/clip-references';
 import { formatElement, formatSvg } from '../document/svg/svg-format';
 import { brokenReferences } from '../document/svg/svg-references';
 import { FilesService } from '../files/files.service';
@@ -23,7 +24,15 @@ import {
   paintedNodes,
   ungroupCommand,
 } from './arrange-operations';
-import { deletableNodes, deleteCommand, duplicateCommand, Planned } from './edit-operations';
+import {
+  deletableNodes,
+  deleteCommand,
+  duplicateCommand,
+  Planned,
+  usedClipsToDelete,
+} from './edit-operations';
+import { CLIP_TEXTS as CT } from '../clip/clip-texts';
+import { usersOutside } from '../document/commands/clip-commands';
 import { EMPTY_SELECTION, followUpSelection, Selection } from './follow-up';
 import { HIERARCHY_TEXTS as T } from './hierarchy-texts';
 import { buildTree, nodeLabelOf } from './hierarchy-model';
@@ -90,16 +99,38 @@ export class EditService {
   }
 
   /** Delete (with follow-up selection, design 006 E9); `confirm` asks first ("Delete…"). */
-  async delete(confirm = false, label?: 'cut'): Promise<boolean> {
+  async delete(confirm?: boolean, label?: 'cut'): Promise<boolean> {
     const s = this.store();
     if (!s) return false;
     const sel = this.selection();
     const doc = s.document();
     const cmd = deleteCommand(doc, sel);
     if (!cmd) return false;
-    if (confirm && !(await this.confirmDelete(sel))) return false;
+    // a clip path that something uses: always asked, unless `confirm: false` (design 014 E10)
+    const clips = sel.nodes.length ? usedClipsToDelete(doc, sel.nodes) : [];
+    if (clips.length && confirm !== false) {
+      if (!(await this.confirmClipDelete(doc, clips))) return false;
+    } else if (confirm && !(await this.confirmDelete(sel))) return false;
     const next = followUpSelection(buildTree(doc), sel.nodes, sel.items);
     return this.run(label ? new CompositeCommand(label, [cmd]) : cmd, () => next);
+  }
+
+  private async confirmClipDelete(doc: IconDocument, clips: Element[]): Promise<boolean> {
+    const one = clips.length === 1 ? clips[0] : null;
+    const root = one ? doc.asset(doc.refOf(one)!.asset)!.svg!.root : null;
+    const answer = await this.ask.ask({
+      title: CT.deleteTitle(one?.getAttribute('id') ?? `${clips.length}`),
+      message:
+        one && root
+          ? CT.deleteMessage(usersOutside(root, one).length)
+          : CT.deleteMany(clips.length),
+      buttons: [
+        { id: 'cancel', label: CT.cancelButton },
+        { id: 'delete', label: CT.deleteButton, primary: true },
+      ],
+      cancel: 'cancel',
+    });
+    return answer === 'delete';
   }
 
   private async confirmDelete(sel: Selection): Promise<boolean> {
@@ -154,9 +185,15 @@ export class EditService {
     const src = this.copySource();
     if (!src) return null;
     if ('els' in src) {
+      // clips the nodes refer to from outside go along as <defs> (design 014 E10)
+      const doc = this.store()!.document();
+      const root = doc.asset(doc.refOf(src.els[0])!.asset)!.svg!.root;
+      const defs = clipDefsMarkup(src.els, root, serializeElement);
+      const extra = defs ? parseFragment(defs) : null;
+      const els = extra ? [...src.els, extra] : src.els;
       return formatted
-        ? src.els.map((e) => formatElement(e)).join('')
-        : src.els.map((e) => serializeElement(e)).join('\n');
+        ? els.map((e) => formatElement(e)).join('')
+        : els.map((e) => serializeElement(e)).join('\n');
     }
     const text = serializeAsset(src.svg);
     return formatted ? (formatSvg(text) ?? text) : text;
@@ -180,7 +217,7 @@ export class EditService {
   }
 
   async cut(): Promise<boolean> {
-    return (await this.copy()) && this.delete(false, 'cut');
+    return (await this.copy()) && this.delete(undefined, 'cut');
   }
 
   /** Paste markup (`text`) or the clipboard's. */

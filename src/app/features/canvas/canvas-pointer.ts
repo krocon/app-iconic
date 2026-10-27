@@ -26,7 +26,14 @@ import {
   scaleSelectionChanges,
 } from './edit-ops';
 import { clickHandle, dragHandle, dragLabel } from './handles/handle-edit';
-import { hitTest, isEnterable, isRendered, paintedRoots, selectableRef } from './hit-test';
+import {
+  hitClipShape,
+  hitTest,
+  isEnterable,
+  isRendered,
+  paintedRoots,
+  selectableRef,
+} from './hit-test';
 import { magicPoints } from './magic-points';
 import { HandleSet, nodeSnaps } from './selection-measure';
 
@@ -69,7 +76,28 @@ export class CanvasInteraction {
     private readonly host: () => SVGSVGElement,
     private readonly layers: () => HTMLElement,
     private readonly mac: boolean,
+    /** The clip path being edited (design 014 E7), `null` outside the mode. */
+    private readonly clip: () => NodeRef | null = () => null,
   ) {}
+
+  /** The live `<clipPath>` being edited. */
+  private scope(): Element | null {
+    const ref = this.clip();
+    const el = ref ? (this.store()?.document().node(ref) ?? null) : null;
+    return el?.localName === 'clipPath' ? el : null;
+  }
+
+  /** What a click selects: in the clip edit mode a shape of the clip, else per design 007 E3. */
+  private selectable(store: DocumentStore, e: PointerLike) {
+    const doc = store.document();
+    const clip = this.clip();
+    if (clip && this.scope()) {
+      const hit = hitClipShape(doc, clip, e);
+      return hit ? { ref: { asset: hit.asset, id: hit.id }, inContext: true } : null;
+    }
+    const hit = hitTest(this.layers(), e);
+    return hit ? selectableRef(doc, hit, this.edit.context()) : null;
+  }
 
   private toDoc = (c: { clientX: number; clientY: number }) => clientToDocument(this.host(), c);
 
@@ -90,9 +118,7 @@ export class CanvasInteraction {
     if (!store || this.view.options().selectionMode === 'none') return false;
     const handle = target?.closest('[data-handle]')?.getAttribute('data-handle');
     if (handle) return this.startHandle(store, handle, e);
-    const doc = store.document();
-    const hit = hitTest(this.layers(), e);
-    const sel = hit ? selectableRef(doc, hit, this.edit.context()) : null;
+    const sel = this.selectable(store, e);
     if (!sel?.inContext && this.edit.context()) this.edit.context.set(null);
     const mode = selectModeOf(e, this.mac);
     if (!sel) {
@@ -123,7 +149,7 @@ export class CanvasInteraction {
   /** Double click: into the group under the pointer (design 007 E3). */
   dblclick(e: PointerLike): void {
     const store = this.store();
-    if (!store || this.view.options().selectionMode === 'none') return;
+    if (!store || this.view.options().selectionMode === 'none' || this.scope()) return;
     const doc = store.document();
     const hit = hitTest(this.layers(), e);
     const sel = hit ? selectableRef(doc, hit, this.edit.context()) : null;
@@ -137,7 +163,8 @@ export class CanvasInteraction {
   private moveOp(store: DocumentStore, refs: readonly NodeRef[], e: PointerLike): DragOp {
     const host = this.host();
     const doc = store.document();
-    const snaps = nodeSnaps(doc, host, refs);
+    const scope = this.scope();
+    const snaps = nodeSnaps(doc, host, refs, scope);
     const union = this.edit.model().union ?? this.unionOf(store, refs);
     const keys = union ? boxKeyPoints(union) : [];
     let candidates: Point[] | null = null;
@@ -145,7 +172,7 @@ export class CanvasInteraction {
     return {
       label: 'moveNode',
       update: (p, mods) => {
-        candidates ??= magicPoints(this.layers(), host, doc, refs);
+        candidates ??= magicPoints(this.layers(), host, doc, refs, scope);
         let d = { x: p.x - p0.x, y: p.y - p0.y };
         const s = snapMove(keys, d, candidates, this.snapOptions(mods));
         d = s.delta;
@@ -161,7 +188,7 @@ export class CanvasInteraction {
 
   private unionOf(store: DocumentStore, refs: readonly NodeRef[]) {
     const host = this.host();
-    const rects = paintedNodes(store.document(), refs).flatMap((el) =>
+    const rects = paintedNodes(store.document(), refs, this.scope()).flatMap((el) =>
       el instanceof SVGGraphicsElement ? [nodeBoundsInDocument(host, el)] : [],
     );
     const r = rects.filter((x) => x !== null);
@@ -208,6 +235,15 @@ export class CanvasInteraction {
   private candidates(store: DocumentStore): { ref: NodeRef; rect: Rect }[] {
     const doc = store.document();
     const host = this.host();
+    const scope = this.scope();
+    if (scope) {
+      // the clip path edit mode: its shapes only (design 014 E7)
+      return [...scope.children].flatMap((c) => {
+        const ref = doc.refOf(c);
+        const rect = c instanceof SVGGraphicsElement ? nodeBoundsInDocument(host, c) : null;
+        return ref && rect ? [{ ref, rect }] : [];
+      });
+    }
     const ctx = this.edit.context();
     const ctxEl = ctx ? doc.node(ctx) : null;
     const parents = ctxEl
@@ -250,6 +286,7 @@ export class CanvasInteraction {
     if (!inv) return null;
     const host = this.host();
     const doc = store.document();
+    const scope = this.scope();
     const excluded =
       set.kind === 'box' && !set.single
         ? store.selection()
@@ -260,7 +297,7 @@ export class CanvasInteraction {
     // a handle that starts off the canvas may stay there (nothing jumps, design 007 E14)
     const bounds = withPoint(CANVAS_BOUNDS, apply(set.toDoc, h.local));
     const target = (p: Point, mods: Modifiers) => {
-      candidates ??= magicPoints(this.layers(), host, doc, excluded);
+      candidates ??= magicPoints(this.layers(), host, doc, excluded, scope);
       const s = snapPoint(p, candidates, this.snapOptions(mods));
       this.edit.snap.set(s.target && s.kind !== 'none' ? { point: s.target, kind: s.kind } : null);
       return clampPoint(bounds, s.point);
@@ -313,7 +350,7 @@ export class CanvasInteraction {
         end,
       };
     }
-    const snaps = nodeSnaps(doc, host, store.selection());
+    const snaps = nodeSnaps(doc, host, store.selection(), scope);
     return {
       label: 'changeTransform',
       update: (p, mods) =>

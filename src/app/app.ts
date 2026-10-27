@@ -1,3 +1,5 @@
+import { registerClipActions } from './features/clip/clip-actions';
+import { ClipService } from './features/clip/clip.service';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { ActionService } from './core/actions/action.service';
 import { KeyboardDispatcher } from './core/actions/keyboard-dispatcher';
@@ -213,6 +215,7 @@ export class App implements OnInit {
     registerIconActions(this.actions, inject(IconInspectorService), this.destroyRef);
     registerSvgSourceActions(this.actions, inject(SvgSourceService), this.destroyRef);
     registerExportActions(this.actions, inject(ExportService), this.destroyRef);
+    registerClipActions(this.actions, inject(ClipService), this.destroyRef);
     // where the keyboard is (design 005 E4): a dialog owns it; else hierarchy or canvas first
     this.dispatcher.setContextProvider((target) => {
       if (this.dialogs.open() !== null) return ['dialog'];

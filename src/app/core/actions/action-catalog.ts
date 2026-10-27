@@ -1,6 +1,13 @@
 import { ArgsSpec } from './action-args';
 import { IMAGE_ARGS, shapeArgsSpec, SNIPPET_ARGS } from './add-action-args';
 import { EXPORT_ARGS } from './export-action-args';
+import {
+  CLIP_ASSIGN_ARGS,
+  CLIP_CREATE_ARGS,
+  CLIP_REMOVE_ARGS,
+  CLIP_TARGET_ARGS,
+  CLIP_UNITS_ARGS,
+} from './clip-action-args';
 import { FREEHAND_ARGS, SYMBOL_ARGS, TEXT_PATH_ARGS } from './tool-action-args';
 
 /**
@@ -362,6 +369,13 @@ export const ACTIONS: readonly ActionDef[] = [
   ARRANGE('arrange.align.top', 'Align Top'),
   ARRANGE('arrange.align.middle', 'Align Centers Vertically'),
   ARRANGE('arrange.align.bottom', 'Align Bottom'),
+  // clip paths (design 014 E14)
+  ARRANGE('clip.create', 'Create Clip Path', { args: CLIP_CREATE_ARGS }),
+  ARRANGE('clip.assign', 'Assign Clip Path', { palette: false, args: CLIP_ASSIGN_ARGS }),
+  ARRANGE('clip.edit', 'Edit Clip Path', { args: CLIP_TARGET_ARGS }),
+  ARRANGE('clip.done', 'Finish Editing Clip Path'),
+  ARRANGE('clip.remove', 'Remove Clip Path…', { args: CLIP_REMOVE_ARGS }),
+  ARRANGE('clip.setUnits', 'Clip Path Units', { palette: false, args: CLIP_UNITS_ARGS }),
   // the tree (APG tree pattern, design 006 E5)
   TREE('hierarchy.next', 'Next Row'),
   TREE('hierarchy.prev', 'Previous Row'),

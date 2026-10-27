@@ -37,6 +37,9 @@ import { FreehandOverlay } from '../tools/freehand-overlay';
 import { FreehandStore } from '../tools/freehand.store';
 import { FreehandService } from '../tools/freehand.service';
 import { TOOLS_TEXTS } from '../tools/tools-texts';
+import { ClipEditStore } from '../clip/clip-edit.store';
+import { ClipEditLayer } from '../clip/clip-edit-layer';
+import { CLIP_TEXTS } from '../clip/clip-texts';
 
 /** Ctrl+wheel / pinch: zoom factor per wheel pixel (design 004 E9). */
 const WHEEL_ZOOM = 0.01;
@@ -92,6 +95,15 @@ export class CanvasView {
   protected readonly freehand = inject(FreehandStore);
   private readonly freehandService = inject(FreehandService);
   protected readonly tt = TOOLS_TEXTS;
+  /** The clip path edit mode (design 014 E7). */
+  protected readonly clipEdit = inject(ClipEditStore);
+  protected readonly ct = CLIP_TEXTS;
+  /** The id of the clip being edited (banner), `null` outside the mode. */
+  protected readonly clipId = computed(() => {
+    const el = this.clipEdit.scope(this.store()?.document());
+    return el ? (el.getAttribute('id') ?? '') : null;
+  });
+  private clipLayer: ClipEditLayer | null = null;
   /** Document → viewport pixels, measured with the host's screen CTM (design 007 E5). */
   protected readonly toView = signal<Matrix>(IDENTITY);
 
@@ -120,15 +132,28 @@ export class CanvasView {
       this.view();
       this.viewport();
       const o = this.opt();
+      this.clipEdit.target();
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const doc = s?.document();
         const host = this.hostEl().nativeElement;
+        const scope = untracked(() => this.clipEdit.scope(doc));
         this.toView.set(this.measureView());
         this.edit.model.set(
-          doc ? measureSelection(doc, host, refs, o.selectionMode, o.handles) : EMPTY_MODEL,
+          doc ? measureSelection(doc, host, refs, o.selectionMode, o.handles, scope) : EMPTY_MODEL,
         );
+        (this.clipLayer ??= new ClipEditLayer(host)).update(scope);
       });
+    });
+    // the edit mode ends when its clip is gone (undo, delete), the document changes or something
+    // outside the clip is selected (tree, AI)
+    effect(() => {
+      const s = this.store();
+      const doc = s?.document();
+      const refs = s?.selection() ?? [];
+      if (!untracked(() => this.clipEdit.target())) return;
+      const scope = this.clipEdit.scope(doc);
+      if (!scope || refs.some((r) => !scope.contains(doc!.node(r)))) this.clipEdit.exit();
     });
     // a selection made elsewhere (tree, AI) outside the group context leaves it; the chosen
     // point goes with its node
@@ -162,6 +187,10 @@ export class CanvasView {
       () => this.canvas.host,
       destroy,
       this.freehand,
+      {
+        scope: () => this.clipEdit.scope(this.store()?.document()),
+        exit: () => this.clipEdit.exit(),
+      },
     );
     this.interaction = new CanvasInteraction(
       () => this.store(),
@@ -170,6 +199,7 @@ export class CanvasView {
       () => this.hostEl().nativeElement,
       () => this.layersEl().nativeElement,
       actions.os === 'mac',
+      () => this.clipEdit.target(),
     );
     destroy.onDestroy(() => {
       this.edit.gesture.cancel();

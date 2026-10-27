@@ -2,6 +2,7 @@ import { IconDocument, NodeRef } from '../document/icon-document';
 import { groups, layers } from '../document/model/icon-json';
 import { isDefinitionElement, layerRoot, topLevelElements } from '../document/model/reorder-rules';
 import { Selection } from '../hierarchy/follow-up';
+import { layerInsertParent } from '../document/model/clip-model';
 
 /**
  * Where "Add …" puts a new element (design 008 E2; legacy `resolveTargetAssetAndContainer`,
@@ -103,7 +104,7 @@ export function insertTarget(
   for (const item of sel.items) {
     if (item.kind === 'root') continue;
     const root = layerRoot(doc, item.group, item.kind === 'layer' ? item.layer : 0);
-    const t = root ? into(doc, root) : null;
+    const t = root ? into(doc, layerInsertParent(root)) : null;
     if (t) return t;
   }
   const ctx = context ? doc.node(context) : null;
@@ -113,5 +114,5 @@ export function insertTarget(
   }
   const first = firstEditableLayer(doc);
   const root = first ? layerRoot(doc, first.group, first.layer) : null;
-  return (root && into(doc, root)) || { kind: 'newGroup' };
+  return (root && into(doc, layerInsertParent(root))) || { kind: 'newGroup' };
 }

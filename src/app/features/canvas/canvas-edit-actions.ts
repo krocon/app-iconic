@@ -26,11 +26,12 @@ export function moveSelectionCommand(
   store: DocumentStore,
   host: SVGSVGElement | null,
   d: Point,
+  scope: Element | null = null,
 ): SetAttributes | null {
   const refs = store.selection();
   const doc = store.document();
-  const snaps = nodeSnaps(doc, host, refs);
-  const union = unionBounds(doc, host, refs);
+  const snaps = nodeSnaps(doc, host, refs, scope);
+  const union = unionBounds(doc, host, refs, scope);
   if (!snaps.length || !union) return null;
   const changes = moveChanges(snaps, clampTranslation(CANVAS_BOUNDS, union, d));
   return changes.length ? new SetAttributes(changes, 'moveNode') : null;
@@ -43,11 +44,13 @@ export function registerCanvasEditActions(
   host: () => SVGSVGElement | null,
   destroyRef: DestroyRef,
   tool?: { escape(): boolean; active(): boolean },
+  clip?: { scope(): Element | null; exit(): boolean },
 ): void {
   const hasNodes = () => (store()?.selection().length ?? 0) > 0;
+  const scope = () => clip?.scope() ?? null;
   const nudge = (dx: number, dy: number) => {
     const s = store();
-    const cmd = s ? moveSelectionCommand(s, host(), { x: dx, y: dy }) : null;
+    const cmd = s ? moveSelectionCommand(s, host(), { x: dx, y: dy }, scope()) : null;
     if (s && cmd) s.executeCoalescing(cmd, keyOf(s.selection()));
   };
   /** The chosen point, if its node still exists. */
@@ -62,12 +65,14 @@ export function registerCanvasEditActions(
         // the freehand tool first (design 013 E3): its stroke, then the tool
         if (tool?.escape()) return;
         if (edit.escape()) return;
+        // the clip path edit mode (design 014 E7) before the group context
+        if (clip?.exit()) return;
         const ctx = edit.context();
         if (!ctx) return;
         edit.context.set(null);
         store()?.select([ctx]);
       },
-      enabled: () => !!tool?.active() || edit.canEscape(),
+      enabled: () => !!tool?.active() || edit.canEscape() || scope() !== null,
     },
     'canvas.deletePoint': {
       run: () => {
@@ -89,7 +94,7 @@ export function registerCanvasEditActions(
       run: (args) => {
         const { dx, dy } = args as { dx: number; dy: number };
         const s = store();
-        const cmd = s ? moveSelectionCommand(s, host(), { x: dx, y: dy }) : null;
+        const cmd = s ? moveSelectionCommand(s, host(), { x: dx, y: dy }, scope()) : null;
         if (s && cmd) s.execute(cmd);
       },
       enabled: hasNodes,

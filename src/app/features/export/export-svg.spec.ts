@@ -94,6 +94,25 @@ describe('exportSvg', () => {
     expect(t).toContain('href="#l1-r"');
   });
 
+  it('clip paths go along with prefixed ids, also in two layers (design 014 E11)', () => {
+    const clipped =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs>' +
+      '<clipPath id="clip" clipPathUnits="objectBoundingBox"><rect width="1" height="0.5"/></clipPath></defs>' +
+      '<g clip-path="url(#clip)"><rect width="100" height="100" style="clip-path:url(#clip)"/></g></svg>';
+    const t = exportSvg(
+      doc([{ layers: [L('c.svg'), L('c.svg')] }], {}, { 'c.svg': clipped }),
+      'light',
+      NO_FX,
+    );
+    checkReferences(t);
+    const root = parse(t);
+    expect([...root.querySelectorAll('clipPath')].map((c) => c.id)).toEqual(['l1-clip', 'l2-clip']);
+    expect(root.querySelector('clipPath')!.getAttribute('clipPathUnits')).toBe('objectBoundingBox');
+    expect(
+      [...root.querySelectorAll('g[clip-path]')].map((g) => g.getAttribute('clip-path')),
+    ).toEqual(['url(#l1-clip)', 'url(#l2-clip)']);
+  });
+
   it('prefixIds also rewrites url() in <style> text', () => {
     const root = parse(
       '<svg xmlns="http://www.w3.org/2000/svg"><style>.a{fill:url(#p)} #p{opacity:1}</style>' +

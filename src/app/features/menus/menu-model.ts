@@ -151,6 +151,8 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
       a('arrange.align.middle', t.alignMiddle),
       a('arrange.align.bottom', t.alignBottom),
     ]),
+    sep,
+    sub(t.clipPath, [a('clip.create'), a('clip.edit'), a('clip.done'), a('clip.remove')]),
   ];
   const help: MenuNode[] = [a('app.shortcuts'), ...(os === 'mac' ? [] : [sep, a('app.about')])];
   return [

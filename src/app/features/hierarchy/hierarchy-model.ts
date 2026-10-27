@@ -8,6 +8,8 @@ import {
 } from '../document/model/reorder-rules';
 import { IconItem, sameItem, sameRef, TreeTarget } from '../document/model/selection';
 import { ID_ATTR } from '../document/svg/node-ids';
+import { clipIdOf, isClipGroup } from '../document/model/clip-model';
+import { CLIP_TEXTS as CT } from '../clip/clip-texts';
 import { HIERARCHY_TEXTS as T } from './hierarchy-texts';
 import { groupLabel, layerLabel, nodeLabel } from './node-label';
 import { fillSwatch, Swatch, swatchOf } from './swatch';
@@ -38,6 +40,8 @@ export interface TreeNode {
   container: boolean;
   /** A layer whose image is missing or cannot be edited. */
   warning?: string;
+  /** The clip the node itself refers to (design 014 E12). */
+  clip?: string;
   children: TreeNode[];
 }
 
@@ -64,10 +68,16 @@ export function isHiddenElement(el: Element): boolean {
 function nodeOf(el: Element, asset: string, parentId: string, root: Element): TreeNode {
   const id = el.getAttribute(ID_ATTR) ?? '';
   const rowId = `${parentId}/${id}`;
+  const clip = clipIdOf(el);
+  const label =
+    isClipGroup(el, root) && !el.getAttribute('id')
+      ? `${CT.layerClipGroup} · ${el.children.length}`
+      : nodeLabel(el);
   return {
     id: rowId,
     kind: 'node',
-    label: nodeLabel(el),
+    label,
+    ...(clip ? { clip } : {}),
     tag: el.localName,
     ref: { asset, id },
     fill: swatchOf(el, 'fill', root),

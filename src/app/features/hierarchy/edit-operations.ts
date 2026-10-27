@@ -10,7 +10,11 @@ import {
   RemoveGroup,
   RemoveLayer,
   RemoveNode,
+  InsertDefinition,
+  RemoveClipPath,
 } from '../document/commands';
+import { duplicateClips, usedClipsAmong } from '../clip/clip-references';
+import { isDefinitionElement } from '../document/model/reorder-rules';
 import { IconDocument, NodeRef } from '../document/icon-document';
 import { groups, layerNames, layers } from '../document/model/icon-json';
 import { topLevelElements } from '../document/model/reorder-rules';
@@ -88,9 +92,29 @@ export function deletableNodes(doc: IconDocument, refs: readonly NodeRef[]): Ele
   return topLevelElements(doc, refs).filter((e) => e.parentElement !== null);
 }
 
+/** Clip paths among / inside the nodes to delete that other elements still use (design 014 E10). */
+export function usedClipsToDelete(doc: IconDocument, refs: readonly NodeRef[]): Element[] {
+  const els = deletableNodes(doc, refs);
+  const byAsset = new Map<string, Element[]>();
+  for (const el of els) {
+    const a = doc.refOf(el)!.asset;
+    byAsset.set(a, [...(byAsset.get(a) ?? []), el]);
+  }
+  return [...byAsset].flatMap(([a, list]) => usedClipsAmong(list, doc.assets.get(a)!.svg!.root));
+}
+
 export function deleteCommand(doc: IconDocument, sel: Selection): DocCommand | null {
   if (sel.nodes.length) {
-    const cmds = deletableNodes(doc, sel.nodes).map((el) => new RemoveNode(doc.refOf(el)!));
+    const els = deletableNodes(doc, sel.nodes);
+    const used = usedClipsToDelete(doc, sel.nodes);
+    // painting nodes first, then used clips with their references, then the other definitions
+    const painting = els.filter((e) => !isDefinitionElement(e));
+    const rest = els.filter((e) => isDefinitionElement(e) && !used.includes(e));
+    const cmds: DocCommand[] = [
+      ...painting.map((el) => new RemoveNode(doc.refOf(el)!)),
+      ...used.map((c) => new RemoveClipPath(doc.refOf(c)!)),
+      ...rest.map((el) => new RemoveNode(doc.refOf(el)!)),
+    ];
     return cmds.length ? new CompositeCommand('delete', cmds) : null;
   }
   const gs = groupItems(sel.items).sort((a, b) => b.group - a.group);
@@ -113,28 +137,41 @@ export interface Planned {
   selection(): Selection;
 }
 
-/** Markup of a copy of `el` with ids that do not clash in its asset. */
-function cloneMarkup(el: Element, taken: Set<string>): string {
+/**
+ * Markup of a copy of `el` with ids that do not clash in its asset; clips it refers to from
+ * outside are copied with new ids (design 014 E10) – their markup in `clips`.
+ */
+function cloneMarkup(
+  el: Element,
+  root: Element,
+  taken: Set<string>,
+): { markup: string; clips: string[] } {
   const copy = el.cloneNode(true) as Element;
   stripInternal(copy);
   renameCollidingIds([copy], taken);
-  return new XMLSerializer().serializeToString(copy);
+  const clips = duplicateClips(el, copy, root, taken);
+  return { markup: new XMLSerializer().serializeToString(copy), clips };
 }
 
 function duplicateNodes(doc: IconDocument, refs: readonly NodeRef[]): Planned | null {
   const els = deletableNodes(doc, refs);
   if (!els.length) return null;
   const taken = new Map<string, Set<string>>();
+  const defs: InsertDefinition[] = [];
   const inserts = [...els].reverse().map((el) => {
     const ref = doc.refOf(el)!;
-    const ids = taken.get(ref.asset) ?? collectIds(doc.assets.get(ref.asset)!.svg!.root);
+    const root = doc.assets.get(ref.asset)!.svg!.root;
+    const ids = taken.get(ref.asset) ?? collectIds(root);
     taken.set(ref.asset, ids);
     const parent = el.parentElement!;
     const index = Array.prototype.indexOf.call(parent.children, el) as number;
-    return new InsertNode(doc.refOf(parent)!, cloneMarkup(el, ids), index + 1, 'clone');
+    const { markup, clips } = cloneMarkup(el, root, ids);
+    defs.push(...clips.map((c) => new InsertDefinition(ref.asset, c, 'clone')));
+    return new InsertNode(doc.refOf(parent)!, markup, index + 1, 'clone');
   });
   return {
-    command: new CompositeCommand('clone', inserts),
+    // the clip copies last: a new <defs> at the root must not shift the indices of the inserts
+    command: new CompositeCommand('clone', [...inserts, ...defs]),
     selection: () => ({
       nodes: inserts.reverse().flatMap((i) => (i.ref ? [i.ref] : [])),
       items: [],

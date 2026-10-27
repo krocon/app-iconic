@@ -18,13 +18,15 @@ export const MAX_MAGIC_POINTS = 20_000;
  * centre of its local bounding box and its point handles (path anchors, polygon points, line
  * ends, circle centres), all mapped to the document with the browser's matrices; plus corners,
  * edge midpoints and centre of the canvas. Nodes being dragged (and their descendants) are left
- * out. Collected once when a gesture starts.
+ * out. Collected once when a gesture starts. In the clip path edit mode the shapes of `scope` (the
+ * clip being edited) count as well (design 014 E7).
  */
 export function magicPoints(
   box: HTMLElement,
   host: SVGSVGElement | null,
   doc: IconDocument,
   exclude: readonly NodeRef[],
+  scope: Element | null = null,
 ): Point[] {
   const out: Point[] = boxKeyPoints({ x: 0, y: 0, width: CANVAS_SIZE, height: CANVAS_SIZE });
   if (!host) return out;
@@ -39,7 +41,7 @@ export function magicPoints(
       const id = el.getAttribute(ID_ATTR);
       const live = id ? doc.node({ asset, id }) : null;
       if (!live || moving.some((m) => m.asset === asset && m.el.contains(live))) continue;
-      if (!isRendered(el, root)) continue;
+      if (!isRendered(el, root, scope)) continue;
       const m = nodeToDocument(host, el);
       if (!m) continue;
       const toDoc = fromDom(m);

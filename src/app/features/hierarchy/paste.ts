@@ -1,11 +1,24 @@
-import { AddAsset, AddGroup, CompositeCommand, InsertNode, MAX_MARKUP } from '../document/commands';
+import {
+  AddAsset,
+  AddGroup,
+  CompositeCommand,
+  InsertDefinition,
+  InsertNode,
+  MAX_MARKUP,
+} from '../document/commands';
 import { IconDocument } from '../document/icon-document';
 import { layerNames, newGroup, newLayer } from '../document/model/icon-json';
-import { isContainerElement, layerRoot, topLevelElements } from '../document/model/reorder-rules';
+import {
+  isContainerElement,
+  isDefinitionTag,
+  layerRoot,
+  topLevelElements,
+} from '../document/model/reorder-rules';
 import { layerNameFor, uniqueAssetName, uniqueLayerName } from '../document/model/unique-names';
 import { parseSvg, SVG_NS } from '../document/svg/node-ids';
 import { collectIds, renameCollidingIds } from '../document/svg/svg-references';
 import { Planned } from './edit-operations';
+import { layerInsertParent } from '../document/model/clip-model';
 import { Selection } from './follow-up';
 
 /** Name of the asset a pasted whole SVG becomes (made unique). */
@@ -38,7 +51,9 @@ function destination(doc: IconDocument, sel: Selection): { parent: Element; inde
   }
   const layer = sel.items.find((i) => i.kind === 'layer');
   const root = layer?.kind === 'layer' ? layerRoot(doc, layer.group, layer.layer) : null;
-  return root ? { parent: root, index: root.children.length } : null;
+  // a layer with a clip: into its clip group (design 014 E3)
+  const into = root ? layerInsertParent(root) : null;
+  return into ? { parent: into, index: into.children.length } : null;
 }
 
 /**
@@ -56,12 +71,27 @@ export function pasteCommand(doc: IconDocument, text: string, sel: Selection): P
     const taken = collectIds(doc.assets.get(ref.asset)!.svg!.root);
     renameCollidingIds(parsed.elements, taken);
     const ser = new XMLSerializer();
-    const inserts = parsed.elements.map(
+    // `<defs>` of definitions go into the root's defs (design 014 E10), not into the target
+    const toDefs = (e: Element) =>
+      e.localName === 'defs' && e.children.length > 0 && [...e.children].every(isDefinitionTag);
+    const defs = parsed.elements.filter(toDefs).flatMap((d) => [...d.children]);
+    const nodes = parsed.elements.filter((e) => !toDefs(e));
+    const inserts = nodes.map(
       (el, k) => new InsertNode(ref, ser.serializeToString(el), dest.index + k, 'paste'),
     );
+    const definitions = defs.map(
+      (d) => new InsertDefinition(ref.asset, ser.serializeToString(d), 'paste'),
+    );
+    if (!inserts.length && !definitions.length) return null;
     return {
-      command: new CompositeCommand('paste', inserts),
-      selection: () => ({ nodes: inserts.flatMap((i) => (i.ref ? [i.ref] : [])), items: [] }),
+      // definitions last: a new root <defs> must not shift the indices of the inserts
+      command: new CompositeCommand('paste', [...inserts, ...definitions]),
+      selection: () => ({
+        nodes: [...inserts, ...(inserts.length ? [] : definitions)].flatMap((i) =>
+          i.ref ? [i.ref] : [],
+        ),
+        items: [],
+      }),
     };
   }
   const markup =

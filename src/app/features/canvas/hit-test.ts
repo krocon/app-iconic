@@ -1,3 +1,4 @@
+import { clipOwnerOf, clipShapeAt, insideClips } from '../../shared/geometry/clip-geometry';
 import { IconDocument, NodeRef } from '../document/icon-document';
 import { ID_ATTR } from '../document/svg/node-ids';
 
@@ -45,10 +46,14 @@ export function paintedRoots(box: HTMLElement): { asset: string; root: SVGSVGEle
   });
 }
 
-/** `el` and its ancestors up to `root` are rendered (no definition, no `display: none` …). */
-export function isRendered(el: Element, root: Element): boolean {
+/**
+ * `el` and its ancestors up to `root` are rendered (no definition, no `display: none` …). Inside
+ * `scope` – the clip path being edited (design 014 E7) – definitions count as rendered.
+ */
+export function isRendered(el: Element, root: Element, scope: Element | null = null): boolean {
+  const inScope = !!scope && scope.contains(el);
   for (let e: Element | null = el; e && e !== root.parentElement; e = e.parentElement) {
-    if (NOT_RENDERED.has(e.localName)) return false;
+    if (NOT_RENDERED.has(e.localName) && !inScope) return false;
     const cs = globalThis.getComputedStyle?.(e);
     if (cs && cs.display === 'none') return false;
   }
@@ -100,7 +105,10 @@ export function hitsElement(
   return false;
 }
 
-/** The topmost painted element under the client point, or `null`. */
+/**
+ * The topmost painted element under the client point, or `null`. Clips count (design 014 E9): a
+ * point that a clip cuts away hits what lies below.
+ */
 export function hitTest(
   box: HTMLElement,
   p: { clientX: number; clientY: number },
@@ -114,11 +122,25 @@ export function hitTest(
         continue;
       if (!isRendered(el, root)) continue;
       if (!hitsElement(el, p.clientX, p.clientY, tol)) continue;
+      if (!insideClips(el, root, p.clientX, p.clientY)) continue;
       const id = el.getAttribute(ID_ATTR);
       if (id) return { asset, id };
     }
   }
   return null;
+}
+
+/** The topmost shape of the clip path `clip` (live, being edited) under the point (design 014 E7). */
+export function hitClipShape(
+  doc: IconDocument,
+  clip: NodeRef,
+  p: { clientX: number; clientY: number },
+): Hit | null {
+  const el = doc.node(clip);
+  const owner = el ? clipOwnerOf(el) : null;
+  const shape = el && owner ? clipShapeAt(owner, el, p.clientX, p.clientY) : null;
+  const id = shape?.getAttribute(ID_ATTR);
+  return id ? { asset: clip.asset, id } : null;
 }
 
 /**

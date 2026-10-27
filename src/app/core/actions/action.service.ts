@@ -10,8 +10,11 @@ import { formatChord } from './shortcut';
 export interface ActionHandler {
   /** `args` were checked against the action's `args` spec. */
   run(args?: unknown): void;
-  /** May read signals (menus follow). Default: enabled. */
-  enabled?: () => boolean;
+  /**
+   * May read signals (menus follow). Default: enabled. `run` passes the arguments, so a target
+   * given by the AI counts (design 014 E14); menus and keys ask without.
+   */
+  enabled?: (args?: unknown) => boolean;
   /** For toggles / radio items in menus. */
   checked?: () => boolean | undefined;
   /** A label that changes ("Undo Change Fill", legacy §12). */
@@ -113,7 +116,7 @@ export class ActionService {
   run(id: string, args?: unknown): boolean {
     const def = actionDef(id);
     const h = this.handler(id);
-    if (!def || !h || !(h.enabled?.() ?? true) || !checkArgs(def.args, args)) return false;
+    if (!def || !h || !checkArgs(def.args, args) || !(h.enabled?.(args) ?? true)) return false;
     h.run(args);
     return true;
   }

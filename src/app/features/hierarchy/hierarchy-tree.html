@@ -63,6 +63,15 @@
           </span>
         }
         <span class="label">{{ r.node.label }}</span>
+        @if (r.node.clip) {
+          <span class="clip" data-testid="tree-clip" [title]="clipTitle(r.node.clip)">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3 3h10v10H3z" stroke-dasharray="2 1.5" />
+              <path d="M5.5 8a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0" />
+            </svg>
+            <span class="sr-only">{{ clipTitle(r.node.clip) }}</span>
+          </span>
+        }
         @if (r.node.warning) {
           <span class="warn">{{ r.node.warning }}</span>
         }

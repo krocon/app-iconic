@@ -1,3 +1,4 @@
+import { CLIP_TEXTS } from '../clip/clip-texts';
 import {
   afterNextRender,
   ChangeDetectionStrategy,
@@ -141,6 +142,10 @@ export class HierarchyTree {
   }
 
   protected icon = treeIcon;
+
+  protected clipTitle(id: string): string {
+    return CLIP_TEXTS.treeBadge(id);
+  }
 
   protected swatchStyle(s: Swatch): string | null {
     return s.kind === 'color' || s.kind === 'gradient' ? s.css : null;

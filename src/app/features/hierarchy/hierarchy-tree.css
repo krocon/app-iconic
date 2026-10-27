@@ -155,6 +155,23 @@
   color: var(--color-warning);
 }
 
+/* a node with its own clip (design 014 E12) */
+.clip {
+  display: inline-flex;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--ai-clip-stroke);
+
+  svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+  }
+}
+
 .eye {
   display: inline-flex;
   flex: none;

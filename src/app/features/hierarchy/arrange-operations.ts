@@ -26,9 +26,18 @@ import { Selection } from './follow-up';
  * / Into / Out (keyboard alternative to drag & drop), Group <g>, Ungroup. Pure command builders.
  */
 
-/** Nodes for canvas actions: no definitions, no asset roots (design 006 E1). */
-export function paintedNodes(doc: IconDocument, refs: readonly NodeRef[]): Element[] {
-  return deletableNodes(doc, refs).filter((e) => !isDefinitionElement(e));
+/**
+ * Nodes for canvas actions: no definitions, no asset roots (design 006 E1) – except the shapes of
+ * `scope`, the clip path being edited (design 014 E7).
+ */
+export function paintedNodes(
+  doc: IconDocument,
+  refs: readonly NodeRef[],
+  scope: Element | null = null,
+): Element[] {
+  return deletableNodes(doc, refs).filter(
+    (e) => !isDefinitionElement(e) || (!!scope && scope !== e && scope.contains(e)),
+  );
 }
 
 function itemsOf<K extends 'group' | 'layer'>(items: readonly IconItem[], kind: K) {

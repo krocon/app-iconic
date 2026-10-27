@@ -47,7 +47,7 @@
         @if (opt().background) {
           <app-canvas-background [fill]="fill().preview" />
         }
-        <div #layers class="layers"></div>
+        <div #layers class="layers" [class.clip-editing]="clipId() !== null"></div>
       </div>
       <svg
         #host
@@ -75,6 +75,21 @@
         [closed]="freehand.closed()"
         [strokeWidth]="freehand.strokeWidth()"
       />
+    }
+    @if (clipId(); as id) {
+      <div class="clip-banner" role="status" data-testid="clip-banner">
+        <span>{{ ct.editing(id) }}</span>
+        <span class="muted">{{ ct.editingHint }}</span>
+        <button
+          type="button"
+          class="btn primary"
+          data-testid="clip-done"
+          (pointerdown)="$event.stopPropagation()"
+          (click)="clipEdit.exit()"
+        >
+          {{ ct.done }}
+        </button>
+      </div>
     }
     <app-selection-overlay
       [model]="edit.model()"

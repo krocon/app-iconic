@@ -190,3 +190,12 @@ export function canvasRect(root: Element): ClipRect {
 export function paintingChildren(root: Element): Element[] {
   return Array.from(root.children).filter((k) => !isDefinitionElement(k));
 }
+
+/**
+ * Where new content of a layer goes (design 014 E3): into its last clip group when the layer ends
+ * with one (so it is clipped like the rest), else the asset root.
+ */
+export function layerInsertParent(root: Element): Element {
+  const last = paintingChildren(root).at(-1);
+  return last && isClipGroup(last, root) ? last : root;
+}

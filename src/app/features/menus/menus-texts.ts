@@ -31,6 +31,7 @@ export const MENUS_TEXTS = {
   alignTop: 'Top',
   alignMiddle: 'Centers Vertically',
   alignBottom: 'Bottom',
+  clipPath: 'Clip Path',
   paletteTitle: 'Command Palette',
   palettePlaceholder: 'Type a command…',
   paletteEmpty: 'No command matches.',

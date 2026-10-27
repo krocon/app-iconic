@@ -1,3 +1,4 @@
+import { clipSpaceToDocument, enclosingClipPath } from './clip-geometry';
 import { Point } from './view-transform';
 
 /** An axis-parallel rectangle in document units. */
@@ -39,9 +40,12 @@ export function documentToClient(
 /**
  * The matrix from the user space of `el` (an element of a live asset, inside its layer's shadow
  * root) to document units. `el.getCTM()` stops at the nearest viewport element – the asset's own
- * `<svg>` or the placement `<svg>` – so both screen CTMs are combined instead.
+ * `<svg>` or the placement `<svg>` – so both screen CTMs are combined instead. Shapes of a
+ * `<clipPath>` (and the `<clipPath>` itself) map through the element that uses the clip (design
+ * 014 E8).
  */
 export function nodeToDocument(host: SVGSVGElement, el: SVGGraphicsElement): DOMMatrix | null {
+  if (enclosingClipPath(el)) return clipSpaceToDocument(host, el);
   const h = host.getScreenCTM();
   const e = el.getScreenCTM();
   return h && e ? h.inverse().multiply(e) : null;

@@ -77,7 +77,7 @@ export function registerEditActions(
       },
       'edit.duplicate': { run: () => edit.duplicate(), enabled: has },
       'edit.delete': {
-        run: (a) => void edit.delete((a as { confirm?: boolean } | undefined)?.confirm ?? false),
+        run: (a) => void edit.delete((a as { confirm?: boolean } | undefined)?.confirm),
         enabled: () => edit.canDelete(),
       },
       'edit.toggleVisibility': {
@@ -137,7 +137,7 @@ function installClipboardEvents(
     if (text === null || !e.clipboardData) return;
     e.preventDefault();
     e.clipboardData.setData('text/plain', text);
-    if (e.type === 'cut') void edit.delete(false, 'cut');
+    if (e.type === 'cut') void edit.delete(undefined, 'cut');
   };
   const paste = (e: ClipboardEvent) => {
     if (!ours(e) || !e.clipboardData) return;
