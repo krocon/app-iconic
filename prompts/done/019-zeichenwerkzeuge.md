@@ -25,7 +25,7 @@ ihres Typs.
   Esc bricht die Form ab, ein zweites Esc beendet das Werkzeug. Grid-/Magic-Snap gilt für jeden Punkt.
 - **Stil-Gedächtnis je Formtyp** (Marc): Stroke, Fill, Farben, Breite, Deckkraft, Linienenden … der zuletzt
   gezeichneten oder geänderten Form desselben Typs; dauerhaft in `settings.json`. Default: kein Fill, Stroke
-  schwarz, Breite 2.
+  schwarz, Breite 1.
 - Jede Funktion ist eine Aktion mit serialisierbaren Argumenten (KI-Regel): dieselben Klicks als `points`, Maße
   als `values`.
 

@@ -41,7 +41,7 @@ describe('remembered paint (design 019 E12)', () => {
   });
 
   it('writes only what is set', () => {
-    expect(styleAttrs(THIN_LINE)).toEqual({ fill: 'none', stroke: '#000000', 'stroke-width': '2' });
+    expect(styleAttrs(THIN_LINE)).toEqual({ fill: 'none', stroke: '#000000', 'stroke-width': '1' });
   });
 
   it('remembers per kind in the settings', () => {
@@ -51,7 +51,7 @@ describe('remembered paint (design 019 E12)', () => {
     expect(memory.attrs('circle')).toEqual({
       fill: 'none',
       stroke: '#000000',
-      'stroke-width': '2',
+      'stroke-width': '1',
     });
     memory.record(el('<circle fill="#00ff00" stroke="#123456" stroke-width="5"/>'));
     expect(memory.attrs('circle')).toEqual({
@@ -60,7 +60,7 @@ describe('remembered paint (design 019 E12)', () => {
       'stroke-width': '5',
     });
     // another kind keeps its own
-    expect(memory.attrs('rect')).toEqual({ fill: 'none', stroke: '#000000', 'stroke-width': '2' });
+    expect(memory.attrs('rect')).toEqual({ fill: 'none', stroke: '#000000', 'stroke-width': '1' });
     expect(settings.settings().drawing.styles.circle.stroke).toBe('#123456');
     // a fill it does not state itself (class, gradient) keeps the remembered one – no black fill
     memory.record(el('<circle fill="url(#g)" stroke-width="7"/>'));

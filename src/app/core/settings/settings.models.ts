@@ -70,7 +70,7 @@ export const THIN_LINE: DrawStyle = {
   fill: 'none',
   fillOpacity: '',
   stroke: '#000000',
-  strokeWidth: '2',
+  strokeWidth: '1',
   strokeOpacity: '',
   strokeLinecap: '',
   strokeLinejoin: '',

@@ -59,7 +59,7 @@ describe('sketch actions (design 019 E1, E14)', () => {
     expect(Number(a['width'])).toBeCloseTo(200, 4);
     expect(Number(a['height'])).toBeCloseTo(50, 4);
     expect(a['transform']).toMatch(/^rotate\(-90 /);
-    expect(a).toMatchObject({ fill: 'none', stroke: '#000000', 'stroke-width': '2' });
+    expect(a).toMatchObject({ fill: 'none', stroke: '#000000', 'stroke-width': '1' });
     expect(store.undoLabel()).toBe('Undo Add Rectangle');
     const json = store.lastCommandJson()!;
     store.undo();

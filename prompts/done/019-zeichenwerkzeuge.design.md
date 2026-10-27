@@ -120,8 +120,8 @@ werden ebenfalls Werkzeuge.
   Gemerkt werden `fill`, `fill-opacity`, `stroke`, `stroke-width`, `stroke-opacity`, `stroke-linecap`,
   `stroke-linejoin`, `stroke-dasharray`, `opacity` – als Text, wie sie an der Form stehen (eigener `style` vor
   Attribut, „“ = nicht gesetzt).
-- **E13 Default und Merken**: Default für alle Typen `fill="none" stroke="#000000" stroke-width="2"` (Marc: „dünne
-  Linie, Stroke 1 oder 2“); gilt auch für die Sofort-Aktionen von 008. Gemerkt wird (a) nach jeder Änderung im
+- **E13 Default und Merken**: Default für alle Typen `fill="none" stroke="#000000" stroke-width="1"` (Marc: „dünne
+  Linie, Stroke 1 oder 2“; 27.10.2026: „lieber 1“); gilt auch für die Sofort-Aktionen von 008. Gemerkt wird (a) nach jeder Änderung im
   Properties-Panel für jede betroffene Form ihres Typs und (b) beim Einfügen (eine Form mit Stil der KI zählt
   ebenso). Dauerhaft in `settings.json` unter `drawing.styles.<typ>` (Rust `DrawingSettings` + TS-Spiegel,
   gemeinsame Fälle in `testdata/settings-cases.json`): jeder Wert ein Text ≤ 128 Zeichen ohne `<>"'`;{}\` und
@@ -180,7 +180,7 @@ Commands, keine neue Abhängigkeit.
   Ende einer Linie (Tangente stetig); Stil: Stroke einer Form ändern → nächste Form desselben Typs übernimmt ihn,
   ein anderer Typ nicht.
 
-## Fragen an Marc
+## Fragen an Marc (beantwortet 27.10.2026: Kürzel überall, vierter Klick ok, Breite 1)
 
 1. Kürzel `l`, `r`, `c` global (wie Fusion) – ok, oder nur bei Fokus auf der Zeichenfläche? Die Sofort-Aktionen
    heißen jetzt „Circle at Center“, „Rectangle at Center“, „Line at Center“ – passt das?

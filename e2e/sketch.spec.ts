@@ -95,7 +95,7 @@ test('2-point rectangle with the mouse: a thin line, one undo step, then selecti
   expect(Number(s!.attrs['x'])).toBeCloseTo(200, 1);
   expect(Number(s!.attrs['width'])).toBeCloseTo(200, 1);
   expect(Number(s!.attrs['height'])).toBeCloseTo(100, 1);
-  expect(s!.attrs).toMatchObject({ fill: 'none', stroke: '#000000', 'stroke-width': '2' });
+  expect(s!.attrs).toMatchObject({ fill: 'none', stroke: '#000000', 'stroke-width': '1' });
   // the tool ends with the shape: the new (unfilled) rectangle can be dragged from inside at once
   await expect(page.getByTestId('sketch-hint')).toHaveCount(0);
   const from = await toClient(page, 300, 250);

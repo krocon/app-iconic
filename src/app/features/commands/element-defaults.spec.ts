@@ -17,30 +17,30 @@ const c = { x: 500, y: 400 };
 describe('default geometry (design 008 E5, legacy §8) with a thin line (design 019 E13)', () => {
   it.each<[ShapeKind, string]>([
     ['container', '<g/>'],
-    ['circle', '<circle cx="500" cy="400" r="128" fill="none" stroke="#000000" stroke-width="2"/>'],
+    ['circle', '<circle cx="500" cy="400" r="128" fill="none" stroke="#000000" stroke-width="1"/>'],
     [
       'ellipse',
-      '<ellipse cx="500" cy="400" rx="160" ry="120" fill="none" stroke="#000000" stroke-width="2"/>',
+      '<ellipse cx="500" cy="400" rx="160" ry="120" fill="none" stroke="#000000" stroke-width="1"/>',
     ],
     [
       'rect',
-      '<rect x="372" y="272" width="256" height="256" fill="none" stroke="#000000" stroke-width="2"/>',
+      '<rect x="372" y="272" width="256" height="256" fill="none" stroke="#000000" stroke-width="1"/>',
     ],
     [
       'path',
-      '<path d="M 500,260 L 360,540 L 640,540 Z" fill="none" stroke="#000000" stroke-width="2"/>',
+      '<path d="M 500,260 L 360,540 L 640,540 Z" fill="none" stroke="#000000" stroke-width="1"/>',
     ],
     [
       'line',
-      '<line x1="340" y1="400" x2="660" y2="400" fill="none" stroke="#000000" stroke-width="2"/>',
+      '<line x1="340" y1="400" x2="660" y2="400" fill="none" stroke="#000000" stroke-width="1"/>',
     ],
     [
       'polyline',
-      '<polyline points="340,520 500,260 660,520" fill="none" stroke="#000000" stroke-width="2"/>',
+      '<polyline points="340,520 500,260 660,520" fill="none" stroke="#000000" stroke-width="1"/>',
     ],
     [
       'polygon',
-      '<polygon points="500,240 340,520 660,520" fill="none" stroke="#000000" stroke-width="2"/>',
+      '<polygon points="500,240 340,520 660,520" fill="none" stroke="#000000" stroke-width="1"/>',
     ],
     [
       'text',

@@ -44,7 +44,7 @@ const pts = (ps: readonly [number, number][]) =>
 export const THIN_LINE_ATTRS: Readonly<Record<string, string>> = {
   fill: 'none',
   stroke: BLACK,
-  'stroke-width': '2',
+  'stroke-width': '1',
 };
 
 /**

@@ -133,7 +133,7 @@ impl DrawStyle {
             fill: "none".into(),
             fill_opacity: String::new(),
             stroke: "#000000".into(),
-            stroke_width: "2".into(),
+            stroke_width: "1".into(),
             stroke_opacity: String::new(),
             stroke_linecap: String::new(),
             stroke_linejoin: String::new(),
