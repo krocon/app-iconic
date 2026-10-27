@@ -106,9 +106,10 @@ jobs:
           - { label: macos, os: macos-latest, scope: --workspace, apt: false, optional: false }
           - { label: windows, os: windows-latest, scope: --workspace, apt: false, optional: false }
           # Linux, required: the engine crates need no GTK/WebKit – no apt, cannot hang on a mirror
+          # (ai-mcp = the MCP sidecar and its bridge, prompt 018)
           - label: linux engine
             os: ubuntu-24.04
-            scope: -p ai-core
+            scope: -p ai-core -p ai-mcp
             apt: false
             optional: false
           # Linux, optional: the app with GTK/WebKit from apt. GitHub's Linux runners downloaded

@@ -549,7 +549,7 @@ mod tests {
     fn calls_go_to_the_window_of_the_id_or_the_active_one() {
         let r = Router::new(Fake::with(&[
             ("main", doc(None, false)),
-            ("doc-1", doc(Some("/a.icon"), false)),
+            ("doc-1", doc(Some("a.icon"), false)),
         ]));
         r.call("get_tree", &json!({"id": "doc-1"})).unwrap();
         r.call("get_selection", &json!({})).unwrap();
@@ -633,7 +633,7 @@ mod tests {
     fn list_documents_asks_every_window() {
         let r = Router::new(Fake::with(&[
             ("main", doc(None, true)),
-            ("doc-1", doc(Some("/a.icon"), false)),
+            ("doc-1", doc(Some("a.icon"), false)),
         ]));
         *r.host.active.lock().unwrap() = Some("doc-1".into());
         let l = r.call("list_documents", &json!({})).unwrap();
@@ -665,34 +665,27 @@ mod tests {
 
     #[test]
     fn open_document_shows_reuses_or_opens_a_window() {
+        // absolute on every OS (Windows: `C:\…`)
+        let abs = |n: &str| std::env::temp_dir().join(n).to_string_lossy().into_owned();
+        let (pa, pb, pc) = (abs("a.icon"), abs("b.icon"), abs("c.icon"));
         let r = Router::new(Fake::with(&[
-            ("main", doc(Some("/a.icon"), false)),
+            ("main", doc(Some(&pa), false)),
             ("doc-1", doc(None, true)),
         ]));
         // already open: to the front, nothing loaded
-        let d = r
-            .call("open_document", &json!({"path": "/a.icon"}))
-            .unwrap();
+        let d = r.call("open_document", &json!({ "path": pa })).unwrap();
         assert_eq!(d["id"], "main");
         assert!(!r.host.log().iter().any(|l| l.contains(":open:")));
         // an untouched window loads it
-        let d = r
-            .call("open_document", &json!({"path": "/b.icon"}))
-            .unwrap();
+        let d = r.call("open_document", &json!({ "path": pb })).unwrap();
         assert_eq!(d["id"], "doc-1");
-        assert!(
-            r.host
-                .log()
-                .contains(&r#"doc-1:open:{"path":"/b.icon"}"#.to_string())
-        );
+        let opened = format!("doc-1:open:{}", json!({ "path": pb }));
+        assert!(r.host.log().contains(&opened));
         // none untouched: a new window; a failure there closes it again
-        r.host.windows.lock().unwrap()[1].1 = doc(Some("/b.icon"), false);
-        let mut f = Fake::with(&[("main", doc(Some("/a.icon"), false))]);
+        let mut f = Fake::with(&[("main", doc(Some(&pa), false))]);
         f.fail_open = true;
         let r = Router::new(f);
-        let e = r
-            .call("open_document", &json!({"path": "/c.icon"}))
-            .unwrap_err();
+        let e = r.call("open_document", &json!({ "path": pc })).unwrap_err();
         assert_eq!(e.code, "not_found");
         let log = r.host.log();
         assert!(log.contains(&"open_window:doc-1".to_string()));

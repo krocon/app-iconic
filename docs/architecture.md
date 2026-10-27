@@ -117,6 +117,12 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 015 E11 | Aktionen `app.settings` (⌘,), `settings.set { key, value }` (Pfad aus `SETTING_KEYS`, TS-Spiegel der Rust-Regeln, gemeinsame Fälle `testdata/settings-cases.json`), `settings.reset { confirm? }`, `view.panelWidth { panel, width? }` | KI-Regel |
 | 015 E13/E14 | i18n aus editlicious (`translatable()`, Sprach-Signal) mit **tiefem** Proxy; alle Kataloge, Fehlertexte, About und Aktionsnamen (`action-catalog.de.ts`) deutsch; Property-Namen über ein Phrasenbuch; das native Menü (auch App-/Fenster-Menü über `MenuSpec.app`) folgt der Sprache, weil die Spec ein `computed` über die Texte ist | Sprachwechsel ohne Neustart, Vollständigkeit per Test |
 | 015 E15 | Theme: `data-theme` auf `<html>` + `set_window_theme` (Rahmen, `prefers-color-scheme` der WebView); Kontraste beider Schemata in `scripts/theme-contrast.test.mjs` | Tokens seit 001 vorbereitet |
+| 018 E1–E3 | KI-Steuerung über MCP wie editlicious 016: Sidecar `app-iconic-mcp` (Crate `ai-mcp`, eigene JSON-RPC-Schicht statt `rmcp`, nur serde) über stdio, Brücke TCP 127.0.0.1 + 256-Bit-Token je Start in `mcp.json` (0600); die App öffnet die Brücke in Rust genau dann, wenn `settings.mcp.enabled` an ist | erprobt, ohne Abhängigkeit, „Einstellung aus = kein Port“ hängt an keinem Fenster |
+| 018 E4–E6 | Router in Rust (`mcp.rs`, rein über `WindowHost`): Argumente gegen die Tool-Schemas prüfen und begrenzen, Zielfenster bestimmen (Id = Fenster-Label), Aufruf als Ereignis `mcp-call` an **dieses** Fenster, Antwort über `mcp_reply` (Zeitlimit); neue Fenster erst nach `mcp_ready` | das Dokument lebt im Frontend (001 E8); Rust bleibt Brücke, Fenster- und Dateiverwaltung |
+| 018 E8 | `render_preview`: das Fenster baut das Export-SVG, Rust rendert es mit resvg, Rückgabe als MCP-Bildinhalt | gleicher Weg wie „Export PNG“ |
+| 018 E9–E11 | Schreibende Tools mit `expected_revision` (`revision_conflict`); alle Schritte eines Aufrufs → ein Undo-Schritt `AiCommand` („Undo AI: Add Circle“, `UndoService.groupSince`); `ActionService.runAsync` wartet auf das Promise der Handler | Prompt; ⌘Z nimmt jeden KI-Schritt einzeln zurück |
+| 018 E12/E13 | Sperrliste für `run_action` (Beenden, `file.*`, Zwischenablage, `settings.reset`, `settings.set mcp.*`, Tastatur-Aktionen); Speichern an neuen Pfad und Export fragen im UI (`mcp.confirmFiles`, Standard an) | kein Datei-/Shell-Zugriff am geprüften Weg vorbei, die KI kann sich nicht selbst freischalten |
+| 018 E18 | Sidecar als `bundle.externalBin` über `tauri.sidecar.conf.json` + `scripts/mcp-sidecar.mjs` (Release-Pipeline 016) | Alltag und CI ohne Sidecar-Build |
 | 009 E10/E11 | Generische Editoren in `shared/controls/` (Zahl mit Stepped Slider, Farbe, Auswahl, Text, Schalter; Ausgaben `edited`/`committed`/`reverted`), Aktionen `properties.set/reset/resetAll` | wiederverwendbar für den Icon-Inspector (010); die KI setzt, was das Panel setzt |
 
 ## Schichten
@@ -193,6 +199,13 @@ Dokument-Commands `insertDefinition { asset, markup }`, `assignClip { ref, mode:
 `reset_settings()` → `Settings`, `set_window_theme(theme)`; `MenuSpec.app` (Texte des macOS-App- und Fenstermenüs,
 Settings… mit ⌘,); Aktionen `app.settings`, `settings.set { key, value }`, `settings.reset { confirm? }`,
 `view.panelWidth { panel, width? }`; keine neue Abhängigkeit, kein neuer Dokument-Command.
+
+018 (Modul `mcp_commands.rs`, Router `mcp.rs`, Crate `ai-mcp`): `mcp_info()` → `McpInfo { enabled, connections,
+sidecar }`, `mcp_ready()`, `mcp_reply(callId, result?, error?)`, `mcp_disconnect()`; Ereignisse `mcp-call
+{ callId, tool, args }` (an ein Fenster) und `mcp-status` (an alle); Fehlercodes `revision_conflict`,
+`unknown_document`, `invalid_request`, `timeout`, `denied`, `unavailable`; Einstellung `mcp { enabled, confirmFiles }`;
+Aktion `mcp.disconnect`; kein neuer Dokument-Command (`AiCommand` hüllt vorhandene ein); keine neue Abhängigkeit
+(`ai-mcp` nutzt nur `serde`/`serde_json`). Tools und Sicherheit: [mcp.md](mcp.md).
 
 ## Abhängigkeiten
 

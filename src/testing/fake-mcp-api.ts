@@ -1,3 +1,4 @@
+import { Injectable } from '@angular/core';
 import { McpApi } from '../app/core/mcp/mcp-api';
 import { McpCall, McpError, McpInfo, NO_MCP } from '../app/core/mcp/mcp.models';
 
@@ -12,6 +13,7 @@ export interface FakeReply {
  * `McpApi` without a backend (tests, browser mode): `send` plays a tool call of the app, the
  * answers are kept in `replies`; `waitFor(callId)` resolves with the answer.
  */
+@Injectable()
 export class FakeMcpApi extends McpApi {
   infoValue: McpInfo = { ...NO_MCP };
   readyCount = 0;

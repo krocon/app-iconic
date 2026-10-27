@@ -107,6 +107,12 @@
 - [x] Optional mit Plattform-Maske *(neu)* (012; dazu Schatten/Effekte als Annäherung, Schalter)
 - [ ] Share Export (macOS, optional) (016)
 
+## 11a. KI-Steuerung (MCP) *(neu)*
+- [x] Sidecar `app-iconic-mcp` (stdio) + lokale Brücke (127.0.0.1, Token je Start), Einstellung „KI-Steuerung (MCP) erlauben“ (Standard aus), Konfig-Zeile für Claude Code, Status „KI verbunden“, „KI trennen“ (018)
+- [x] Tools: Dokumente, Lesen (icon.json, Baum, Node mit BBox, Asset-SVG, Auswahl), Schreiben (Commands, Aktionen, SVG, Auswahl), Vorschau als PNG, Export, Speichern (018)
+- [x] Jeder KI-Aufruf ein Undo-Schritt („Undo AI: …“), erwartete Revision, Rückfrage vor Speichern an neuem Ort/Export, Sperrliste (018)
+- [ ] Sidecar in den Paketen, signiert wie die App (vorbereitet: `tauri.sidecar.conf.json`, `scripts/mcp-sidecar.mjs`; Pipeline 016)
+
 ## 12. Undo/Redo
 - [x] Benannte Aktionen im Menü („Undo Move“ …), ⌘Z / ⇧⌘Z (003 Namen, 005 Menü und Kürzel)
 - [x] Gesten-Coalescing und zusammengesetzte Aktionen (003 UndoService; Gesten im UI und Pfeiltasten-Folgen 007)

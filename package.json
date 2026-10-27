@@ -25,6 +25,8 @@
     "rust:fmt": "cargo fmt --manifest-path src-tauri/Cargo.toml --all --check",
     "rust:lint": "cargo clippy --manifest-path src-tauri/Cargo.toml --workspace --all-targets -- -D warnings",
     "rust:test": "cargo test --manifest-path src-tauri/Cargo.toml --workspace",
+    "mcp:sidecar": "node scripts/mcp-sidecar.mjs",
+    "mcp:sidecar:dev": "node scripts/mcp-sidecar.mjs --dev",
     "e2e": "playwright test",
     "e2e:install": "playwright install chromium",
     "check": "pnpm fixtures:check && pnpm scripts:test && pnpm format:check && pnpm lint && pnpm test && pnpm build && pnpm rust:fmt && pnpm rust:lint && pnpm rust:test"

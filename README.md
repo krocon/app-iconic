@@ -14,6 +14,10 @@ browser renders, parses and measures); Rust handles files, `.icon` bundles and Z
 The UI speaks English and German (switchable at runtime), light and dark. Settings (⌘, / Ctrl+,) are kept in
 `settings.json`, your own shortcuts in `keymap.json` – both in the app's config folder.
 
+**AI control (MCP):** an assistant such as Claude Code or Claude Desktop can drive a running AppIconic – create and
+open icons, add shapes, set the background, look at a preview, export – through the same actions as menus and
+keyboard, each AI step one undo step. Off by default; set up in Settings → AI control, see [docs/mcp.md](docs/mcp.md).
+
 ## Development
 
 Requirements: Node ≥ 22.22.3, pnpm 10, Rust stable ≥ 1.93, and the

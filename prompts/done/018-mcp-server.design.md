@@ -1,6 +1,6 @@
 # Design 018: MCP-Server – KI steuert AppIconic
 
-Status: in Arbeit · Datum: 27.10.2026 · Freigabe: Marc, 27.10.2026 („mache bitte auch noch Prompt 018“)
+Status: umgesetzt · Datum: 27.10.2026 · Freigabe: Marc, 27.10.2026 („mache bitte auch noch Prompt 018“)
 
 Vorbild: editlicious 016 (`ed-mcp`: Sidecar, Brücke, eigene JSON-RPC-Schicht; `src-tauri/src/mcp.rs`,
 `features/mcp/mcp.store.ts`, `scripts/mcp-sidecar.mjs`, `docs/mcp.md`). Übernommen mit Herkunftsvermerk und auf
@@ -116,8 +116,33 @@ ActionService.runAsync(id, args?): Promise<boolean>
 
 ## Fortschritt
 
-- [ ] Design
-- [ ] Rust: `ai-mcp` (Brücke, Server, Tools, Client, Host), Router, Commands, Einstellungen, Fehlercodes
-- [ ] Frontend: McpApi, McpStore, Undo-Gruppe, runAsync, Einstellungen, Status
-- [ ] Playwright, Ende-zu-Ende unter Xvfb
-- [ ] Doku (`docs/mcp.md`, architecture, FEATURES, CLAUDE.md, README)
+- [x] Design
+- [x] Rust: `ai-mcp` (Brücke, Server mit Bildinhalt, Tools + Schnappschuss, Client, Host), Router `mcp.rs`,
+      `mcp_commands.rs`, Einstellung `mcp`, Fehlercodes, `preview_base64`
+- [x] Frontend: McpApi + Fake, McpStore, McpTools, mcp-read, mcp-policy, `UndoService.groupSince` + `AiCommand`,
+      `ActionService.runAsync`, `FilesService.openQuietly/saveQuietly`, Abschnitt „AI control“, KI-Badge, Test-Hook
+- [x] Playwright `e2e/mcp.spec.ts`, Ende-zu-Ende unter Xvfb (`scripts/mcp-e2e.mjs`)
+- [x] Doku (`docs/mcp.md`, architecture, FEATURES, CLAUDE.md, README)
+
+## Ende-zu-Ende (27.10.2026, Container, Debug-App unter Xvfb, Sidecar über stdio)
+
+`scripts/mcp-e2e.mjs` gegen die laufende App (Einstellung an, Rückfrage aus): initialize, `tools/list` (18),
+`list_documents`, `new_document` (unberührtes `main` wiederverwendet), `icon.setFill` („Undo AI: Change
+Background“), Kreis mit Radialverlauf über `insert_svg` („Undo AI: Add SVG Snippet“), `get_tree`, `get_node` (BBox
+640 × 640 vom Browser gemessen), veraltete Revision → `revision_conflict`, `render_preview` (PNG als Bildinhalt),
+`export_png` 1024 + 64 px, zweimal `edit.undo` → je ein KI-Schritt zurück, nichts übrig; Redo, `save_document` als
+ZIP. Danach: Einstellungsdialog zeigt „AI connected“, Konfig-Zeile, Badge „AI“; Schalter aus → `mcp.json` weg,
+Sidecar meldet `not_running: AppIconic is not running, or AI control is off …`. Wieder an: `new_document` bei
+geändertem Dokument öffnet `doc-1` und wartet auf dessen Bereitschaft; `open_document` einer offenen Datei holt das
+Fenster nach vorn, eine fehlende Datei → `not_found`, das dafür geöffnete Fenster schließt wieder.
+
+## Abweichungen und Hinweise
+
+- Eigene JSON-RPC-Schicht statt `rmcp` (E2) – wie editlicious, keine neue Abhängigkeit.
+- `get_asset_svg` hat zusätzlich `node_ids` (die internen Ids, die `get_tree` verwendet).
+- Die Tools tragen `expected_revision` statt eines Pflichtfelds; ohne Angabe wird nicht geprüft (wie editlicious).
+- Die Release-Pipeline (Sidecar bauen, signieren, `--config src-tauri/tauri.sidecar.conf.json`) ist Prompt 016;
+  hier vorbereitet und getestet sind Skript und Konfiguration.
+- Die Claude-Code-Dokumentation (`docs.anthropic.com/en/docs/claude-code/mcp`) war in der Sitzung nicht abrufbar;
+  `docs/mcp.md` nutzt die übliche Form `claude mcp add <name> -- <Programm>` und `mcpServers` in
+  `claude_desktop_config.json` – bitte einmal mit der aktuellen Doku abgleichen.

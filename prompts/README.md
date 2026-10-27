@@ -41,7 +41,7 @@ Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 je
 | 014 | [014-clip-paths.md](done/014-clip-paths.md) | Clip Paths fertig: Picker, Anlegen je Layer, Bearbeitungsmodus, Vererbung Layer → Node, `clipPathUnits`, nicht selektierbar | 009 | M | ✅ 27.10.2026 |
 | 015 | [015-einstellungen-layout-i18n.md](done/015-einstellungen-layout-i18n.md) | `settings.json` (Schema, Migration, Reset), Seitenleisten ein-/ausblendbar und in der Breite ziehbar, View-Options persistent, Settings-Dialog, Deutsch/Englisch zur Laufzeit, Hell/Dunkel | 005 | M | ✅ 27.10.2026 |
 | 016 | [016-release-distribution.md](016-release-distribution.md) | Version aus einer Quelle, Lizenzhinweise, Pakete je OS, Dateizuordnung `.icon`, Release-Workflow (Probelauf), Signierung/Notarisierung vorbereitet, Share (macOS) | 012 | M | offen |
-| 018 | [018-mcp-server.md](018-mcp-server.md) | MCP-Server: KI steuert den laufenden AppIconic über serialisierbare Commands und Aktionen (Sidecar + lokale Brücke wie editlicious), Lesen, Ändern, Vorschau, Export; Standard aus | 005, 009, 012 | M–L | erst nach Freigabe |
+| 018 | [018-mcp-server.md](done/018-mcp-server.md) | MCP-Server: KI steuert den laufenden AppIconic über serialisierbare Commands und Aktionen (Sidecar + lokale Brücke wie editlicious), Lesen, Ändern, Vorschau, Export; Standard aus | 005, 009, 012 | M–L | ✅ 27.10.2026 (freigegeben von Marc) |
 | 017 | [017-haertung-paritaet.md](017-haertung-paritaet.md) | Parität gegen `docs/FEATURES.md`, Review durch separaten Agenten, feindliche Dateien, Performance großer SVGs, Barrierefreiheit, Doku | 002–016 | M | offen |
 
 ## Folge-Ideen (noch ohne Prompt)

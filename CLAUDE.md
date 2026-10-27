@@ -29,6 +29,7 @@
 | E2E (Browser) | `pnpm e2e` (Playwright gegen den Dev-Server); einmalig `pnpm e2e:install` |
 | Lint / Format | `pnpm lint`, `pnpm format`, `pnpm format:check` |
 | Frontend-Build | `pnpm build` |
+| KI-Sidecar | `pnpm mcp:sidecar:dev` (Debug neben der Debug-App), Doku `docs/mcp.md` |
 | Rust | `pnpm rust:fmt`, `pnpm rust:lint` (clippy `-D warnings`), `pnpm rust:test` (ganzer Workspace inkl. `ai-core`) |
 | Fixture-Module | `pnpm fixtures` (neu erzeugen), `pnpm fixtures:check`, `pnpm scripts:test` |
 | Alles prüfen | `pnpm check` (+ `pnpm e2e`) |
@@ -58,6 +59,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/fonts/             FontApi (list_fonts, text_to_path), DTOs + Grenzen (013)
   app/core/i18n/              translatable() (tiefer Proxy), phrasebook(), Sprach-Signal, systemLanguage,
                               catalogs.spec (Vollständigkeit aller Kataloge + Aktionsnamen, 015)
+  app/core/mcp/               McpApi (mcp_info/ready/reply/disconnect, Ereignisse mcp-call/mcp-status), DTOs (018)
   app/core/settings/          SettingsApi (load/save(patch)/reset, settings-changed, Fenster-Theme), DTOs,
                               settings-rules (TS-Spiegel von Rust merge/sanitize, SETTING_KEYS), theme (015)
   app/backend-providers.ts    Bindung der Fassaden; Dev-Build: backend-providers.dev.ts (Fakes im Browser, 003 E14)
@@ -109,6 +111,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               Fenster), SettingsSync (Stores ↔ Einstellungen, Theme, Sprache, Undo-Log),
                               SettingsDialog (⌘,, Tabs) + settings-view, settings-actions (app.settings,
                               settings.set/reset), Texte
+  app/features/mcp/           KI-Steuerung (018): McpStore (mcp-call → ausführen → mcp_reply, Status, mcp.disconnect),
+                              McpTools (Tools im Fenster: Revision, Undo-Gruppe, Rückfrage), mcp-read (rein: Dokument,
+                              Baum, Node + BBox, Asset-SVG), mcp-policy (Sperrliste), Texte
   app/features/about/         About-Dialog + Texte
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
@@ -153,6 +158,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/font_commands.rs        list_fonts, text_to_path, Vorladen der Schriften beim Start (013)
   src/settings_commands.rs    load_settings, save_settings(patch), reset_settings, set_window_theme; SettingsState,
                               Ereignis settings-changed an alle Fenster (015)
+  src/mcp.rs                  KI-Router (018, rein über WindowHost): Argumente prüfen/begrenzen, Zielfenster, Calls
+  src/mcp_commands.rs         Brücke an/aus nach settings.mcp, TauriHost (mcp-call → mcp_reply), mcp_* Commands (018)
   src/about.rs, model.rs      AppInfo, DTOs (serde camelCase)
   core/                       Crate `ai-core` (Workspace-Mitglied): Engine ohne Tauri
     src/error.rs              FsError { code, message, path }
@@ -167,6 +174,9 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
                               Fortschritt, Abbruch); `export::fonts` = Re-Export von `fonts::system`
     src/fonts/                Schriften (012, 013): system (fontdb einmal je Prozess, generische Familien), FontCatalog
                               (Familien/Stile/Ids), outline (Text → Pfad: harfrust-Shaping, skrifa-Umrisse, BBox)
+  mcp/                        Crate `ai-mcp` + Binary `app-iconic-mcp` (018, aus editlicious ed-mcp): server (MCP über
+                              stdio), tools (Schemas, Schnappschuss tools.snapshot.json), bridge, client, host
+  tauri.sidecar.conf.json     bundle.externalBin für das Sidecar (nur Release, 016)
   icons/source/app-icon.svg   Quelle des App-Icons
 testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverändert); all-fields.icon (010: alle
                               belegten Felder + unbekannte)
@@ -174,9 +184,10 @@ testdata/fonts/               Caladea-Regular.ttf + OFL.txt (Testschrift für Ru
 testdata/unique-names.json    Tabelle der eindeutigen Asset-/Layer-Namen (Rust `names.rs` und TS `unique-names.ts`)
 testdata/settings-cases.json  Standardwerte + Fälle von settings.json (Rust `settings.rs` und TS `settings-rules`, 015)
 scripts/                      fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test, keymaps.test.mjs,
-                              theme-contrast.test.mjs (Tokens light/dark, Kontraste, 015)
+                              theme-contrast.test.mjs (Tokens light/dark, Kontraste, 015); mcp-sidecar.mjs (+ Test,
+                              Sidecar bauen), mcp-e2e.mjs (Sidecar gegen die laufende App, 018)
 docs/                         architecture.md (Entscheidungen, Commands, Abhängigkeiten), legacy-analysis.md, legacy/,
-                              FEATURES.md (Checkliste)
+                              FEATURES.md (Checkliste), mcp.md (KI-Steuerung: Einrichtung, Tools, Sicherheit)
 prompts/                      Feature-Prompts (Index README.md), done/
 THIRD-PARTY-NOTICES.txt       Lizenzen fremder Werke (Lucide/Feather, Testschrift)
 ```
