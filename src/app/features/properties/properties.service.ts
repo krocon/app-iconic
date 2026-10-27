@@ -1,6 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { AskService } from '../../shared/ask/ask.service';
 import { DocumentStore } from '../document/document.store';
+import { NodeRef } from '../document/icon-document';
 import { FilesService } from '../files/files.service';
 import { STYLE_ATTRS } from '../sketch/draw-style';
 import { StyleMemory } from '../sketch/style-memory';
@@ -21,7 +22,11 @@ export class PropertiesService {
   private readonly askService = inject(AskService);
   /** Paint changes are remembered per kind of shape (design 019 E13). */
   private readonly memory = inject(StyleMemory);
-  private session: { store: DocumentStore; s: PropertySession } | null = null;
+  private session: {
+    store: DocumentStore;
+    s: PropertySession;
+    refs: readonly NodeRef[];
+  } | null = null;
 
   /** Constrain proportions of width/height and rx/ry (design 009 E6), per window. */
   readonly constrainSize = signal(false);
@@ -52,7 +57,8 @@ export class PropertiesService {
     if (this.session && (this.session.store !== store || this.session.s.name !== name)) {
       this.commit();
     }
-    this.session ??= { store, s: new PropertySession(store, store.selection(), name) };
+    const refs = store.selection();
+    this.session ??= { store, s: new PropertySession(store, refs, name), refs };
     return this.session.s.edit(value, this.constrainFor(name));
   }
 
@@ -61,13 +67,13 @@ export class PropertiesService {
     const changed = session?.s.active ?? false;
     session?.s.commit();
     this.session = null;
-    if (session && changed) this.remember(session.store, session.s.name);
+    if (session && changed) this.remember(session.store, session.s.name, session.refs);
   }
 
   /** After a change of `name` ('all' = Reset All): remember the paint of the selection. */
-  private remember(store: DocumentStore, name: string): void {
+  private remember(store: DocumentStore, name: string, refs = store.selection()): void {
     if (name === 'all' || STYLE_ATTRS.has(name) || name === 'style') {
-      this.memory.recordRefs(store.document(), store.selection());
+      this.memory.recordRefs(store.document(), refs);
     }
   }
 

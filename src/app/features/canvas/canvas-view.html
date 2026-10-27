@@ -20,7 +20,7 @@
   <div
     #vp
     class="viewport"
-    role="img"
+    [attr.role]="sketch.active() ? 'application' : 'img'"
     tabindex="0"
     [attr.aria-label]="t.canvas"
     [class.cross]="opt().crossCursor"

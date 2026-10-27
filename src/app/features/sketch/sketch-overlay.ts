@@ -68,6 +68,7 @@ export function parseValue(text: string): number | null {
         class="fields"
         role="group"
         data-testid="sketch-fields"
+        (pointerdown)="$event.stopPropagation()"
         [attr.aria-label]="t.fieldsLabel"
         [title]="t.fieldsHint"
         [style.left.px]="at.left"
@@ -76,7 +77,7 @@ export function parseValue(text: string): number | null {
         [style.bottom.px]="at.bottom"
       >
         @for (f of fields(); track f) {
-          <label class="field" [class.locked]="locked(f)">
+          <label class="field" [class.locked]="locked(f)" [class.invalid]="invalid(f)">
             <span class="name">{{ t.fields[f] }}</span>
             <input
               #field
@@ -87,6 +88,7 @@ export function parseValue(text: string): number | null {
               spellcheck="false"
               [attr.data-field]="f"
               [attr.aria-label]="locked(f) ? t.fixed(t.fields[f]) : t.fields[f]"
+              [attr.aria-invalid]="invalid(f)"
               [value]="shown(f)"
               (input)="typed(f, $event)"
               (keydown)="key(f, $event)"
@@ -159,6 +161,9 @@ export function parseValue(text: string): number | null {
       }
       &.locked .input {
         font-weight: 600;
+      }
+      &.invalid {
+        border-color: var(--color-error);
       }
     }
     .name {
@@ -267,11 +272,15 @@ export class SketchOverlay {
   protected typed(f: FieldKey, e: Event): void {
     const text = (e.target as HTMLInputElement).value;
     this.drafts.update((d) => ({ ...d, [f]: text }));
-    if (text.trim() === '') this.store.setLock(f, null);
-    else {
-      const v = parseValue(text);
-      if (v !== null) this.store.setLock(f, v);
-    }
+    const v = parseValue(text);
+    // not a number (or not a size > 0): the field is free again and marked
+    this.store.setLock(f, v !== null && (ANGLES.has(f) || v > 0) ? v : null);
+  }
+
+  /** Text typed that is no usable value. */
+  protected invalid(f: FieldKey): boolean {
+    const d = this.drafts()[f];
+    return d !== undefined && d.trim() !== '' && !this.locked(f);
   }
 
   protected key(f: FieldKey, e: KeyboardEvent): void {

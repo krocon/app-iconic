@@ -123,6 +123,11 @@ export class CanvasInteraction {
     const sel = this.selectable(store, e);
     if (!sel?.inContext && this.edit.context()) this.edit.context.set(null);
     const mode = selectModeOf(e, this.mac);
+    if (!sel && mode === 'replace' && this.insideSelection(this.toDoc(e))) {
+      // inside the frame of the selection: move it – unfilled shapes have no inside to hit
+      this.edit.gesture.start(this.moveOp(store, store.selection(), e), store, e, this.toDoc);
+      return true;
+    }
     if (!sel) {
       this.edit.gesture.start(this.marqueeOp(store, mode, this.toDoc(e)), store, e, this.toDoc);
       return true;
@@ -162,6 +167,11 @@ export class CanvasInteraction {
   }
 
   /** Moving the selection (design 007 E11): snapped by its box points, kept on the canvas. */
+  /** `p` (document units) lies inside the frame of a selected node (design 019, Marc 27.10.2026). */
+  private insideSelection(p: { x: number; y: number }): boolean {
+    return this.edit.model().frames.some((f) => insidePolygon(f, p));
+  }
+
   private moveOp(store: DocumentStore, refs: readonly NodeRef[], e: PointerLike): DragOp {
     const host = this.host();
     const doc = store.document();
@@ -366,4 +376,20 @@ export class CanvasInteraction {
       end,
     };
   }
+}
+
+/** Point in polygon (even-odd ray casting). */
+export function insidePolygon(
+  poly: readonly { x: number; y: number }[],
+  p: { x: number; y: number },
+): boolean {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const a = poly[i];
+    const b = poly[j];
+    if (a.y > p.y !== b.y > p.y && p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y) + a.x) {
+      inside = !inside;
+    }
+  }
+  return inside;
 }

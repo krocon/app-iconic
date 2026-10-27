@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { MAX_SKETCH_POINTS, SKETCH_VALUE_KEYS } from '../../core/actions/sketch-action-args';
-import { SketchShape } from '../../shared/geometry/sketch/sketch-shapes';
+import { isDegenerate, SketchShape } from '../../shared/geometry/sketch/sketch-shapes';
 import {
   Locks,
   Placed,
@@ -84,12 +84,14 @@ export class SketchService {
     for (const k of OWN_ARGS) delete rest[k];
     const addKind = kind === 'arc' ? 'path' : kind;
     return this.add.insertBuilt(label, args, (_c, _local, toLocal) => {
-      const spec = applyShapeArgs(
-        addKind,
-        shapeSpec(shape, toLocal, this.memory.attrs(kind)),
-        rest,
-      );
-      return spec ? [buildElement(spec)] : null;
+      const own = shapeSpec(shape, toLocal, this.memory.attrs(kind));
+      const spec = applyShapeArgs(addKind, own, rest);
+      if (!spec) return null;
+      // a caller's transform goes in front of the shape's own (rotation, parent matrix)
+      const mine = own.attrs['transform'];
+      const theirs = spec.attrs['transform'];
+      if (mine && theirs !== mine) spec.attrs['transform'] = theirs ? `${theirs} ${mine}` : mine;
+      return [buildElement(spec)];
     });
   }
 
@@ -144,9 +146,10 @@ export class SketchService {
       sweep = cur.sweep ?? sweep;
       placed.push(cur);
     }
-    const shape = shapeOf(tool, placed, null);
+    const found = shapeOf(tool, placed, null);
+    const shape = found && !isDegenerate(found, 1e-6) ? found : null;
     const tangent = tool === 'circle2t' || tool === 'circle3t';
-    if (!shape) this.files.notice.set(tangent ? T.noSolution : T.failed);
+    if (!shape) this.files.notice.set(tangent && !found ? T.noSolution : T.failed);
     return shape;
   }
 }

@@ -158,3 +158,17 @@ export function arcFromCenterTangent(c: Point, s: Point, t: Point, e: Point) {
   const sweep = cw ? d : d === 0 ? 0 : d - TAU;
   return { c, r, start, sweep };
 }
+
+/** A shape too small to draw (`min` = smallest length, document units): a double click, a 0 typed. */
+export function isDegenerate(shape: SketchShape, min: number): boolean {
+  switch (shape.kind) {
+    case 'line':
+      return dist(shape.a, shape.b) < min;
+    case 'rect':
+      return !(shape.w >= min && shape.h >= min);
+    case 'circle':
+      return !(shape.r >= min);
+    case 'arc':
+      return !(shape.r >= min) || Math.abs(shape.sweep) * shape.r < min;
+  }
+}

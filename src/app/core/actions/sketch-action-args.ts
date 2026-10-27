@@ -28,7 +28,10 @@ export const SKETCH_ARGS: ArgsSpec = {
   properties: {
     /** `[[x, y], …]` – one point per step of the tool. */
     points: { type: 'json' },
-    /** `{ length, angle, width, height, diameter, radius, start, sweep }` – degrees counter-clockwise. */
+    /**
+     * `{ length, angle, width, height, diameter, radius, start, sweep }` – degrees counter-clockwise.
+     * A Center Point Arc from `points` alone sweeps at most 180°; a larger one needs `sweep`.
+     */
     values: { type: 'json' },
     ...PAINT,
     ...PLACE,

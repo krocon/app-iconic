@@ -89,6 +89,19 @@ describe('sketch actions (design 019 E1, E14)', () => {
     expect(TestBed.inject(StyleMemory).attrs('circle')['stroke']).toBe('#000000');
   });
 
+  it("a caller's transform goes in front of the shape's own rotation", async () => {
+    actions.run('sketch.rect3p', {
+      points: [
+        [0, 0],
+        [0, -100],
+        [50, -50],
+      ],
+      transform: 'translate(5 6)',
+    });
+    await flush();
+    expect(attrs()['transform']).toMatch(/^translate\(5 6\) rotate\(-90 /);
+  });
+
   it('a line from two clicks; a circle from three points', async () => {
     actions.run('sketch.line', {
       points: [

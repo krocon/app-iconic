@@ -61,7 +61,8 @@
 - [x] Zeichenwerkzeuge wie Fusion *(neu)* (019): Line, Midpoint Line; Rectangle ▸ 2-Point / 3-Point / Center; Circle ▸
       Center Diameter / 2-Point / 3-Point / 2-Tangent / 3-Tangent; Arc ▸ 3-Point / Center Point / Tangent – Klicks mit
       Grid-/Magic-Snap, Maßfelder (Länge, Winkel, Breite, Höhe, Durchmesser, Radius, Start-/Bogenwinkel; Tab, Enter,
-      Esc), Tangenten an Kanten und Kreisen, Kürzel `l`/`r`/`c`, `sketch.* { points, values }` für die KI
+      Esc), Tangenten an Kanten und Kreisen, Kürzel `l`/`r`/`c`, `sketch.* { points, values }` für die KI; nach jeder
+      Form wieder Auswahl, ausgewählte Formen auch innerhalb des Rahmens ziehbar
 - [x] Stil-Gedächtnis je Formtyp *(neu)* (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
       gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)

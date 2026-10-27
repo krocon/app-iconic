@@ -1,5 +1,5 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { SketchShape } from '../../shared/geometry/sketch/sketch-shapes';
+import { isDegenerate, SketchShape } from '../../shared/geometry/sketch/sketch-shapes';
 import {
   FieldKey,
   Locks,
@@ -20,6 +20,9 @@ import {
   SketchTargets,
 } from './sketch-targets';
 import { SKETCH_TEXTS } from './sketch-texts';
+
+/** Smallest shape in screen pixels (design 019 E6). */
+export const MIN_SIZE_PX = 0.5;
 
 /** Pick distance of edges, circles and line ends in screen pixels (design 019 E10). */
 export const PICK_TOLERANCE_PX = 8;
@@ -51,6 +54,7 @@ export class SketchStore {
   /** Raised when a step was placed (the overlay focuses the first field again). */
   readonly stepSerial = signal(0);
   private targets: SketchTargets | null = null;
+  private targetsRevision = 0;
   private lastPointer: Point | null = null;
   private sweep = 0;
 
@@ -102,13 +106,17 @@ export class SketchStore {
   }
 
   /** The targets of the painted shapes (collected by the canvas at the start of a pick step). */
-  setTargets(t: SketchTargets | null): void {
+  /** The targets of the painted shapes at document revision `revision`. */
+  setTargets(t: SketchTargets | null, revision = 0): void {
     this.targets = t;
+    this.targetsRevision = revision;
   }
 
-  get needsTargets(): boolean {
+  /** A pick step whose targets are missing or older than `revision` (undo, AI). */
+  needsTargets(revision = 0): boolean {
     const pick = this.step()?.pick;
-    return (pick === 'tangent' || pick === 'anchor') && this.targets === null;
+    if (pick !== 'tangent' && pick !== 'anchor') return false;
+    return this.targets === null || this.targetsRevision !== revision;
   }
 
   /** The pointer moved to `p` (document units, snapped); `pxPerUnit` = zoom. */
@@ -155,7 +163,7 @@ export class SketchStore {
 
   /**
    * Places the current step (a click, or Enter in a field); the finished shape when it was the
-   * last step (then the next shape starts), else `null`.
+   * last step (then the tool goes off), else `null`.
    */
   place(p: Point | null = this.lastPointer, pxPerUnit = 1): SketchResult | null {
     const t = this.tool();
@@ -166,9 +174,13 @@ export class SketchStore {
     const hover = this.hover();
     const placed = [...this.placed(), cur];
     const steps = SKETCH_TOOLS[t].steps;
-    // the last step without a shape (no tangent circle, collinear points): nothing happens
-    const shape = placed.length === steps.length ? shapeOf(t, placed, null) : null;
-    if (placed.length === steps.length && !shape) return null;
+    // the last step without a shape (no tangent circle, collinear points, nothing to see – a
+    // double click, a 0 typed): nothing happens
+    const last = placed.length === steps.length;
+    const shape = last ? shapeOf(t, placed, null) : null;
+    if (last && (!shape || isDegenerate(shape, MIN_SIZE_PX / (pxPerUnit > 0 ? pxPerUnit : 1)))) {
+      return null;
+    }
     if (hover && 'tangent' in hover) this.picked.update((x) => [...x, hover]);
     this.locks.set({});
     this.targets =
@@ -179,7 +191,9 @@ export class SketchStore {
       this.move(p, pxPerUnit);
       return null;
     }
+    // one shape per tool start: afterwards the pointer selects and moves again (Marc, 27.10.2026)
     this.reset();
+    this.tool.set(null);
     return shape ? { tool: t, shape } : null;
   }
 

@@ -345,6 +345,7 @@ export class CanvasView {
 
   protected onPointerCancel(e: PointerEvent): void {
     this.freehand.cancel();
+    this.sketchPointer.leave();
     this.edit.gesture.cancel();
     this.endPan(e);
   }

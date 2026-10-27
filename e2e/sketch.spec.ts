@@ -79,7 +79,7 @@ function rectCorners(a: Record<string, string>) {
 const near = (p: { x: number; y: number }, x: number, y: number, tol = 0.01) =>
   Math.abs(p.x - x) <= tol && Math.abs(p.y - y) <= tol;
 
-test('2-point rectangle with the mouse: a thin line, one undo step, the tool stays', async ({
+test('2-point rectangle with the mouse: a thin line, one undo step, then selection again', async ({
   page,
 }) => {
   const errors = collectErrors(page);
@@ -96,13 +96,28 @@ test('2-point rectangle with the mouse: a thin line, one undo step, the tool sta
   expect(Number(s!.attrs['width'])).toBeCloseTo(200, 1);
   expect(Number(s!.attrs['height'])).toBeCloseTo(100, 1);
   expect(s!.attrs).toMatchObject({ fill: 'none', stroke: '#000000', 'stroke-width': '2' });
-  await expect(page.getByTestId('sketch-hint')).toContainText('click a corner');
-  await page.evaluate(() => window.__appIconic!.store()!.undo());
+  // the tool ends with the shape: the new (unfilled) rectangle can be dragged from inside at once
+  await expect(page.getByTestId('sketch-hint')).toHaveCount(0);
+  const from = await toClient(page, 300, 250);
+  await page.mouse.move(from.clientX, from.clientY);
+  await page.mouse.down();
+  await page.mouse.move(from.clientX + 40, from.clientY + 30, { steps: 5 });
+  await page.mouse.up();
+  await frames(page);
+  const moved = await selected(page);
+  expect(moved?.ref).toEqual(s!.ref);
+  expect(moved!.attrs['transform']).toMatch(/^translate\(/);
+  await page.evaluate(() => window.__appIconic!.store()!.undo()); // the move
+  await page.evaluate(() => window.__appIconic!.store()!.undo()); // the rectangle
   expect(
     await page.evaluate((r) => !!window.__appIconic!.store()!.document().node(r), s!.ref),
   ).toBe(false);
-  // Esc ends the tool
-  // the canvas has the focus after the last click: Esc ends the tool
+  // Esc drops a started shape, a second Esc ends the tool
+  await tool(page, 'sketch.rect2p');
+  await click(page, 600, 600);
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('sketch-hint')).toContainText('click a corner');
+  await page.locator('.viewport').focus();
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('sketch-hint')).toHaveCount(0);
   expect(errors).toEqual([]);
@@ -220,6 +235,7 @@ test('new shapes take the style of the last shape of their kind', async ({ page 
       window.__appIconic!.run('properties.set', { name: 'stroke', value: '#ff0000' }),
     ),
   ).toBe(true);
+  await tool(page, 'sketch.rect2p');
   await click(page, 300, 300);
   await click(page, 400, 400);
   expect((await selected(page))!.attrs['stroke']).toBe('#ff0000');

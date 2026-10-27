@@ -23,8 +23,11 @@ export class StyleMemory {
     if (!el) return;
     const kind = styleKindOf(el);
     if (!kind) return;
-    const style = readStyle(el);
     const now = this.settings.settings().drawing?.styles[kind];
+    const style = readStyle(el);
+    // a paint the shape does not state itself (CSS class, inherited, a gradient): keep the old one,
+    // else the next shape would be filled black
+    for (const k of ['fill', 'stroke'] as const) if (!style[k]) style[k] = now?.[k] ?? THIN_LINE[k];
     if (now && sameStyle(now, style)) return;
     this.settings.update({ drawing: { styles: { [kind]: style } } });
   }

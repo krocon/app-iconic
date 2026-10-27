@@ -32,7 +32,10 @@ werden ebenfalls Werkzeuge.
   schließen sich aus. Ein Klick (linke Taste) setzt den Punkt des aktuellen Schritts; Ziehen vom ersten Punkt und
   Loslassen ≥ 4 Bildschirm-px daneben setzt den zweiten (wie Fusion). Auswahl, Handles und Rahmenauswahl ruhen;
   Leertaste/Mitteltaste pannen weiter. Nach dem letzten Schritt wird die Form eingefügt (ein Undo-Schritt, Auswahl
-  = neue Form) und das Werkzeug bleibt für die nächste aktiv. Esc (`canvas.escape`): laufende Form verwerfen,
+  = neue Form). Danach geht das Werkzeug aus (Marc, 27.10.2026: „nach dem Zeichnen verschieben“ – Abweichung von
+  Fusion, das aktiv bleibt); die nächste Form startet wieder mit `l`/`r`/`c` oder dem Menü. Eine ausgewählte Form
+  lässt sich auch innerhalb ihres Auswahlrahmens ziehen, nicht nur an der Linie (ungefüllte Formen haben kein
+  Inneres zum Treffen). Esc (`canvas.escape`): laufende Form verwerfen,
   sonst Werkzeug beenden. Cursor `crosshair`, Hinweis je Schritt in der Statuszeile.
 - **E4 Punkte im Dokumentraum**, jeder Punkt durch `snapPoint` (Grid + Magic wie 007 E13, ⌥ = aus, Magic-Punkte
   einmal je Werkzeugstart bzw. nach jedem Einfügen gesammelt); bereits gesetzte Punkte des laufenden Werkzeugs
@@ -70,7 +73,8 @@ werden ebenfalls Werkzeuge.
   App-Funktionen. Ein Klick in die Zeichenfläche nimmt die festen Werte ebenso. Verlässt der Zeiger die
   Zeichenfläche, gilt seine letzte Position weiter (Enter setzt trotzdem). Hat der letzte Schritt keine Form (kein
   Tangentenkreis, Punkte auf einer Geraden), bleibt er offen. Die Felder springen auf die andere Seite des Zeigers,
-  wenn sie rechts oder unten aus der Zeichenfläche ragen würden.
+  wenn sie rechts oder unten aus der Zeichenfläche ragen würden. Formen ohne Größe (Doppelklick, 0 getippt) werden
+  nicht eingefügt; was keine Zahl bzw. bei Längen nicht > 0 ist, löst das Feld und markiert es als ungültig.
 - **E7 Vorschau** im Overlay (Viewport-Pixel, nie im Dokument-DOM): die Form in Akzentfarbe, Hilfslinien
   gestrichelt (Basiskante, Radius, Bogen-Sehne), gesetzte Punkte als Kreuze, unter dem Zeiger liegender Bezug
   (Tangente/Endpunkt) hervorgehoben, gewählte Bezüge markiert.

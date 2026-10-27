@@ -17,7 +17,7 @@ describe('SketchStore (design 019 E3–E6)', () => {
     expect(store.tool()).toBeNull();
   });
 
-  it('places steps; the last one gives the shape and starts the next', () => {
+  it('places steps; the last one gives the shape and ends the tool', () => {
     store.toggle('rect2p');
     expect(store.fields()).toEqual([]);
     expect(store.place({ x: 10, y: 10 })).toBeNull();
@@ -27,7 +27,7 @@ describe('SketchStore (design 019 E3–E6)', () => {
     const r = store.place({ x: 30, y: 50 });
     expect(r?.shape).toEqual({ kind: 'rect', c: { x: 20, y: 30 }, w: 20, h: 40, angle: 0 });
     expect(store.placed()).toEqual([]);
-    expect(store.tool()).toBe('rect2p');
+    expect(store.tool()).toBeNull();
   });
 
   it('typed values are fixed until cleared; the pointer gives the rest', () => {
@@ -48,10 +48,22 @@ describe('SketchStore (design 019 E3–E6)', () => {
       expect(r.shape.w).toBeCloseTo(200, 9);
       expect(r.shape.h).toBeCloseTo(100, 9);
     }
+    store.toggle('rect3p');
     store.place({ x: 0, y: 0 });
     store.setLock('length', 5);
     store.setLock('length', null);
     expect(store.locks()).toEqual({});
+  });
+
+  it('a shape of no size (double click, 0 typed) is not placed; the step stays', () => {
+    store.toggle('line');
+    store.place({ x: 5, y: 5 });
+    expect(store.place({ x: 5, y: 5 })).toBeNull();
+    expect(store.placed().length).toBe(1);
+    store.setLock('length', 0);
+    expect(store.place({ x: 50, y: 5 })).toBeNull();
+    store.setLock('length', 10);
+    expect(store.place({ x: 50, y: 5 })?.shape.kind).toBe('line');
   });
 
   it('Esc drops the shape first, then the tool', () => {

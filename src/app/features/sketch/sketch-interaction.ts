@@ -73,8 +73,9 @@ export class SketchInteraction {
 
   /** Collects the pick targets when the step needs them. */
   private targets(): void {
-    if (this.sketch.needsTargets) {
-      this.sketch.setTargets(collectSketchTargets(this.layers(), this.host()));
+    const revision = this.store()?.revision() ?? 0;
+    if (this.sketch.needsTargets(revision)) {
+      this.sketch.setTargets(collectSketchTargets(this.layers(), this.host()), revision);
     }
   }
 
