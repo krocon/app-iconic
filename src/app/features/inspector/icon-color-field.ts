@@ -4,6 +4,15 @@ import { CONTROLS_TEXTS } from '../../shared/controls/controls-texts';
 import { DraftField } from '../../shared/controls/draft-field';
 import { hexOf, isIconColor, spaceOf, withHex } from './icon-color-text';
 
+const SHORT: Record<string, string> = {
+  'display-p3': 'P3',
+  'extended-display-p3': 'P3+',
+  srgb: 'sRGB',
+  'extended-srgb': 'sRGB+',
+  gray: 'Gray',
+  'extended-gray': 'Gray+',
+};
+
 /**
  * A colour of `icon.json` (design 010 E8): swatch with the native picker, a text field that takes
  * hex (`#RGB`, `#RRGGBB`, `#RRGGBBAA` – the channels in the file's colour space) or Icon
@@ -37,7 +46,7 @@ import { hexOf, isIconColor, spaceOf, withHex } from './icon-color-text';
         (keydown)="onKey($event)"
         (blur)="confirm()"
       />
-      <span class="unit" data-testid="color-space">{{ space() }}</span>
+      <span class="unit" data-testid="color-space" [title]="space()">{{ short() }}</span>
     </span>
   `,
   styleUrl: '../../shared/controls/controls.css',
@@ -49,6 +58,8 @@ export class IconColorField extends DraftField {
     (hexOf(this.value()) ?? '#000000').slice(0, 7).toLowerCase(),
   );
   protected readonly space = computed(() => spaceOf(this.value()));
+  /** Short name of the colour space next to the field (the full one in the tooltip). */
+  protected readonly short = computed(() => SHORT[this.space()] ?? this.space());
   /** Shown as hex – Icon Composer's long form stays in the tooltip. */
   protected override readonly shown = computed(() =>
     this.editing() ? this.draft() : (hexOf(this.value()) ?? this.value() ?? ''),

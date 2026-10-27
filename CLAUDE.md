@@ -56,8 +56,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/document/      IconDocument, DocumentStore (runCommand), UndoService (undo/), Commands (commands/:
                               serialisierbar, command-json.ts + registry.ts commandFromJson, 005; tree-commands:
                               ReorderNode/GroupNodes/Ungroup, 006; set-attributes: Ergebnis einer Geste, 007),
-                              model/ (icon-json, unique-names, selection, reorder-rules), svg/ (node-ids,
-                              sanitize-svg, resolve-styles, svg-references, style-props) (003, 006, 009)
+                              model/ (icon-json, unique-names, selection, reorder-rules, specializations 010),
+                              svg/ (node-ids, sanitize-svg, resolve-styles, svg-references, style-props) (003–010)
   app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster/Quit), Recent,
                               file-actions (Aktionen der Datei-Funktionen), Texte (003, 005)
   app/features/menus/         Menümodell (rein), MenuService (nativ/HTML), MenuBar (Windows/Linux), Befehlspalette,
@@ -74,10 +74,16 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               style/Attribut/berechnet/Default), property-edit (setAttributes/setText, PropertySession
                               = Geste je Feld, Reset), panel-model, mixed, constrain, transform-list (rein) +
                               transform-editor/-step-row, PropertiesService + properties-actions (properties.*)
+  app/features/inspector/     Icon-Inspector (010) im Properties-Panel: icon-fields (rein: Feld-Specs je Root/Gruppe/
+                              Layer), fill-model, icon-color-text, platforms, icon-json-text (rein), inspector-edit
+                              (Felder → SetIconJsonValue, Umbenennen), IconInspectorService + icon-actions (icon.*),
+                              Komponenten icon-inspector, inspector-section/-row, variant-tools, fill-editor,
+                              icon-color-field, json-preview
   app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3), Texte der Fensterhülle
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
-                              icon-color, asset-placement (004), canvas-actions, View-Options-Menü (005);
+                              icon-color, asset-placement (004), effects (Vorschau-Annäherung, 010),
+                              canvas-actions, View-Options-Menü (005);
                               Auswahl/Handles (007): CanvasEditStore (Kontext, Punkt, Rahmen, Snap), canvas-pointer
                               (Klick/Rahmen/Ziehen), canvas-gesture (Geste je Ziehen), hit-test, selection-measure
                               (Rahmen + Handle-Sets über CTM), selection-overlay, magic-points, edit-ops (rein),
@@ -95,7 +101,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,
                               command-cases.ts, tree-documents.ts, fake-clipboard-api.ts, browser-hook.ts =
                               `window.__appIconic` für Playwright)
-  testing/fixtures/           generiert aus testdata/ (camscanner.icon, svg/, unique-names.json; `pnpm fixtures`)
+  testing/fixtures/           generiert aus testdata/ (camscanner.icon, all-fields.icon, svg/, unique-names.json;
+                              `pnpm fixtures`)
 e2e/                          Playwright-Tests gegen den Dev-Server
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
@@ -115,7 +122,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
     src/menu_spec.rs          MenuSpec prüfen, Accelerators, Menü ohne Fenster (005)
     src/keymap_file.rs        keymap.json laden (005)
   icons/source/app-icon.svg   Quelle des App-Icons
-testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverändert)
+testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverändert); all-fields.icon (010: alle
+                              belegten Felder + unbekannte)
 testdata/unique-names.json    Tabelle der eindeutigen Asset-/Layer-Namen (Rust `names.rs` und TS `unique-names.ts`)
 scripts/                      fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test, keymaps.test.mjs
 docs/                         architecture.md (Entscheidungen, Commands, Abhängigkeiten), legacy-analysis.md, legacy/,

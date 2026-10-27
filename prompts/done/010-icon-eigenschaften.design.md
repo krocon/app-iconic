@@ -1,6 +1,6 @@
 # Design 010: Icon-Eigenschaften (icon.json-Inspector)
 
-Status: in Arbeit · Datum: 27.10.2026
+Status: umgesetzt · Datum: 27.10.2026
 
 ## Belege für das Format
 
@@ -195,4 +195,34 @@ Rust: `SaveAssetDto { name, text?, unchanged, source? }`, `AssetInput { …, sou
 
 ## Fortschritt
 
-- [x] Design
+- [x] Design (Belege: Auswertung von 10 echten Dateien + inoffiziellem Schema)
+- [x] 009-Nacharbeit E15: roter Test `style-props.spec.ts` zuerst (8 rot), dann textuelles Entfernen; Erwartungen in
+      `property-edit.spec`, `edit-operations.spec` und `e2e/properties.spec` auf den byte-gleichen Rest angepasst
+      (`'fill: blue; opacity: 0.5'` → `'opacity: 0.5'` statt der CSSOM-Form `'opacity: 0.5;'`)
+- [x] Rust: `SaveAssetDto.source` / `AssetInput.source`, Leerlisten wie Icon Composer, Fixture `all-fields.icon`
+      (Bearbeiten an anderer Stelle ändert genau eine Zeile; unverändert bytegleich), Tests in `save.rs`,
+      `json_format.rs`, `model.rs`
+- [x] Rein: `specializations`, `setIn` sortiert, `fill-model`, `icon-color-text`, `platforms`, `icon-json-text`,
+      `icon-fields`, `inspector-edit`, `canvas/effects`; Command `renameAsset` (Registry, Roundtrip-Fall)
+- [x] UI: Inspector im Properties-Panel (ein Item gewählt; mehrere → Hinweis), Fill-Editor, Farbfeld, Abschnitte,
+      Varianten-Werkzeuge, JSON-Vorschau, Other properties; `IconInspectorService`, Aktionen `icon.*`,
+      Ansichtsoption `view.effects`; `SelectField` mit `clearable`/`optionLabels`
+- [x] Playwright `e2e/inspector.spec.ts` (4): linear-gradient → Verlauf im Canvas (Pixel), Hex im Farbraum der
+      Datei, Undo, Vorschau markiert; Dark-Variante anlegen/entfernen bytegleich; Layer-Opacity im Canvas,
+      Schatten-Filter neutral/chromatic/aus, Transluzenz, Datei umbenennen → Speicher-Request mit `source`;
+      `icon.setFill`
+- [x] Echte App unter Xvfb (WebKitGTK): Root → Linear Gradient per Tastatur, Canvas zeigt den Verlauf, Vorschau
+      markiert die Änderung; Gruppe in Dark mit Abschnitten und Hinweisen
+- [x] Doku, `pnpm check` + `pnpm e2e` grün
+
+## Abweichungen und Grenzen
+
+- **`radial-gradient`** nur lesen/Farben bearbeiten, nicht neu wählbar (E7, nicht belegt).
+- **Tinted** wird bearbeitet, aber nicht im Canvas gezeigt; Layer-`fill`, `specular`, `blur-material`,
+  `lighting`, `glass` haben keine Vorschau (Hinweis im Inspector).
+- **Schatten je Layer** statt je Gruppe (E13) – bei mehreren Layern einer Gruppe fällt der Schatten mehrfach.
+- **Blur an** setzt 0,5 (Startwert angenommen); `blur-material: null` = aus.
+- **Gruppennamen** sind nicht eindeutig (das Format verlangt es nicht), Layer-Namen schon.
+- Die Farbraum-Angabe neben dem Hex-Feld ist kurz (P3, sRGB, Gray; `+` = extended), der volle Name im Tooltip.
+- Bestehende E2E-Pixeltests mit Farbvergleich laufen mit `effects` aus (`canvas.spec` „first group on top“),
+  weil die Transluzenz-Annäherung die Farben aufhellt.

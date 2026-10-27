@@ -77,12 +77,13 @@
 - [ ] Clip Path: Picker, Create, Edit-Modus, Vererbung, `clipPathUnits` (014)
 
 ## 8. Icon-Eigenschaften
-- [ ] Hintergrund-Fill: automatic, system-light/-dark, solid, automatic-gradient, linear-/radial-gradient (Apple-Format) (010)
-- [ ] Specializations je Appearance (light/dark/tinted) soweit im Format vorhanden *(neu)* (010)
-- [ ] Gruppe: Shadow (neutral/chromatic/none, opacity), Translucency (enabled, value) (010)
-- [ ] Layer: Name, Opacity, Asset-Zuordnung (010)
-- [ ] Supported Platforms (squares, circles) (010)
-- [ ] icon.json Preview (read-only, kopierbar) (010)
+- [x] Hintergrund-Fill: automatic, system-light/-dark, none, solid, automatic-gradient, linear-gradient mit Orientierung (Apple-Format); radial-gradient nur lesen – nicht belegt (010)
+- [x] Specializations je Appearance (Default/Dark/Tinted) für alle belegten Felder *(neu)*; `idiom`-Varianten bleiben erhalten (010)
+- [x] Gruppe: Name, Hidden, Opacity, Blend-Mode, Lighting, Specular, Blur, Shadow (neutral/chromatic/off, opacity), Translucency (enabled, value), Position (010)
+- [x] Layer: Name (eindeutig), Opacity, Asset-Zuordnung und Umbenennen der Datei, Hidden, Blend-Mode, Glass, Fill, Position (010)
+- [x] Supported Platforms (squares, circles) und Farbraum für SVG-Farben ohne Profil (010)
+- [x] icon.json Preview (read-only, kopierbar, letzte Änderung markiert); „Other properties (read-only)“ (010)
+- [x] Canvas-Vorschau: Fill je Appearance, Schatten/Transluzenz/Blend-Modes als Annäherung (Ansichtsoption) (010)
 
 ## 9. SVG-Quelltext
 - [ ] Edit SVG… mit CodeMirror, Fehleranzeige, Übernahme nur bei gültigem Markup, Undo (011)

@@ -75,6 +75,13 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 009 E3/E4 | Schreiben = Attribut, eine gleichnamige `style`-Eigenschaft fällt im selben `setAttributes` weg (`value: null` = entfernen); Text-Inhalt über den neuen Command `setText`; getippte Werte sind eine Geste je Feld (Ziele beim Start fest, `merge` → ein Command), Enter/Blur = commit, Esc = cancel | eine Änderung, die sichtbar wirkt; ein Undo-Schritt je getipptem Wert; serialisierbar (KI-Regel) |
 | 009 E7 | Transform-Liste rein (`transform-list.ts`): strenge Grammatik, unveränderte Schritte behalten ihren Text, Matrix = Produkt der Schritte (in Playwright gegen `transform.baseVal.consolidate()` geprüft); „Use pivot“ = BBox-Mitte im Raum des `rotate` | Rohtext bleibt lesbar; der Browser bleibt Richter über die Bedeutung |
 | 009 E8 | Reset entfernt Attribut + `style`-Eigenschaft (statt Defaults zu schreiben); Geometrie, ohne die die Form verschwindet, und `id` sind nicht zurücksetzbar | Defaults wie `fill="none"` hätten das Bild verändert; `url(#id)`-Verweise bleiben heil |
+| 010 E1–E3 | Icon-Inspector im Apple-Format, nur belegte Felder (echte Icon-Composer-Dateien + inoffizielles Schema); Appearance Default/Dark/Tinted: Bearbeiten in Dark/Tinted legt eine Variante an (`X` → `X-specializations`, nie beides), ✕ entfernt sie (nur Grund übrig → wieder `X`), `idiom`-Einträge bleiben unangetastet (`document/model/specializations.ts`) | so schreibt Icon Composer (alle Belegdateien); Hin und Zurück bytegleich |
+| 010 E4 | Neue `icon.json`-Schlüssel kommen in sortierten Objekten an ihre alphabetische Stelle (`setIn`) | Icon-Composer-Dateien bleiben sortiert; Umwandlung `fill` → `fill-specializations` an derselben Stelle |
+| 010 E5–E8 | Änderungen als `SetIconJsonValue` (mehrere = `composite`, ein sprechender Undo-Name), Unterfelder einzeln (`…/shadow/opacity`); Fill-Editor = Sicht (`fill-model.ts`, ungeändert = gleicher Wert); Farben als Hex der Kanäle im Farbraum der Datei, geschrieben in gelesener Form (Präfix, Komponenten, 5 Nachkommastellen) | verlustfrei; unbekannte Formen bleiben read-only |
+| 010 E9 | Asset umbenennen = Command `renameAsset` + Referenzen in einem Schritt; `SaveAsset.source` sagt Rust, unter welchem Namen die Sitzung die Bytes hat | auch PNG-Assets überleben das Umbenennen, ohne Bytes über die Brücke |
+| 010 E11 | Rust schreibt leere Listen wie Icon Composer (`[\n\n  ]`, `New.icon`) | belegt; leere Objekte mangels Beleg weiter `{}` |
+| 010 E13 | Canvas-Vorschau der Gruppen-Effekte als **Annäherung** (Ansichtsoption „Effects Preview“): Schatten als SVG-Filter je Layer (`feDropShadow` bzw. abgedunkelte Weichzeichnung), Transluzenz als Opacity-Verlauf (`mask-image`), Blend-Modes als `mix-blend-mode`; Werte je Appearance | Liquid Glass wird nicht nachgebaut; Filter im Shadow Root des Layers sind zoomfest |
+| 010 E15 | `styleWithout` entfernt nur die eine Deklaration textuell, der Rest des `style`-Attributs bleibt Zeichen für Zeichen | Roundtrip-Regel (009 entfernte über das CSSOM und verlor unbekannte Deklarationen) |
 | 009 E10/E11 | Generische Editoren in `shared/controls/` (Zahl mit Stepped Slider, Farbe, Auswahl, Text, Schalter; Ausgaben `edited`/`committed`/`reverted`), Aktionen `properties.set/reset/resetAll` | wiederverwendbar für den Icon-Inspector (010); die KI setzt, was das Panel setzt |
 
 ## Schichten
@@ -118,7 +125,11 @@ DTO-Ergänzung 003: `IconDocumentDto.name`, `SaveResult.name` (Dateiname fürs U
 (Auswahl, Handles, Snapping, BoundsGuard nur im Frontend; neuer Dokument-Command `setAttributes`). 008: keine
 neuen Dokument-Commands (Add = `composite` aus `insertNode`/`addAsset`/`addGroup`), Fehlercode `invalid_image`,
 keine neue Abhängigkeit (Bildköpfe von Hand, `base64` war schon da). 009: kein Rust-Command; Dokument-Commands `setAttributes` mit `value: null` (Attribut
-entfernen) und neu `setText { changes: [{ ref, text }] }`; keine neue Abhängigkeit.
+entfernen) und neu `setText { changes: [{ ref, text }] }`; keine neue Abhängigkeit. 010: kein neuer Rust-Command; `save_icon`-DTO `SaveAssetDto.source?` (umbenanntes,
+unverändertes Asset), Formatter mit Icon-Composer-Leerlisten; Dokument-Command `renameAsset { from, to }`;
+Aktionen `icon.setFill`, `icon.set`, `icon.removeVariant`, `icon.renameGroup`, `icon.renameLayer`,
+`icon.renameAsset`, `icon.setPlatforms`, `icon.setColorSpace`, `icon.editAppearance`, `icon.copyJson`, `view.effects`;
+keine neue Abhängigkeit.
 
 Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `export_svg`,
 `export_png` (012), `list_fonts`, `text_to_path` (013), `load_settings`/`save_settings` (015).
