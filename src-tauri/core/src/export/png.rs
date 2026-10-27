@@ -157,6 +157,23 @@ mod tests {
         assert!(has_transparency(&p));
     }
 
+    /// Clip paths of assets as the export builds them (design 014 E11): the asset root nested in a
+    /// placement `<svg>`, a layer clip group, a node with its own `objectBoundingBox` clip inside
+    /// a transformed group, ids prefixed per layer.
+    #[test]
+    fn asset_clip_paths_in_placement_svg() {
+        let svg = icon(
+            r##"<g><svg x="0" y="0" width="1024" height="1024" viewBox="0 0 100 100"><svg viewBox="0 0 100 100"><defs><clipPath id="l0-clip"><rect x="0" y="0" width="50" height="100"/></clipPath><clipPath id="l0-obb" clipPathUnits="objectBoundingBox"><rect x="0" y="0" width="1" height="0.5"/></clipPath></defs><g clip-path="url(#l0-clip)"><rect width="100" height="40" fill="#ff0000"/></g><g transform="translate(0 60)"><rect width="100" height="40" fill="#0000ff" clip-path="url(#l0-obb)"/></g></svg></svg></g>"##,
+        );
+        let p = render_png(&svg, 100, empty_fonts()).unwrap();
+        // layer clip: left half red, right half cut away
+        assert!(close(rgba(&p, 25, 20), [255, 0, 0, 255]));
+        assert_eq!(rgba(&p, 75, 20)[3], 0);
+        // OBB clip relative to the rect's own box (y 60 … 100 → upper half 60 … 80)
+        assert!(close(rgba(&p, 50, 70), [0, 0, 255, 255]));
+        assert_eq!(rgba(&p, 50, 90)[3], 0);
+    }
+
     #[test]
     fn text_with_a_system_font() {
         let fonts = system_fonts();

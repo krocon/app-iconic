@@ -2,6 +2,7 @@ import { IconGroup, IconLayer } from '../../../core/icon-file/icon-file.models';
 import { NodeRef } from '../icon-document';
 import { UNDO_TEXTS, UndoLabel } from '../undo/undo-texts';
 import { AddAsset, RemoveAsset, RenameAsset, ReplaceAssetMarkup } from './asset-commands';
+import { AssignClip, InsertDefinition, RemoveClipPath, SetLayerClip } from './clip-commands';
 import { CommandError, CompositeCommand, DocCommand } from './command';
 import { CommandType } from './command-json';
 import { DROP_POSITIONS, DropPosition, TreeTarget } from '../model/selection';
@@ -286,6 +287,34 @@ const PARSERS: Record<CommandType, Parser> = {
   renameAsset: (o) => {
     keys(o, ['from', 'to']);
     return new RenameAsset(name(o['from'], 'from'), name(o['to'], 'to'));
+  },
+  insertDefinition: (o) => {
+    keys(o, ['asset', 'markup', 'label']);
+    return new InsertDefinition(
+      name(o['asset'], 'asset'),
+      str(o['markup'], 'markup', MAX_NODE_MARKUP),
+      label(o['label']),
+    );
+  },
+  assignClip: (o) => {
+    keys(o, ['ref', 'mode', 'clip']);
+    const mode = o['mode'];
+    if (mode !== 'own' && mode !== 'none' && mode !== 'inherit') fail('mode');
+    const clip = o['clip'] === undefined ? undefined : name(o['clip'], 'clip');
+    if ((mode === 'own') !== (clip !== undefined)) fail('clip');
+    return new AssignClip(ref(o['ref'], 'ref'), mode, clip);
+  },
+  setLayerClip: (o) => {
+    keys(o, ['asset', 'clip']);
+    if (!('clip' in o)) fail('clip');
+    return new SetLayerClip(
+      name(o['asset'], 'asset'),
+      o['clip'] === null ? null : name(o['clip'], 'clip'),
+    );
+  },
+  removeClipPath: (o) => {
+    keys(o, ['ref']);
+    return new RemoveClipPath(ref(o['ref'], 'ref'));
   },
   composite: (o, depth, count) => {
     keys(o, ['label', 'commands']);

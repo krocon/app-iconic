@@ -55,3 +55,21 @@ export function smallDocument(path: string | null = '/a.icon'): IconDocument {
     warnings: [],
   });
 }
+
+/** A document with one group / layer showing `a.svg` = `<svg viewBox="0 0 100 100">body</svg>`. */
+export function svgDocument(body: string, attrs = 'viewBox="0 0 100 100"'): IconDocument {
+  return IconDocument.fromDto({
+    path: null,
+    name: null,
+    format: 'bundle',
+    iconJson: { groups: [{ layers: [{ 'image-name': 'a.svg', name: 'a' }] }] },
+    assets: [
+      {
+        name: 'a.svg',
+        kind: 'svg',
+        text: `<svg xmlns="http://www.w3.org/2000/svg" ${attrs}>${body}</svg>`,
+      },
+    ],
+    warnings: [],
+  });
+}

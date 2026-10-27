@@ -2,6 +2,10 @@ import { IconDocument } from '../app/features/document/icon-document';
 import { newGroup, newLayer } from '../app/features/document/model/icon-json';
 import { parseSvg } from '../app/features/document/svg/node-ids';
 import {
+  AssignClip,
+  InsertDefinition,
+  RemoveClipPath,
+  SetLayerClip,
   AddAsset,
   AddGroup,
   AddLayer,
@@ -129,6 +133,56 @@ export const CASES: [string, (doc: IconDocument) => DocCommand][] = [
   ['AddAsset', () => new AddAsset('c.svg', SVG)],
   ['RemoveAsset', () => new RemoveAsset('a.svg')],
   ['RenameAsset', () => new RenameAsset('a.svg', 'renamed.svg')],
+  // clip paths (design 014 E5); `commandDocument` has `<clipPath id="c">` (n8) in a.svg
+  [
+    'InsertDefinition',
+    () =>
+      new InsertDefinition('a.svg', '<clipPath id="d"><circle r="3" onclick="x()"/></clipPath>'),
+  ],
+  [
+    'InsertDefinition (makes the defs)',
+    () => new InsertDefinition('b.svg', '<clipPath id="e"><rect width="2" height="2"/></clipPath>'),
+  ],
+  ['AssignClip (own)', () => new AssignClip(a('n3'), 'own', 'c')],
+  ['SetLayerClip', () => new SetLayerClip('a.svg', 'c')],
+  [
+    'AssignClip (none: out of the layer clip group)',
+    () =>
+      new CompositeCommand('assignClip', [
+        new InsertNode(a('n1'), '<rect width="1"/>'),
+        new SetLayerClip('a.svg', 'c'),
+        new AssignClip(a('n2'), 'none'),
+      ]),
+  ],
+  [
+    'AssignClip (inherit: back into the group)',
+    () =>
+      new CompositeCommand('assignClip', [
+        new InsertNode(a('n1'), '<rect width="1"/>'),
+        new SetLayerClip('a.svg', 'c'),
+        new AssignClip(a('n2'), 'own', 'c'),
+        new AssignClip(a('n2'), 'inherit'),
+      ]),
+  ],
+  [
+    'SetLayerClip (remove)',
+    () =>
+      new CompositeCommand('layerClip', [
+        new InsertNode(a('n1'), '<rect width="1"/>'),
+        new SetLayerClip('a.svg', 'c'),
+        new SetLayerClip('a.svg', null),
+      ]),
+  ],
+  ['RemoveClipPath (unused)', () => new RemoveClipPath(a('n8'))],
+  [
+    'RemoveClipPath',
+    () =>
+      new CompositeCommand('removeClipPath', [
+        new SetLayerClip('a.svg', 'c'),
+        new AssignClip(a('n3'), 'own', 'c'),
+        new RemoveClipPath(a('n8')),
+      ]),
+  ],
   [
     'CompositeCommand',
     () =>
@@ -150,5 +204,12 @@ export function commandDocument(): IconDocument {
     groups: [...doc.iconJson.groups!, newGroup(newLayer('b.svg', 'b'))],
   };
   doc.insertAsset({ name: 'b.svg', kind: 'svg', svg: freshSvg(doc) });
+  // a clip path in a.svg (design 014): defs n7, clipPath n8, rect n9
+  const root = doc.assets.get('a.svg')!.svg!.root;
+  const defs = parseSvg(
+    '<svg xmlns="http://www.w3.org/2000/svg"><defs><clipPath id="c"><rect width="5" height="5"/></clipPath></defs></svg>',
+  )!.root.firstElementChild!;
+  doc.prepare(defs);
+  root.append(root.ownerDocument.importNode(defs, true));
   return doc;
 }

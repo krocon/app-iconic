@@ -85,6 +85,12 @@ export const UNDO_TEXTS = {
   removeVariant: 'Remove Appearance Variant',
   // SVG source (design 011 E12)
   optimizePath: 'Optimize Path',
+  // clip paths (design 014 E5)
+  createClipPath: 'Create Clip Path',
+  assignClip: 'Assign Clip Path',
+  layerClip: 'Change Layer Clip',
+  removeClipPath: 'Remove Clip Path',
+  changeClipUnits: 'Change Clip Path Units',
 } as const;
 
 /** Key of an action name (`label` of a command). */
