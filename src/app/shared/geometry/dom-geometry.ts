@@ -1,4 +1,4 @@
-import { clipSpaceToDocument, enclosingClipPath } from './clip-geometry';
+import { clipSpaceToDocument, enclosingClipPath, localBBox } from './clip-geometry';
 import { Point } from './view-transform';
 
 /** An axis-parallel rectangle in document units. */
@@ -54,8 +54,8 @@ export function nodeToDocument(host: SVGSVGElement, el: SVGGraphicsElement): DOM
 /** Bounds of `el` in document units: its `getBBox()` corners mapped by {@link nodeToDocument}. */
 export function nodeBoundsInDocument(host: SVGSVGElement, el: SVGGraphicsElement): Rect | null {
   const m = nodeToDocument(host, el);
-  if (!m) return null;
-  const b = el.getBBox();
+  const b = m ? localBBox(el) : null;
+  if (!m || !b) return null;
   const pts = [
     [b.x, b.y],
     [b.x + b.width, b.y],

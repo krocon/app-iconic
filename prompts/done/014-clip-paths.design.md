@@ -1,6 +1,6 @@
 # Design 014: Clip Paths
 
-Status: in Arbeit · Datum: 27.10.2026
+Status: umgesetzt · Datum: 27.10.2026
 
 ## Ausgangslage
 
@@ -70,7 +70,10 @@ mit ID-Präfixen je Layer (012 E1) und resvg.
   verschwindet der Clip (Undo, Löschen) oder wechselt das Dokument, endet der Modus. Der Clip wirkt im Modus weiter
   (Live-Ergebnis). Die Hierarchie zeigt die Formen unter Definitions › clipPath (Auswahl klappt sie auf).
   Bezugs-Element („Owner“) für `userSpaceOnUse`/`objectBoundingBox`: das erste darstellende Element, das den Clip
-  benutzt (Dokumentreihenfolge) – eindeutig und für die KI vorhersagbar.
+  benutzt (Dokumentreihenfolge) – eindeutig und für die KI vorhersagbar. Der **BoundsGuard** (007 E14) gilt im Modus
+  nicht: ein Layer-Clip deckt die Leinwand, schneiden heißt ihn teilweise hinausschieben. Ein Klick auf Inhalt
+  wählt nie die Clip-Gruppe selbst, sondern ihr Kind (die Gruppe zählt wie die Layer-Ebene; Verschieben der Gruppe
+  hätte den Clip mitgenommen und sie per Transform zur gewöhnlichen Gruppe gemacht – unter Xvfb gefunden).
 - **E8 Geometrie der Clip-Formen** (`shared/geometry/clip-geometry.ts`): Clip-Raum → Dokument =
   `nodeToDocument(owner)` · `transform` des `clipPath` · Einheiten (OBB: `translate(b.x b.y) scale(b.w b.h)` der
   Owner-BBox) · Transforms zwischen `clipPath` und Element. Gemessen: Chromium liefert für Clip-Kinder eine
@@ -156,12 +159,44 @@ Undo-Labels: `createClipPath`, `assignClip`, `removeClipPath`, `changeClipUnits`
    Layer-Clip. Gewünscht?
 3. Duplicate kopiert den Clip mit neuer ID (Prompt). Für viele Duplikate entstehen viele gleiche Clips – lieber
    teilen?
+4. Bitte auf dem Mac prüfen (WKWebView): Bearbeitungsmodus (Rahmen/Handles liegen auf der Clip-Form, auch bei
+   `objectBoundingBox`), Klick auf die weggeschnittene Fläche trifft die Node darunter. Chromium (Playwright) und
+   WebKitGTK (Xvfb, MiniBrowser) sind geprüft. Gemessen: WebKit hat für Clip-Inhalte nicht immer Layout
+   (`getBBox` 0 × 0, `isPointInFill` false bei per `innerHTML` gebautem SVG) – deshalb misst `clip-geometry.ts`
+   Clip-Formen an einer gerenderten Kopie (E8).
+5. Ein Layer-Clip wird beim Anlegen um **alle** darstellenden Kinder gelegt; neue Nodes (Add, Paste in den Layer)
+   kommen in die letzte Clip-Gruppe. Soll „Create Clip Path“ am Layer stattdessen nur die Auswahl einschließen?
 
 ## Fortschritt
 
-- [ ] Design
-- [ ] Rust-Test resvg
-- [ ] Modell, Units, Commands + Tests
-- [ ] Geometrie, Treffer, Bearbeitungsmodus
-- [ ] Properties, Aktionen, Hierarchie, Referenzpflege
-- [ ] Playwright, Xvfb-Sichtprüfung, Doku
+- [x] Design
+- [x] Rust-Test resvg (`asset_clip_paths_in_placement_svg`: Layer-Clip, OBB-Clip in transformierter Gruppe)
+- [x] Modell, Units, Commands + Tests (`clip-model.spec` mit den Fällen aus `SVGClipPathTests`, `clip-units.spec`,
+  `clip-commands.spec`, Registry-/Command-Fälle in `command-cases.ts`)
+- [x] Geometrie, Treffer, Bearbeitungsmodus (Probe in Chromium: Reihenfolge `clip.transform · OBB` wie Blink
+  `LayoutSVGResourceClipper`; `getBBox`/`isPointInFill` an Clip-Kindern funktionieren)
+- [x] Properties, Aktionen, Hierarchie, Referenzpflege (`clip.spec`: Panel, Service, Aktionen der KI, Duplicate,
+  Copy/Paste, Delete mit Rückfrage, Baum)
+- [x] Playwright (`e2e/clip.spec.ts`, 5 Tests), Doku
+- [x] Echte App unter Xvfb (WebKitGTK): Rechteck + Kreis, Layer gewählt, Palette „Create Clip Path“ → „Layer Clip · 2“
+  mit Clip-Symbol im Baum, „Edit Clip Path“ → Banner, Inhalt abgeblendet, Clip-Form als Fläche mit Handles, Ziehen
+  nach rechts → linke Hälfte des Quadrats weggeschnitten, Esc beendet. Dabei gefunden und behoben: Klick wählte die
+  Clip-Gruppe (s. E7), BoundsGuard blockierte das Verschieben des leinwandgroßen Clips
+
+Stand bei Abschluss: `pnpm check` grün (Vitest 863 + 1 übersprungen, cargo 108 `ai-core` + 19 App), `pnpm e2e`
+92 grün.
+
+## Abweichungen und Grenzen
+
+- Opt-out über die Struktur statt `clip-path="none"` (E2/E4); tiefer in einer geclippten Gruppe gibt es kein None.
+- `objectBoundingBox`-Umrechnung ist exakt für den Owner (erstes darstellendes Element, das den Clip benutzt);
+  andere Benutzer eines OBB-Clips folgen ihrer eigenen BBox (SVG-Semantik).
+- Treffer: `clip-rule` wird als `fill-rule` geprüft (`isPointInFill`), ein `clip-path` am `clipPath` selbst wird
+  ignoriert, die Rahmenauswahl nutzt ungeschnittene Bounds.
+- Im Bearbeitungsmodus zeigt die Kopie der Formen `<use>` innerhalb eines Clips nicht (der Verweis löst in der
+  Host-`<svg>` nicht auf); bearbeitbar bleibt es über die Hierarchie.
+- „Copy XML“ einer Node mit Clip enthält die `<defs>` des Clips (zwei Elemente) – sonst wäre das Markup unvollständig.
+- Allgemeine Änderung: `ActionHandler.enabled(args)` bekommt die Argumente von `run` (Menüs fragen ohne), damit die
+  KI `clip.*` mit `node`/`layer` ohne vorherige Auswahl aufrufen kann.
+- Add in einem `objectBoundingBox`-Clip setzt ein `transform` (Inverse der Clip-Matrix) vor die Form, damit die
+  Standardgrößen in Dokumenteinheiten gelten.

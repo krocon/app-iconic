@@ -104,6 +104,12 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 013 E13/E14 | Dialog „Text to Path“ mit Vorschau des echten Rust-Ergebnisses (entprellt, veraltete Antworten verworfen); Einfügen als `<path fill>` zentriert über den Pfad-Tokenizer (`translatePath`); `add.textToPath { text, font, style?, size?, … }` | KI-Regel; „Der Browser ist die Grafik-Engine“ bleibt (Rust liefert nur Umrisse) |
 | 013 E15–E19 | Symbole: **Lucide** (ISC, Feather-Teil MIT) aus `lucide-static` (Daten lazy als eigene Chunks), Plugin-Schnittstelle `SymbolProvider { id, name, license, variants, load, search, toSvg }`; Einfügen als **eine** `<g>` mit Strich-Farbe/-Breite (= Gewicht) und `translate · scale`, jedes Element als `<path>` (`shape-path.ts`) | kleinstes einheitliches freies Set; SF Symbols verboten (legacy §8); Strich bleibt Strich (Umwandeln in Konturen = Folge-Idee) |
 | 013 E22 | `THIRD-PARTY-NOTICES.txt` (Lucide/Feather; Testschrift Caladea OFL nur unter `testdata/fonts/`), About nennt das Symbol-Set mit Lizenz | Lizenzpflicht (Hinweis + Lizenztext) |
+| 014 E1/E2 | Clip Paths als normales SVG: `<clipPath>` in der Wurzel-`<defs>`, `clip-path="url(#id)"` (Attribut; `style` gelesen, beim Schreiben entfernt); `clip-path="none"` ist gültig, aber **kein** Opt-out (Clipping eines Vorfahren wirkt auf die ganze Gruppe) – nie als Opt-out geschrieben | Export und andere Programme verstehen es; die Vorlage speicherte `none` nur im eigenen Modell |
+| 014 E3/E4 | Layer-Clip = „Clip-Gruppe“: `<g clip-path>` als Kind der Asset-Wurzel, sonst nur `id`/`data-*` (Form der Figma-/Sketch-Exporte, an der Struktur erkannt, kein Marker); Opt-out (None) und Override (eigener Clip) eines direkten Kindes teilen die Gruppe an der Node, Inherit führt zurück und fügt Teile zusammen; tiefer gilt SVG (Schnittmenge) | `clip-path` an der Wurzel-`<svg>` wirkt je Renderer anders (CSS-Box); Teilen hält Reihenfolge und Bild exakt |
+| 014 E5 | Commands `insertDefinition`, `assignClip { ref, mode, clip? }`, `setLayerClip { asset, clip }`, `removeClipPath { ref }`; Struktur als aufgezeichnete Grundschritte (Redo = dieselben Elemente), Create = `composite`, Einheitenwechsel = `setAttributes` | KI-Regel; exaktes Undo/Redo |
+| 014 E7/E8 | Bearbeitungsmodus (`ClipEditStore`): Inhalt abgeblendet, Formen als Kopie in der Host-`<svg>`, Klick/Rahmen/Handles/Pfeiltasten/Snapping/Add nur auf den Clip; Geometrie der Formen über das erste benutzende Element (Owner): `getScreenCTM(owner)` · `transform` des `clipPath` · OBB-Matrix · Transforms bis zur Form (`clip-geometry.ts`), in `nodeToDocument` eingehängt | Chromium liefert für Clip-Kinder eine falsche Screen-CTM (als stünde der `clipPath` im Baum); nur Browser-Matrizen |
+| 014 E9/E10 | Treffer respektieren Clips (`isPointInFill` der Clip-Formen im Clip-Raum), Clip-Formen außerhalb des Modus nie treffbar/snapbar; Löschen eines benutzten Clips fragt und entfernt Verweise, Duplicate kopiert Clips mit neuer ID, Copy nimmt sie als `<defs>` mit, Paste legt `<defs>` in die Wurzel-`<defs>` | Klick auf weggeschnittene Fläche trifft, was darunter liegt; keine toten Verweise |
+| 014 E14 | Aktionen `clip.create/assign/edit/done/remove/setUnits` mit Argumenten (`node`/`layer` statt Auswahl); `ActionHandler.enabled(args)` bekommt die Argumente | die KI braucht keine Auswahl vorher |
 | 009 E10/E11 | Generische Editoren in `shared/controls/` (Zahl mit Stepped Slider, Farbe, Auswahl, Text, Schalter; Ausgaben `edited`/`committed`/`reverted`), Aktionen `properties.set/reset/resetAll` | wiederverwendbar für den Icon-Inspector (010); die KI setzt, was das Panel setzt |
 
 ## Schichten
@@ -167,6 +173,13 @@ keine neue Abhängigkeit. 011: kein Rust-Command; Dokument-Command `replaceNode 
 `add.freehand { points?, closed?, epsilon?, … }`, `freehand.toggleClosed`, `add.textToPath { text, font?, style?, size?, … }`,
 `add.symbol { set?, id, size?, weight?, … }`; Undo-Labels `addFreehand`, `addTextPath`, `addSymbol`; kein neuer
 Dokument-Command (Einfügen = `composite` aus `insertNode` wie 008).
+
+014: kein Rust-Command (Rust-Test: resvg schneidet `userSpaceOnUse`/`objectBoundingBox` in Platzierungs-`<svg>`);
+Dokument-Commands `insertDefinition { asset, markup }`, `assignClip { ref, mode: 'own'|'none'|'inherit', clip? }`,
+`setLayerClip { asset, clip | null }`, `removeClipPath { ref }`; Aktionen `clip.create { node?, layer?, shape?, markup?, id? }`,
+`clip.assign { node?, layer?, clip?, mode? }`, `clip.edit { clip?, asset? }`, `clip.done`, `clip.remove { …, confirm? }`,
+`clip.setUnits { units, … }`; Undo-Labels `createClipPath`, `assignClip`, `layerClip`, `removeClipPath`,
+`changeClipUnits`; keine neue Abhängigkeit.
 
 Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `load_settings`/`save_settings` (015).
 

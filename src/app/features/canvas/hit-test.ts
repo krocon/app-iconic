@@ -1,5 +1,6 @@
 import { clipOwnerOf, clipShapeAt, insideClips } from '../../shared/geometry/clip-geometry';
 import { IconDocument, NodeRef } from '../document/icon-document';
+import { isClipGroup } from '../document/model/clip-model';
 import { ID_ATTR } from '../document/svg/node-ids';
 
 /**
@@ -145,7 +146,9 @@ export function hitClipShape(
 
 /**
  * What a click on `hit` selects (design 007 E3): the child of the context (default: the asset
- * root) that contains the element hit. `context` is `null` when the hit lies outside it.
+ * root) that contains the element hit. `context` is `null` when the hit lies outside it. A clip
+ * group of the layer counts as the layer level (design 014 E3): a click selects its child, never
+ * the group (moving it would move the layer's clip along).
  */
 export function selectableRef(
   doc: IconDocument,
@@ -158,9 +161,10 @@ export function selectableRef(
   const ctx = context && context.asset === hit.asset ? doc.node(context) : null;
   const inContext = !!ctx && ctx !== leaf && ctx.contains(leaf);
   const top = inContext ? ctx! : root;
+  const isTop = (p: Element) => p === top || (top === root && isClipGroup(p, root));
   let el: Element = leaf;
-  while (el.parentElement && el.parentElement !== top) el = el.parentElement;
-  if (el.parentElement !== top) return null;
+  while (el.parentElement && !isTop(el.parentElement)) el = el.parentElement;
+  if (!el.parentElement || !isTop(el.parentElement)) return null;
   const ref = doc.refOf(el);
   return ref ? { ref, inContext } : null;
 }

@@ -16,6 +16,7 @@ import { registerClipActions } from './clip-actions';
 import { clipPanel, clipTargetOf } from './clip-panel-model';
 import { ClipPathSection } from './clip-path-section';
 import { ClipService } from './clip.service';
+import { selectableRef } from '../canvas/hit-test';
 
 const DEFS =
   '<defs><clipPath id="c"><rect width="50" height="100"/></clipPath><clipPath id="k"><circle r="9"/></clipPath></defs>';
@@ -231,6 +232,13 @@ describe('references when copying, duplicating, deleting (design 014 E10)', () =
     expect(body(t.doc)).toBe('<rect id="a"/>');
     t.store.undo();
     expect(body(t.doc)).toBe('<g clip-path="url(#c)"><rect id="a"/></g>');
+  });
+
+  it('a click selects the child of a clip group, never the group (E3)', () => {
+    const t = setup(`${DEFS}<g clip-path="url(#c)"><g id="inner"><rect id="a"/></g></g>`);
+    const leaf = t.ref('a');
+    expect(selectableRef(t.doc, leaf, null)!.ref).toEqual(t.ref('inner'));
+    expect(selectableRef(t.doc, leaf, t.ref('inner'))).toEqual({ ref: leaf, inContext: true });
   });
 
   it('the tree marks own clips and names clip groups (E12)', () => {

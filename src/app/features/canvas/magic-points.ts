@@ -1,4 +1,5 @@
 import { nodeToDocument } from '../../shared/geometry/dom-geometry';
+import { localBBox } from '../../shared/geometry/clip-geometry';
 import { CANVAS_SIZE } from '../../shared/geometry/icon-guides';
 import { apply, fromDom } from '../../shared/geometry/matrix';
 import { Point } from '../../shared/geometry/view-transform';
@@ -45,13 +46,10 @@ export function magicPoints(
       const m = nodeToDocument(host, el);
       if (!m) continue;
       const toDoc = fromDom(m);
-      let local: Point[];
-      try {
-        const b = el.getBBox();
-        local = boxKeyPoints({ x: b.x, y: b.y, width: b.width, height: b.height });
-      } catch {
-        local = [];
-      }
+      const b = localBBox(el);
+      const local: Point[] = b
+        ? boxKeyPoints({ x: b.x, y: b.y, width: b.width, height: b.height })
+        : [];
       const g = readGeometry(el);
       if (g.kind !== 'rect' && g.kind !== 'text' && g.kind !== 'box') {
         local.push(

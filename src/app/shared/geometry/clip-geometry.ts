@@ -114,7 +114,54 @@ export function clipSpaceToDocument(host: SVGSVGElement, el: Element): DOMMatrix
   const owner = clip ? clipOwnerOf(clip) : null;
   const h = host.getScreenCTM();
   const m = owner && clip ? clipToScreen(owner, clip, el) : null;
-  return h && m ? h.inverse().multiply(m) : null;
+  return h && m ? DOMMatrix.fromMatrix(h).inverse().multiply(m) : null;
+}
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/**
+ * Runs `fn` on a RENDERED copy of a clip shape (without its own `transform`, so in the same local
+ * space). WebKit has no layout for the content of a `<clipPath>`: `getBBox()` gives 0 × 0 and
+ * `isPointInFill` false there (measured in WebKitGTK); a hidden measuring `<svg>` (as 008 E9)
+ * answers in every engine. The copy's `fill-rule` is the shape's `clip-rule`.
+ */
+function onCopy<T>(shape: Element, fn: (copy: SVGGraphicsElement) => T): T | null {
+  const body = globalThis.document?.body;
+  if (!body) return null;
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute(
+    'style',
+    'position:absolute;left:-99999px;top:0;width:1px;height:1px;visibility:hidden',
+  );
+  const copy = document.importNode(shape, true) as SVGGraphicsElement;
+  copy.removeAttribute('transform');
+  copy.removeAttribute('clip-path');
+  const rule = shape.getAttribute('clip-rule');
+  if (rule) copy.setAttribute('fill-rule', rule);
+  svg.appendChild(copy);
+  body.appendChild(svg);
+  try {
+    return fn(copy);
+  } catch {
+    return null;
+  } finally {
+    svg.remove();
+  }
+}
+
+/**
+ * The local bounding box (`getBBox()`) of an element – through a rendered copy for the shapes of
+ * a `<clipPath>` (WebKit, see `onCopy`).
+ */
+export function localBBox(el: SVGGraphicsElement): DOMRect | null {
+  const clip = enclosingClipPath(el);
+  try {
+    if (clip && clip !== el) return onCopy(el, (c) => c.getBBox());
+    return el.getBBox();
+  } catch {
+    return null;
+  }
 }
 
 /** The client point lies in the shape (fill area; text, images, `use`: their box). */
@@ -125,13 +172,13 @@ function shapeContains(
   y: number,
 ): boolean {
   const p = new DOMPoint(x, y).matrixTransform(toScreen.inverse());
-  try {
-    if (shape instanceof SVGGeometryElement) return shape.isPointInFill(p);
-    const b = shape.getBBox();
-    return p.x >= b.x && p.x <= b.x + b.width && p.y >= b.y && p.y <= b.y + b.height;
-  } catch {
-    return false;
-  }
+  return (
+    onCopy(shape, (c) => {
+      if (c instanceof SVGGeometryElement) return c.isPointInFill(p);
+      const b = c.getBBox();
+      return p.x >= b.x && p.x <= b.x + b.width && p.y >= b.y && p.y <= b.y + b.height;
+    }) ?? false
+  );
 }
 
 /** The topmost shape of `clip` (used by `user`) under the client point, `null` if none. */

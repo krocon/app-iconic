@@ -33,7 +33,8 @@ export function moveSelectionCommand(
   const snaps = nodeSnaps(doc, host, refs, scope);
   const union = unionBounds(doc, host, refs, scope);
   if (!snaps.length || !union) return null;
-  const changes = moveChanges(snaps, clampTranslation(CANVAS_BOUNDS, union, d));
+  // clip shapes may leave the canvas (design 014 E7)
+  const changes = moveChanges(snaps, scope ? d : clampTranslation(CANVAS_BOUNDS, union, d));
   return changes.length ? new SetAttributes(changes, 'moveNode') : null;
 }
 

@@ -74,7 +74,7 @@
 - [x] Stepped Slider (↑/↓, ⇧ × 10, Ziehen am Label), Constrain proportions (width/height, rx/ry, scale) (009)
 - [x] Transform-Liste (Schritte, Pivot, Reihenfolge per Drag/Alt+↑↓, Rohanzeige mit Validierung) (009)
 - [x] Reset je Property, Reset All Properties (mit Bestätigung), Undo/Redo-Knöpfe (009)
-- [ ] Clip Path: Picker, Create, Edit-Modus, Vererbung, `clipPathUnits` (014)
+- [x] Clip Path: Picker, Create, Edit-Modus, Vererbung, `clipPathUnits` (014; Layer-Clip = Clip-Gruppe, Opt-out/Override über Teilen statt `clip-path="none"`, Treffer durch Clips, Referenzpflege bei Löschen/Duplicate/Copy/Paste)
 
 ## 8. Icon-Eigenschaften
 - [x] Hintergrund-Fill: automatic, system-light/-dark, none, solid, automatic-gradient, linear-gradient mit Orientierung (Apple-Format); radial-gradient nur lesen – nicht belegt (010)

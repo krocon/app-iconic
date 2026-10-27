@@ -1,4 +1,5 @@
 import { Rect, nodeBoundsInDocument, nodeToDocument } from '../../shared/geometry/dom-geometry';
+import { localBBox } from '../../shared/geometry/clip-geometry';
 import { apply, fromDom, IDENTITY, invert, Matrix, multiply } from '../../shared/geometry/matrix';
 import { transformItems } from '../../shared/geometry/transform-text';
 import { Point } from '../../shared/geometry/view-transform';
@@ -69,7 +70,9 @@ interface Measured {
 
 function bboxOf(el: SVGGraphicsElement): Rect | null {
   try {
-    const b = el.getBBox();
+    // shapes of a clip path through a rendered copy (WebKit, design 014 E8)
+    const b = localBBox(el);
+    if (!b) return null;
     return [b.x, b.y, b.width, b.height].every(Number.isFinite)
       ? { x: b.x, y: b.y, width: b.width, height: b.height }
       : null;

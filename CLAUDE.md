@@ -50,7 +50,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/actions/           Aktionskatalog, Keymaps (base/mac/other.json), ActionService (run(id, args?)),
                               KeyboardDispatcher (einziger keydown-Listener), shortcut, action-args (005),
                               add-action-args (Schema der Add-Argumente, 008), export-action-args (012),
-                              tool-action-args (Freehand/Text to Path/Symbol, 013)
+                              tool-action-args (Freehand/Text to Path/Symbol, 013), clip-action-args (014)
   app/core/menu/              MenuApi (natives Menü, menu-action), KeymapApi (keymap.json), MenuSpec (005)
   app/core/clipboard/         ClipboardApi (Text der System-Zwischenablage über navigator.clipboard, 006)
   app/core/export/            ExportApi (Ordner-Dialog, export_svg, export_png mit Channel, cancel), DTOs (012)
@@ -61,7 +61,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               ReorderNode/GroupNodes/Ungroup, 006; set-attributes: Ergebnis einer Geste, 007),
                               model/ (icon-json, unique-names, selection, reorder-rules, specializations 010),
                               svg/ (node-ids, sanitize-svg, resolve-styles, svg-references, style-props,
-                              svg-format 011) (003–011); commands/replace-node (011)
+                              svg-format 011) (003–011); commands/replace-node (011); model/clip-model +
+                              clip-units, commands/clip-commands (014)
   app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster/Quit), Recent,
                               file-actions (Aktionen der Datei-Funktionen), Texte (003, 005)
   app/features/menus/         Menümodell (rein), MenuService (nativ/HTML), MenuBar (Windows/Linux), Befehlspalette,
@@ -107,13 +108,17 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               (Rahmen + Handle-Sets über CTM), selection-overlay, magic-points, edit-ops (rein),
                               canvas-edit-actions (Esc, Punkt löschen, Pfeiltasten, moveBy); handles/ (rein:
                               node-geometry, node-handles, handle-edit, handle-types)
+  app/features/clip/          Clip Paths (014): ClipEditStore (Bearbeitungsmodus), ClipEditLayer (Formen in der
+                              Host-<svg>), ClipService + clip-actions (clip.*), clip-panel-model (rein),
+                              ClipPathSection (Properties), clip-references (Copy/Duplicate/Delete), Texte
   app/features/about/         About-Dialog
   app/shared/geometry/        Geometrie: icon-guides, view-transform, zoom-steps, ruler-ticks, squircle, align (rein);
                               dom-geometry (clientToDocument, nodeToDocument über Screen-CTMs, 004); 007 (rein):
                               matrix, snapping, bounds-guard, box-math, box-selection, transform-text,
                               path-data (Tokenizer für `d`), path-edit; 011 (rein): path-write (runden, Form
                               behalten / kürzeste Form), path-optimize (RDP mit Eckenschutz); 013 (rein): freehand
-                              (RDP + Catmull-Rom), shape-path (Grundformen → `d`), path-translate
+                              (RDP + Catmull-Rom), shape-path (Grundformen → `d`), path-translate; 014:
+                              clip-geometry (Clip-Raum → Dokument über den Owner, Treffer durch Clips)
   app/shared/controls/        Generische Editoren (009): DraftField (Basis: live/commit/cancel), NumberField (Stepped
                               Slider), ColorField + color-value (rein), SelectField, TextField, ToggleField, step-value
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)

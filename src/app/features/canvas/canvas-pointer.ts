@@ -15,6 +15,7 @@ import { DocumentStore } from '../document/document.store';
 import { NodeRef } from '../document/icon-document';
 import { UndoLabel } from '../document/undo/undo-texts';
 import { paintedNodes } from '../hierarchy/arrange-operations';
+import { isClipGroup } from '../document/model/clip-model';
 import { CanvasEditStore } from './canvas-edit.store';
 import { DragOp, Modifiers } from './canvas-gesture';
 import { CanvasViewStore } from './canvas-view.store';
@@ -179,7 +180,9 @@ export class CanvasInteraction {
         this.edit.snap.set(
           s.target && s.kind !== 'none' ? { point: s.target, kind: s.kind } : null,
         );
-        if (union) d = clampTranslation(CANVAS_BOUNDS, union, d);
+        // the BoundsGuard keeps nodes on the canvas – not clip shapes (design 014 E7): a clip
+        // moved partly off the canvas is how a picture gets cut
+        if (union && !scope) d = clampTranslation(CANVAS_BOUNDS, union, d);
         return command(moveChanges(snaps, d), 'moveNode');
       },
       end: () => this.edit.snap.set(null),
@@ -257,7 +260,11 @@ export class CanvasInteraction {
     for (const { root, el } of parents) {
       if (seen.has(el)) continue;
       seen.add(el);
-      const refs = [...el.children].flatMap((c) => doc.refOf(c) ?? []);
+      // a clip group of the layer is the layer level (design 014 E3): its children count
+      const kids = [...el.children].flatMap((c) =>
+        el === root && isClipGroup(c, root) ? [...c.children] : [c],
+      );
+      const refs = kids.flatMap((c) => doc.refOf(c) ?? []);
       for (const node of paintedNodes(doc, refs)) {
         if (!(node instanceof SVGGraphicsElement) || !isRendered(node, root)) continue;
         const rect = nodeBoundsInDocument(host, node);
@@ -300,7 +307,7 @@ export class CanvasInteraction {
       candidates ??= magicPoints(this.layers(), host, doc, excluded, scope);
       const s = snapPoint(p, candidates, this.snapOptions(mods));
       this.edit.snap.set(s.target && s.kind !== 'none' ? { point: s.target, kind: s.kind } : null);
-      return clampPoint(bounds, s.point);
+      return scope ? s.point : clampPoint(bounds, s.point);
     };
     const end = () => this.edit.snap.set(null);
     if (set.kind === 'point') {
