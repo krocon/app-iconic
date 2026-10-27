@@ -33,6 +33,8 @@ import { registerCanvasEditActions } from './canvas-edit-actions';
 import { CanvasInteraction } from './canvas-pointer';
 import { EMPTY_MODEL, measureSelection } from './selection-measure';
 import { SelectionOverlay } from './selection-overlay';
+import { GridHintInput, GridHintOverlay } from './grid-hint-overlay';
+import { gridOriginPoint } from '../../shared/geometry/snapping';
 import { FreehandOverlay } from '../tools/freehand-overlay';
 import { FreehandStore } from '../tools/freehand.store';
 import { FreehandService } from '../tools/freehand.service';
@@ -51,7 +53,14 @@ const WHEEL_ZOOM = 0.01;
  */
 @Component({
   selector: 'app-canvas-view',
-  imports: [CanvasBackground, CanvasRuler, CanvasToolbar, FreehandOverlay, SelectionOverlay],
+  imports: [
+    CanvasBackground,
+    CanvasRuler,
+    CanvasToolbar,
+    FreehandOverlay,
+    GridHintOverlay,
+    SelectionOverlay,
+  ],
   templateUrl: './canvas-view.html',
   styleUrl: './canvas-view.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -77,6 +86,13 @@ export class CanvasView {
   protected readonly pointerView = computed(() => {
     const p = this.pointer();
     return p ? documentToView(this.view(), p) : null;
+  });
+  /** The grid near the pointer, only while Snap to Grid is on (not while panning or drawing). */
+  protected readonly gridHint = computed((): GridHintInput | null => {
+    const o = this.opt();
+    const pointer = this.pointer();
+    if (!o.snapToGrid || !pointer || this.panning() || this.freehand.active()) return null;
+    return { pointer, origin: gridOriginPoint(o.gridOrigin), step: o.gridSize };
   });
   protected readonly fill = computed(() => {
     const doc = this.store()?.document();

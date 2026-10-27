@@ -50,6 +50,8 @@
 - [x] Punktbearbeitung Polyline/Polygon/Pfad (alle Befehle, relativ bleibt relativ), Punkt einfügen über Mitte, löschen mit ⌥-Klick/Entf (007)
 - [x] Pfeiltasten 1 px / ⇧ 10 px, eine Undo-Aktion je Folge (007)
 - [x] Snapping Grid (10, worldZero/svgCenter) und Magic Snap (20 Bildschirm-px, Magic vor Grid), Snap-Hinweis (007)
+- [x] Raster-Hinweis *(neu)*: bei aktivem Snap to Grid Rasterpunkte um den Zeiger (Radius ≥ 72 Bildschirm-px,
+      ausblendend, nächster Kreuzungspunkt größer; keiner bei Zellen < 6 Bildschirm-px)
 - [x] Gesten = eine Undo-Gruppe (ein Command `setAttributes`), Esc bricht ab (007)
 - [x] Handles korrekt bei verschachtelten, transformierten Gruppen und Zoom 50/100/150 % (007, Playwright ± 0,5 px)
 

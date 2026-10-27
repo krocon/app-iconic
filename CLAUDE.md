@@ -125,6 +125,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               (Rahmen + Handle-Sets über CTM), selection-overlay, magic-points, edit-ops (rein),
                               canvas-edit-actions (Esc, Punkt löschen, Pfeiltasten, moveBy); handles/ (rein:
                               node-geometry, node-handles, handle-edit, handle-types)
+                              grid-hint-overlay (Rasterpunkte um den Zeiger bei Snap to Grid)
   app/features/clip/          Clip Paths (014): ClipEditStore (Bearbeitungsmodus), ClipEditLayer (Formen in der
                               Host-<svg>), ClipService + clip-actions (clip.*), clip-panel-model (rein),
                               ClipPathSection (Properties), clip-references (Copy/Duplicate/Delete), Texte
@@ -135,6 +136,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               behalten / kürzeste Form), path-optimize (RDP mit Eckenschutz); 013 (rein): freehand
                               (RDP + Catmull-Rom), shape-path (Grundformen → `d`), path-translate; 014:
                               clip-geometry (Clip-Raum → Dokument über den Owner, Treffer durch Clips)
+                              grid-hint (rein: Rasterpunkte um den Zeiger)
   app/shared/controls/        Generische Editoren (009): DraftField (Basis: live/commit/cancel), NumberField (Stepped
                               Slider), ColorField + color-value (rein), SelectField, TextField, ToggleField, step-value
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)
