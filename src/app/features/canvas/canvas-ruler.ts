@@ -1,3 +1,4 @@
+import { themeChange } from '../../core/settings/theme';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -56,6 +57,7 @@ export class CanvasRuler {
     inject(DestroyRef).onDestroy(() => mq?.removeEventListener?.('change', bump));
     effect(() => {
       this.scheme();
+      themeChange();
       this.draw(this.canvas().nativeElement, this.view(), this.length(), this.marker());
     });
   }

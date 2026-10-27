@@ -1,0 +1,137 @@
+.layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: var(--space-3);
+}
+
+.tabs {
+  flex: none;
+  width: 9.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: var(--space-2);
+  border-right: 1px solid var(--color-border);
+}
+
+.tab {
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-hover);
+  }
+
+  &[aria-selected='true'] {
+    background: var(--color-accent);
+    color: var(--color-accent-text);
+  }
+}
+
+.panel {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: 2px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 16rem;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  & legend {
+    margin-bottom: var(--space-1);
+    font-weight: 600;
+  }
+}
+
+.row {
+  display: flex;
+  gap: var(--space-3);
+
+  &.wrap {
+    flex-wrap: wrap;
+  }
+}
+
+.check,
+.inline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 18rem;
+}
+
+.num {
+  width: 5.5rem;
+}
+
+.target {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 24rem;
+}
+
+.path {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: left;
+}
+
+.hint {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.danger {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}

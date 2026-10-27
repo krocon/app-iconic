@@ -1,8 +1,10 @@
+import { translatable } from '../../core/i18n/i18n';
+
 /**
- * Texts of the command sidebar and the "Add" functions (prompt 008). English is the source;
- * German follows in prompt 015. Action titles come from the action catalogue (design 005).
+ * Texts of the command sidebar and the "Add" functions (prompt 008). English is the source,
+ * German beside it (015). Action titles come from the action catalogue (design 005).
  */
-export const COMMANDS_TEXTS = {
+const EN = {
   search: 'Filter commands',
   searchPlaceholder: 'Filter…',
   listLabel: 'Add commands',
@@ -27,3 +29,31 @@ export const COMMANDS_TEXTS = {
   imageFailed: 'The image could not be added.',
   addFailed: 'The element could not be added here.',
 } as const;
+
+export const COMMANDS_TEXTS = translatable('commands', EN, {
+  de: {
+    search: 'Befehle filtern',
+    searchPlaceholder: 'Filtern …',
+    listLabel: 'Befehle zum Hinzufügen',
+    noMatch: 'Kein Befehl passt.',
+    later: 'Kommt in einer späteren Version',
+    sections: {
+      structure: 'Struktur',
+      shapes: 'Formen',
+      tools: 'Werkzeuge',
+      import: 'Import',
+    },
+    snippetTitle: 'SVG-Schnipsel',
+    snippetLabel: 'SVG-Markup zum Anhängen einfügen',
+    snippetPlaceholder: '<circle cx="512" cy="512" r="128" fill="#000"/>',
+    snippetAdd: 'Hinzufügen',
+    snippetCancel: 'Abbrechen',
+    snippetErrors: {
+      empty: 'Das Markup enthält kein Element zum Hinzufügen.',
+      invalid: 'Das ist kein gültiges SVG-Markup.',
+      tooLarge: 'Das Markup ist zu groß.',
+    },
+    imageFailed: 'Das Bild konnte nicht hinzugefügt werden.',
+    addFailed: 'Das Element kann hier nicht hinzugefügt werden.',
+  },
+});

@@ -33,6 +33,7 @@
     "Mod+Shift+ArrowDown": "arrange.sendToBack",
     "Mod+Shift+p": "app.palette",
     "Mod+/": "app.shortcuts",
+    "Mod+,": "app.settings",
     "Mod+Shift+h": "edit.toggleVisibility"
   },
   "canvas": {

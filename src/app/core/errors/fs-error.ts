@@ -1,3 +1,5 @@
+import { translatable } from '../i18n/i18n';
+
 /**
  * Errors from the backend: `FsError { code, message, path }` (Rust `error.rs`). New codes go
  * into both files and into `describeFsError()`. The UI never shows Rust's `message`.
@@ -76,44 +78,53 @@ export function toFsError(value: unknown): FsError {
   return { code: 'unknown', message };
 }
 
-/** User-facing text for an error (English; German follows in prompt 009). */
+const EN = {
+  not_found: 'The file does not exist.',
+  permission_denied: 'Access denied.',
+  not_a_directory: 'This is not a folder.',
+  is_a_directory: 'This is a folder, not a file.',
+  invalid_path: 'The path is not valid.',
+  io: 'The file could not be read or written.',
+  invalid_icon: 'This is not a valid .icon file.',
+  unsupported_icon: 'This .icon file uses a format that is not supported (e.g. an encrypted ZIP).',
+  too_large: 'The file is too large.',
+  missing_asset: 'An image of the document is missing.',
+  invalid_svg: 'The SVG file could not be read as text.',
+  invalid_menu: 'The menu could not be built.',
+  invalid_image: 'The file is not a PNG, JPEG, WebP or SVG image.',
+  already_exists: 'A file with this name already exists.',
+  invalid_text: 'Enter one line of text (size and spacing within their ranges).',
+  missing_glyphs: 'The font has no shapes for some characters (e.g. emoji). Choose another font.',
+  backend_unavailable: 'The desktop backend is not available (running in a browser?).',
+  unknown: 'Something went wrong.',
+} as const satisfies Record<FsErrorCode, string>;
+
+const TEXTS = translatable('errors', EN, {
+  de: {
+    not_found: 'Die Datei gibt es nicht.',
+    permission_denied: 'Zugriff verweigert.',
+    not_a_directory: 'Das ist kein Ordner.',
+    is_a_directory: 'Das ist ein Ordner, keine Datei.',
+    invalid_path: 'Der Pfad ist ungültig.',
+    io: 'Die Datei konnte nicht gelesen oder geschrieben werden.',
+    invalid_icon: 'Das ist keine gültige .icon-Datei.',
+    unsupported_icon:
+      'Diese .icon-Datei hat ein Format, das nicht unterstützt wird (z. B. ein verschlüsseltes ZIP).',
+    too_large: 'Die Datei ist zu groß.',
+    missing_asset: 'Ein Bild des Dokuments fehlt.',
+    invalid_svg: 'Die SVG-Datei konnte nicht als Text gelesen werden.',
+    invalid_menu: 'Das Menü konnte nicht gebaut werden.',
+    invalid_image: 'Die Datei ist kein PNG-, JPEG-, WebP- oder SVG-Bild.',
+    already_exists: 'Eine Datei mit diesem Namen gibt es schon.',
+    invalid_text: 'Gib eine Zeile Text ein (Größe und Abstand in ihren Bereichen).',
+    missing_glyphs:
+      'Die Schrift hat für einige Zeichen keine Formen (z. B. Emoji). Wähle eine andere Schrift.',
+    backend_unavailable: 'Das Desktop-Backend ist nicht verfügbar (läuft es im Browser?).',
+    unknown: 'Etwas ist schiefgegangen.',
+  },
+});
+
+/** User-facing text for an error, in the UI language (design 015 E13). */
 export function describeFsError(error: FsError): string {
-  switch (error.code) {
-    case 'not_found':
-      return 'The file does not exist.';
-    case 'permission_denied':
-      return 'Access denied.';
-    case 'not_a_directory':
-      return 'This is not a folder.';
-    case 'is_a_directory':
-      return 'This is a folder, not a file.';
-    case 'invalid_path':
-      return 'The path is not valid.';
-    case 'io':
-      return 'The file could not be read or written.';
-    case 'invalid_icon':
-      return 'This is not a valid .icon file.';
-    case 'unsupported_icon':
-      return 'This .icon file uses a format that is not supported (e.g. an encrypted ZIP).';
-    case 'too_large':
-      return 'The file is too large.';
-    case 'missing_asset':
-      return 'An image of the document is missing.';
-    case 'invalid_svg':
-      return 'The SVG file could not be read as text.';
-    case 'invalid_menu':
-      return 'The menu could not be built.';
-    case 'invalid_image':
-      return 'The file is not a PNG, JPEG, WebP or SVG image.';
-    case 'already_exists':
-      return 'A file with this name already exists.';
-    case 'invalid_text':
-      return 'Enter one line of text (size and spacing within their ranges).';
-    case 'missing_glyphs':
-      return 'The font has no shapes for some characters (e.g. emoji). Choose another font.';
-    case 'backend_unavailable':
-      return 'The desktop backend is not available (running in a browser?).';
-    case 'unknown':
-      return 'Something went wrong.';
-  }
+  return TEXTS[error.code] ?? TEXTS.unknown;
 }

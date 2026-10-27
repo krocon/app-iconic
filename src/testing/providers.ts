@@ -13,6 +13,8 @@ import { FakeAboutApi } from './fake-about-api';
 import { FakeIconFileApi } from './fake-icon-file-api';
 import { FakeRecentFilesApi } from './fake-recent-files-api';
 import { FakeWindowApi } from './fake-window-api';
+import { SettingsApi } from '../app/core/settings/settings-api';
+import { FakeSettingsApi } from './fake-settings-api';
 
 /** Every backend facade replaced by its fake (unit tests). */
 export function fakeBackend(): {
@@ -24,6 +26,7 @@ export function fakeBackend(): {
   keymap: FakeKeymapApi;
   exporter: FakeExportApi;
   fonts: FakeFontApi;
+  settings: FakeSettingsApi;
 } {
   const files = new FakeIconFileApi();
   const window = new FakeWindowApi();
@@ -32,6 +35,7 @@ export function fakeBackend(): {
   const keymap = new FakeKeymapApi();
   const exporter = new FakeExportApi();
   const fonts = new FakeFontApi();
+  const settings = new FakeSettingsApi();
   return {
     files,
     window,
@@ -40,6 +44,7 @@ export function fakeBackend(): {
     keymap,
     exporter,
     fonts,
+    settings,
     providers: [
       { provide: AboutApi, useClass: FakeAboutApi },
       { provide: IconFileApi, useValue: files },
@@ -49,6 +54,7 @@ export function fakeBackend(): {
       { provide: KeymapApi, useValue: keymap },
       { provide: ExportApi, useValue: exporter },
       { provide: FontApi, useValue: fonts },
+      { provide: SettingsApi, useValue: settings },
     ],
   };
 }

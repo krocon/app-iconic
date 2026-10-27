@@ -10,7 +10,9 @@ import { ActionService } from '../../core/actions/action.service';
 import { isRadio } from '../menus/menu-model';
 import { MENUS_TEXTS } from '../menus/menus-texts';
 
-type Row = { kind: 'item'; id: string; label?: string } | { kind: 'group'; label: string };
+/** Labels are keys of the menu texts – resolved when the rows are built (language switch). */
+type Key = keyof typeof MENUS_TEXTS;
+type Row = { kind: 'item'; id: string; label?: Key } | { kind: 'group'; label: Key };
 
 const T = MENUS_TEXTS;
 const ROWS: Row[] = [
@@ -22,20 +24,20 @@ const ROWS: Row[] = [
   { kind: 'item', id: 'view.handles' },
   { kind: 'item', id: 'view.snapToGrid' },
   { kind: 'item', id: 'view.magicSnap' },
-  { kind: 'group', label: T.gridOrigin },
-  { kind: 'item', id: 'view.gridOrigin.worldZero', label: T.gridWorldZero },
-  { kind: 'item', id: 'view.gridOrigin.svgCenter', label: T.gridSvgCenter },
-  { kind: 'group', label: T.selectionMode },
-  { kind: 'item', id: 'view.selectionMode.point', label: T.selectionPoint },
-  { kind: 'item', id: 'view.selectionMode.boxed', label: T.selectionBoxed },
-  { kind: 'item', id: 'view.selectionMode.none', label: T.selectionNone },
-  { kind: 'group', label: T.appearance },
-  { kind: 'item', id: 'view.appearance.light', label: T.light },
-  { kind: 'item', id: 'view.appearance.dark', label: T.dark },
-  { kind: 'group', label: T.mask },
-  { kind: 'item', id: 'view.mask.squircle', label: T.maskSquircle },
-  { kind: 'item', id: 'view.mask.circle', label: T.maskCircle },
-  { kind: 'item', id: 'view.mask.none', label: T.maskNone },
+  { kind: 'group', label: 'gridOrigin' },
+  { kind: 'item', id: 'view.gridOrigin.worldZero', label: 'gridWorldZero' },
+  { kind: 'item', id: 'view.gridOrigin.svgCenter', label: 'gridSvgCenter' },
+  { kind: 'group', label: 'selectionMode' },
+  { kind: 'item', id: 'view.selectionMode.point', label: 'selectionPoint' },
+  { kind: 'item', id: 'view.selectionMode.boxed', label: 'selectionBoxed' },
+  { kind: 'item', id: 'view.selectionMode.none', label: 'selectionNone' },
+  { kind: 'group', label: 'appearance' },
+  { kind: 'item', id: 'view.appearance.light', label: 'light' },
+  { kind: 'item', id: 'view.appearance.dark', label: 'dark' },
+  { kind: 'group', label: 'mask' },
+  { kind: 'item', id: 'view.mask.squircle', label: 'maskSquircle' },
+  { kind: 'item', id: 'view.mask.circle', label: 'maskCircle' },
+  { kind: 'item', id: 'view.mask.none', label: 'maskNone' },
 ];
 
 /**
@@ -159,11 +161,11 @@ export class ViewOptionsMenu {
   protected readonly rows = computed(() =>
     ROWS.map((r) =>
       r.kind === 'group'
-        ? r
+        ? { kind: 'group' as const, label: T[r.label] as string }
         : {
             kind: 'item' as const,
             id: r.id,
-            label: r.label ?? this.actions.label(r.id),
+            label: r.label ? (T[r.label] as string) : this.actions.label(r.id),
             enabled: this.actions.enabled(r.id),
             checked: this.actions.checked(r.id) ?? false,
             radio: isRadio(r.id),

@@ -58,6 +58,6 @@ describe('CanvasViewStore', () => {
     expect(s.options().rulers).toBe(false);
     s.set('mask', 'circle');
     s.set('appearance', 'dark');
-    expect(s.options()).toMatchObject({ mask: 'circle', appearance: 'dark', crossCursor: false });
+    expect(s.options()).toMatchObject({ mask: 'circle', appearance: 'dark', crossCursor: true });
   });
 });

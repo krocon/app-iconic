@@ -7,6 +7,8 @@ import { KeymapApi, MenuApi, TauriKeymapApi, TauriMenuApi } from './core/menu/me
 import { TauriWindowApi, WindowApi } from './core/window/window-api';
 import { ExportApi, TauriExportApi } from './core/export/export-api';
 import { FontApi, TauriFontApi } from './core/fonts/font-api';
+import { SettingsApi, TauriSettingsApi } from './core/settings/settings-api';
+import { FakeSettingsApi } from '../testing/fake-settings-api';
 import { FakeKeymapApi, FakeMenuApi } from '../testing/fake-menu-api';
 import { FakeIconFileApi } from '../testing/fake-icon-file-api';
 import { FakeRecentFilesApi } from '../testing/fake-recent-files-api';
@@ -40,6 +42,14 @@ function browserWindow(): WindowApi {
   return fake;
 }
 
+function browserStorage(): Storage | null {
+  try {
+    return globalThis.localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
   ? [
       { provide: AboutApi, useClass: TauriAboutApi },
@@ -50,6 +60,7 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
       { provide: KeymapApi, useClass: TauriKeymapApi },
       { provide: ExportApi, useClass: TauriExportApi },
       { provide: FontApi, useClass: TauriFontApi },
+      { provide: SettingsApi, useClass: TauriSettingsApi },
     ]
   : [
       // About keeps the real facade: it shows "desktop backend not available" (e2e/shell)
@@ -61,5 +72,7 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
       { provide: KeymapApi, useClass: FakeKeymapApi },
       { provide: ExportApi, useFactory: () => new FakeExportApi() },
       { provide: FontApi, useFactory: () => new FakeFontApi() },
+      // "settings.json" in localStorage: a reload is the restart of the e2e tests (design 015 E18)
+      { provide: SettingsApi, useFactory: () => new FakeSettingsApi(browserStorage()) },
       provideAppInitializer(installTestHook),
     ];

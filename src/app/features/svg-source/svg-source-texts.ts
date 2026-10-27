@@ -1,5 +1,7 @@
-/** Texts of "Edit SVG…" and "Optimize Path" (design 011). English is the source (German: 015). */
-export const SVG_SOURCE_TEXTS = {
+import { translatable } from '../../core/i18n/i18n';
+
+/** Texts of "Edit SVG…" and "Optimize Path" (design 011). English is the source, German beside it. */
+const EN = {
   editTitle: 'Edit SVG',
   editSubtitleNode: (name: string) => `Element ${name}`,
   editSubtitleAsset: (name: string) => `Asset ${name}`,
@@ -38,3 +40,44 @@ export const SVG_SOURCE_TEXTS = {
   optimizeApply: 'Optimize',
   nothingToOptimize: 'No path selected.',
 } as const;
+
+export const SVG_SOURCE_TEXTS = translatable('svgSource', EN, {
+  de: {
+    editTitle: 'SVG bearbeiten',
+    editSubtitleNode: (name: string) => `Element ${name}`,
+    editSubtitleAsset: (name: string) => `Asset ${name}`,
+    editorLabel: 'SVG-Quelltext',
+    loading: 'Editor wird geladen …',
+    editorFailed: 'Der Editor konnte nicht geladen werden.',
+    format: 'Formatieren',
+    formatHint: 'Einrücken, Attribute sortieren und Zahlen runden',
+    precision: 'Nachkommastellen',
+    apply: 'Übernehmen',
+    cancel: 'Abbrechen',
+    applyHint: (shortcut: string) => `Übernehmen (${shortcut})`,
+    unchanged: 'Noch keine Änderungen',
+    valid: 'Gültiges SVG',
+    problems: {
+      syntax: (line: number, column: number, detail: string) =>
+        `Zeile ${line}, Spalte ${column}: ${detail || 'das Markup ist nicht wohlgeformt'}`,
+      root: 'Ein Asset muss genau ein <svg>-Element im SVG-Namensraum sein.',
+      count: 'Ein Element muss genau ein Element sein – mehrere in ein <g> packen.',
+      empty: 'Das Markup ist leer.',
+    },
+    applyFailed: 'Das Markup konnte nicht übernommen werden.',
+    discardQuestion: 'Änderungen verwerfen?',
+    keepEditing: 'Weiter bearbeiten',
+    discard: 'Verwerfen',
+    optimizeTitle: 'Pfad optimieren',
+    optimizeSummary: (paths: number) => (paths === 1 ? '1 Pfad' : `${paths} Pfade`),
+    epsilon: 'Toleranz',
+    epsilonHint: 'Größte Abweichung eines entfernten Punkts, in Dokumenteinheiten',
+    points: 'Punkte',
+    characters: 'Zeichen',
+    before: 'Vorher',
+    after: 'Nachher',
+    noChange: 'Mit diesen Einstellungen gibt es nichts zu optimieren.',
+    optimizeApply: 'Optimieren',
+    nothingToOptimize: 'Kein Pfad ausgewählt.',
+  },
+});

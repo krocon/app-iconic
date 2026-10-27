@@ -110,6 +110,7 @@ export class CanvasInteraction {
       grid: o.snapToGrid && !off,
       magic: o.magicSnap && !off,
       origin: gridOriginPoint(o.gridOrigin),
+      step: o.gridSize,
     };
   }
 

@@ -1,5 +1,7 @@
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
+import { language } from '../i18n/i18n';
 import { KeymapApi } from '../menu/menu-api';
+import { ACTION_LABELS_DE } from './action-catalog.de';
 import { checkArgs, ArgsSpec } from './action-args';
 import { ActionContext, actionDef, ActionDef, ActionGroup, ACTIONS } from './action-catalog';
 import { buildKeymap, Keymap } from './keymap';
@@ -130,9 +132,12 @@ export class ActionService {
     return actionDef(id);
   }
 
-  /** The label now: the handler's own (Undo …) or the catalogue's. */
+  /** The label now, in the UI language (reactive): the handler's own (Undo …) or the catalogue's. */
   label(id: string): string {
-    return this.handler(id)?.label?.() ?? actionDef(id)?.label ?? id;
+    const own = this.handler(id)?.label?.();
+    if (own !== undefined) return own;
+    const en = actionDef(id)?.label ?? id;
+    return language() === 'de' ? (ACTION_LABELS_DE[id] ?? en) : en;
   }
 
   /** The chords of an action (canonical). */

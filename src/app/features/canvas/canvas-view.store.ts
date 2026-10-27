@@ -16,7 +16,7 @@ import { SelectionMode } from './selection-measure';
 /** Platform mask of the preview (design 004 E8). */
 export type MaskShape = 'none' | 'squircle' | 'circle';
 
-/** View options of the canvas (design 004 E14; persisted in prompt 015). */
+/** View options of the canvas (design 004 E14; persisted since design 015 E6). */
 export interface CanvasOptions {
   rulers: boolean;
   guides: boolean;
@@ -30,6 +30,8 @@ export interface CanvasOptions {
   snapToGrid: boolean;
   magicSnap: boolean;
   gridOrigin: GridOrigin;
+  /** Grid spacing in document units (legacy 10, design 015 E9). */
+  gridSize: number;
   /** none / point / boxed (design 007 E4). */
   selectionMode: SelectionMode;
   mask: MaskShape;
@@ -67,11 +69,12 @@ export class CanvasViewStore {
     guides: true,
     background: true,
     effects: true,
-    crossCursor: false,
+    crossCursor: true,
     handles: true,
     snapToGrid: false,
     magicSnap: true,
     gridOrigin: 'worldZero',
+    gridSize: 10,
     selectionMode: 'point',
     mask: 'squircle',
     appearance: systemAppearance(),
@@ -83,12 +86,25 @@ export class CanvasViewStore {
   layers: HTMLElement | null = null;
   /** The user zoomed or panned – until then resizing keeps the artboard fitted and centred. */
   private touched = false;
+  /**
+   * The zoom the user chose last – `0` = fit (design 015 E7). Saved as the start zoom of new
+   * windows; set only by user zooms, not by resizing.
+   */
+  readonly chosenZoom = signal(0);
+  /** Start zoom of this window (from the settings): `0` = fit. */
+  private startZoom = 0;
+
+  /** The zoom the window starts with (before the first layout; `0` = fit). */
+  setStartZoom(zoom: number): void {
+    this.startZoom = zoom > 0 ? clampZoom(zoom) : 0;
+    this.chosenZoom.set(this.startZoom);
+  }
 
   setViewport(width: number, height: number): void {
     this.viewport.set({ width, height });
     if (width <= 0 || height <= 0) return;
     if (this.touched) this.view.update((v) => clampPan(v, width, height));
-    else this.view.set(centered(width, height, fitZoom(width, height)));
+    else this.view.set(centered(width, height, this.startZoom || fitZoom(width, height)));
   }
 
   /** Zooms to `zoom` (clamped) around `anchor` (viewport pixels; default the middle). */
@@ -97,6 +113,7 @@ export class CanvasViewStore {
     const at = anchor ?? { x: width / 2, y: height / 2 };
     this.touched = true;
     this.view.update((v) => clampPan(zoomAround(v, clampZoom(zoom), at), width, height));
+    this.chosenZoom.set(this.zoom());
   }
 
   zoomIn(anchor?: Point): void {
@@ -121,6 +138,8 @@ export class CanvasViewStore {
   fit(): void {
     const { width, height } = this.viewport();
     this.touched = false;
+    this.startZoom = 0;
+    this.chosenZoom.set(0);
     this.view.set(centered(width, height, fitZoom(width, height)));
   }
 

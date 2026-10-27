@@ -79,11 +79,13 @@ describe('CanvasView', () => {
     expect(document.activeElement).toBe(item('Rulers'));
     const cross = item('Cross Cursor');
     expect(cross.getAttribute('role')).toBe('menuitemcheckbox');
-    expect(cross.getAttribute('aria-checked')).toBe('false');
+    // on by default since design 015 E9 (legacy §9)
+    expect(cross.getAttribute('aria-checked')).toBe('true');
+    expect(el.querySelector('.viewport')!.classList).toContain('cross');
     cross.click();
     await fixture.whenStable();
-    expect(item('Cross Cursor').getAttribute('aria-checked')).toBe('true');
-    expect(el.querySelector('.viewport')!.classList).toContain('cross');
+    expect(item('Cross Cursor').getAttribute('aria-checked')).toBe('false');
+    expect(el.querySelector('.viewport')!.classList).not.toContain('cross');
     expect(item('Magic Snap').getAttribute('aria-checked')).toBe('true');
     expect(item('Snap to Grid').getAttribute('aria-checked')).toBe('false');
     const watch = item('watchOS');

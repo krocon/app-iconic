@@ -1,5 +1,7 @@
-/** Texts of the clip path functions (design 014). English is the source; German in prompt 015. */
-export const CLIP_TEXTS = {
+import { translatable } from '../../core/i18n/i18n';
+
+/** Texts of the clip path functions (design 014). English is the source, German beside it. */
+const EN = {
   section: 'Clip Path',
   clip: 'Clip',
   layerClip: 'Layer clip',
@@ -36,3 +38,42 @@ export const CLIP_TEXTS = {
   treeBadge: (id: string) => `Clipped by #${id}`,
   layerClipGroup: 'Layer Clip',
 } as const;
+
+export const CLIP_TEXTS = translatable('clip', EN, {
+  de: {
+    section: 'Beschneidungspfad',
+    clip: 'Beschneidung',
+    layerClip: 'Beschneidung der Ebene',
+    none: 'Keine',
+    inherit: 'Von der Ebene erben',
+    other: (v: string) => `Andere: ${v}`,
+    units: 'Einheiten',
+    unitLabels: { userSpaceOnUse: 'Nutzerraum', objectBoundingBox: 'Begrenzungsrahmen' },
+    create: 'Beschneidungspfad anlegen',
+    edit: 'Beschneidungspfad bearbeiten',
+    remove: 'Entfernen …',
+    done: 'Fertig',
+    editing: (id: string) => `Beschneidungspfad #${id} wird bearbeitet`,
+    editingHint: 'Esc oder „Fertig“ beendet',
+    inheritedFrom: (id: string) => `Beschnitten durch die Ebenen-Beschneidung #${id}`,
+    inheritedGroup: (id: string) => `Beschnitten durch eine Gruppe mit #${id}`,
+    alsoClipped: (id: string) => `Zusätzlich beschnitten durch #${id} (Schnittmenge)`,
+    noneBlocked:
+      'Liegt in einer beschnittenen Gruppe – auf die Ebene verschieben, um die Beschneidung zu entfernen.',
+    users: (n: number) => (n === 1 ? 'Von 1 Element benutzt' : `Von ${n} Elementen benutzt`),
+    unused: 'Nicht benutzt',
+    obbShared: 'Einheiten des Begrenzungsrahmens folgen jedem Element, das die Beschneidung nutzt.',
+    deleteTitle: (id: string) => `Beschneidungspfad „${id}“ löschen?`,
+    deleteMessage: (n: number) =>
+      n === 1
+        ? '1 Element benutzt ihn. Seine Beschneidung wird entfernt.'
+        : `${n} Elemente benutzen ihn. Ihre Beschneidung wird entfernt.`,
+    deleteMany: (n: number) =>
+      `${n} Beschneidungspfade werden benutzt. Die Verweise werden entfernt.`,
+    deleteButton: 'Löschen',
+    cancelButton: 'Abbrechen',
+    failed: 'Der Beschneidungspfad konnte nicht geändert werden.',
+    treeBadge: (id: string) => `Beschnitten durch #${id}`,
+    layerClipGroup: 'Ebenen-Beschneidung',
+  },
+});

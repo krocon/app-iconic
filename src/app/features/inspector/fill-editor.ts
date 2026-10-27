@@ -56,7 +56,7 @@ import { VariantTools } from './variant-tools';
       <span></span>
     }
     @if (gradient()) {
-      @for (p of points; track p.id) {
+      @for (p of points(); track p.id) {
         <app-number-field
           [fieldId]="fieldId() + '-' + p.id"
           [label]="p.label"
@@ -113,12 +113,15 @@ export class FillEditor {
   );
   protected readonly raw = computed(() => JSON.stringify(this.state().value, null, 2));
   protected readonly defaults = DEFAULT_ORIENTATION;
-  protected readonly points = [
-    { id: 'start-x', end: 'start', axis: 'x', label: `${INSPECTOR_TEXTS.start} x` },
-    { id: 'start-y', end: 'start', axis: 'y', label: `${INSPECTOR_TEXTS.start} y` },
-    { id: 'stop-x', end: 'stop', axis: 'x', label: `${INSPECTOR_TEXTS.stop} x` },
-    { id: 'stop-y', end: 'stop', axis: 'y', label: `${INSPECTOR_TEXTS.stop} y` },
-  ] as const;
+  protected readonly points = computed(
+    () =>
+      [
+        { id: 'start-x', end: 'start', axis: 'x', label: `${INSPECTOR_TEXTS.start} x` },
+        { id: 'start-y', end: 'start', axis: 'y', label: `${INSPECTOR_TEXTS.start} y` },
+        { id: 'stop-x', end: 'stop', axis: 'x', label: `${INSPECTOR_TEXTS.stop} x` },
+        { id: 'stop-y', end: 'stop', axis: 'y', label: `${INSPECTOR_TEXTS.stop} y` },
+      ] as const,
+  );
 
   protected kind(k: string | null): void {
     if (k === null || k === this.model().kind) return;

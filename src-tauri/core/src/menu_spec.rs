@@ -48,6 +48,64 @@ pub struct TopMenu {
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct MenuSpec {
     pub menus: Vec<TopMenu>,
+    /// Texts of the macOS app and Window menus in the UI language (design 015 E14); missing =
+    /// English.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app: Option<AppMenuSpec>,
+}
+
+/// The texts of the menus Rust adds on macOS (app menu, Window) – the frontend translates them.
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", default)]
+pub struct AppMenuSpec {
+    pub about: String,
+    pub settings: String,
+    /// Shortcut of Settings… (our chord notation, e.g. `Mod+,`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub settings_accelerator: Option<String>,
+    pub services: String,
+    pub hide: String,
+    pub hide_others: String,
+    pub show_all: String,
+    pub quit: String,
+    pub window: String,
+    pub minimize: String,
+    pub maximize: String,
+}
+
+impl Default for AppMenuSpec {
+    fn default() -> Self {
+        Self {
+            about: "About AppIconic".into(),
+            settings: "Settings…".into(),
+            settings_accelerator: Some("Mod+,".into()),
+            services: "Services".into(),
+            hide: "Hide AppIconic".into(),
+            hide_others: "Hide Others".into(),
+            show_all: "Show All".into(),
+            quit: "Quit AppIconic".into(),
+            window: "Window".into(),
+            minimize: "Minimize".into(),
+            maximize: "Zoom".into(),
+        }
+    }
+}
+
+impl AppMenuSpec {
+    fn labels(&self) -> [&str; 10] {
+        [
+            &self.about,
+            &self.settings,
+            &self.services,
+            &self.hide,
+            &self.hide_others,
+            &self.show_all,
+            &self.quit,
+            &self.window,
+            &self.minimize,
+            &self.maximize,
+        ]
+    }
 }
 
 fn invalid(message: impl Into<String>) -> FsError {
@@ -101,6 +159,11 @@ pub fn validate(spec: &MenuSpec) -> Result<(), FsError> {
             }
         }
         Ok(())
+    }
+    if let Some(app) = &spec.app
+        && !app.labels().iter().all(|l| valid_label(l))
+    {
+        return Err(invalid("bad menu text"));
     }
     let mut count = 0usize;
     for m in &spec.menus {
@@ -231,7 +294,13 @@ pub fn predefined(id: &str) -> Option<Predefined> {
 pub fn works_without_window(id: &str) -> bool {
     matches!(
         id,
-        "file.new" | "file.newWindow" | "file.open" | "app.about" | "app.shortcuts" | "app.quit"
+        "file.new"
+            | "file.newWindow"
+            | "file.open"
+            | "app.about"
+            | "app.settings"
+            | "app.shortcuts"
+            | "app.quit"
     ) || id.starts_with("file.recent.")
 }
 
@@ -270,6 +339,7 @@ pub fn without_window(spec: &MenuSpec) -> MenuSpec {
                 items: items(&m.items),
             })
             .collect(),
+        app: spec.app.clone(),
     }
 }
 
@@ -313,6 +383,7 @@ mod tests {
                 label: "File".into(),
                 items,
             }],
+            app: None,
         }
     }
 
@@ -407,14 +478,23 @@ mod tests {
                     items: vec![],
                 })
                 .collect(),
+            app: None,
         };
         assert!(validate(&menus).is_err());
+        // the texts of the app menu are checked too (design 015 E14)
+        let mut app = spec(vec![]);
+        app.app = Some(AppMenuSpec::default());
+        assert!(validate(&app).is_ok());
+        app.app.as_mut().unwrap().quit = " ".into();
+        assert!(validate(&app).is_err());
+        assert!(works_without_window("app.settings"));
         for label in ["a\u{0}b", "   ", "", &"x".repeat(MAX_LABEL + 1), "a\nb"] {
             let s = MenuSpec {
                 menus: vec![TopMenu {
                     label: label.into(),
                     items: vec![],
                 }],
+                app: None,
             };
             assert!(validate(&s).is_err(), "{label:?}");
         }

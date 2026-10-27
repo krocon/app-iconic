@@ -287,12 +287,15 @@ test('rulers, guides and cross cursor follow their toggles', async ({ page }) =>
   await expect(page.locator('app-canvas-view svg.host .guides')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await expect(options).toBeHidden();
-  await menu(page, 'View', 'Cross Cursor');
+  // the cross cursor is on by default (design 015 E9, legacy §9)
   const c = await toClient(page, 300, 400);
   await page.mouse.move(c.clientX, c.clientY);
   const cross = page.locator('app-canvas-view .cross-v');
   await expect(cross).toBeVisible();
   expect((await cross.boundingBox())!.x).toBeCloseTo(c.clientX, 0);
+  await menu(page, 'View', 'Cross Cursor');
+  await page.mouse.move(c.clientX + 4, c.clientY);
+  await expect(cross).toBeHidden();
 });
 
 test('zoom and pan stay fluid with logo-artv.svg (100 KB)', async ({ page }) => {

@@ -1,8 +1,11 @@
+import { translatable } from '../../../core/i18n/i18n';
+
 /**
  * Names of undoable actions (legacy §12 `UndoController`, plus the icon.json actions of the
- * rewrite). English is the source; German follows in prompt 015.
+ * rewrite). English is the source, German beside it (design 015 E13). `undoNamed`/`redoNamed`
+ * build the menu title ("Undo Change Fill" / „Widerrufen: Füllung ändern“).
  */
-export const UNDO_TEXTS = {
+const EN = {
   undo: 'Undo',
   redo: 'Redo',
   // legacy §12
@@ -93,5 +96,116 @@ export const UNDO_TEXTS = {
   changeClipUnits: 'Change Clip Path Units',
 } as const;
 
+export const UNDO_TEXTS = translatable('undo', EN, {
+  de: {
+    undo: 'Widerrufen',
+    redo: 'Wiederholen',
+    changeFill: 'Füllung ändern',
+    changeStroke: 'Kontur ändern',
+    changeStrokeWidth: 'Konturstärke ändern',
+    changeOpacity: 'Deckkraft ändern',
+    changeFontSize: 'Schriftgröße ändern',
+    changeFontFamily: 'Schriftart ändern',
+    changeFontWeight: 'Schriftstärke ändern',
+    changeText: 'Text ändern',
+    changeTransform: 'Transformation ändern',
+    changeAttribute: 'Attribut ändern',
+    editSvgCode: 'SVG-Code bearbeiten',
+    insertPoint: 'Punkt einfügen',
+    deletePoint: 'Punkt löschen',
+    adjustPath: 'Pfad anpassen',
+    moveNode: 'Element bewegen',
+    reorderNode: 'Element umsortieren',
+    groupNodes: 'Gruppieren <g>',
+    ungroup: 'Gruppierung aufheben',
+    clone: 'Duplizieren',
+    delete: 'Löschen',
+    toggleVisibility: 'Sichtbarkeit umschalten',
+    resetAllProperties: 'Alle Eigenschaften zurücksetzen',
+    resetProperty: 'Eigenschaft zurücksetzen',
+    removeAttribute: 'Attribut entfernen',
+    insertNode: 'Element einfügen',
+    changeIconProperty: 'Icon-Eigenschaft ändern',
+    addGroup: 'Gruppe hinzufügen',
+    removeGroup: 'Gruppe entfernen',
+    moveGroup: 'Gruppe verschieben',
+    addLayer: 'Ebene hinzufügen',
+    removeLayer: 'Ebene entfernen',
+    addAsset: 'Asset hinzufügen',
+    removeAsset: 'Asset entfernen',
+    importSvg: 'SVG importieren',
+    moveLayer: 'Ebene verschieben',
+    bringToFront: 'In den Vordergrund',
+    sendToBack: 'In den Hintergrund',
+    paste: 'Einsetzen',
+    cut: 'Ausschneiden',
+    addContainer: 'Container hinzufügen',
+    addCircle: 'Kreis hinzufügen',
+    addEllipse: 'Ellipse hinzufügen',
+    addRect: 'Rechteck hinzufügen',
+    addPath: 'Pfad hinzufügen',
+    addLine: 'Linie hinzufügen',
+    addPolyline: 'Linienzug hinzufügen',
+    addPolygon: 'Polygon hinzufügen',
+    addText: 'Text hinzufügen',
+    addImage: 'Bild hinzufügen',
+    addSvgSnippet: 'SVG-Schnipsel hinzufügen',
+    addFreehand: 'Freihandlinie hinzufügen',
+    addTextPath: 'Textpfad hinzufügen',
+    addSymbol: 'Symbol hinzufügen',
+    changeBackground: 'Hintergrund ändern',
+    changeShadow: 'Schatten ändern',
+    changeTranslucency: 'Transluzenz ändern',
+    changeGroupOpacity: 'Deckkraft der Gruppe ändern',
+    changeLayerOpacity: 'Deckkraft der Ebene ändern',
+    changeBlendMode: 'Füllmethode ändern',
+    changeLighting: 'Beleuchtung ändern',
+    changeSpecular: 'Glanzlicht ändern',
+    changeBlur: 'Unschärfe ändern',
+    changeGlass: 'Glas ändern',
+    changePosition: 'Position ändern',
+    changeLayerFill: 'Füllung der Ebene ändern',
+    renameGroup: 'Gruppe umbenennen',
+    renameLayer: 'Ebene umbenennen',
+    renameAsset: 'Asset umbenennen',
+    changeLayerAsset: 'Asset der Ebene ändern',
+    changePlatforms: 'Plattformen ändern',
+    changeColorSpace: 'Farbraum ändern',
+    removeVariant: 'Variante des Erscheinungsbilds entfernen',
+    optimizePath: 'Pfad optimieren',
+    createClipPath: 'Beschneidungspfad anlegen',
+    assignClip: 'Beschneidungspfad zuweisen',
+    layerClip: 'Beschneidung der Ebene ändern',
+    removeClipPath: 'Beschneidungspfad entfernen',
+    changeClipUnits: 'Einheiten des Beschneidungspfads ändern',
+  },
+});
+
 /** Key of an action name (`label` of a command). */
-export type UndoLabel = Exclude<keyof typeof UNDO_TEXTS, 'undo' | 'redo'>;
+export type UndoLabel = Exclude<keyof typeof EN, 'undo' | 'redo'>;
+
+/** Every key of an action name (registry check, design 005 E15). */
+export function isUndoLabel(v: string): v is UndoLabel {
+  return v !== 'undo' && v !== 'redo' && Object.hasOwn(EN, v);
+}
+
+const VERBS = translatable(
+  'undo.verbs',
+  {
+    undoNamed: (name: string) => `Undo ${name}`,
+    redoNamed: (name: string) => `Redo ${name}`,
+  },
+  {
+    de: {
+      undoNamed: (name: string) => `Widerrufen: ${name}`,
+      redoNamed: (name: string) => `Wiederholen: ${name}`,
+    },
+  },
+);
+
+/** "Undo Change Fill" for the label key (or "Undo" without one), in the UI language. */
+export function undoTitle(kind: 'undo' | 'redo', label: UndoLabel | null): string {
+  if (!label) return UNDO_TEXTS[kind];
+  const name = UNDO_TEXTS[label];
+  return kind === 'undo' ? VERBS.undoNamed(name) : VERBS.redoNamed(name);
+}

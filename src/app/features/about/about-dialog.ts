@@ -4,6 +4,7 @@ import { AppInfo } from '../../core/about/about.models';
 import { Modal } from '../../shared/dialog/modal';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { SYMBOL_PROVIDERS } from '../symbols/symbol-providers';
+import { ABOUT_TEXTS } from './about-texts';
 
 /**
  * About: app icon, version and platform from the backend, the licences of the symbol sets
@@ -13,19 +14,19 @@ import { SYMBOL_PROVIDERS } from '../symbols/symbol-providers';
   selector: 'app-about-dialog',
   imports: [Modal],
   template: `
-    <app-modal heading="About AppIconic" width="26rem" (closed)="dialogs.close()">
+    <app-modal [heading]="t.title" width="26rem" (closed)="dialogs.close()">
       <div class="about">
         <img class="logo" src="icon.svg" alt="" />
-        <p class="tagline">Editor for Apple .icon app icons with SVG layers.</p>
+        <p class="tagline">{{ t.tagline }}</p>
         @if (info(); as i) {
-          <p class="meta">Version {{ i.version }} · {{ i.os }} / {{ i.arch }}</p>
+          <p class="meta">{{ t.version(i.version, i.os, i.arch) }}</p>
         } @else {
-          <p class="meta">Version: desktop backend not available</p>
+          <p class="meta">{{ t.noBackend }}</p>
         }
-        <p class="meta">© 2026 Marc Kronberg · MIT License</p>
+        <p class="meta">{{ t.copyright }}</p>
         @for (p of symbols; track p.id) {
           <p class="meta" data-testid="about-symbols">
-            Symbols: {{ p.name }} (<a
+            {{ t.symbols }} {{ p.name }} (<a
               [href]="p.license.url"
               target="_blank"
               rel="noopener noreferrer"
@@ -33,11 +34,11 @@ import { SYMBOL_PROVIDERS } from '../symbols/symbol-providers';
             >)
           </p>
         }
-        <p class="meta">Third-party notices: THIRD-PARTY-NOTICES.txt</p>
+        <p class="meta">{{ t.notices }}</p>
       </div>
       <div class="actions">
         <button type="button" class="btn primary" data-autofocus (click)="dialogs.close()">
-          Close
+          {{ t.close }}
         </button>
       </div>
     </app-modal>
@@ -78,6 +79,7 @@ export class AboutDialog {
   protected readonly dialogs = inject(DialogService);
   protected readonly info = signal<AppInfo | null>(null);
   protected readonly symbols = SYMBOL_PROVIDERS;
+  protected readonly t = ABOUT_TEXTS;
 
   constructor() {
     inject(AboutApi)

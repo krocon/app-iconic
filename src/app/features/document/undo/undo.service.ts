@@ -1,7 +1,8 @@
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 import { CompositeCommand, DocCommand } from '../commands/command';
 import { IconDocument } from '../icon-document';
-import { UNDO_TEXTS, UndoLabel } from './undo-texts';
+import { logUndo } from './undo-log';
+import { undoTitle, UndoLabel } from './undo-texts';
 
 /** What menus and buttons show (design 003 E6). */
 export interface UndoState {
@@ -11,6 +12,15 @@ export interface UndoState {
   undoLabel: string;
   redoLabel: string;
   /** Not at the save point. */
+  dirty: boolean;
+}
+
+/** The state with the names as keys – translated when read (design 015 E17). */
+interface RawState {
+  canUndo: boolean;
+  canRedo: boolean;
+  undoName: UndoLabel | null;
+  redoName: UndoLabel | null;
   dirty: boolean;
 }
 
@@ -34,8 +44,16 @@ export class UndoService {
   /** Id of the top entry when saved (0 = the empty stack, -1 = no longer reachable). */
   private savePoint = 0;
   private gesture: { label: UndoLabel; commands: DocCommand[] } | null = null;
-  private readonly _state = signal<UndoState>(this.compute());
-  readonly state = this._state.asReadonly();
+  private readonly _state = signal<RawState>(this.compute());
+  /** Labels in the UI language: a language switch renames "Undo …" at once. */
+  readonly state = computed<UndoState>(() => {
+    const { undoName, redoName, ...rest } = this._state();
+    return {
+      ...rest,
+      undoLabel: undoTitle('undo', undoName),
+      redoLabel: undoTitle('redo', redoName),
+    };
+  });
 
   constructor(
     private readonly doc: IconDocument,
@@ -67,6 +85,7 @@ export class UndoService {
     command.do(this.doc);
     const top = this.done.at(-1);
     if (into && top && top.command === into && top.id !== this.savePoint && into.merge?.(command)) {
+      logUndo('merged into the top step', into.label);
       this.undone = [];
       this.publish();
       return true;
@@ -79,6 +98,7 @@ export class UndoService {
   /** Starts a gesture (drag, slider): the following updates become one step (prompt 007). */
   begin(label: UndoLabel): void {
     if (this.gesture) this.commit();
+    logUndo('gesture begins', label);
     this.gesture = { label, commands: [] };
   }
 
@@ -90,7 +110,8 @@ export class UndoService {
     }
     command.do(this.doc);
     const last = this.gesture.commands.at(-1);
-    if (!last?.merge?.(command)) this.gesture.commands.push(command);
+    if (last?.merge?.(command)) logUndo('gesture merges', command.label);
+    else this.gesture.commands.push(command);
     this.changed();
   }
 
@@ -99,6 +120,7 @@ export class UndoService {
     const g = this.gesture;
     this.gesture = null;
     if (!g || g.commands.length === 0) return;
+    logUndo('gesture commits', g.label, { commands: g.commands.length });
     const command =
       g.commands.length === 1 && g.commands[0].label === g.label
         ? g.commands[0]
@@ -162,16 +184,14 @@ export class UndoService {
     }
   }
 
-  private compute(): UndoState {
+  private compute(): RawState {
     const top = this.done?.at(-1);
     const next = this.undone?.at(-1);
-    const name = (e: Entry | undefined, verb: string) =>
-      e ? `${verb} ${UNDO_TEXTS[e.command.label]}` : verb;
     return {
       canUndo: !!top,
       canRedo: !!next,
-      undoLabel: name(top, UNDO_TEXTS.undo),
-      redoLabel: name(next, UNDO_TEXTS.redo),
+      undoName: top?.command.label ?? null,
+      redoName: next?.command.label ?? null,
       dirty: (top?.id ?? 0) !== (this.savePoint ?? 0),
     };
   }

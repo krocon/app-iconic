@@ -198,25 +198,33 @@ pub fn apply(app: &AppHandle, spec: &MenuSpec) -> tauri::Result<()> {
         }
         Ok(b)
     }
+    // texts in the UI language (design 015 E14); Settings… opens the dialog of the window in front
+    let t = spec.app.clone().unwrap_or_default();
+    let mut settings = MenuItemBuilder::with_id("app.settings", &t.settings);
+    if let Some(a) = t.settings_accelerator.as_deref().and_then(accelerator) {
+        settings = settings.accelerator(a);
+    }
     let app_menu = SubmenuBuilder::new(app, app.package_info().name.clone())
-        .item(&MenuItemBuilder::with_id("app.about", "About AppIconic").build(app)?)
+        .item(&MenuItemBuilder::with_id("app.about", &t.about).build(app)?)
         .separator()
-        .services()
+        .item(&settings.build(app)?)
         .separator()
-        .hide()
-        .hide_others()
-        .show_all()
+        .item(&PredefinedMenuItem::services(app, Some(&t.services))?)
+        .separator()
+        .item(&PredefinedMenuItem::hide(app, Some(&t.hide))?)
+        .item(&PredefinedMenuItem::hide_others(app, Some(&t.hide_others))?)
+        .item(&PredefinedMenuItem::show_all(app, Some(&t.show_all))?)
         .separator()
         .item(
-            &MenuItemBuilder::with_id("app.quit", "Quit AppIconic")
+            &MenuItemBuilder::with_id("app.quit", &t.quit)
                 .accelerator("CmdOrCtrl+Q")
                 .build(app)?,
         )
         .build()?;
     // no predefined "Close Window" (⌘W is our File › Close, which asks about unsaved changes)
-    let window = SubmenuBuilder::new(app, "Window")
-        .minimize()
-        .maximize()
+    let window = SubmenuBuilder::new(app, &t.window)
+        .item(&PredefinedMenuItem::minimize(app, Some(&t.minimize))?)
+        .item(&PredefinedMenuItem::maximize(app, Some(&t.maximize))?)
         .build()?;
     let mut tops: Vec<Submenu<tauri::Wry>> = Vec::new();
     for m in &spec.menus {
@@ -251,6 +259,7 @@ mod tests {
                     checked: None,
                 }],
             }],
+            app: None,
         }
     }
 

@@ -1,8 +1,10 @@
+import { translatable } from '../../core/i18n/i18n';
+
 /**
- * Texts of the tools (prompt 013): freehand, text to path, symbols. English is the source; German
- * follows in prompt 015. Action titles come from the action catalogue (design 005).
+ * Texts of the tools (prompt 013): freehand, text to path, symbols. English is the source,
+ * German beside it (015). Action titles come from the action catalogue (design 005).
  */
-export const TOOLS_TEXTS = {
+const EN = {
   freehand: {
     toolbar: 'Freehand options',
     title: 'Freehand',
@@ -50,3 +52,54 @@ export const TOOLS_TEXTS = {
     unknown: 'There is no such symbol.',
   },
 } as const;
+
+export const TOOLS_TEXTS = translatable('tools', EN, {
+  de: {
+    freehand: {
+      toolbar: 'Freihand-Optionen',
+      title: 'Freihand',
+      hint: 'Freihand: ziehen zum Zeichnen · C offen/geschlossen · Esc beendet',
+      smoothing: 'Glättung',
+      strokeWidth: 'Konturstärke',
+      closed: 'Geschlossen',
+      done: 'Fertig',
+      failed: 'Die Freihandlinie konnte nicht hinzugefügt werden.',
+    },
+    textPath: {
+      title: 'Text in Pfad',
+      text: 'Text',
+      textPlaceholder: 'Text',
+      family: 'Schrift',
+      familySearch: 'Schriften suchen',
+      style: 'Schnitt',
+      size: 'Größe',
+      letterSpacing: 'Zeichenabstand',
+      preview: 'Vorschau',
+      previewEmpty: 'Text eingeben, um die Umrisse zu sehen.',
+      loading: 'Schriften werden geladen …',
+      noFonts: 'Keine Schriften gefunden.',
+      add: 'Hinzufügen',
+      cancel: 'Abbrechen',
+      failed: 'Der Text konnte nicht in einen Pfad umgewandelt werden.',
+      unknownFont: 'Die Schrift ist nicht installiert.',
+      count: (n: number, max: number) => `${n}/${max}`,
+    },
+    symbol: {
+      title: 'Symbol',
+      set: 'Symbolsatz',
+      search: 'Symbole suchen',
+      searchPlaceholder: 'Suchen …',
+      grid: 'Symbole',
+      weight: 'Stärke',
+      size: 'Größe',
+      add: 'Hinzufügen',
+      cancel: 'Abbrechen',
+      loading: 'Symbole werden geladen …',
+      loadFailed: 'Die Symbole konnten nicht geladen werden.',
+      none: 'Kein Symbol passt.',
+      more: (shown: number, total: number) => `${shown} von ${total} gezeigt – Suche verfeinern.`,
+      license: (set: string, license: string) => `${set} · ${license}`,
+      unknown: 'Dieses Symbol gibt es nicht.',
+    },
+  },
+});

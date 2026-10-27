@@ -16,6 +16,22 @@ export type MenuItemSpec =
 
 export interface MenuSpec {
   menus: { label: string; items: MenuItemSpec[] }[];
+  /** Texts of the macOS app and Window menus (Rust `AppMenuSpec`, design 015 E14). */
+  app?: AppMenuSpec;
+}
+
+export interface AppMenuSpec {
+  about: string;
+  settings: string;
+  settingsAccelerator?: string;
+  services: string;
+  hide: string;
+  hideOthers: string;
+  showAll: string;
+  quit: string;
+  window: string;
+  minimize: string;
+  maximize: string;
 }
 
 /** A problem with a config file (Rust `config_file::ConfigWarning`). */

@@ -6,7 +6,7 @@ import { LayoutStore, PanelId } from '../shell/layout.store';
 
 /**
  * Actions of the window shell (design 005 E17): palette, shortcut overview, About, the side
- * panels (⌘1/⌘2/⌘3) and `edit.runCommand` – a serialised document command (design 005 E15), the
+ * panels (⌘1/⌘2/⌘3, widths since 015) and `edit.runCommand` – a serialised document command (design 005 E15), the
  * way the AI of prompt 018 changes the document. Throws `CommandError` for an invalid one.
  */
 export function registerAppActions(
@@ -29,6 +29,15 @@ export function registerAppActions(
       'view.commandSidebar': panel('commands'),
       'view.hierarchy': panel('hierarchy'),
       'view.properties': panel('properties'),
+      // width of a side panel (design 015 E10): without `width` the default
+      'view.panelWidth': {
+        run: (args) => {
+          const { panel: id, width } = args as { panel: PanelId; width?: number };
+          if (width === undefined) layout.resetWidth(id);
+          else layout.setWidth(id, width);
+        },
+        enabled: (args) => args !== undefined,
+      },
       'edit.runCommand': {
         run: (args) => files.store()?.runCommand((args as { command: unknown }).command),
         enabled: () => files.store() !== null,

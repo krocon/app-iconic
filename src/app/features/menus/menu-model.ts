@@ -1,7 +1,7 @@
 import { MAX_RECENT_ACTIONS } from '../../core/actions/action-catalog';
 import { Os } from '../../core/actions/platform';
 import { formatChord } from '../../core/actions/shortcut';
-import { MenuItemSpec, MenuSpec } from '../../core/menu/menu.models';
+import { AppMenuSpec, MenuItemSpec, MenuSpec } from '../../core/menu/menu.models';
 import { MENUS_TEXTS } from './menus-texts';
 
 /**
@@ -71,6 +71,8 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     sep,
     a('edit.selectAll'),
     a('edit.deselect'),
+    // macOS: Settings… lives in the app menu Rust adds (design 015 E14)
+    ...(os === 'mac' ? [] : [sep, a('app.settings')]),
   ];
   const view: MenuNode[] = [
     a('view.commandSidebar'),
@@ -228,6 +230,24 @@ export function menuLabel(text: string): string {
 }
 
 /** The spec Rust gets (the HTML-only `shortcut` stays here). */
+/** Texts of the macOS app and Window menus (design 015 E14). */
+export function appMenuSpec(label: (id: string) => string, settingsChord: string): AppMenuSpec {
+  const t = MENUS_TEXTS;
+  return {
+    about: menuLabel(label('app.about')),
+    settings: menuLabel(label('app.settings')),
+    ...(settingsChord ? { settingsAccelerator: settingsChord } : {}),
+    services: t.services,
+    hide: t.hideApp,
+    hideOthers: t.hideOthers,
+    showAll: t.showAll,
+    quit: menuLabel(label('app.quit')),
+    window: t.window,
+    minimize: t.minimize,
+    maximize: t.maximize,
+  };
+}
+
 export function toSpec(menus: ResolvedMenu[]): MenuSpec {
   const strip = (items: ResolvedItem[]): MenuItemSpec[] =>
     items.map((i) => {

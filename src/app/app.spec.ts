@@ -157,7 +157,8 @@ describe('App', () => {
     await new Promise((r) => setTimeout(r));
     await fixture.whenStable();
     expect(el.querySelector('[role="dialog"]')).toBeNull();
-    expect(el.querySelector('.viewport')!.classList).toContain('cross');
+    // the cross cursor is on by default (design 015 E9): the palette turned it off
+    expect(el.querySelector('.viewport')!.classList).not.toContain('cross');
   });
 
   it('lists the shortcuts by menu (Ctrl+/)', async () => {

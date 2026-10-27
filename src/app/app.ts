@@ -36,6 +36,11 @@ import { ShortcutsDialog } from './features/menus/shortcuts-dialog';
 import { LayoutStore } from './features/shell/layout.store';
 import { SHELL_TEXTS } from './features/shell/shell-texts';
 import { SidePanel } from './features/shell/side-panel';
+import { Splitter } from './features/shell/splitter';
+import { registerSettingsActions } from './features/settings/settings-actions';
+import { SettingsDialog } from './features/settings/settings-dialog';
+import { SettingsStore } from './features/settings/settings.store';
+import { AskService } from './shared/ask/ask.service';
 import { AskDialog } from './shared/ask/ask-dialog';
 import { DialogService } from './shared/dialog/dialog.service';
 import { OptimizePathDialog } from './features/svg-source/optimize-path-dialog';
@@ -48,8 +53,9 @@ import { SvgSourceService } from './features/svg-source/svg-source.service';
 
 /**
  * Root (design 005 E11): one header row – the HTML menu bar (Windows/Linux; macOS has the native
- * menu), the document title and Undo/Redo –, the three side panels (⌘1/⌘2/⌘3; legacy defaults
- * 260 / 260 / 300 px), the canvas and the one modal dialog of the moment. One document per window
+ * menu), the document title and Undo/Redo –, the three side panels (⌘1/⌘2/⌘3; widths 160…480
+ * with splitters, legacy defaults 260 / 260 / 300 px, design 015 E10), the canvas and the one
+ * modal dialog of the moment. One document per window
  * (design 003 E8). Every function is an action (design 005 E17); this component only wires them.
  */
 @Component({
@@ -66,7 +72,9 @@ import { SvgSourceService } from './features/svg-source/svg-source.service';
     ExportDialog,
     PropertiesPanel,
     ShortcutsDialog,
+    SettingsDialog,
     SidePanel,
+    Splitter,
     SvgSnippetDialog,
     SymbolPickerDialog,
     TextPathDialog,
@@ -113,22 +121,40 @@ import { SvgSourceService } from './features/svg-source/svg-source.service';
     </header>
     <div class="workspace">
       @if (panels().commands) {
-        <app-side-panel class="commands" [heading]="t.commands" [flush]="true">
+        <app-side-panel
+          class="commands"
+          [heading]="t.commands"
+          [flush]="true"
+          [style.width.px]="widths().commands"
+        >
           <app-command-sidebar />
         </app-side-panel>
+        <app-splitter panel="commands" side="end" [name]="t.commands" />
       }
       @if (panels().hierarchy) {
-        <app-side-panel class="hierarchy" [heading]="t.hierarchy" [flush]="!!store()">
+        <app-side-panel
+          class="hierarchy"
+          [heading]="t.hierarchy"
+          [flush]="!!store()"
+          [style.width.px]="widths().hierarchy"
+        >
           @if (store(); as s) {
             <app-hierarchy-tree [store]="s" />
           } @else {
             {{ t.noDocument }}
           }
         </app-side-panel>
+        <app-splitter panel="hierarchy" side="end" [name]="t.hierarchy" />
       }
       <app-canvas-view [store]="store()" />
       @if (panels().properties) {
-        <app-side-panel class="properties" [heading]="t.properties" [flush]="true">
+        <app-splitter panel="properties" side="start" [name]="t.properties" />
+        <app-side-panel
+          class="properties"
+          [heading]="t.properties"
+          [flush]="true"
+          [style.width.px]="widths().properties"
+        >
           <app-properties-panel [store]="store()" />
         </app-side-panel>
       }
@@ -172,6 +198,9 @@ import { SvgSourceService } from './features/svg-source/svg-source.service';
       @case ('symbolPicker') {
         <app-symbol-picker-dialog />
       }
+      @case ('settings') {
+        <app-settings-dialog />
+      }
     }
   `,
   styleUrl: './app.css',
@@ -190,6 +219,7 @@ export class App implements OnInit {
   protected readonly f = FILES_TEXTS;
   protected readonly store = this.files.store;
   protected readonly panels = inject(LayoutStore).panels;
+  protected readonly widths = inject(LayoutStore).widths;
   protected readonly mac = this.actions.os === 'mac';
 
   constructor() {
@@ -216,6 +246,13 @@ export class App implements OnInit {
     registerSvgSourceActions(this.actions, inject(SvgSourceService), this.destroyRef);
     registerExportActions(this.actions, inject(ExportService), this.destroyRef);
     registerClipActions(this.actions, inject(ClipService), this.destroyRef);
+    registerSettingsActions(
+      this.actions,
+      inject(SettingsStore),
+      this.dialogs,
+      inject(AskService),
+      this.destroyRef,
+    );
     // where the keyboard is (design 005 E4): a dialog owns it; else hierarchy or canvas first
     this.dispatcher.setContextProvider((target) => {
       if (this.dialogs.open() !== null) return ['dialog'];

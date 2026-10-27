@@ -84,15 +84,14 @@
   display: flex;
 }
 
+/* widths from the LayoutStore (design 015 E10) */
 .commands,
 .hierarchy {
-  width: 260px;
   flex: none;
   border-right: 1px solid var(--color-border);
 }
 
 .properties {
-  width: 300px;
   flex: none;
   border-left: 1px solid var(--color-border);
 }

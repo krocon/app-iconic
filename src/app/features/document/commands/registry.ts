@@ -1,6 +1,6 @@
 import { IconGroup, IconLayer } from '../../../core/icon-file/icon-file.models';
 import { NodeRef } from '../icon-document';
-import { UNDO_TEXTS, UndoLabel } from '../undo/undo-texts';
+import { isUndoLabel, UndoLabel } from '../undo/undo-texts';
 import { AddAsset, RemoveAsset, RenameAsset, ReplaceAssetMarkup } from './asset-commands';
 import { AssignClip, InsertDefinition, RemoveClipPath, SetLayerClip } from './clip-commands';
 import { CommandError, CompositeCommand, DocCommand } from './command';
@@ -95,7 +95,7 @@ function ref(v: unknown, what: string): NodeRef {
 
 function label(v: unknown): UndoLabel | undefined {
   if (v === undefined) return undefined;
-  if (typeof v !== 'string' || v === 'undo' || v === 'redo' || !Object.hasOwn(UNDO_TEXTS, v)) {
+  if (typeof v !== 'string' || !isUndoLabel(v)) {
     fail('label');
   }
   return v as UndoLabel;

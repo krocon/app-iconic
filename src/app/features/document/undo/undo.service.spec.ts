@@ -1,5 +1,7 @@
 import { smallDocument } from '../../../../testing/documents';
 import { RemoveNode, SetAttribute, SetIconJsonValue } from '../commands';
+import { setLanguage } from '../../../core/i18n/i18n';
+import { logUndoGrouping } from './undo-log';
 import { UNDO_DEPTH, UndoService } from './undo.service';
 
 const rect = { asset: 'a.svg', id: 'n3' };
@@ -12,6 +14,47 @@ describe('UndoService', () => {
     const fill = () => doc.node(rect)?.getAttribute('fill');
     return { doc, undo, fill, changes: () => changes };
   }
+
+  it('names the steps in the UI language – a switch renames them at once (design 015 E17)', () => {
+    const { undo } = setup();
+    undo.execute(new SetAttribute(rect, 'fill', 'blue', 'changeFill'));
+    setLanguage('de');
+    try {
+      expect(undo.state().undoLabel).toBe('Widerrufen: Füllung ändern');
+      undo.undo();
+      expect(undo.state().redoLabel).toBe('Wiederholen: Füllung ändern');
+      expect(undo.state().undoLabel).toBe('Widerrufen');
+    } finally {
+      setLanguage('en');
+    }
+    expect(undo.state().redoLabel).toBe('Redo Change Fill');
+  });
+
+  it('logs the grouping only while the debug flag is on (design 015 E16)', () => {
+    const { undo } = setup();
+    const lines: unknown[][] = [];
+    const debug = console.debug;
+    console.debug = (...a: unknown[]) => void lines.push(a);
+    try {
+      undo.begin('moveNode');
+      undo.update(new SetAttribute(rect, 'x', '1', 'moveNode'));
+      undo.commit();
+      expect(lines).toEqual([]);
+      logUndoGrouping.set(true);
+      undo.begin('moveNode');
+      undo.update(new SetAttribute(rect, 'x', '2', 'moveNode'));
+      undo.update(new SetAttribute(rect, 'x', '3', 'moveNode'));
+      undo.commit();
+      expect(lines.map((l) => l[0])).toEqual([
+        '[undo] gesture begins: moveNode',
+        '[undo] gesture merges: moveNode',
+        '[undo] gesture commits: moveNode',
+      ]);
+    } finally {
+      console.debug = debug;
+      logUndoGrouping.set(false);
+    }
+  });
 
   it('names the steps and moves between undo and redo', () => {
     const { undo, fill, changes } = setup();

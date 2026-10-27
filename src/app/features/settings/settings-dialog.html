@@ -1,0 +1,333 @@
+<app-modal [heading]="t.title" width="40rem" height="34rem" (closed)="dialogs.close()">
+  <div class="layout">
+    <div class="tabs" role="tablist" aria-orientation="vertical" [attr.aria-label]="t.title">
+      @for (id of sections; track id) {
+        <button
+          type="button"
+          role="tab"
+          class="tab"
+          [id]="'settings-tab-' + id"
+          [attr.aria-selected]="section() === id"
+          [attr.aria-controls]="'settings-panel-' + id"
+          [attr.tabindex]="section() === id ? 0 : -1"
+          [attr.data-autofocus]="section() === id ? '' : null"
+          [attr.data-testid]="'settings-tab-' + id"
+          (click)="section.set(id)"
+          (keydown)="tabKey($event)"
+        >
+          {{ t.sections[id] }}
+        </button>
+      }
+    </div>
+    @let v = s();
+    <div
+      class="panel"
+      role="tabpanel"
+      tabindex="0"
+      [id]="'settings-panel-' + section()"
+      [attr.aria-labelledby]="'settings-tab-' + section()"
+    >
+      @switch (section()) {
+        @case ('general') {
+          <label class="field">
+            <span>{{ t.theme }}</span>
+            <select
+              class="input"
+              data-testid="settings-theme"
+              (change)="set('theme', value($event))"
+            >
+              @for (o of ['system', 'light', 'dark']; track o) {
+                <option [value]="o" [selected]="v.theme === o">{{ $any(t.themes)[o] }}</option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            <span>{{ t.language }}</span>
+            <select
+              class="input"
+              data-testid="settings-language"
+              (change)="set('language', value($event))"
+            >
+              @for (o of ['system', 'en', 'de']; track o) {
+                <option [value]="o" [selected]="v.language === o">
+                  {{ $any(t.languages)[o] }}
+                </option>
+              }
+            </select>
+          </label>
+          <fieldset class="group">
+            <legend>{{ t.panels }}</legend>
+            @for (p of panelKeys; track p) {
+              <div class="panel-row">
+                <label class="check">
+                  <input
+                    type="checkbox"
+                    [attr.data-testid]="'settings-panel-' + p"
+                    [checked]="v.panels[p].visible"
+                    (change)="set('panels.' + p + '.visible', checked($event))"
+                  />
+                  {{ panelName(p) }}
+                </label>
+                <label class="inline">
+                  <span class="sr-only">{{ t.panelWidth(panelName(p)) }}</span>
+                  <input
+                    class="input num"
+                    type="number"
+                    step="10"
+                    [min]="min"
+                    [max]="max"
+                    [attr.data-testid]="'settings-width-' + p"
+                    [value]="v.panels[p].width"
+                    (change)="number('panels.' + p + '.width', $event)"
+                  />
+                  {{ t.px }}
+                </label>
+              </div>
+            }
+          </fieldset>
+        }
+        @case ('canvas') {
+          <fieldset class="group">
+            <legend>{{ t.canvasShow }}</legend>
+            @for (o of toggles; track o.key) {
+              @if (o.section === 'canvas') {
+                <label class="check">
+                  <input
+                    type="checkbox"
+                    [attr.data-testid]="'settings-' + o.key"
+                    [checked]="$any(v.canvas)[o.key.slice(7)]"
+                    (change)="set(o.key, checked($event))"
+                  />
+                  {{ actions.label(o.action) }}
+                </label>
+              }
+            }
+          </fieldset>
+          <label class="field">
+            <span>{{ t.preview }}</span>
+            <select class="input" (change)="set('canvas.appearance', value($event))">
+              @for (o of ['system', 'light', 'dark']; track o) {
+                <option [value]="o" [selected]="v.canvas.appearance === o">
+                  {{ $any(t.previewChoices)[o] }}
+                </option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            <span>{{ t.mask }}</span>
+            <select class="input" (change)="set('canvas.mask', value($event))">
+              @for (o of ['squircle', 'circle', 'none']; track o) {
+                <option [value]="o" [selected]="v.canvas.mask === o">{{ $any(t.masks)[o] }}</option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            <span>{{ t.startZoom }}</span>
+            <select
+              class="input"
+              data-testid="settings-zoom"
+              (change)="set('canvas.zoom', +value($event))"
+            >
+              @for (z of zooms; track z) {
+                <option [value]="z" [selected]="v.canvas.zoom === z">
+                  {{ z === 0 ? t.zoomFit : zoomLabel(z) }}
+                </option>
+              }
+            </select>
+          </label>
+        }
+        @case ('snapping') {
+          @for (o of toggles; track o.key) {
+            @if (o.section === 'snapping') {
+              <label class="check">
+                <input
+                  type="checkbox"
+                  [attr.data-testid]="'settings-' + o.key"
+                  [checked]="$any(v.canvas)[o.key.slice(7)]"
+                  (change)="set(o.key, checked($event))"
+                />
+                {{ actions.label(o.action) }}
+              </label>
+            }
+          }
+          <label class="field">
+            <span>{{ t.gridSize }}</span>
+            <input
+              class="input num"
+              type="number"
+              min="1"
+              max="256"
+              data-testid="settings-grid-size"
+              [value]="v.canvas.gridSize"
+              (change)="number('canvas.gridSize', $event)"
+            />
+          </label>
+          <label class="field">
+            <span>{{ t.gridOrigin }}</span>
+            <select class="input" (change)="set('canvas.gridOrigin', value($event))">
+              @for (o of ['worldZero', 'svgCenter']; track o) {
+                <option [value]="o" [selected]="v.canvas.gridOrigin === o">
+                  {{ $any(t.gridOrigins)[o] }}
+                </option>
+              }
+            </select>
+          </label>
+          <label class="field">
+            <span>{{ t.selectionMode }}</span>
+            <select
+              class="input"
+              data-testid="settings-selection-mode"
+              (change)="set('canvas.selectionMode', value($event))"
+            >
+              @for (o of ['point', 'boxed', 'none']; track o) {
+                <option [value]="o" [selected]="v.canvas.selectionMode === o">
+                  {{ $any(t.selectionModes)[o] }}
+                </option>
+              }
+            </select>
+          </label>
+        }
+        @case ('export') {
+          <p class="hint">{{ t.exportHint }}</p>
+          <label class="field">
+            <span>{{ t.exportFormat }}</span>
+            <select class="input" (change)="set('export.format', value($event))">
+              @for (o of ['png', 'svg']; track o) {
+                <option [value]="o" [selected]="v.export.format === o">
+                  {{ o.toUpperCase() }}
+                </option>
+              }
+            </select>
+          </label>
+          <fieldset class="group">
+            <legend>{{ t.exportAppearances }}</legend>
+            <div class="row">
+              @for (a of ['light', 'dark']; track a) {
+                <label class="check">
+                  <input
+                    type="checkbox"
+                    [checked]="$any(v.export.appearances).includes(a)"
+                    (change)="
+                      toggleList('export.appearances', v.export.appearances, a, checked($event))
+                    "
+                  />
+                  {{ a === 'light' ? t.light : t.dark }}
+                </label>
+              }
+            </div>
+          </fieldset>
+          <fieldset class="group">
+            <legend>{{ t.exportSizes }}</legend>
+            <div class="row wrap">
+              @for (n of sizes; track n) {
+                <label class="check">
+                  <input
+                    type="checkbox"
+                    [checked]="v.export.sizes.includes(n)"
+                    (change)="toggleList('export.sizes', v.export.sizes, n, checked($event))"
+                  />
+                  {{ n }}
+                </label>
+              }
+            </div>
+          </fieldset>
+          <label class="field">
+            <span>{{ t.exportMask }}</span>
+            <select class="input" (change)="set('export.mask', value($event))">
+              @for (o of ['none', 'squircle', 'circle']; track o) {
+                <option [value]="o" [selected]="v.export.mask === o">
+                  {{ $any(t.exportMasks)[o] }}
+                </option>
+              }
+            </select>
+          </label>
+          <label class="check">
+            <input
+              type="checkbox"
+              [checked]="v.export.effects"
+              (change)="set('export.effects', checked($event))"
+            />
+            {{ t.exportEffects }}
+          </label>
+          <div class="field">
+            <span>{{ t.exportFolder }}</span>
+            <div class="target">
+              <span class="path" [title]="v.export.targetDir ?? ''"
+                ><bdi>{{ v.export.targetDir ?? t.exportNoFolder }}</bdi></span
+              >
+              @if (v.export.targetDir) {
+                <button type="button" class="btn" (click)="set('export.targetDir', null)">
+                  {{ t.exportForget }}
+                </button>
+              }
+            </div>
+          </div>
+          <fieldset class="group">
+            <legend>{{ t.freehand }}</legend>
+            <label class="inline">
+              {{ t.freehandSmoothing }}
+              <input
+                class="input num"
+                type="number"
+                min="0"
+                max="20"
+                step="0.5"
+                [value]="v.freehand.epsilon"
+                (change)="number('freehand.epsilon', $event, false)"
+              />
+            </label>
+            <label class="inline">
+              {{ t.freehandWidth }}
+              <input
+                class="input num"
+                type="number"
+                min="1"
+                max="64"
+                [value]="v.freehand.strokeWidth"
+                (change)="number('freehand.strokeWidth', $event)"
+              />
+            </label>
+            <label class="check">
+              <input
+                type="checkbox"
+                [checked]="v.freehand.closed"
+                (change)="set('freehand.closed', checked($event))"
+              />
+              {{ t.freehandClosed }}
+            </label>
+          </fieldset>
+        }
+        @case ('advanced') {
+          <label class="check">
+            <input
+              type="checkbox"
+              data-testid="settings-log-undo"
+              aria-describedby="settings-log-undo-hint"
+              [checked]="v.debug.logUndoGrouping"
+              (change)="set('debug.logUndoGrouping', checked($event))"
+            />
+            {{ t.logUndo }}
+          </label>
+          <p class="hint" id="settings-log-undo-hint">{{ t.logUndoHint }}</p>
+          <div class="danger">
+            <button type="button" class="btn" data-testid="settings-reset" (click)="reset()">
+              {{ t.reset }}
+            </button>
+            <p class="hint">{{ t.resetMessage }}</p>
+          </div>
+        }
+      }
+    </div>
+  </div>
+  <div class="footer">
+    <p class="hint">{{ t.savedHint }}</p>
+    <button
+      type="button"
+      class="btn primary"
+      data-testid="settings-close"
+      (click)="dialogs.close()"
+    >
+      {{ t.close }}
+    </button>
+  </div>
+</app-modal>

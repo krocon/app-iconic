@@ -16,7 +16,8 @@ import { FREEHAND_ARGS, SYMBOL_ARGS, TEXT_PATH_ARGS } from './tool-action-args';
  * menu group. Shortcuts live in the keymaps (`keymap.*.json`), handlers are registered by the
  * features (`ActionService`). Menus, the command palette, the keyboard – and the AI over MCP
  * (prompt 018) – all run actions by id. Entries whose function a later prompt brings stand here
- * already; without a handler they are disabled. Texts: English = source (German in prompt 015).
+ * already; without a handler they are disabled. Texts: English = source, German in
+ * `action-catalog.de.ts` (design 015 E13).
  */
 
 /**
@@ -102,6 +103,19 @@ export const ACTIONS: readonly ActionDef[] = [
   APP('app.palette', 'Command Palette…', { palette: false }),
   APP('app.about', 'About AppIconic'),
   APP('app.settings', 'Settings…'),
+  // settings (design 015 E11): `key` is a path of `SETTING_KEYS` (`canvas.rulers`, `theme` …)
+  APP('settings.set', 'Change a Setting', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['key', 'value'],
+      properties: { key: { type: 'string', maxLength: 64 }, value: { type: 'json' } },
+    },
+  }),
+  // `confirm: false` resets without asking (AI, tests)
+  APP('settings.reset', 'Reset Settings to Default…', {
+    args: { type: 'object', properties: { confirm: { type: 'boolean' } } },
+  }),
   APP('app.quit', 'Quit AppIconic'),
   APP('app.focusMenu', 'Focus the menu bar', { palette: false }),
   // file (legacy §4)
@@ -284,6 +298,18 @@ export const ACTIONS: readonly ActionDef[] = [
   VIEW('view.commandSidebar', 'Command Sidebar'),
   VIEW('view.hierarchy', 'Hierarchy'),
   VIEW('view.properties', 'Properties'),
+  // width of a side panel (design 015 E10); without `width` the default
+  VIEW('view.panelWidth', 'Side Panel Width', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['panel'],
+      properties: {
+        panel: { type: 'string', enum: ['commands', 'hierarchy', 'properties'] },
+        width: { type: 'integer', minimum: 0, maximum: 10000 },
+      },
+    },
+  }),
   VIEW('view.rulers', 'Rulers'),
   VIEW('view.guides', 'Guides'),
   VIEW('view.background', 'Background'),

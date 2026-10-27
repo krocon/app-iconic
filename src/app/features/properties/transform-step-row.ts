@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { NumberField } from '../../shared/controls/number-field';
-import { PROPERTIES_TEXTS } from './properties-texts';
+import { PROPERTIES_TEXTS, propertyLabel } from './properties-texts';
 import { displayNumber, hasPivot, normalizedArgs, TransformStep } from './transform-list';
 
 interface ArgField {
@@ -121,7 +121,7 @@ function fieldsOf(step: TransformStep): ArgField[] {
       @for (f of fields(); track f.index) {
         <app-number-field
           [fieldId]="fieldId() + '-a' + f.index"
-          [label]="f.label"
+          [label]="tr(f.label)"
           [value]="values()[f.index]"
           [step]="f.step"
           [unit]="f.unit"
@@ -152,6 +152,7 @@ export class TransformStepRow {
   readonly dragStart = output<PointerEvent>();
   readonly dragEnd = output<PointerEvent>();
   protected readonly t = PROPERTIES_TEXTS;
+  protected readonly tr = propertyLabel;
 
   protected readonly fields = computed(() => fieldsOf(this.step()));
   protected readonly values = computed(() => normalizedArgs(this.step()).map(displayNumber));

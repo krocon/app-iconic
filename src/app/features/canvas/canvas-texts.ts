@@ -1,5 +1,7 @@
-/** Texts of the canvas (English = source; German in prompt 015). */
-export const CANVAS_TEXTS = {
+import { translatable } from '../../core/i18n/i18n';
+
+/** Texts of the canvas (English = source, German beside it; design 015 E13). */
+const EN = {
   canvas: '1024 × 1024 canvas',
   toolbar: 'Canvas view',
   zoomIn: 'Zoom In',
@@ -26,3 +28,33 @@ export const CANVAS_TEXTS = {
   outside: '–',
   unknownFill: 'This background is not known yet – shown as Automatic.',
 } as const;
+
+export const CANVAS_TEXTS = translatable('canvas', EN, {
+  de: {
+    canvas: 'Arbeitsfläche 1024 × 1024',
+    toolbar: 'Ansicht der Arbeitsfläche',
+    zoomIn: 'Vergrößern',
+    zoomOut: 'Verkleinern',
+    zoomLevel: 'Zoomstufe',
+    actualSize: 'Originalgröße',
+    actualSizeShort: '100 %',
+    fit: 'In Fenster einpassen',
+    fitShort: 'Einpassen',
+    center: 'Arbeitsfläche zentrieren',
+    centerShort: 'Zentrieren',
+    rulers: 'Lineale',
+    guides: 'Hilfslinien',
+    background: 'Hintergrund',
+    crossCursor: 'Fadenkreuz',
+    mask: 'Plattform-Maske',
+    maskNone: 'Keine Maske',
+    maskSquircle: 'iOS / macOS',
+    maskCircle: 'watchOS',
+    appearance: 'Erscheinungsbild',
+    light: 'Hell',
+    dark: 'Dunkel',
+    position: 'Zeigerposition',
+    outside: '–',
+    unknownFill: 'Dieser Hintergrund ist noch unbekannt – gezeigt als „Automatisch“.',
+  },
+});

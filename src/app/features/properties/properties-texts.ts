@@ -1,7 +1,8 @@
+import { phrasebook, translatable } from '../../core/i18n/i18n';
 import { SectionId } from './property-spec';
 
-/** Texts of the properties panel (design 009 E9). English is the source (German: prompt 015). */
-export const PROPERTIES_TEXTS = {
+/** Texts of the properties panel (design 009 E9). English is the source, German beside it (015). */
+const EN = {
   nothingSelected: 'Nothing selected',
   nothingSelectedHint: 'Select an element in the hierarchy or on the canvas.',
   iconItems: 'Select a single icon, group or layer to edit its properties.',
@@ -49,3 +50,116 @@ export const PROPERTIES_TEXTS = {
     matrix: 'Matrix',
   },
 } as const;
+
+export const PROPERTIES_TEXTS = translatable('properties', EN, {
+  de: {
+    nothingSelected: 'Nichts ausgewählt',
+    nothingSelectedHint: 'Wähle ein Element in der Hierarchie oder auf der Arbeitsfläche.',
+    iconItems: 'Wähle ein einzelnes Icon, eine Gruppe oder eine Ebene, um sie zu bearbeiten.',
+    items: (n: number) => `${n} Elemente ausgewählt`,
+    mixed: 'gemischt',
+    reset: (label: string) => `${label} zurücksetzen`,
+    resetAll: 'Alle zurücksetzen …',
+    resetAllTitle: 'Alle Eigenschaften zurücksetzen?',
+    resetAllMessage: (n: number) =>
+      n === 1
+        ? 'Jede zurücksetzbare Eigenschaft wird vom ausgewählten Element entfernt.'
+        : `Jede zurücksetzbare Eigenschaft wird von den ${n} ausgewählten Elementen entfernt.`,
+    resetAllButton: 'Alle zurücksetzen',
+    cancelButton: 'Abbrechen',
+    constrain: 'Proportionen beibehalten',
+    inherited: 'geerbt',
+    hasChildren: 'Enthält Kindelemente – mit „SVG bearbeiten …“ ändern',
+    sections: {
+      geometry: 'Geometrie',
+      appearance: 'Darstellung',
+      stroke: 'Kontur',
+      text: 'Text',
+      transform: 'Transformation',
+      advanced: 'Erweitert',
+    },
+    transformRaw: 'Attribut transform',
+    transformInvalid: 'Keine gültige Transformationsliste.',
+    transformMixed: 'Die ausgewählten Elemente haben verschiedene Transformationen.',
+    transformEmpty: 'Keine Transformation – mit „Hinzufügen“ anlegen.',
+    transformAdd: 'Hinzufügen …',
+    transformOrder: 'Ziehen zum Umsortieren (oben wirkt zuerst)',
+    usePivot: 'Drehpunkt verwenden',
+    keepRatio: 'Verhältnis beibehalten',
+    moveUp: 'Schritt nach oben',
+    moveDown: 'Schritt nach unten',
+    removeStep: 'Schritt entfernen',
+    dragStep: 'Ziehen zum Umsortieren, Alt+↑/↓ zum Verschieben',
+    steps: {
+      translate: 'Verschieben',
+      scale: 'Skalieren',
+      rotate: 'Drehen',
+      skewX: 'Neigen X',
+      skewY: 'Neigen Y',
+      matrix: 'Matrix',
+    },
+  },
+});
+
+/**
+ * Names of SVG properties and transform fields (`property-defs.ts`, `transform-step-row.ts`) in
+ * the UI language; attribute names themselves (`stroke-linecap`) stay as they are.
+ */
+export const propertyLabel = phrasebook('properties.labels', {
+  de: {
+    X: 'X',
+    Y: 'Y',
+    Width: 'Breite',
+    Height: 'Höhe',
+    'Corner Radius X': 'Eckenradius X',
+    'Corner Radius Y': 'Eckenradius Y',
+    'Radius X': 'Radius X',
+    'Radius Y': 'Radius Y',
+    'Center X': 'Mitte X',
+    'Center Y': 'Mitte Y',
+    Radius: 'Radius',
+    'Start X': 'Start X',
+    'Start Y': 'Start Y',
+    'End X': 'Ende X',
+    'End Y': 'Ende Y',
+    'Path Data': 'Pfaddaten',
+    Points: 'Punkte',
+    Reference: 'Verweis',
+    'View Box': 'View Box',
+    Offset: 'Versatz',
+    Fill: 'Füllung',
+    'Fill Opacity': 'Deckkraft der Füllung',
+    'Fill Rule': 'Füllregel',
+    Opacity: 'Deckkraft',
+    Display: 'Anzeige',
+    Visibility: 'Sichtbarkeit',
+    'Stop Color': 'Farbe des Farbstopps',
+    'Stop Opacity': 'Deckkraft des Farbstopps',
+    Stroke: 'Kontur',
+    'Stroke Opacity': 'Deckkraft der Kontur',
+    'Stroke Width': 'Konturstärke',
+    'Dash Array': 'Strichmuster',
+    'Dash Offset': 'Strichversatz',
+    'Line Cap': 'Linienende',
+    'Line Join': 'Linienecke',
+    'Miter Limit': 'Gehrungsgrenze',
+    'Non-scaling Stroke': 'Kontur nicht skalieren',
+    Content: 'Inhalt',
+    'Font Size': 'Schriftgröße',
+    'Font Family': 'Schriftart',
+    'Font Weight': 'Schriftstärke',
+    Anchor: 'Anker',
+    Decoration: 'Auszeichnung',
+    Transform: 'Transformation',
+    ID: 'ID',
+    Filter: 'Filter',
+    Mask: 'Maske',
+    'Aspect Ratio': 'Seitenverhältnis',
+    // transform steps (transform-step-row.ts)
+    Angle: 'Winkel',
+    'Pivot X': 'Drehpunkt X',
+    'Pivot Y': 'Drehpunkt Y',
+    // symbol variants (lucide-provider.ts)
+    Weight: 'Stärke',
+  },
+});

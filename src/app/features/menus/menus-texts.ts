@@ -1,5 +1,7 @@
-/** Texts of the menus and the dialogs around them (English = source; German in prompt 015). */
-export const MENUS_TEXTS = {
+import { translatable } from '../../core/i18n/i18n';
+
+/** Texts of the menus and the dialogs around them (English = source, German beside it, 015). */
+const EN = {
   menuBar: 'Menu',
   file: 'File',
   edit: 'Edit',
@@ -39,6 +41,14 @@ export const MENUS_TEXTS = {
   shortcutsFilter: 'Filter shortcuts…',
   shortcutsHint: 'Your own shortcuts go into keymap.json in the settings folder.',
   viewOptions: 'View Options',
+  // the macOS app and Window menus (design 015 E14)
+  services: 'Services',
+  hideApp: 'Hide AppIconic',
+  hideOthers: 'Hide Others',
+  showAll: 'Show All',
+  window: 'Window',
+  minimize: 'Minimize',
+  maximize: 'Zoom',
   groups: {
     app: 'App',
     file: 'File',
@@ -49,3 +59,63 @@ export const MENUS_TEXTS = {
     help: 'Help',
   },
 } as const;
+
+export const MENUS_TEXTS = translatable('menus', EN, {
+  de: {
+    menuBar: 'Menü',
+    file: 'Datei',
+    edit: 'Bearbeiten',
+    view: 'Ansicht',
+    add: 'Hinzufügen',
+    arrange: 'Anordnen',
+    help: 'Hilfe',
+    openRecent: 'Zuletzt benutzt',
+    clearRecent: 'Menü leeren',
+    quit: 'Beenden',
+    appearance: 'Erscheinungsbild',
+    light: 'Hell',
+    dark: 'Dunkel',
+    mask: 'Plattform-Maske',
+    maskSquircle: 'iOS / macOS',
+    maskCircle: 'watchOS',
+    maskNone: 'Keine',
+    gridOrigin: 'Raster-Ursprung',
+    gridWorldZero: 'Weltnullpunkt',
+    gridSvgCenter: 'SVG-Mitte',
+    selectionMode: 'Auswahlmodus',
+    selectionPoint: 'Punkt',
+    selectionBoxed: 'Rahmen',
+    selectionNone: 'Keine',
+    align: 'Ausrichten',
+    alignLeft: 'Links',
+    alignCenterH: 'Mitten horizontal',
+    alignRight: 'Rechts',
+    alignTop: 'Oben',
+    alignMiddle: 'Mitten vertikal',
+    alignBottom: 'Unten',
+    clipPath: 'Beschneidungspfad',
+    paletteTitle: 'Befehlspalette',
+    palettePlaceholder: 'Befehl eingeben …',
+    paletteEmpty: 'Kein Befehl passt.',
+    shortcutsTitle: 'Tastenkürzel',
+    shortcutsFilter: 'Kürzel filtern …',
+    shortcutsHint: 'Eigene Kürzel gehören in keymap.json im Einstellungsordner.',
+    viewOptions: 'Ansichtsoptionen',
+    services: 'Dienste',
+    hideApp: 'AppIconic ausblenden',
+    hideOthers: 'Andere ausblenden',
+    showAll: 'Alle einblenden',
+    window: 'Fenster',
+    minimize: 'Im Dock ablegen',
+    maximize: 'Zoomen',
+    groups: {
+      app: 'App',
+      file: 'Datei',
+      edit: 'Bearbeiten',
+      view: 'Ansicht',
+      add: 'Hinzufügen',
+      arrange: 'Anordnen',
+      help: 'Hilfe',
+    },
+  },
+});

@@ -1,5 +1,7 @@
-/** Texts of the hierarchy (design 006). English is the source; German follows in prompt 015. */
-export const HIERARCHY_TEXTS = {
+import { translatable } from '../../core/i18n/i18n';
+
+/** Texts of the hierarchy (design 006). English is the source, German beside it (015). */
+const EN = {
   tree: 'Document tree',
   icon: 'Icon',
   group: (n: number) => `Group ${n}`,
@@ -29,3 +31,37 @@ export const HIERARCHY_TEXTS = {
   pasteFailed: 'The clipboard holds no SVG markup that could be pasted.',
   clipboardFailed: 'The clipboard could not be used.',
 } as const;
+
+export const HIERARCHY_TEXTS = translatable('hierarchy', EN, {
+  de: {
+    tree: 'Dokumentbaum',
+    icon: 'Icon',
+    group: (n: number) => `Gruppe ${n}`,
+    layer: 'Ebene',
+    definitions: 'Definitionen',
+    missing: 'Bild fehlt',
+    notEditable: 'nicht bearbeitbar',
+    hide: 'Ausblenden',
+    show: 'Einblenden',
+    visibilityHint: 'Alt-Klick: mit allem darin',
+    fill: 'Füllung',
+    stroke: 'Kontur',
+    none: 'keine',
+    inherited: 'geerbt',
+    pattern: 'Muster',
+    noDocument: 'Kein Dokument.',
+    contextMenu: 'Aktionen des Elements',
+    deleteMenu: 'Löschen …',
+    dropNotAllowed: 'Hier nicht ablegbar',
+    deleteTitle: (name: string) => `„${name}“ löschen?`,
+    deleteMessage: 'Das Element wird mit seinen Kindern entfernt. Du kannst es widerrufen.',
+    deleteMessageMany: (n: number) =>
+      `${n} Elemente werden mit ihren Kindern entfernt. Du kannst es widerrufen.`,
+    deleteButton: 'Löschen',
+    cancelButton: 'Abbrechen',
+    brokenRefs: (ids: string[]) =>
+      `In ein anderes Bild verschoben: die Verweise ${ids.map((i) => `#${i}`).join(', ')} zeigen ins Leere.`,
+    pasteFailed: 'Die Zwischenablage enthält kein SVG, das eingefügt werden kann.',
+    clipboardFailed: 'Die Zwischenablage konnte nicht benutzt werden.',
+  },
+});

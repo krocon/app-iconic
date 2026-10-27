@@ -6,7 +6,7 @@ import { TextField } from '../../shared/controls/text-field';
 import { ToggleField } from '../../shared/controls/toggle-field';
 import { PanelRow } from './panel-model';
 import { PropertiesService } from './properties.service';
-import { PROPERTIES_TEXTS } from './properties-texts';
+import { PROPERTIES_TEXTS, propertyLabel } from './properties-texts';
 
 /**
  * One property of the panel (design 009 E9): label + editor of the spec type + Reset (only when a
@@ -19,11 +19,12 @@ import { PROPERTIES_TEXTS } from './properties-texts';
   template: `
     @let r = row();
     @let d = r.def;
+    @let label = tr(d.label);
     @switch (d.type) {
       @case ('color') {
         <app-color-field
           [fieldId]="fieldId()"
-          [label]="d.label"
+          [label]="label"
           [value]="value()"
           [placeholder]="placeholder()"
           [mixed]="mixed()"
@@ -36,7 +37,7 @@ import { PROPERTIES_TEXTS } from './properties-texts';
       @case ('enum') {
         <app-select-field
           [fieldId]="fieldId()"
-          [label]="d.label"
+          [label]="label"
           [value]="value()"
           [placeholder]="r.fallback ?? ''"
           [mixed]="mixed()"
@@ -49,7 +50,7 @@ import { PROPERTIES_TEXTS } from './properties-texts';
       @case ('toggle') {
         <app-toggle-field
           [fieldId]="fieldId()"
-          [label]="d.label"
+          [label]="label"
           [value]="value()"
           [placeholder]="r.fallback ?? ''"
           [mixed]="mixed()"
@@ -63,7 +64,7 @@ import { PROPERTIES_TEXTS } from './properties-texts';
       @case ('text') {
         <app-text-field
           [fieldId]="fieldId()"
-          [label]="d.label"
+          [label]="label"
           [value]="value()"
           [placeholder]="r.editable ? placeholder() : t.hasChildren"
           [readonly]="!r.editable"
@@ -75,7 +76,7 @@ import { PROPERTIES_TEXTS } from './properties-texts';
       @case ('textarea') {
         <app-text-field
           [fieldId]="fieldId()"
-          [label]="d.label"
+          [label]="label"
           [value]="value()"
           [placeholder]="placeholder()"
           [multiline]="true"
@@ -87,7 +88,7 @@ import { PROPERTIES_TEXTS } from './properties-texts';
       @default {
         <app-number-field
           [fieldId]="fieldId()"
-          [label]="d.label"
+          [label]="label"
           [value]="value()"
           [placeholder]="placeholder()"
           [min]="d.min"
@@ -125,8 +126,8 @@ import { PROPERTIES_TEXTS } from './properties-texts';
         <button
           type="button"
           class="tool reset"
-          [title]="t.reset(d.label)"
-          [attr.aria-label]="t.reset(d.label)"
+          [title]="t.reset(label)"
+          [attr.aria-label]="t.reset(label)"
           (click)="props.reset(d.name)"
         >
           <svg viewBox="0 0 16 16" aria-hidden="true">
@@ -184,6 +185,7 @@ export class PropertyRow {
   readonly swatch = input<string | null>(null);
   protected readonly props = inject(PropertiesService);
   protected readonly t = PROPERTIES_TEXTS;
+  protected readonly tr = propertyLabel;
 
   protected readonly mixed = computed(() => this.row().value.kind === 'mixed');
   protected readonly value = computed(() => {

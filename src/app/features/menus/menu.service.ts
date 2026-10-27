@@ -3,7 +3,14 @@ import { ActionService } from '../../core/actions/action.service';
 import { MenuApi } from '../../core/menu/menu-api';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { RecentFilesService } from '../files/recent-files.service';
-import { buildMenuModel, menuChord, resolveMenu, ResolvedMenu, toSpec } from './menu-model';
+import {
+  appMenuSpec,
+  buildMenuModel,
+  menuChord,
+  resolveMenu,
+  ResolvedMenu,
+  toSpec,
+} from './menu-model';
 
 /** Pause before the native menu is rebuilt after a change. */
 const NATIVE_DEBOUNCE_MS = 150;
@@ -43,7 +50,13 @@ export class MenuService {
   });
 
   /** The spec the native menu gets (also for tests and the browser hook). */
-  readonly spec = computed(() => toSpec(this.menus()));
+  readonly spec = computed(() => ({
+    ...toSpec(this.menus()),
+    app: appMenuSpec(
+      (id) => this.actions.label(id),
+      menuChord(this.actions.chords('app.settings')),
+    ),
+  }));
 
   /** A menu opens (HTML bar): "Open Recent" shows only files that still exist (legacy §4). */
   opening(): void {

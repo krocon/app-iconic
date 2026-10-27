@@ -25,6 +25,10 @@ import { FakeRecentFilesApi } from './fake-recent-files-api';
 import { FakeWindowApi } from './fake-window-api';
 import { FakeExportApi } from './fake-export-api';
 import { ExportApi } from '../app/core/export/export-api';
+import { SettingsApi } from '../app/core/settings/settings-api';
+import { Settings } from '../app/core/settings/settings.models';
+import { SettingsStore } from '../app/features/settings/settings.store';
+import { FakeSettingsApi } from './fake-settings-api';
 
 /**
  * `window.__appIconic` – the test hook of the browser mode (design 003 E14): Playwright reaches
@@ -74,6 +78,12 @@ export interface AppIconicHook {
   menuSpec(): MenuSpec;
   /** `listMatrix(parseTransformList(text))` as `[a, b, c, d, e, f]` (design 009 E7). */
   transformListMatrix(text: string): number[] | null;
+  /** The settings of this window now (design 015). */
+  settings(): Settings;
+  /** The settings backend in memory + localStorage ("settings.json" of the browser mode). */
+  settingsApi: FakeSettingsApi;
+  /** Sends a waiting settings change now. */
+  flushSettings(): Promise<void>;
 }
 
 declare global {
@@ -93,6 +103,8 @@ export function installTestHook(): void {
   const canvas = inject(CanvasViewStore);
   const actions = inject(ActionService);
   const menus = inject(MenuService);
+  const settings = inject(SettingsStore);
+  const settingsApi = inject(SettingsApi) as FakeSettingsApi;
   const node = (asset: string, id: string) =>
     (store()?.document().node({ asset, id }) as SVGGraphicsElement | null) ?? null;
   window.__appIconic = {
@@ -149,5 +161,8 @@ export function installTestHook(): void {
       const m = listMatrix(steps);
       return [m.a, m.b, m.c, m.d, m.e, m.f];
     },
+    settings: () => settings.settings(),
+    settingsApi,
+    flushSettings: () => settings.flush(),
   };
 }
