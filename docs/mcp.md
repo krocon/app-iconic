@@ -23,6 +23,7 @@ undo step** (“Undo AI: Add Circle”).
 
    The settings show the exact path of your installation. `claude mcp add --scope user …` makes it available in
    every project.
+
 3. **Claude Desktop** (and other MCP clients): add the program as a local (stdio) server in
    `claude_desktop_config.json` (Claude Desktop: Settings → Developer → Edit Config):
 
@@ -38,8 +39,8 @@ undo step** (“Undo AI: Add Circle”).
 
    and restart Claude Desktop.
 
-AppIconic must be running. The header shows **AI** while an assistant is connected – click it (or run *Disconnect
-AI*, also in the settings) to cut every connection. A client that calls while AppIconic is closed or the setting is
+AppIconic must be running. The header shows **AI** while an assistant is connected – click it (or run _Disconnect
+AI_, also in the settings) to cut every connection. A client that calls while AppIconic is closed or the setting is
 off gets the clear error `not_running: AppIconic is not running, or AI control is off …`.
 
 “Ask before the AI saves to a new place or exports” (on by default) shows a question in the window before the AI
@@ -58,20 +59,20 @@ The assistant then calls `new_document`, `run_action icon.setFill`, `insert_svg`
 Documents are windows; their `id` is the window label (`"main"`, `"doc-2"`). Without `id` a tool works on the window
 that was active last. Coordinates are icon units of the 1024 × 1024 canvas.
 
-| Tool | |
-|---|---|
-| `list_documents`, `new_document`, `open_document(path)`, `activate_document(id)` | windows and documents; `new_document` reuses an untouched window |
-| `save_document(id?, path?, format?)` | own file, or a new absolute path (`bundle` / `zip`, may ask the user) |
-| `get_document(id?, icon_json?)` | name, path, revision, undo step, selection, assets, groups/layers, `icon.json` |
-| `get_tree(id?, max_nodes?)` | the hierarchy with node refs `{asset, id}` (default 500 rows, at most 5 000) |
-| `get_node(id?, node)` | tag, attributes, text, children and the bounding box in icon units, measured by the browser |
-| `get_asset_svg(id?, asset, max_chars?, node_ids?)` | SVG source (default 20 000 characters, at most 200 000) |
-| `get_selection(id?)`, `select(id?, nodes)` | selection |
-| `list_actions(id?)`, `run_action(id?, action, args?, expected_revision?)` | the actions of the app with their argument schemas, e.g. `add.circle {cx, cy, r, fill}`, `icon.setFill {fill}`, `properties.set {name, value}`, `edit.undo` |
-| `run_command(id?, command, expected_revision?)` | one document command as JSON (`setAttributes`, `insertNode`, `setIconJsonValue`, `insertDefinition` …) |
-| `insert_svg(id?, markup, parent?, index?, expected_revision?)` | SVG markup like *Add › SVG Snippet* – cleaned, centred |
-| `render_preview(id?, size?, appearance?, mask?)` | the icon as a PNG image (same renderer as the export) |
-| `export_png(id?, dir, sizes?, appearances?, mask?, effects?, overwrite?)`, `export_svg(id?, dir, …)` | exports into a folder (may ask the user) |
+| Tool                                                                                                 |                                                                                                                                                             |
+| ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `list_documents`, `new_document`, `open_document(path)`, `activate_document(id)`                     | windows and documents; `new_document` reuses an untouched window                                                                                            |
+| `save_document(id?, path?, format?)`                                                                 | own file, or a new absolute path (`bundle` / `zip`, may ask the user)                                                                                       |
+| `get_document(id?, icon_json?)`                                                                      | name, path, revision, undo step, selection, assets, groups/layers, `icon.json`                                                                              |
+| `get_tree(id?, max_nodes?)`                                                                          | the hierarchy with node refs `{asset, id}` (default 500 rows, at most 5 000)                                                                                |
+| `get_node(id?, node)`                                                                                | tag, attributes, text, children and the bounding box in icon units, measured by the browser                                                                 |
+| `get_asset_svg(id?, asset, max_chars?, node_ids?)`                                                   | SVG source (default 20 000 characters, at most 200 000)                                                                                                     |
+| `get_selection(id?)`, `select(id?, nodes)`                                                           | selection                                                                                                                                                   |
+| `list_actions(id?)`, `run_action(id?, action, args?, expected_revision?)`                            | the actions of the app with their argument schemas, e.g. `add.circle {cx, cy, r, fill}`, `icon.setFill {fill}`, `properties.set {name, value}`, `edit.undo` |
+| `run_command(id?, command, expected_revision?)`                                                      | one document command as JSON (`setAttributes`, `insertNode`, `setIconJsonValue`, `insertDefinition` …)                                                      |
+| `insert_svg(id?, markup, parent?, index?, expected_revision?)`                                       | SVG markup like _Add › SVG Snippet_ – cleaned, centred                                                                                                      |
+| `render_preview(id?, size?, appearance?, mask?)`                                                     | the icon as a PNG image (same renderer as the export)                                                                                                       |
+| `export_png(id?, dir, sizes?, appearances?, mask?, effects?, overwrite?)`, `export_svg(id?, dir, …)` | exports into a folder (may ask the user)                                                                                                                    |
 
 `expected_revision` (from `get_document` or the answer of the last write) protects against changing a document that
 was edited in between: the call fails with `revision_conflict` and the current state.

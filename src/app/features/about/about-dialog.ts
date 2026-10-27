@@ -8,7 +8,8 @@ import { ABOUT_TEXTS } from './about-texts';
 
 /**
  * About: app icon, version and platform from the backend, the licences of the symbol sets
- * (design 013 E22, CLAUDE.md §7).
+ * (design 013 E22, CLAUDE.md §7), the repository and the licence texts of every component inside the
+ * app on demand (design 030 E7).
  */
 @Component({
   selector: 'app-about-dialog',
@@ -34,7 +35,21 @@ import { ABOUT_TEXTS } from './about-texts';
             >)
           </p>
         }
-        <p class="meta">{{ t.notices }}</p>
+        <p class="meta">
+          <a [href]="repo" target="_blank" rel="noopener noreferrer">{{ t.repo }}</a>
+        </p>
+        <button
+          type="button"
+          class="btn"
+          data-testid="about-notices"
+          [attr.aria-expanded]="notices() !== null"
+          (click)="toggleNotices()"
+        >
+          {{ notices() === null ? t.notices : t.noticesHide }}
+        </button>
+        @if (notices(); as text) {
+          <pre class="notices" tabindex="0" [attr.aria-label]="t.noticesLabel">{{ text }}</pre>
+        }
       </div>
       <div class="actions">
         <button type="button" class="btn primary" data-autofocus (click)="dialogs.close()">
@@ -72,6 +87,19 @@ import { ABOUT_TEXTS } from './about-texts';
       display: flex;
       justify-content: flex-end;
     }
+    .notices {
+      align-self: stretch;
+      max-height: 16rem;
+      overflow: auto;
+      margin: var(--space-1) 0 0;
+      padding: var(--space-2);
+      text-align: left;
+      white-space: pre-wrap;
+      font-family: var(--font-mono);
+      font-size: var(--font-size-small);
+      background: var(--color-surface-2);
+      border-radius: var(--radius);
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -80,9 +108,24 @@ export class AboutDialog {
   protected readonly info = signal<AppInfo | null>(null);
   protected readonly symbols = SYMBOL_PROVIDERS;
   protected readonly t = ABOUT_TEXTS;
+  protected readonly repo = 'https://github.com/krocon/app-iconic';
+  /** The licence texts while shown (loaded on demand, ~600 KB). */
+  protected readonly notices = signal<string | null>(null);
+  private readonly api = inject(AboutApi);
+
+  protected toggleNotices(): void {
+    if (this.notices() !== null) {
+      this.notices.set(null);
+      return;
+    }
+    this.api
+      .thirdPartyNotices()
+      .then((text) => this.notices.set(text))
+      .catch(() => this.notices.set(this.t.noticesFailed));
+  }
 
   constructor() {
-    inject(AboutApi)
+    this.api
       .appInfo()
       .then((i) => this.info.set(i))
       .catch(() => this.info.set(null));

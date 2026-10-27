@@ -19,6 +19,7 @@ const FIXED: Record<string, string> = {
   'file.importSvg': 'SVG importieren …',
   'file.exportSvg': 'SVG exportieren …',
   'file.exportPng': 'PNG exportieren …',
+  'file.revealExport': 'Letzten Export im Ordner zeigen',
   'file.save': 'Speichern',
   'file.saveAs': 'Speichern unter …',
   'file.close': 'Schließen',

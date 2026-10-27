@@ -50,13 +50,16 @@
     "macOS": {
       "minimumSystemVersion": "12.0",
       "hardenedRuntime": true,
-      "signingIdentity": null
+      "signingIdentity": null,
+      "entitlements": "entitlements.plist"
     },
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",
       "timestampUrl": "http://timestamp.digicert.com",
-      "webviewInstallMode": { "type": "downloadBootstrapper" },
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
       "nsis": {
         "installMode": "currentUser",
         "languages": ["English", "German"],
@@ -64,9 +67,18 @@
       }
     },
     "linux": {
-      "deb": { "section": "graphics" },
-      "rpm": { "release": "1" },
-      "appimage": { "bundleMediaFramework": false }
+      "deb": {
+        "section": "graphics"
+      },
+      "rpm": {
+        "release": "1"
+      },
+      "appimage": {
+        "bundleMediaFramework": false
+      }
+    },
+    "resources": {
+      "../THIRD-PARTY-NOTICES.txt": "THIRD-PARTY-NOTICES.txt"
     }
   }
 }

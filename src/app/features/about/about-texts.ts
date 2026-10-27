@@ -8,7 +8,11 @@ const EN = {
   noBackend: 'Version: desktop backend not available',
   copyright: '© 2026 Marc Kronberg · MIT License',
   symbols: 'Symbols:',
-  notices: 'Third-party notices: THIRD-PARTY-NOTICES.txt',
+  repo: 'Source code on GitHub',
+  notices: 'Third-party licences…',
+  noticesHide: 'Hide third-party licences',
+  noticesLabel: 'Licences of the components inside AppIconic',
+  noticesFailed: 'The licence texts are only in the desktop app (THIRD-PARTY-NOTICES.txt).',
   close: 'Close',
 } as const;
 
@@ -20,7 +24,11 @@ export const ABOUT_TEXTS = translatable('about', EN, {
     noBackend: 'Version: Desktop-Backend nicht verfügbar',
     copyright: '© 2026 Marc Kronberg · MIT-Lizenz',
     symbols: 'Symbole:',
-    notices: 'Hinweise zu Fremdwerken: THIRD-PARTY-NOTICES.txt',
+    repo: 'Quelltext auf GitHub',
+    notices: 'Lizenzen fremder Komponenten…',
+    noticesHide: 'Lizenzen ausblenden',
+    noticesLabel: 'Lizenzen der Komponenten in AppIconic',
+    noticesFailed: 'Die Lizenztexte gibt es nur in der Desktop-App (THIRD-PARTY-NOTICES.txt).',
     close: 'Schließen',
   },
 });

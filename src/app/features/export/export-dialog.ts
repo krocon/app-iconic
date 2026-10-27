@@ -168,6 +168,16 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
             </button>
           }
           @default {
+            @if (phase() === 'result' && service.lastExport()) {
+              <button
+                type="button"
+                class="btn"
+                data-testid="export-reveal"
+                (click)="service.reveal()"
+              >
+                {{ t.reveal }}
+              </button>
+            }
             <button type="button" class="btn" (click)="close()">
               {{ phase() === 'result' ? t.close : t.cancel }}
             </button>

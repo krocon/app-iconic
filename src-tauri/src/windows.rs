@@ -109,6 +109,8 @@ struct Inner {
     takes_close: HashSet<String>,
     /// label → action the window runs at start (taken once, design 005 E6).
     start_action: HashMap<String, String>,
+    /// labels that asked for their start path already (design 030 E5).
+    asked: HashSet<String>,
     quit: QuitQueue,
 }
 
@@ -134,7 +136,23 @@ impl DocWindows {
     }
 
     pub fn take_start_path(&self, label: &str) -> Option<String> {
-        self.lock().start.remove(label)
+        let mut i = self.lock();
+        i.asked.insert(label.to_owned());
+        i.start.remove(label)
+    }
+
+    /**
+     * A file for window `label` while it has not asked for its start path yet and has none
+     * (design 030 E5: a double click that starts the app opens the file in the first window, no
+     * extra empty one). `false`: the window is running – open the file elsewhere.
+     */
+    pub fn offer_start_path(&self, label: &str, path: String) -> bool {
+        let mut i = self.lock();
+        if i.asked.contains(label) || i.start.contains_key(label) {
+            return false;
+        }
+        i.start.insert(label.to_owned(), path);
+        true
     }
 
     /// A fresh label whose window runs `action` once it has started.
@@ -190,6 +208,7 @@ impl DocWindows {
         i.shows.remove(label);
         i.takes_close.remove(label);
         i.start_action.remove(label);
+        i.asked.remove(label);
     }
 }
 
@@ -227,6 +246,21 @@ mod tests {
         assert_eq!(w.showing("/a.icon", None), None);
         w.forget("doc-1");
         assert_eq!(w.showing("/b.icon", None), None);
+    }
+
+    #[test]
+    fn a_file_goes_to_a_window_that_has_not_started_yet() {
+        let w = DocWindows::default();
+        assert!(w.offer_start_path("main", "/a.icon".into()));
+        assert!(
+            !w.offer_start_path("main", "/b.icon".into()),
+            "one start file per window"
+        );
+        assert_eq!(w.take_start_path("main").as_deref(), Some("/a.icon"));
+        assert!(
+            !w.offer_start_path("main", "/c.icon".into()),
+            "running: elsewhere"
+        );
     }
 
     #[test]

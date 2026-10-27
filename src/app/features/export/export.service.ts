@@ -57,6 +57,8 @@ export class ExportService {
   readonly choice = signal<ExportChoice>(DEFAULT_CHOICE);
   readonly running = signal(false);
   readonly progress = signal<ExportProgress | null>(null);
+  /** The first file of the last finished export – "Show in Folder" (design 030 E6). */
+  readonly lastExport = signal<string | null>(null);
   readonly canExport = computed(() => !!this.files.store() && !this.running());
   /** Stop pressed before the backend had the job (while the SVGs were built). */
   private stopRequested = false;
@@ -111,6 +113,7 @@ export class ExportService {
               this.progress.set(p),
             );
       if (report.cancelled) return { kind: 'cancelled', report };
+      if (report.files.length) this.lastExport.set(report.files[0].path);
       const transparentWarning =
         req.format === 'png' && req.mask === 'none' && report.files.some((f) => f.transparent);
       return { kind: 'done', report, transparentWarning };
@@ -121,6 +124,19 @@ export class ExportService {
         : { kind: 'error', message: T.failed(describeFsError(err)) };
     } finally {
       this.running.set(false);
+    }
+  }
+
+  /** Shows the last exported file in the file manager (`file.revealExport`). */
+  async reveal(): Promise<boolean> {
+    const path = this.lastExport();
+    if (!path) return false;
+    try {
+      await this.api.revealExport(path);
+      return true;
+    } catch (e) {
+      this.files.notice.set(T.revealFailed(describeFsError(toFsError(e))));
+      return false;
     }
   }
 

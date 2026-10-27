@@ -13,6 +13,8 @@
 //! - [`settings_commands`] `settings.json` for every window: load, patches, reset, theme (015)
 //! - [`mcp`]           AI control: the tool router over the windows (design 018)
 //! - [`mcp_commands`]  the bridge for the `app-iconic-mcp` sidecar, calls to the windows (018)
+//! - [`open_files`]    `.icon` files from the command line, a second start and the Finder (030)
+//! - [`reveal`]        "Show in Finder" for files this process exported (030)
 //!
 //! The engine (icon documents, file I/O, export, fonts) lives in the Tauri-free crate
 //! `ai-core` (`src-tauri/core`); `error` is re-exported from there.
@@ -25,6 +27,8 @@ pub mod font_commands;
 pub mod mcp;
 pub mod mcp_commands;
 pub mod model;
+pub mod open_files;
+pub mod reveal;
 pub mod sessions;
 pub mod settings_commands;
 pub mod windows;
@@ -34,6 +38,19 @@ pub use ai_core::error;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        // first: a second start (Windows/Linux, "Open with") hands its files to this one
+        // (design 030 E5)
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+            let paths = open_files::paths_from_args(
+                argv.into_iter().skip(1),
+                Some(std::path::Path::new(&cwd)),
+            );
+            if paths.is_empty() {
+                open_files::bring_to_front(app);
+            } else {
+                open_files::open_paths(app, paths);
+            }
+        }))
         // only the Rust API is used (open/save dialogs) – the WebView gets no `dialog:` permission
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
@@ -44,12 +61,17 @@ pub fn run() {
         .manage(export_commands::ExportJobs::default())
         .manage(settings_commands::SettingsState::default())
         .manage(mcp_commands::McpState::default())
+        .manage(reveal::Exported::default())
         .setup(|app| {
             // system fonts for text to path and the PNG export, scanned in the background
             font_commands::warm_up();
             // settings first: the AI bridge is open from the start if it is on (design 018 E3)
             let handle = app.handle().clone();
             std::thread::spawn(move || settings_commands::load_at_start(&handle));
+            // `.icon` files on the command line (design 030 E5)
+            let cwd = std::env::current_dir().ok();
+            let paths = open_files::paths_from_args(std::env::args().skip(1), cwd.as_deref());
+            open_files::open_paths(app.handle(), paths);
             Ok(())
         })
         // native menu (macOS): a click is an action of the focused window; Quit asks every
@@ -114,6 +136,8 @@ pub fn run() {
             export_commands::export_svg,
             export_commands::export_png,
             export_commands::cancel_export,
+            reveal::reveal_export,
+            commands::third_party_notices,
             font_commands::list_fonts,
             font_commands::text_to_path,
             settings_commands::load_settings,
@@ -128,6 +152,17 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|_app, _event| {
+            // macOS: files from the Finder (double click, "Open with", drop on the Dock icon) –
+            // also while the app runs (design 030 E5)
+            #[cfg(any(target_os = "macos", target_os = "ios"))]
+            if let tauri::RunEvent::Opened { urls } = &_event {
+                let paths = urls
+                    .iter()
+                    .filter_map(|u| u.to_file_path().ok())
+                    .map(|p| p.to_string_lossy().into_owned())
+                    .collect();
+                open_files::open_paths(_app, paths);
+            }
             // macOS: the app stays open without windows (menu bar); a click on the Dock icon
             // opens a new document window (design 003 E10). Elsewhere the last window ends it.
             #[cfg(target_os = "macos")]

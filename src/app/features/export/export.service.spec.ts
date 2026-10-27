@@ -140,4 +140,18 @@ describe('ExportService (design 012)', () => {
     actions.run('file.exportPng', { sizes: [100] });
     await vi.waitFor(() => expect(files.notice()).toContain('unknown appearance or size'));
   });
+
+  it('shows the last export in the file manager (design 030 E6)', async () => {
+    expect(actions.enabled('file.revealExport')).toBe(false);
+    await service.export(req({ format: 'svg' }));
+    expect(service.lastExport()).toBe('/out/camscanner-light.svg');
+    expect(actions.enabled('file.revealExport')).toBe(true);
+    actions.run('file.revealExport');
+    await Promise.resolve();
+    expect(api.revealed).toEqual(['/out/camscanner-light.svg']);
+    // a file that is gone: a notice, no crash
+    api.files.clear();
+    expect(await service.reveal()).toBe(false);
+    expect(files.notice()).toContain('could not be shown');
+  });
 });

@@ -24,6 +24,7 @@ serde_json = "1.0"
 tauri = { version = "2.12.4", features = [] }
 # only the Rust API (open/save dialogs) – the WebView gets no `dialog:` permission (architecture E4)
 tauri-plugin-dialog = "2"
+tauri-plugin-single-instance = "2"
 # window size/position per window label; no WebView permission needed
 tauri-plugin-window-state = "2"
 # 001 E2: the icon engine (icon.json, bundle/ZIP, export, fonts) – Tauri-free, testable without GTK

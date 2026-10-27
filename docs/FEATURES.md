@@ -1,36 +1,39 @@
 # Feature-Checkliste (Parität mit der Vorlage = Definition of Done)
 
 > Aus `prompts/000-init.md`, korrigiert nach `docs/legacy-analysis.md`. In Klammern: Prompt, der das Feature liefert.
-> Abhaken, sobald es Ende-zu-Ende funktioniert und getestet ist. Neu gegenüber der Vorlage: *(neu)*.
+> Abhaken, sobald es Ende-zu-Ende funktioniert und getestet ist. Neu gegenüber der Vorlage: _(neu)_.
 
 ## 1. Dokument & Dateien
+
 - [x] New Window ⇧⌘N, New Document ⌘N mit Dirty-Abfrage Save / Don't Save / Cancel (003, Menü und Kürzel 005)
 - [x] Open… ⌘O für `.icon` (Bundle und ZIP) (002, 003)
 - [x] Open Recent mit Validierung und „Clear Menu“ (003, Menü 005; natives macOS-Menü auf dem Mac prüfen)
 - [x] Import SVG… ⇧⌘I als neue Gruppe/Layer/Asset (003)
 - [x] Save ⌘S (nur wenn dirty), Save As… ⇧⌘S (Format Bundle/ZIP), Close ⌘W mit Dirty-Abfrage (003)
-- [x] Speichern im gelesenen Format (Bundle bleibt Bundle, ZIP bleibt ZIP), atomar *(neu)* (002, 003)
-- [x] Verlustfreier Roundtrip von `icon.json` inkl. unbekannter Felder und Layer-`opacity` *(neu)* (002, 003)
+- [x] Speichern im gelesenen Format (Bundle bleibt Bundle, ZIP bleibt ZIP), atomar _(neu)_ (002, 003)
+- [x] Verlustfreier Roundtrip von `icon.json` inkl. unbekannter Felder und Layer-`opacity` _(neu)_ (002, 003)
 - [x] Dirty-Tracking, Fenstertitel = Dateiname + Marker (003; macOS-Punkt im Schließknopf auf dem Mac prüfen)
 - [x] Mehrere Fenster/Dokumente (003; macOS: App bleibt ohne Fenster offen – auf dem Mac prüfen)
-- [ ] `.icon` als Dateizuordnung / Öffnen per Doppelklick *(neu)* (030)
+- [x] `.icon` als Dateizuordnung / Öffnen per Doppelklick _(neu)_ (030; macOS „Öffnen mit“ als Package-Dokument mit Rang Alternate, Windows Zuordnung, Linux Mime-Typ; Zweitstart/Finder öffnen in der laufenden App – Mac-Test durch Marc offen)
 
 ## 2. Layout & Einstellungen
+
 - [x] Drei ein-/ausblendbare Seitenleisten ⌘1/⌘2/⌘3 (005), Breite 160–480 px per Splitter (Maus und Tastatur),
       Defaults 260/260/300, Doppelklick = Standardbreite; Fenstergröße/-position über `tauri-plugin-window-state` (015)
 - [x] View Options: Command Sidebar, Hierarchy, Properties, Rulers, Guides, Background, Cross Cursor, Show Handles,
       Snap to Grid, Magic Snap (005 Menü View + „View Options“ im Canvas, Snap wirkt seit 007; persistent seit 015,
       dazu Grid-Abstand/-Ursprung, Selection Mode, Start-Zoom, Appearance-Vorschau, Maske, Export- und Freehand-Vorgaben)
 - [x] Menüs File/Edit/View/Add/Arrange/Help aus einem Modell: natives macOS-Menü, HTML-Menüleiste Windows/Linux (005; macOS auf dem Mac prüfen)
-- [x] Befehlspalette ⇧⌘P, Übersicht „Keyboard Shortcuts“, eigene Kürzel in `keymap.json` *(neu)* (005)
+- [x] Befehlspalette ⇧⌘P, Übersicht „Keyboard Shortcuts“, eigene Kürzel in `keymap.json` _(neu)_ (005)
 - [x] Quit ⌘Q fragt alle Fenster mit ungespeicherten Änderungen nacheinander (005; auf dem Mac prüfen)
 - [x] `settings.json` mit Schema-Version und Migration (je Feld nachsichtig, kaputt → `.bad`); „Reset to Default“ mit
       Bestätigung; Änderungen wirken in allen offenen Fenstern (015)
 - [x] Settings-Dialog (⌘,) mit General, Canvas, Snapping, Export, Advanced inkl. Debug „Log Undo Grouping“ (015)
-- [x] Deutsch/Englisch zur Laufzeit, natives Menü folgt *(neu)* (015; macOS-Menü auf dem Mac prüfen)
-- [x] Hell/Dunkel/System (`data-theme`, Fensterrahmen), Kontraste beider Schemata geprüft *(neu)* (015)
+- [x] Deutsch/Englisch zur Laufzeit, natives Menü folgt _(neu)_ (015; macOS-Menü auf dem Mac prüfen)
+- [x] Hell/Dunkel/System (`data-theme`, Fensterrahmen), Kontraste beider Schemata geprüft _(neu)_ (015)
 
 ## 3. Canvas
+
 - [x] Zoom 25/33/50/66/75/100/125/150/200 %, Anzeige, Pinch, ⌘+/⌘−/⌘0, Center Canvas (004, dazu „Fit“; Kürzel als Aktionen 005)
 - [x] Pan (Scroll / Space+Drag / mittlere Maustaste) (004)
 - [x] Lineale mit Haupt-/Nebenteilung, zoomabhängig (004)
@@ -39,31 +42,33 @@
 - [x] Icon-Guides (Diagonalen, Raster 128…896, Kreise Ø 820/512/204, #0A84FF) (004)
 - [x] Hintergrund nach Icon-Fill, Light/Dark umschaltbar (004 Vorschau; Bearbeiten 010)
 - [x] Plattform-Vorschau Squircle / Kreis als Maske (004)
-- [x] Assets lebendig im DOM, Reihenfolge wie Icon Composer (erste Gruppe oben), Layer-/Gruppen-Opacity, hidden, eindeutige IDs je Layer *(neu)* (004)
-- [x] Gruppen-Schatten und Transluzenz als Vorschau-Annäherung *(neu)* (010: „Effects Preview“, Schatten je Layer)
+- [x] Assets lebendig im DOM, Reihenfolge wie Icon Composer (erste Gruppe oben), Layer-/Gruppen-Opacity, hidden, eindeutige IDs je Layer _(neu)_ (004)
+- [x] Gruppen-Schatten und Transluzenz als Vorschau-Annäherung _(neu)_ (010: „Effects Preview“, Schatten je Layer)
 - [x] BoundsGuard (Punkte, Pfade, Translationen klemmen) (007)
 
 ## 4. Auswahl & Manipulation
+
 - [x] Selection Modes none / point / boxed, Mehrfachauswahl ⇧/⌘, Rahmenauswahl (007)
 - [x] Hit-Testing, Klick ins Leere hebt Auswahl auf, Doppelklick in Gruppe, Esc heraus (007)
 - [x] Handles position/size/control/anchor/midpoint/pivot mit Farben/Größen der Vorlage, Box-Handles (007)
 - [x] Punktbearbeitung Polyline/Polygon/Pfad (alle Befehle, relativ bleibt relativ), Punkt einfügen über Mitte, löschen mit ⌥-Klick/Entf (007)
 - [x] Pfeiltasten 1 px / ⇧ 10 px, eine Undo-Aktion je Folge (007)
 - [x] Snapping Grid (10, worldZero/svgCenter) und Magic Snap (20 Bildschirm-px, Magic vor Grid), Snap-Hinweis (007)
-- [x] Raster-Hinweis *(neu)*: bei aktivem Snap to Grid Rasterpunkte um den Zeiger (Radius ≥ 72 Bildschirm-px,
+- [x] Raster-Hinweis _(neu)_: bei aktivem Snap to Grid Rasterpunkte um den Zeiger (Radius ≥ 72 Bildschirm-px,
       ausblendend, nächster Kreuzungspunkt größer; keiner bei Zellen < 6 Bildschirm-px)
 - [x] Gesten = eine Undo-Gruppe (ein Command `setAttributes`), Esc bricht ab (007)
 - [x] Handles korrekt bei verschachtelten, transformierten Gruppen und Zoom 50/100/150 % (007, Playwright ± 0,5 px)
 
 ## 5. Elemente hinzufügen
+
 - [x] Group (Icon-Gruppe + Layer + Asset) und Container `<g>` (008; Command Sidebar mit Suche, Menü „Add“, Aktionen mit Argumenten)
 - [x] Circle, Ellipse, Rectangle, Line, Polyline, Polygon, Path, Text mit Defaults der Vorlage (008; zentriert im sichtbaren Ausschnitt, auch in transformierten Gruppen; „… at Center“ seit 019)
-- [x] Zeichenwerkzeuge wie Fusion *(neu)* (019): Line, Midpoint Line; Rectangle ▸ 2-Point / 3-Point / Center; Circle ▸
+- [x] Zeichenwerkzeuge wie Fusion _(neu)_ (019): Line, Midpoint Line; Rectangle ▸ 2-Point / 3-Point / Center; Circle ▸
       Center Diameter / 2-Point / 3-Point / 2-Tangent / 3-Tangent; Arc ▸ 3-Point / Center Point / Tangent – Klicks mit
       Grid-/Magic-Snap, Maßfelder (Länge, Winkel, Breite, Höhe, Durchmesser, Radius, Start-/Bogenwinkel; Tab, Enter,
       Esc), Tangenten an Kanten und Kreisen, Kürzel `l`/`r`/`c`, `sketch.* { points, values }` für die KI; nach jeder
       Form wieder Auswahl, ausgewählte Formen auch innerhalb des Rahmens ziehbar
-- [x] Stil-Gedächtnis je Formtyp *(neu)* (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
+- [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
       gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)
 - [x] SVG Snippet (008; bereinigt, `defs`, IDs eindeutig, auf die Bounds zentriert)
@@ -72,6 +77,7 @@
 - [x] Symbol-Picker mit freiem Icon-Set, Suche, Gewicht/Größe, Plugin-Schnittstelle (013; Lucide ISC, Daten lazy, Lizenz in THIRD-PARTY-NOTICES.txt und About)
 
 ## 6. Hierarchie
+
 - [x] Baum Root → Gruppen → Layer → Nodes, Typ-Icon, Name, Swatches, Sichtbarkeit (006; „Definitions“-Knoten, ab 500 Zeilen virtualisiert)
 - [x] Auswahl synchron mit Canvas, Mehrfachauswahl (006; APG-Tree-Tastatur, Auswahlrahmen im Canvas; Auswahl per Klick im Canvas: 007)
 - [x] Drag & Drop mit Einfügelinie vor/nach/hinein, Nachfahren-Schutz, über Assets (006; Command „Reorder Node“, Move Up/Down/Into/Out per Tastatur)
@@ -81,6 +87,7 @@
 - [x] Copy/Paste als SVG-XML, auch zwischen Dokumenten (006)
 
 ## 7. Properties
+
 - [x] Leerzustand „Nothing selected – Select an element in the hierarchy…“ (009; Root/Gruppe/Layer: Hinweis auf 010)
 - [x] Editoren aus Property-Specs (Typ, Einheit, Min/Max, Schritt) für alle Attribute aus legacy §7.4 (009; Abschnitte Geometry/Appearance/Stroke/Text/Transform/Advanced, Mehrfachauswahl „mixed“, getippte Werte = ein Undo-Schritt)
 - [x] Farbeingabe Swatch + Hex (#RRGGBB/#RRGGBBAA – CSS-Reihenfolge, Frage an Marc), none/inherit/currentColor/mixed, nativer Farbwähler, Verlaufs-Swatch (009)
@@ -90,8 +97,9 @@
 - [x] Clip Path: Picker, Create, Edit-Modus, Vererbung, `clipPathUnits` (014; Layer-Clip = Clip-Gruppe, Opt-out/Override über Teilen statt `clip-path="none"`, Treffer durch Clips, Referenzpflege bei Löschen/Duplicate/Copy/Paste)
 
 ## 8. Icon-Eigenschaften
+
 - [x] Hintergrund-Fill: automatic, system-light/-dark, none, solid, automatic-gradient, linear-gradient mit Orientierung (Apple-Format); radial-gradient nur lesen – nicht belegt (010)
-- [x] Specializations je Appearance (Default/Dark/Tinted) für alle belegten Felder *(neu)*; `idiom`-Varianten bleiben erhalten (010)
+- [x] Specializations je Appearance (Default/Dark/Tinted) für alle belegten Felder _(neu)_; `idiom`-Varianten bleiben erhalten (010)
 - [x] Gruppe: Name, Hidden, Opacity, Blend-Mode, Lighting, Specular, Blur, Shadow (neutral/chromatic/off, opacity), Translucency (enabled, value), Position (010)
 - [x] Layer: Name (eindeutig), Opacity, Asset-Zuordnung und Umbenennen der Datei, Hidden, Blend-Mode, Glass, Fill, Position (010)
 - [x] Supported Platforms (squares, circles) und Farbraum für SVG-Farben ohne Profil (010)
@@ -99,30 +107,35 @@
 - [x] Canvas-Vorschau: Fill je Appearance, Schatten/Transluzenz/Blend-Modes als Annäherung (Ansichtsoption) (010)
 
 ## 9. SVG-Quelltext
+
 - [x] Edit SVG… mit CodeMirror, Fehleranzeige, Übernahme nur bei gültigem Markup, Undo (011: Node oder Asset, Lint-Marker mit Zeile/Spalte, ⌘Enter/Esc, Auswahl bleibt)
 - [x] Code-Formatierung (Zahlen runden, Einrückung) (011: Knopf „Format“ im Dialog, „Copy XML“)
 - [x] Pfad-Optimierer (RDP mit Eckenschutz, epsilon einstellbar) (011: Aktion „Optimize Path…“ mit Vorschau, kürzeste Form)
 
 ## 10. SVG-Unterstützung
+
 - [ ] Elemente aus legacy §10 + `use`, `defs`, Verläufe rendern und bearbeiten (004 rendern, 009 Attribute von
       `use`/`stop`/`image` bearbeitbar; ein eigener Verlaufseditor fehlt noch → 031)
 - [x] Inline-`<style>`/Klassen beim Import in Attribute auflösen, Einheiten (003)
 - [x] Unbekannte Attribute/Elemente bleiben erhalten (002 unveränderte Assets byte-genau; 003 bearbeitete SVGs über DOM-Serialisierung)
-- [x] Fremdes SVG wird bereinigt (Skripte, Event-Handler, externe Referenzen) *(neu)* (003)
+- [x] Fremdes SVG wird bereinigt (Skripte, Event-Handler, externe Referenzen) _(neu)_ (003)
 
 ## 11. Export
-- [x] Export SVG je Appearance (Light/Dark) inkl. Hintergrund, Gruppen, Layer, Layer-Opacity (012)
-- [x] Export PNG mit resvg, Größen-Set 1024/512/256/128/64/32/16 *(neu: Größen)* (012; Fortschritt, Abbruch, Apple-Hinweis zur Transparenz)
-- [x] Optional mit Plattform-Maske *(neu)* (012; dazu Schatten/Effekte als Annäherung, Schalter)
-- [ ] Share Export (macOS, optional) (030)
 
-## 11a. KI-Steuerung (MCP) *(neu)*
+- [x] Export SVG je Appearance (Light/Dark) inkl. Hintergrund, Gruppen, Layer, Layer-Opacity (012)
+- [x] Export PNG mit resvg, Größen-Set 1024/512/256/128/64/32/16 _(neu: Größen)_ (012; Fortschritt, Abbruch, Apple-Hinweis zur Transparenz)
+- [x] Optional mit Plattform-Maske _(neu)_ (012; dazu Schatten/Effekte als Annäherung, Schalter)
+- [x] Share Export → „Im Ordner zeigen“ nach dem Export (030 E6; Share-Sheet bewusst nicht)
+
+## 11a. KI-Steuerung (MCP) _(neu)_
+
 - [x] Sidecar `app-iconic-mcp` (stdio) + lokale Brücke (127.0.0.1, Token je Start), Einstellung „KI-Steuerung (MCP) erlauben“ (Standard aus), Konfig-Zeile für Claude Code, Status „KI verbunden“, „KI trennen“ (018)
 - [x] Tools: Dokumente, Lesen (icon.json, Baum, Node mit BBox, Asset-SVG, Auswahl), Schreiben (Commands, Aktionen, SVG, Auswahl), Vorschau als PNG, Export, Speichern (018)
 - [x] Jeder KI-Aufruf ein Undo-Schritt („Undo AI: …“), erwartete Revision, Rückfrage vor Speichern an neuem Ort/Export, Sperrliste (018)
-- [ ] Sidecar in den Paketen, signiert wie die App (vorbereitet: `tauri.sidecar.conf.json`, `scripts/mcp-sidecar.mjs`; Pipeline 030)
+- [x] Sidecar in den Paketen, signiert wie die App (030: Release-Workflow baut ihn und bündelt ihn über `tauri.sidecar.conf.json`)
 
 ## 12. Undo/Redo
+
 - [x] Benannte Aktionen im Menü („Undo Move“ …), ⌘Z / ⇧⌘Z (003 Namen, 005 Menü und Kürzel)
 - [x] Gesten-Coalescing und zusammengesetzte Aktionen (003 UndoService; Gesten im UI und Pfeiltasten-Folgen 007)
 - [x] Undo-Stack je Dokument, Dirty am Save-Punkt (003)

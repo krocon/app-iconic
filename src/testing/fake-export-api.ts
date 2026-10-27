@@ -106,4 +106,15 @@ export class FakeExportApi extends ExportApi {
     this.cancelled = true;
     return Promise.resolve();
   }
+
+  /** Paths shown in the "file manager". */
+  readonly revealed: string[] = [];
+
+  revealExport(path: string): Promise<void> {
+    if (!this.files.has(path)) {
+      return Promise.reject({ code: 'not_found', message: 'not exported', path } as FsError);
+    }
+    this.revealed.push(path);
+    return Promise.resolve();
+  }
 }

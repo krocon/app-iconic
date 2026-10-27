@@ -33,6 +33,8 @@ const EN = {
   done: (n: number) => (n === 1 ? 'Exported 1 file.' : `Exported ${n} files.`),
   cancelled: (n: number) => `Export stopped after ${n === 1 ? '1 file' : `${n} files`}.`,
   failed: (reason: string) => `Export failed: ${reason}`,
+  reveal: 'Show in Folder',
+  revealFailed: (reason: string) => `The file could not be shown: ${reason}`,
   noDocument: 'There is no document to export.',
   badArguments: 'unknown appearance or size',
   transparentWarning:
@@ -71,6 +73,8 @@ export const EXPORT_TEXTS = translatable('export', EN, {
     done: (n: number) => (n === 1 ? '1 Datei exportiert.' : `${n} Dateien exportiert.`),
     cancelled: (n: number) => `Export nach ${n === 1 ? '1 Datei' : `${n} Dateien`} angehalten.`,
     failed: (reason: string) => `Export fehlgeschlagen: ${reason}`,
+    reveal: 'Im Ordner zeigen',
+    revealFailed: (reason: string) => `Die Datei konnte nicht gezeigt werden: ${reason}`,
     noDocument: 'Es gibt kein Dokument zum Exportieren.',
     badArguments: 'unbekanntes Erscheinungsbild oder unbekannte Größe',
     transparentWarning:

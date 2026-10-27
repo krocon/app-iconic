@@ -22,7 +22,15 @@ export function registerExportActions(
     enabled: () => service.canExport(),
   });
   actions.registerAll(
-    { 'file.exportSvg': handler('svg'), 'file.exportPng': handler('png') },
+    {
+      'file.exportSvg': handler('svg'),
+      'file.exportPng': handler('png'),
+      // "Show in Folder" for the last export (design 030 E6)
+      'file.revealExport': {
+        run: () => service.reveal(),
+        enabled: () => service.lastExport() !== null,
+      },
+    },
     destroyRef,
   );
 }

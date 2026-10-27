@@ -34,6 +34,7 @@
 | Rust | `pnpm rust:fmt`, `pnpm rust:lint` (clippy `-D warnings`), `pnpm rust:test` (ganzer Workspace inkl. `ai-core`) |
 | Fixture-Module | `pnpm fixtures` (neu erzeugen), `pnpm fixtures:check`, `pnpm scripts:test` |
 | Alles prüfen | `pnpm check` (+ `pnpm e2e`) |
+| Release | `pnpm version:set X.Y.Z`, `pnpm release:notes`, `pnpm notices` + `pnpm licenses:report` (nach Abhängigkeitsänderungen!); Pipeline testen: Workflow „Release“ Modus `dry-run` – Ablauf `docs/release.md` |
 | Debug-App ohne Bundle | `pnpm tauri build --debug --no-bundle` → `src-tauri/target/debug/app-iconic` |
 | Icons neu erzeugen | `pnpm tauri icon src-tauri/icons/source/app-icon.svg -o src-tauri/icons` (danach `android/`, `ios/` löschen; `public/icon.svg` = Quelle, `public/favicon.png` = `32x32.png`) |
 
@@ -170,6 +171,10 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
                               Ereignis settings-changed an alle Fenster (015)
   src/mcp.rs                  KI-Router (018, rein über WindowHost): Argumente prüfen/begrenzen, Zielfenster, Calls
   src/mcp_commands.rs         Brücke an/aus nach settings.mcp, TauriHost (mcp-call → mcp_reply), mcp_* Commands (018)
+  src/open_files.rs           `.icon` aus argv, Zweitstart (single-instance) und Finder (`RunEvent::Opened`) → Fenster (030)
+  src/reveal.rs               „Im Ordner zeigen“ nur für exportierte Dateien (030)
+  Info.plist, entitlements.plist  macOS: `.icon` als Package-Dokument (Alternate), Hardened-Runtime-Rechte (030)
+  tauri.linux.conf.json, tauri.windows.conf.json, linux/  Dateizuordnung je OS, Mime-XML + postinst/postrm (030)
   src/about.rs, model.rs      AppInfo, DTOs (serde camelCase)
   core/                       Crate `ai-core` (Workspace-Mitglied): Engine ohne Tauri
     src/error.rs              FsError { code, message, path }
@@ -193,13 +198,15 @@ testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverän
 testdata/fonts/               Caladea-Regular.ttf + OFL.txt (Testschrift für Rust-Tests, nicht im Bundle, 013)
 testdata/unique-names.json    Tabelle der eindeutigen Asset-/Layer-Namen (Rust `names.rs` und TS `unique-names.ts`)
 testdata/settings-cases.json  Standardwerte + Fälle von settings.json (Rust `settings.rs` und TS `settings-rules`, 015)
-scripts/                      fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test, keymaps.test.mjs,
+scripts/                      version.mjs, release-notes.mjs, notices.mjs, licenses.mjs, collect-packages.mjs (030, aus
+                              editlicious, je mit Test); fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test, keymaps.test.mjs,
                               theme-contrast.test.mjs (Tokens light/dark, Kontraste, 015); mcp-sidecar.mjs (+ Test,
                               Sidecar bauen), mcp-e2e.mjs (Sidecar gegen die laufende App, 018)
 docs/                         architecture.md (Entscheidungen, Commands, Abhängigkeiten), legacy-analysis.md, legacy/,
+                              release.md (Release, Pakete, Signierung, Dateizuordnung), licenses.md (Lizenzbericht),
                               FEATURES.md (Checkliste), mcp.md (KI-Steuerung: Einrichtung, Tools, Sicherheit)
 prompts/                      Feature-Prompts (Index README.md), done/
-THIRD-PARTY-NOTICES.txt       Lizenzen fremder Werke (Lucide/Feather, Testschrift)
+THIRD-PARTY-NOTICES.txt       Lizenzen aller ausgelieferten Teile (`pnpm notices`, im Paket und im About-Dialog)
 ```
 
 ## 4. Architekturregeln (verbindlich)

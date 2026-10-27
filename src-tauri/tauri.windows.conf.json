@@ -1,0 +1,13 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "bundle": {
+    "fileAssociations": [
+      {
+        "ext": ["icon"],
+        "name": "Icon Composer Icon",
+        "description": "Icon Composer icon",
+        "role": "Editor"
+      }
+    ]
+  }
+}

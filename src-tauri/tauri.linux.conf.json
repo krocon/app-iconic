@@ -1,0 +1,36 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "bundle": {
+    "fileAssociations": [
+      {
+        "ext": ["icon"],
+        "name": "Icon Composer Icon",
+        "mimeType": "application/x-icon-composer",
+        "role": "Editor"
+      }
+    ],
+    "linux": {
+      "deb": {
+        "section": "graphics",
+        "files": {
+          "/usr/share/mime/packages/app-iconic.xml": "linux/app-iconic-mime.xml"
+        },
+        "postInstallScript": "linux/post-install.sh",
+        "postRemoveScript": "linux/post-remove.sh",
+        "desktopTemplate": "linux/app-iconic.desktop"
+      },
+      "rpm": {
+        "release": "1",
+        "files": {
+          "/usr/share/mime/packages/app-iconic.xml": "linux/app-iconic-mime.xml"
+        },
+        "postInstallScript": "linux/post-install.sh",
+        "postRemoveScript": "linux/post-remove.sh",
+        "desktopTemplate": "linux/app-iconic.desktop"
+      },
+      "appimage": {
+        "bundleMediaFramework": false
+      }
+    }
+  }
+}

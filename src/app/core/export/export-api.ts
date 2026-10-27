@@ -31,6 +31,8 @@ export abstract class ExportApi {
   ): Promise<ExportReport>;
   /** Stops the running PNG export of this window after the current file. */
   abstract cancelExport(): Promise<void>;
+  /** Shows a file this app exported in the file manager (design 030 E6). */
+  abstract revealExport(path: string): Promise<void>;
 }
 
 @Injectable()
@@ -69,5 +71,9 @@ export class TauriExportApi extends ExportApi {
 
   cancelExport(): Promise<void> {
     return call<void>('cancel_export');
+  }
+
+  revealExport(path: string): Promise<void> {
+    return call<void>('reveal_export', { path });
   }
 }

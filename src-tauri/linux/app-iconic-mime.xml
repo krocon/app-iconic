@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- An Icon Composer icon saved as a ZIP file (design 030 E4); installed by deb/rpm. -->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-icon-composer">
+    <comment>Icon Composer icon</comment>
+    <sub-class-of type="application/zip"/>
+    <glob pattern="*.icon"/>
+  </mime-type>
+</mime-info>

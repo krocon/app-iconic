@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Merged by Tauri into the generated Info.plist (design 030 E4). An Icon Composer `.icon` is a
+  folder bundle: AppIconic opens it as an Editor with rank Alternate – Icon Composer stays the
+  default. No own UTI: Apple's identifier for `.icon` is not documented, a guessed one could
+  disturb Icon Composer's (question to Marc in the design document).
+-->
+<plist version="1.0">
+<dict>
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeName</key>
+      <string>Icon Composer Icon</string>
+      <key>CFBundleTypeExtensions</key>
+      <array>
+        <string>icon</string>
+      </array>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>LSHandlerRank</key>
+      <string>Alternate</string>
+      <key>LSTypeIsPackage</key>
+      <true/>
+    </dict>
+  </array>
+</dict>
+</plist>

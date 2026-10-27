@@ -3,6 +3,7 @@
 
 use crate::commands::{blocking, file_path, to_string};
 use crate::error::FsError;
+use crate::reveal::Exported;
 use ai_core::export::{
     ExportOptions, ExportProgress, ExportReport, Variant, files, fonts::system_fonts,
 };
@@ -57,12 +58,15 @@ pub async fn pick_export_dir(app: AppHandle) -> Result<Option<String>, FsError> 
 /// Writes the SVG of every appearance as `<name>-<appearance>.svg` into `target_dir`.
 #[tauri::command]
 pub async fn export_svg(
+    exported: State<'_, Exported>,
     variants: Vec<Variant>,
     target_dir: String,
     options: ExportOptions,
 ) -> Result<ExportReport, FsError> {
     let dir = file_path(&target_dir)?;
-    blocking(move || files::export_svg(&variants, &dir, &options)).await
+    let report = blocking(move || files::export_svg(&variants, &dir, &options)).await?;
+    exported.remember(report.files.iter().map(|f| f.path.clone()));
+    Ok(report)
 }
 
 /// Renders every appearance in every size with resvg; progress per file over `on_progress`.
@@ -95,6 +99,13 @@ pub async fn export_png(
     })
     .await;
     jobs.finish(&label, &flag);
+    if let Ok(report) = &result {
+        use tauri::Manager;
+        window
+            .app_handle()
+            .state::<Exported>()
+            .remember(report.files.iter().map(|f| f.path.clone()));
+    }
     result
 }
 

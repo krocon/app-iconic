@@ -34,8 +34,8 @@ Quelle: `Packages/AppIconicCore/.../Document/IconFileFormat.swift`, `IconFill.sw
 - `fill` wird gelesen als: String `automatic`/`system-light`/`system-dark` oder Objekt mit genau einem von
   `solid` (Farbe), `automatic-gradient` (Farbe), `linear-gradient` ([Farben]), `radial-gradient` ([Farben]).
   Intern wird daraus ein **eigenes Modell** `IconFill { mode: solid|gradient|auto|system, color, opacity, blendMode,
-  gradient { type, angle, stops[] }, auto { palette, strategy: accent|monochrome|complementary|elevated },
-  system { light, dark, elevated }, fallbackColor }`.
+gradient { type, angle, stops[] }, auto { palette, strategy: accent|monochrome|complementary|elevated },
+system { light, dark, elevated }, fallbackColor }`.
 - **Schreiben:** Die Vorlage schreibt dieses eigene Modell (`{"mode": "system", …}`) zurück nach `icon.json` –
   **nicht Apples Format**. Ein geöffnetes `"fill": "automatic"` kommt als `{"mode":"system","system":{…}}` zurück.
   → In der Neuauflage ist das Apple-Format die Wahrheit; ein Inspector-Modell darf nur eine Sicht darauf sein.
@@ -71,19 +71,19 @@ Quelle: `Packages/SVGParser/.../Icon/IconFileReader.swift`, `IconFileWriter.swif
 
 Quelle: `Core/Commands/FileMenuCommands.swift`, `App/AppIconicApp.swift`, `Services/RecentFilesManager.swift`.
 
-| Menüpunkt | Kürzel | Bemerkung |
-|---|---|---|
-| New Window | ⇧⌘N | |
-| New Document… | ⌘N | Dirty-Abfrage Save / Don't Save / Cancel |
-| Open… | ⌘O | `.icon` |
-| Open Recent › … / Clear Menu | – | Einträge werden beim Anzeigen validiert (fehlende ausgeblendet); „No Recent Items“ |
-| Import SVG… | ⇧⌘I | SVG als neue Gruppe/Layer/Asset |
-| Export SVG… / Export PNG… | – | s. §3 |
-| Save / Save As… | ⌘S / ⇧⌘S | Save nur bei Änderungen aktiv |
-| Close | ⌘W | Dirty-Abfrage |
-| Undo / Redo | ⌘Z / ⇧⌘Z | Menütitel mit Aktionsnamen (§12) |
-| Command Sidebar / Hierarchy / Properties ein/aus | ⌘1 / ⌘2 / ⌘3 | Menü View |
-| Add › (alle Add-Befehle) | ⌘I = Image | Menü „Add“ (§8) |
+| Menüpunkt                                        | Kürzel       | Bemerkung                                                                          |
+| ------------------------------------------------ | ------------ | ---------------------------------------------------------------------------------- |
+| New Window                                       | ⇧⌘N          |                                                                                    |
+| New Document…                                    | ⌘N           | Dirty-Abfrage Save / Don't Save / Cancel                                           |
+| Open…                                            | ⌘O           | `.icon`                                                                            |
+| Open Recent › … / Clear Menu                     | –            | Einträge werden beim Anzeigen validiert (fehlende ausgeblendet); „No Recent Items“ |
+| Import SVG…                                      | ⇧⌘I          | SVG als neue Gruppe/Layer/Asset                                                    |
+| Export SVG… / Export PNG…                        | –            | s. §3                                                                              |
+| Save / Save As…                                  | ⌘S / ⇧⌘S     | Save nur bei Änderungen aktiv                                                      |
+| Close                                            | ⌘W           | Dirty-Abfrage                                                                      |
+| Undo / Redo                                      | ⌘Z / ⇧⌘Z     | Menütitel mit Aktionsnamen (§12)                                                   |
+| Command Sidebar / Hierarchy / Properties ein/aus | ⌘1 / ⌘2 / ⌘3 | Menü View                                                                          |
+| Add › (alle Add-Befehle)                         | ⌘I = Image   | Menü „Add“ (§8)                                                                    |
 
 - Fenstertitel = Dateiname; Änderungsmarker. Mehrere Fenster (je Fenster ein Dokument).
 - Accessibility-Label in Recent-Menü teils deutsch („Öffne kürzlich genutzte Datei“) – UI sonst englisch.
@@ -110,9 +110,9 @@ Quelle: `HandleSystem/*`, `CanvasCore/CanvasHitTester.swift`, `SnappingService.s
 - Handle-Typen (Farbe / Größe in pt): `position` blau 8, `size` grün 6, `control` orange 5, `anchor` lila 6,
   `midpoint` gelb 7, `pivot` rot 9.
 - Handles je Typ: Circle = Mitte (position) + Radius (size); Ellipse = Mitte + rx + ry; Rect = oben links (position)
-  + drei Ecken (size) + Eckenradius (control, wenn rx > 0); Line = Start/Ende (position); Text = Position +
-  Anker-Handle je `text-anchor` (±20); Path = Anker (position), Kontrollpunkte C/Q (control); Polyline/Polygon =
-  Punkte + Segment-Mitten (midpoint → Punkt einfügen); Rotate-Schritt mit Pivot (pivot).
+  - drei Ecken (size) + Eckenradius (control, wenn rx > 0); Line = Start/Ende (position); Text = Position +
+    Anker-Handle je `text-anchor` (±20); Path = Anker (position), Kontrollpunkte C/Q (control); Polyline/Polygon =
+    Punkte + Segment-Mitten (midpoint → Punkt einfügen); Rotate-Schritt mit Pivot (pivot).
 - **Fehlerursache „versetzte Handles“:** jede Node-Art wendet Transform und Position in anderer Reihenfolge an
   (`extractHandles`: Rect „transform, dann Offset“, Circle „transform vor position“, Ellipse umgekehrt …); dazu
   eine selbst gebaute Vorfahren-Kette (`accumulatedAncestorTransform`, `rules.md`). → Neuauflage: CTM des DOM.
@@ -128,16 +128,23 @@ Quelle: `Views/TreeView.swift`, `Core/Tree/*`, `Models/AppModel/AppModelAndHiera
 `Features/Properties/**`, `Packages/AppIconicCore/Specs/PropertySpec.swift`.
 
 ### 7.1 Baum
+
 - Root (Fill) → Icon-Gruppen → Layer (Asset) → SVG-Nodes rekursiv. Zeile: Typ-Icon, Name/Id, Farb-Swatch (Fill und
   Stroke, Weiß mit Rand), Sichtbarkeit (`display`). Drag & Drop vor/nach/hinein, Schutz gegen Nachfahren
   (`TreeReorderServiceTests`), über Asset-Grenzen.
+
 ### 7.2 Kontextmenü
+
 - `Delete…` (Bestätigung), `Duplicate`, `Group <g>`, `Bring to Front`, `Send to Back`, `Copy XML`, `Edit SVG…`.
+
 ### 7.3 Ausrichten
+
 - Nur bei ≥ 2 Nodes; Bezug ist die **Vereinigung der Welt-Bounding-Boxes** der Auswahl (nicht die Leinwand);
   umgesetzt als zusätzliche Translation im `transform`; eine Undo-Aktion „Change Transform“.
   Aktionen: links, horizontal zentriert, rechts, oben, vertikal zentriert, unten.
+
 ### 7.4 Property-Specs (Auszug)
+
 - Präsentation: `fill`, `fill-opacity` 0…1, `stroke`, `stroke-opacity` 0…1, `stroke-width` 0…100, `opacity` 0…1,
   `transform`, `id`, `display`, `visibility`, `vector-effect`.
 - Text: `text`, `font-size` 4…512, `font-family`, `font-weight`, `text-decoration`.
@@ -147,10 +154,14 @@ Quelle: `Views/TreeView.swift`, `Core/Tree/*`, `Models/AppModel/AppModelAndHiera
   `stroke-linecap` butt|round|square, `stroke-linejoin` miter|round|bevel, `stroke-miterlimit` 1…100 (Default 4).
 - Farbeingabe mit Swatch + Hex, `none`/`inherit`, „mixed“ bei Mehrfachauswahl; Stepped Slider; Constrain proportions;
   Reset je Property und „Reset All Properties“; Undo/Redo-Knöpfe im Panel.
+
 ### 7.5 Transform-Liste
+
 - Geordnete Schritte `translate`, `scale`, `rotate` (optional Pivot, „Use pivot“), `skewX`, `skewY`, `matrix`;
   hinzufügen über „Add“, Reihenfolge per Drag („top applies first“), entfernen; Rohanzeige des Attributs.
+
 ### 7.6 Icon-Inspector
+
 - Hintergrund-Fill mit den Modi aus §2 (eigene Sicht!), Gruppen-Schatten/Transluzenz, Layer-Name, Plattformen,
   „icon.json Preview“.
 
@@ -161,23 +172,23 @@ Quelle: `Core/Commands/AddCommand.swift`, `AppModel.add*`.
 Einfügeort: in den gewählten Container bzw. hinter die gewählte Node, sonst in das Asset der aktuellen Gruppe;
 Zentrum = Mitte des Viewports (`viewportCenter`).
 
-| Befehl | Ergebnis (c = Zentrum) |
-|---|---|
-| Group (SVG) | **neue Icon-Gruppe** in `icon.json` mit einem Layer und neuem Asset `layer-N.svg` (1024er-Viewport), hinter der aktuellen Gruppe |
-| Container `<g>` | leeres `<g>` |
-| Circle | r 128, fill schwarz |
-| Ellipse | rx 160, ry 120, fill schwarz |
-| Rectangle | 256 × 256 zentriert, fill schwarz |
-| Path | Dreieck `M c.x,c.y-140 L c.x-140,c.y+140 L c.x+140,c.y+140 Z`, fill schwarz |
-| Line | c.x ± 160, stroke schwarz 12, cap round |
-| Polyline | (c.x-160, c.y+120), (c.x, c.y-140), (c.x+160, c.y+120), stroke schwarz 10, cap/join round |
-| Polygon | (c.x, c.y-160), (c.x-160, c.y+120), (c.x+160, c.y+120), fill schwarz |
-| Text | „Text“, SF Pro 160, weight 400, fill schwarz |
-| Image (⌘I) | Datei wählen → `<image>` 100 × 100 mit Data-URL |
-| Freehand | Werkzeug: Punkte mit `minDistance` 3 (≤ 120 Hz), RDP `epsilon` 2.5, Glättung (Catmull-Rom, `alpha` 0.5) zu Béziers, 1 Nachkommastelle, ≤ 4 096 Segmente, offen/geschlossen; Ergebnis: Stroke schwarz, round |
-| Text to Path | Dialog: Text, Schrift (PostScript-Name, CoreText), Vorschau → Glyph-Outlines als `<path>` |
-| SVG Snippet | „Paste SVG markup to append“ → parsen, Nodes extrahieren, zentrieren, einfügen |
-| SF Symbol | Katalog (Suche, Gewicht, Skalierung) → Pfad (über Vision) – **Lizenz verbietet SF Symbols in App-Icons** |
+| Befehl          | Ergebnis (c = Zentrum)                                                                                                                                                                                      |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Group (SVG)     | **neue Icon-Gruppe** in `icon.json` mit einem Layer und neuem Asset `layer-N.svg` (1024er-Viewport), hinter der aktuellen Gruppe                                                                            |
+| Container `<g>` | leeres `<g>`                                                                                                                                                                                                |
+| Circle          | r 128, fill schwarz                                                                                                                                                                                         |
+| Ellipse         | rx 160, ry 120, fill schwarz                                                                                                                                                                                |
+| Rectangle       | 256 × 256 zentriert, fill schwarz                                                                                                                                                                           |
+| Path            | Dreieck `M c.x,c.y-140 L c.x-140,c.y+140 L c.x+140,c.y+140 Z`, fill schwarz                                                                                                                                 |
+| Line            | c.x ± 160, stroke schwarz 12, cap round                                                                                                                                                                     |
+| Polyline        | (c.x-160, c.y+120), (c.x, c.y-140), (c.x+160, c.y+120), stroke schwarz 10, cap/join round                                                                                                                   |
+| Polygon         | (c.x, c.y-160), (c.x-160, c.y+120), (c.x+160, c.y+120), fill schwarz                                                                                                                                        |
+| Text            | „Text“, SF Pro 160, weight 400, fill schwarz                                                                                                                                                                |
+| Image (⌘I)      | Datei wählen → `<image>` 100 × 100 mit Data-URL                                                                                                                                                             |
+| Freehand        | Werkzeug: Punkte mit `minDistance` 3 (≤ 120 Hz), RDP `epsilon` 2.5, Glättung (Catmull-Rom, `alpha` 0.5) zu Béziers, 1 Nachkommastelle, ≤ 4 096 Segmente, offen/geschlossen; Ergebnis: Stroke schwarz, round |
+| Text to Path    | Dialog: Text, Schrift (PostScript-Name, CoreText), Vorschau → Glyph-Outlines als `<path>`                                                                                                                   |
+| SVG Snippet     | „Paste SVG markup to append“ → parsen, Nodes extrahieren, zentrieren, einfügen                                                                                                                              |
+| SF Symbol       | Katalog (Suche, Gewicht, Skalierung) → Pfad (über Vision) – **Lizenz verbietet SF Symbols in App-Icons**                                                                                                    |
 
 ## 9. Einstellungen
 

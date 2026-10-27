@@ -134,6 +134,7 @@ export const ACTIONS: readonly ActionDef[] = [
   // without arguments the export dialog; with them straight to the files (design 012 E14)
   FILE('file.exportSvg', 'Export SVG…', { args: EXPORT_ARGS }),
   FILE('file.exportPng', 'Export PNG…', { args: EXPORT_ARGS }),
+  FILE('file.revealExport', 'Show Last Export in Folder'),
   FILE('file.save', 'Save'),
   FILE('file.saveAs', 'Save As…'),
   FILE('file.close', 'Close'),

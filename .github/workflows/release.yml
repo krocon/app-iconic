@@ -1,0 +1,307 @@
+# Release pipeline of AppIconic (design 030 E2; taken over from editlicious design 012 + 014, there
+# from comic-commander-tauri / files-and-folders-tauri – MIT, same author). Builds installable packages for macOS (universal .dmg/.app),
+# Windows (.msi + NSIS setup .exe) and Linux (.deb, .rpm, .AppImage) with tauri-apps/tauri-action,
+# checks them, writes SHA256SUMS.txt and – only when asked – attaches everything to a DRAFT release.
+#
+# Modes:
+#   - Actions → Release → Run workflow, mode "dry-run" (default): build + check + artifacts only.
+#     No tag, no release, no draft – safe to run any time to test the pipeline.
+#   - mode "draft" or pushing a tag `v*`: the same, plus a DRAFT GitHub release with generated
+#     release notes and checksums. Nothing is published: Marc publishes the draft by hand.
+#
+# Signing is optional. Without the secrets below the packages are built unsigned
+# (macOS: Gatekeeper warning, Windows: SmartScreen warning) – see docs/release.md.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'dry-run = build and check only; draft = also create a draft release'
+        type: choice
+        options: [dry-run, draft]
+        default: dry-run
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write # create the draft release and upload assets (not used in dry-run)
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: Pre-flight (versions, scripts, notes)
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      publish: ${{ steps.v.outputs.publish }}
+      body: ${{ steps.notes.outputs.body }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # tags and history for the release notes
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          package-manager-cache: false # no pnpm here – the scripts need plain node
+      - name: Versions agree (and match the tag, if any)
+        id: v
+        run: |
+          node scripts/version.mjs check
+          v=$(node -p "require('./package.json').version")
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          if [[ "$GITHUB_REF_TYPE" == "tag" && "$GITHUB_REF_NAME" != "v$v" ]]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match package.json version $v"; exit 1
+          fi
+          if [[ "$GITHUB_REF_TYPE" == "tag" || "${{ inputs.mode }}" == "draft" ]]; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Script tests (version, notes, notices, licences, packages, sidecar)
+        run: node --test scripts/*.test.mjs
+      - name: Release notes
+        id: notes
+        run: |
+          v="${{ steps.v.outputs.version }}"
+          # the tag of this release is no "previous" tag: notes since the one before
+          prev=$(git tag --list 'v*' --sort=-v:refname | grep -vx "v$v" | head -1 || true)
+          {
+            echo "AppIconic $v – the editor for Apple .icon app icons."
+            echo
+            if [ -n "$prev" ]; then
+              node scripts/release-notes.mjs "$prev"
+            else
+              # first release: no earlier tag (describe would find this release's own tag)
+              echo "First public release."
+            fi
+            echo
+            echo "### Downloads"
+            echo
+            echo "- macOS 12+: \`.dmg\` (Apple silicon and Intel) · Windows 10/11: \`-setup.exe\` or \`.msi\` · Linux: \`.deb\`, \`.rpm\`, \`.AppImage\`"
+            echo "- Checksums: \`SHA256SUMS.txt\` (\`sha256sum -c SHA256SUMS.txt\`)"
+            echo "- Unless noted otherwise the packages are not signed yet: macOS – right-click → Open; Windows – SmartScreen → More info → Run anyway."
+          } > release-body.md
+          cat release-body.md >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo 'body<<EOF_RELEASE_BODY'
+            cat release-body.md
+            echo 'EOF_RELEASE_BODY'
+          } >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            os: macos
+            args: --target universal-apple-darwin
+            rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
+          # Oldest supported Ubuntu runner → AppImage/deb work on older glibc as well
+          - platform: ubuntu-22.04
+            os: linux
+            args: ''
+            rust_targets: ''
+          - platform: windows-latest
+            os: windows
+            args: ''
+            rust_targets: ''
+    name: Packages (${{ matrix.os }})
+    runs-on: ${{ matrix.platform }}
+    env:
+      # secrets cannot be used in `if:` directly
+      HAS_WINDOWS_CERT: ${{ secrets.WINDOWS_CERTIFICATE != '' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # Downloaded .debs are kept in the GitHub cache: the Azure mirror is sometimes very slow
+      # (28 min on 26.10.2026). Only what the build needs – no recommended extras (GStreamer …).
+      - name: Cache of Linux packages
+        if: runner.os == 'Linux'
+        uses: actions/cache@v4
+        with:
+          path: ~/apt-cache
+          key: apt-${{ matrix.platform }}-${{ hashFiles('.github/workflows/*.yml') }}
+          restore-keys: apt-${{ matrix.platform }}-
+      - name: Linux system dependencies
+        if: runner.os == 'Linux'
+        timeout-minutes: 15 # normally ~1 min; a stuck mirror fails instead of hanging ("Re-run failed jobs")
+        run: |
+          mkdir -p ~/apt-cache/partial
+          # GitHub's Azure mirror was very slow on 26.10.2026: use the Ubuntu archive instead
+          sudo sed -i 's#http://azure.archive.ubuntu.com/ubuntu#http://archive.ubuntu.com/ubuntu#g' \
+            /etc/apt/sources.list /etc/apt/sources.list.d/*.sources 2>/dev/null || true
+          apt_opts="-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Dir::Cache::Archives=$HOME/apt-cache"
+          sudo apt-get $apt_opts update
+          sudo apt-get $apt_opts install -y --no-install-recommends libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev libssl-dev rpm
+          sudo chown -R "$USER" ~/apt-cache
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: pnpm install --frozen-lockfile
+      # THIRD-PARTY-NOTICES.txt goes into every package (tauri.conf.json `bundle.resources`):
+      # refuse to ship it out of date (`pnpm notices` regenerates it)
+      - run: pnpm notices:check
+
+      # --- Windows code signing (optional) ------------------------------------------
+      # Imports a .pfx (base64 in WINDOWS_CERTIFICATE) into the user store and tells
+      # Tauri its thumbprint. Skipped when the secret is missing → unsigned installer.
+      - name: Import Windows certificate
+        if: runner.os == 'Windows' && env.HAS_WINDOWS_CERT == 'true'
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        shell: pwsh
+        run: |
+          $bytes = [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE)
+          $pfx = Join-Path $env:RUNNER_TEMP 'cert.pfx'
+          [IO.File]::WriteAllBytes($pfx, $bytes)
+          $pw = ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+          $cert = Import-PfxCertificate -FilePath $pfx -CertStoreLocation Cert:\CurrentUser\My -Password $pw
+          Remove-Item $pfx
+          $conf = Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json
+          $conf.bundle.windows.certificateThumbprint = $cert.Thumbprint
+          $conf | ConvertTo-Json -Depth 32 | Set-Content src-tauri/tauri.conf.json -Encoding utf8
+
+      # --- macOS signing + notarisation (optional) ------------------------------------
+      # Only non-empty secrets are exported: an empty APPLE_CERTIFICATE would make the
+      # bundler try (and fail) to import a certificate. No secrets → unsigned .dmg/.app.
+      - name: macOS signing secrets
+        if: runner.os == 'macOS'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Notarisation via App Store Connect API key (preferred, docs/release.md):
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_PRIVATE_KEY: ${{ secrets.APPLE_API_PRIVATE_KEY }}
+        run: |
+          for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID APPLE_API_ISSUER APPLE_API_KEY; do
+            if [ -n "${!name}" ]; then echo "$name=${!name}" >> "$GITHUB_ENV"; fi
+          done
+          # The bundler wants a file path for the .p8 key; write it to the runner's temp dir.
+          if [ -n "$APPLE_API_PRIVATE_KEY" ]; then
+            key="$RUNNER_TEMP/AuthKey_${APPLE_API_KEY}.p8"
+            printf '%s\n' "$APPLE_API_PRIVATE_KEY" > "$key"
+            chmod 600 "$key"
+            echo "APPLE_API_KEY_PATH=$key" >> "$GITHUB_ENV"
+          fi
+
+      # --- the MCP sidecar (design 018 E18): built first, bundled via tauri.sidecar.conf.json
+      - name: MCP sidecar
+        shell: bash
+        run: |
+          if [ "${{ matrix.os }}" = "macos" ]; then
+            node scripts/mcp-sidecar.mjs universal-apple-darwin
+          else
+            node scripts/mcp-sidecar.mjs
+          fi
+
+      # --- build: with a draft release, or packages only (dry-run) ---------------------
+      - name: Build and attach to the draft release
+        if: needs.check.outputs.publish == 'true'
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # --- updater signature (only once the updater is enabled, docs/release.md) -
+          # TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          # TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: v__VERSION__
+          releaseName: AppIconic v__VERSION__
+          releaseBody: ${{ needs.check.outputs.body }}
+          releaseDraft: true
+          prerelease: ${{ startsWith(needs.check.outputs.version, '0.') }}
+          args: ${{ matrix.args }} --config src-tauri/tauri.sidecar.conf.json
+      - name: Build only (dry-run)
+        if: needs.check.outputs.publish != 'true'
+        uses: tauri-apps/tauri-action@v0
+        with:
+          args: ${{ matrix.args }} --config src-tauri/tauri.sidecar.conf.json
+
+      # --- check what was built ---------------------------------------------------------
+      - name: Collect packages, checksums, summary
+        shell: bash
+        run: node scripts/collect-packages.mjs ${{ matrix.os }} packages
+      - name: Linux package contents
+        if: runner.os == 'Linux'
+        run: |
+          deb=$(ls packages/*.deb)
+          dpkg-deb -c "$deb" > deb.txt
+          grep -Eq ' (\./)?usr/bin/app-iconic$' deb.txt
+          grep -Eq ' (\./)?usr/bin/app-iconic-mcp$' deb.txt
+          grep -Eq ' (\./)?usr/lib/AppIconic/THIRD-PARTY-NOTICES.txt$' deb.txt
+          grep -Eq ' (\./)?usr/share/mime/packages/app-iconic.xml$' deb.txt
+          mkdir debx && dpkg-deb -x "$deb" debx
+          desktop=$(find debx -name '*.desktop')
+          grep -q '^Exec=app-iconic %F$' "$desktop"
+          grep -q '^MimeType=application/x-icon-composer;' "$desktop"
+          dpkg-deb -e "$deb" debctl && grep -q update-mime-database debctl/postinst
+          echo "deb: binary, sidecar, notices, mime type, .desktop (Exec %F, MimeType), postinst present" >> "$GITHUB_STEP_SUMMARY"
+      - name: macOS bundle contents
+        if: runner.os == 'macOS'
+        run: |
+          app=$(find src-tauri/target -maxdepth 6 -path '*/release/bundle/macos/*.app' | head -1)
+          lipo -archs "$app/Contents/MacOS/app-iconic" | tee archs.txt
+          grep -q x86_64 archs.txt && grep -q arm64 archs.txt
+          lipo -archs "$app/Contents/MacOS/app-iconic-mcp" | grep -q arm64
+          test -f "$app/Contents/Resources/THIRD-PARTY-NOTICES.txt"
+          plist="$app/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleDocumentTypes:0:LSHandlerRank' "$plist" | grep -q Alternate
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleDocumentTypes:0:LSTypeIsPackage' "$plist" | grep -q true
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleDocumentTypes:0:CFBundleTypeExtensions:0' "$plist" | grep -q icon
+          echo "app: universal (x86_64 + arm64), sidecar, notices, .icon as package document (Alternate)" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages-${{ matrix.os }}
+          path: packages
+          if-no-files-found: error
+          retention-days: 14
+
+  checksums:
+    name: SHA256SUMS.txt
+    needs: [check, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: packages-*
+          path: all
+          merge-multiple: true
+      - name: One checksum file for every package
+        run: |
+          cd all
+          cat SHA256SUMS-*.txt | sort -k2 > SHA256SUMS.txt
+          sha256sum -c SHA256SUMS.txt
+          { echo '### SHA256SUMS.txt'; echo; echo '```'; cat SHA256SUMS.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SHA256SUMS
+          path: all/SHA256SUMS.txt
+      - name: Attach to the draft release
+        if: needs.check.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release upload "v${{ needs.check.outputs.version }}" all/SHA256SUMS.txt --clobber

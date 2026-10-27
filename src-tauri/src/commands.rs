@@ -297,6 +297,13 @@ fn set_document_edited(window: &WebviewWindow, edited: bool) {
     });
 }
 
+/// The licence texts of everything inside the app (`THIRD-PARTY-NOTICES.txt`, `pnpm notices`;
+/// compiled in so the About dialog shows them in every build – design 030 E7).
+#[tauri::command]
+pub async fn third_party_notices() -> Result<String, FsError> {
+    Ok(include_str!("../../THIRD-PARTY-NOTICES.txt").to_owned())
+}
+
 /// Creates the window `label` (same size limits as `main` in `tauri.conf.json`).
 pub fn build_document_window(app: &AppHandle, label: &str) -> Result<WebviewWindow, FsError> {
     tauri::WebviewWindowBuilder::new(app, label, tauri::WebviewUrl::App("index.html".into()))
