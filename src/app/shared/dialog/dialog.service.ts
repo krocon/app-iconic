@@ -2,7 +2,14 @@ import { Injectable, signal } from '@angular/core';
 
 /** The modal dialogs of the app (one at a time). */
 export type DialogKind =
-  'about' | 'ask' | 'palette' | 'shortcuts' | 'svgSnippet' | 'svgSource' | 'optimizePath';
+  | 'about'
+  | 'ask'
+  | 'palette'
+  | 'shortcuts'
+  | 'svgSnippet'
+  | 'svgSource'
+  | 'optimizePath'
+  | 'export';
 
 /**
  * Which modal dialog is open. Remembers the focused element on `show` and gives the focus back

@@ -7,11 +7,9 @@ import { Appearance, fieldFor, specialized } from './appearance';
 import { assetPlacement } from './asset-placement';
 import {
   blendCss,
-  chromaticMatrix,
   groupEffects,
-  SHADOW_BLUR,
-  SHADOW_OFFSET,
   ShadowEffect,
+  shadowFilter,
   stackTransform,
   translucencyMask,
 } from './effects';
@@ -215,54 +213,11 @@ export class LayerStack {
     return host;
   }
 
-  /**
-   * The group's shadow for one layer (design 010 E13, approximation): `feDropShadow` in black
-   * (`neutral`), or the blurred layer itself, darkened (`layer-color`). In the layer's own shadow
-   * root, in canvas units – it scales with the zoom.
-   */
+  /** The group's shadow for one layer (design 010 E13) in the layer's own shadow root. */
   private shadowFilter(s: ShadowEffect): Element {
     const d = this.box.ownerDocument;
-    const el = (name: string, attrs: Record<string, string | number>) => {
-      const e = d.createElementNS(SVG_NS, name);
-      for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v));
-      return e;
-    };
-    const defs = el('defs', {});
-    const filter = el('filter', {
-      id: SHADOW_ID,
-      x: '-25%',
-      y: '-25%',
-      width: '150%',
-      height: '160%',
-      'color-interpolation-filters': 'sRGB',
-      'data-kind': s.kind,
-    });
-    if (s.kind === 'neutral') {
-      filter.append(
-        el('feDropShadow', {
-          dx: 0,
-          dy: SHADOW_OFFSET,
-          stdDeviation: SHADOW_BLUR,
-          'flood-color': '#000',
-          'flood-opacity': s.opacity,
-        }),
-      );
-    } else {
-      const merge = el('feMerge', {});
-      merge.append(el('feMergeNode', { in: 'shadow' }), el('feMergeNode', { in: 'SourceGraphic' }));
-      filter.append(
-        el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: SHADOW_BLUR, result: 'blur' }),
-        el('feOffset', { in: 'blur', dy: SHADOW_OFFSET, result: 'moved' }),
-        el('feColorMatrix', {
-          in: 'moved',
-          type: 'matrix',
-          values: chromaticMatrix(s.opacity),
-          result: 'shadow',
-        }),
-        merge,
-      );
-    }
-    defs.append(filter);
+    const defs = d.createElementNS(SVG_NS, 'defs');
+    defs.append(shadowFilter(d, SHADOW_ID, s));
     return defs;
   }
 

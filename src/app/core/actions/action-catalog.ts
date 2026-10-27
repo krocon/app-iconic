@@ -1,5 +1,6 @@
 import { ArgsSpec } from './action-args';
 import { IMAGE_ARGS, shapeArgsSpec, SNIPPET_ARGS } from './add-action-args';
+import { EXPORT_ARGS } from './export-action-args';
 
 /**
  * Every function of the app as an action (design 005 E1; taken over from editlicious
@@ -105,8 +106,9 @@ export const ACTIONS: readonly ActionDef[] = [
   FILE('file.noRecent', 'No Recent Items', { palette: false }),
   FILE('file.clearRecent', 'Clear Recent Menu'),
   FILE('file.importSvg', 'Import SVG…'),
-  FILE('file.exportSvg', 'Export SVG…'),
-  FILE('file.exportPng', 'Export PNG…'),
+  // without arguments the export dialog; with them straight to the files (design 012 E14)
+  FILE('file.exportSvg', 'Export SVG…', { args: EXPORT_ARGS }),
+  FILE('file.exportPng', 'Export PNG…', { args: EXPORT_ARGS }),
   FILE('file.save', 'Save'),
   FILE('file.saveAs', 'Save As…'),
   FILE('file.close', 'Close'),

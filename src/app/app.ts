@@ -32,6 +32,9 @@ import { AskDialog } from './shared/ask/ask-dialog';
 import { DialogService } from './shared/dialog/dialog.service';
 import { OptimizePathDialog } from './features/svg-source/optimize-path-dialog';
 import { registerSvgSourceActions } from './features/svg-source/svg-source-actions';
+import { registerExportActions } from './features/export/export-actions';
+import { ExportService } from './features/export/export.service';
+import { ExportDialog } from './features/export/export-dialog';
 import { SvgSourceDialog } from './features/svg-source/svg-source-dialog';
 import { SvgSourceService } from './features/svg-source/svg-source.service';
 
@@ -52,6 +55,7 @@ import { SvgSourceService } from './features/svg-source/svg-source.service';
     HierarchyTree,
     MenuBar,
     OptimizePathDialog,
+    ExportDialog,
     PropertiesPanel,
     ShortcutsDialog,
     SidePanel,
@@ -149,6 +153,9 @@ import { SvgSourceService } from './features/svg-source/svg-source.service';
       @case ('optimizePath') {
         <app-optimize-path-dialog />
       }
+      @case ('export') {
+        <app-export-dialog />
+      }
     }
   `,
   styleUrl: './app.css',
@@ -183,6 +190,7 @@ export class App implements OnInit {
     registerPropertiesActions(this.actions, inject(PropertiesService), this.destroyRef);
     registerIconActions(this.actions, inject(IconInspectorService), this.destroyRef);
     registerSvgSourceActions(this.actions, inject(SvgSourceService), this.destroyRef);
+    registerExportActions(this.actions, inject(ExportService), this.destroyRef);
     // where the keyboard is (design 005 E4): a dialog owns it; else hierarchy or canvas first
     this.dispatcher.setContextProvider((target) => {
       if (this.dialogs.open() !== null) return ['dialog'];

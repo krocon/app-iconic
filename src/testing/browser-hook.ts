@@ -23,6 +23,8 @@ import { Point } from '../app/shared/geometry/view-transform';
 import { FakeIconFileApi } from './fake-icon-file-api';
 import { FakeRecentFilesApi } from './fake-recent-files-api';
 import { FakeWindowApi } from './fake-window-api';
+import { FakeExportApi } from './fake-export-api';
+import { ExportApi } from '../app/core/export/export-api';
 
 /**
  * `window.__appIconic` – the test hook of the browser mode (design 003 E14): Playwright reaches
@@ -33,6 +35,8 @@ export interface AppIconicHook {
   files: FakeIconFileApi;
   window: FakeWindowApi;
   recent: FakeRecentFilesApi;
+  /** The export backend in memory (design 012). */
+  exporter: FakeExportApi;
   store(): DocumentStore | null;
   /** `data-ai-id` of the root element of an asset. */
   rootId(asset: string): string | null;
@@ -82,6 +86,7 @@ export function installTestHook(): void {
   const files = inject(IconFileApi) as FakeIconFileApi;
   const win = inject(WindowApi) as FakeWindowApi;
   const recent = inject(RecentFilesApi) as FakeRecentFilesApi;
+  const exporter = inject(ExportApi) as FakeExportApi;
   const service = inject(FilesService);
   const store = () => service.store();
   const svgOf = (asset: string) => store()?.document().assets.get(asset)?.svg ?? null;
@@ -94,6 +99,7 @@ export function installTestHook(): void {
     files,
     window: win,
     recent,
+    exporter,
     store,
     rootId: (asset) => svgOf(asset)?.root.getAttribute('data-ai-id') ?? null,
     setAttribute: (asset, id, name, value) =>

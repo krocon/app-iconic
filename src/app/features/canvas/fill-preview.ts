@@ -8,12 +8,17 @@ export interface UnitPoint {
   y: number;
 }
 
-/** What the canvas paints as background (design 004 E7). CSS colours. */
-export type FillPreview =
+/**
+ * What the canvas paints as background (design 004 E7). Colours as CSS (canvas) or, for the
+ * export, in the form the caller asks for (`SvgColor`, design 012 E3).
+ */
+export type FillPreview<C = string> =
   | { kind: 'none' }
-  | { kind: 'solid'; color: string }
-  | { kind: 'linear'; stops: string[]; start: UnitPoint; stop: UnitPoint }
-  | { kind: 'radial'; stops: string[]; center: UnitPoint; radius: number };
+  | { kind: 'solid'; color: C }
+  | { kind: 'linear'; stops: C[]; start: UnitPoint; stop: UnitPoint }
+  | { kind: 'radial'; stops: C[]; center: UnitPoint; radius: number };
+
+type ColorOf<C> = (c: IconColor) => C;
 
 /** Approximation of Icon Composer's system backgrounds (question 3); legacy: white / 0.07843. */
 const SYSTEM: Record<Appearance, [IconColor, IconColor]> = {
@@ -30,9 +35,9 @@ function rgb(r: number, g: number, b: number): IconColor {
   return { space: 'srgb', r, g, b, a: 1 };
 }
 
-function system(appearance: Appearance): FillPreview {
+function system<C>(appearance: Appearance, color: ColorOf<C>): FillPreview<C> {
   const [a, b] = SYSTEM[appearance];
-  return { kind: 'linear', stops: [cssColor(a), cssColor(b)], start: TOP, stop: BOTTOM };
+  return { kind: 'linear', stops: [color(a), color(b)], start: TOP, stop: BOTTOM };
 }
 
 function unitPoint<T extends UnitPoint | null>(v: unknown, fallback: T): UnitPoint | T {
@@ -44,41 +49,51 @@ function unitPoint<T extends UnitPoint | null>(v: unknown, fallback: T): UnitPoi
 }
 
 /** Colours of a gradient list; `null` if there are none that parse. */
-function colorList(v: unknown): string[] | null {
+function colorList<C>(v: unknown, color: ColorOf<C>): C[] | null {
   const list = (Array.isArray(v) ? v : [v]).map(parseIconColor).filter((c) => c !== null);
   if (list.length === 0) return null;
-  const css = list.map(cssColor);
-  return css.length === 1 ? [css[0], css[0]] : css;
+  const out = list.map(color);
+  return out.length === 1 ? [out[0], out[0]] : out;
 }
 
 /** One fill value (string or object, Apple format) → preview; `null` = not understood. */
-export function previewOf(fill: unknown, appearance: Appearance): FillPreview | null {
-  if (fill === 'automatic') return system(appearance);
-  if (fill === 'system-light') return system('light');
-  if (fill === 'system-dark') return system('dark');
+export function previewOf(fill: unknown, appearance: Appearance): FillPreview | null;
+export function previewOf<C>(
+  fill: unknown,
+  appearance: Appearance,
+  color: ColorOf<C>,
+): FillPreview<C> | null;
+export function previewOf(
+  fill: unknown,
+  appearance: Appearance,
+  color: ColorOf<unknown> = cssColor,
+): FillPreview<unknown> | null {
+  if (fill === 'automatic') return system(appearance, color);
+  if (fill === 'system-light') return system('light', color);
+  if (fill === 'system-dark') return system('dark', color);
   if (fill === 'none') return { kind: 'none' };
   if (typeof fill !== 'object' || fill === null || Array.isArray(fill)) return null;
   const f = fill as Record<string, unknown>;
   const orientation = (f['orientation'] ?? {}) as { start?: unknown; stop?: unknown };
   if ('solid' in f) {
     const c = parseIconColor(f['solid']);
-    return c ? { kind: 'solid', color: cssColor(c) } : null;
+    return c ? { kind: 'solid', color: color(c) } : null;
   }
   if ('automatic-gradient' in f) {
     const c = parseIconColor(f['automatic-gradient']);
     if (!c) return null;
-    const stops = [cssColor(shift(c, 0.16)), cssColor(shift(c, -0.14))];
+    const stops = [color(shift(c, 0.16)), color(shift(c, -0.14))];
     return { kind: 'linear', stops, start: TOP, stop: BOTTOM };
   }
   if ('linear-gradient' in f) {
-    const stops = colorList(f['linear-gradient']);
+    const stops = colorList(f['linear-gradient'], color);
     if (!stops) return null;
     const start = unitPoint(orientation.start, TOP);
     const stop = unitPoint(orientation.stop, BOTTOM);
     return { kind: 'linear', stops, start, stop };
   }
   if ('radial-gradient' in f) {
-    const stops = colorList(f['radial-gradient']);
+    const stops = colorList(f['radial-gradient'], color);
     if (!stops) return null;
     const center = unitPoint(orientation.start, CENTER);
     const edge = unitPoint(orientation.stop, null);
@@ -98,8 +113,18 @@ export function previewOf(fill: unknown, appearance: Appearance): FillPreview | 
 export function fillPreview(
   icon: IconJson,
   appearance: Appearance,
-): { preview: FillPreview; known: boolean } {
+): { preview: FillPreview; known: boolean };
+export function fillPreview<C>(
+  icon: IconJson,
+  appearance: Appearance,
+  color: ColorOf<C>,
+): { preview: FillPreview<C>; known: boolean };
+export function fillPreview(
+  icon: IconJson,
+  appearance: Appearance,
+  color: ColorOf<unknown> = cssColor,
+): { preview: FillPreview<unknown>; known: boolean } {
   const fill = specialized(icon['fill-specializations'], appearance, icon.fill ?? 'automatic');
-  const preview = previewOf(fill, appearance);
-  return preview ? { preview, known: true } : { preview: system(appearance), known: false };
+  const preview = previewOf(fill, appearance, color);
+  return preview ? { preview, known: true } : { preview: system(appearance, color), known: false };
 }

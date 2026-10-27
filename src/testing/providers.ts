@@ -4,6 +4,8 @@ import { IconFileApi } from '../app/core/icon-file/icon-file-api';
 import { RecentFilesApi } from '../app/core/recent/recent-files-api';
 import { KeymapApi, MenuApi } from '../app/core/menu/menu-api';
 import { WindowApi } from '../app/core/window/window-api';
+import { ExportApi } from '../app/core/export/export-api';
+import { FakeExportApi } from './fake-export-api';
 import { FakeKeymapApi, FakeMenuApi } from './fake-menu-api';
 import { FakeAboutApi } from './fake-about-api';
 import { FakeIconFileApi } from './fake-icon-file-api';
@@ -18,18 +20,21 @@ export function fakeBackend(): {
   recent: FakeRecentFilesApi;
   menu: FakeMenuApi;
   keymap: FakeKeymapApi;
+  exporter: FakeExportApi;
 } {
   const files = new FakeIconFileApi();
   const window = new FakeWindowApi();
   const recent = new FakeRecentFilesApi();
   const menu = new FakeMenuApi();
   const keymap = new FakeKeymapApi();
+  const exporter = new FakeExportApi();
   return {
     files,
     window,
     recent,
     menu,
     keymap,
+    exporter,
     providers: [
       { provide: AboutApi, useClass: FakeAboutApi },
       { provide: IconFileApi, useValue: files },
@@ -37,6 +42,7 @@ export function fakeBackend(): {
       { provide: RecentFilesApi, useValue: recent },
       { provide: MenuApi, useValue: menu },
       { provide: KeymapApi, useValue: keymap },
+      { provide: ExportApi, useValue: exporter },
     ],
   };
 }

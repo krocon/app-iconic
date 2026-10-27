@@ -1,4 +1,4 @@
-import { cssColor, parseIconColor, shift } from './icon-color';
+import { cssColor, parseIconColor, shift, svgColor } from './icon-color';
 
 describe('icon-color', () => {
   it.each([
@@ -33,5 +33,18 @@ describe('icon-color', () => {
     expect([up.r, up.g, up.b.toFixed(2)]).toEqual([1, 0.66, '0.26']);
     const down = shift(c, -0.14);
     expect(down.b).toBe(0);
+  });
+
+  it.each([
+    ['srgb:1,0,0,1', '#ff0000', 1],
+    ['extended-srgb:0.00000,0.53333,1.00000,0.5', '#0088ff', 0.5],
+    ['gray:0.5', '#808080', 1],
+    ['extended-srgb:1.2,-0.1,0.5,3', '#ff0080', 1],
+    // Display P3 → sRGB (export for resvg, design 012 E3): pure P3 red lies outside sRGB → clamped
+    ['display-p3:1,0,0,1', '#ff0000', 1],
+    ['display-p3:0.5,0.5,0.5,1', '#808080', 1],
+    ['display-p3:0.99799,0.62558,0.32982,1.00000', '#ff9a40', 1],
+  ])('svgColor %s → %s', (input, hex, opacity) => {
+    expect(svgColor(parseIconColor(input)!)).toEqual({ hex, opacity });
   });
 });

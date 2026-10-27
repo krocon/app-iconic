@@ -116,11 +116,11 @@ describe('App', () => {
       (li) => li.querySelector('.label')?.textContent === 'Save',
     )!;
     expect(save.querySelector('kbd')?.textContent).toBe('Ctrl+S');
-    // future functions are there, but disabled
+    // Export (prompt 012) is there and enabled with a document
     const exportPng = [...el.querySelectorAll('[role="menu"] li[tabindex]')].find(
       (li) => li.querySelector('.label')?.textContent === 'Export PNG…',
     )!;
-    expect(exportPng.getAttribute('aria-disabled')).toBe('true');
+    expect(exportPng.getAttribute('aria-disabled')).not.toBe('true');
   });
 
   it('Ctrl+1/2/3 hide and show the side panels; the View menu has check items', async () => {

@@ -1,6 +1,7 @@
 import { IconGroup, IconLayer } from '../../core/icon-file/icon-file.models';
 import { Appearance, fieldFor } from './appearance';
 import { layerTransform } from './asset-placement';
+import { SVG_NS } from '../document/svg/node-ids';
 
 /**
  * The preview approximation of Icon Composer's group effects (design 010 E13) – Apple's Liquid
@@ -87,4 +88,52 @@ export function stackTransform(
 export function chromaticMatrix(opacity: number): string {
   const d = 0.6;
   return `${d} 0 0 0 0 0 ${d} 0 0 0 0 0 ${d} 0 0 0 0 0 ${opacity} 0`;
+}
+
+/**
+ * The `<filter>` of a group shadow (design 010 E13, approximation; also the export, 012 E6):
+ * `feDropShadow` in black (`neutral`), or the blurred layer itself, darkened (`layer-color`). In
+ * canvas units (1024 = icon), so it scales with the zoom.
+ */
+export function shadowFilter(d: Document, id: string, s: ShadowEffect): Element {
+  const el = (name: string, attrs: Record<string, string | number>) => {
+    const e = d.createElementNS(SVG_NS, name);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v));
+    return e;
+  };
+  const filter = el('filter', {
+    id,
+    x: '-25%',
+    y: '-25%',
+    width: '150%',
+    height: '160%',
+    'color-interpolation-filters': 'sRGB',
+    'data-kind': s.kind,
+  });
+  if (s.kind === 'neutral') {
+    filter.append(
+      el('feDropShadow', {
+        dx: 0,
+        dy: SHADOW_OFFSET,
+        stdDeviation: SHADOW_BLUR,
+        'flood-color': '#000',
+        'flood-opacity': s.opacity,
+      }),
+    );
+  } else {
+    const merge = el('feMerge', {});
+    merge.append(el('feMergeNode', { in: 'shadow' }), el('feMergeNode', { in: 'SourceGraphic' }));
+    filter.append(
+      el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: SHADOW_BLUR, result: 'blur' }),
+      el('feOffset', { in: 'blur', dy: SHADOW_OFFSET, result: 'moved' }),
+      el('feColorMatrix', {
+        in: 'moved',
+        type: 'matrix',
+        values: chromaticMatrix(s.opacity),
+        result: 'shadow',
+      }),
+      merge,
+    );
+  }
+  return filter;
 }
