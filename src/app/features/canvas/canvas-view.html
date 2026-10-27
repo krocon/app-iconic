@@ -43,6 +43,11 @@
       [style.height.px]="px()"
       [style.transform]="translate()"
     >
+      <!-- the shadow of the artboard on an empty element of the same shape: a filter over the
+           painted layers would redo it for every shape on each pan (prompt 031) -->
+      <div class="shade" aria-hidden="true">
+        <div class="shade-shape" [style.clip-path]="clip()"></div>
+      </div>
       <div class="paper" [class.transparent]="!opt().background" [style.clip-path]="clip()">
         @if (opt().background) {
           <app-canvas-background [fill]="fill().preview" />

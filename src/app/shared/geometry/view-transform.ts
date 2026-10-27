@@ -63,8 +63,3 @@ export function clampPan(
   const clamp = (v: number, view: number) => Math.min(Math.max(v, k - s), view - k);
   return { zoom: t.zoom, panX: clamp(t.panX, viewW), panY: clamp(t.panY, viewH) };
 }
-
-/** Document → viewport as matrix (`a = d = zoom`, `e/f = pan`). Needs the browser's DOMMatrix. */
-export function toMatrix(t: ViewTransform): DOMMatrix {
-  return new DOMMatrix([t.zoom, 0, 0, t.zoom, t.panX, t.panY]);
-}

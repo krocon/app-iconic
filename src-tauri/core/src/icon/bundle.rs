@@ -2,7 +2,7 @@
 //! a new bundle next to the old one and swapping (design 002 E6 – a folder cannot be renamed over
 //! an existing one, neither on Windows nor over a non-empty folder on Unix).
 
-use super::names::is_valid_asset_name;
+use super::names::{is_valid_asset_name, name_key};
 use super::{
     ExtraFile, IconAsset, IconFile, IconFormat, IconWarning, IconWarningCode, Limits, invalid,
     too_large,
@@ -14,25 +14,80 @@ use std::path::{Component, Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 /// Sorts `(relative path, bytes)` entries into `icon.json`, assets and extra files (002 E9).
+/// Entries that a case-insensitive file system (macOS, Windows) cannot keep apart from an earlier
+/// one – `a.svg` next to `A.svg`, a file `ASSETS` or `Icon.json` – are left out with a warning:
+/// saving would make one overwrite the other (prompt 031).
 pub(crate) fn split_entries(
     entries: Vec<(String, Vec<u8>)>,
+    warnings: &mut Vec<IconWarning>,
 ) -> (Option<Vec<u8>>, Vec<IconAsset>, Vec<ExtraFile>) {
     let mut json = None;
     let mut assets = Vec::new();
     let mut extra = Vec::new();
-    for (path, bytes) in entries {
+    let mut keys = PathKeys::default();
+    keys.add("icon.json");
+    keys.add("Assets/");
+    let ignore = |path: String, warnings: &mut Vec<IconWarning>| {
+        warnings.push(IconWarning {
+            code: IconWarningCode::IgnoredEntry,
+            name: path,
+        })
+    };
+    // icon.json and assets first: they win over extra files
+    let (main, rest): (Vec<_>, Vec<_>) = entries.into_iter().partition(|(p, _)| {
+        p == "icon.json"
+            || p.strip_prefix("Assets/")
+                .is_some_and(|n| !n.contains('/') && is_valid_asset_name(n))
+    });
+    for (path, bytes) in main {
         if path == "icon.json" {
             json = Some(bytes);
-        } else if let Some(name) = path
-            .strip_prefix("Assets/")
-            .filter(|n| !n.contains('/') && is_valid_asset_name(n))
-        {
-            assets.push(IconAsset::new(name, bytes));
+        } else if keys.add(&path) {
+            assets.push(IconAsset::new(&path["Assets/".len()..], bytes));
         } else {
+            ignore(path, warnings);
+        }
+    }
+    for (path, bytes) in rest {
+        if keys.add(&path) {
             extra.push(ExtraFile { path, bytes });
+        } else {
+            ignore(path, warnings);
         }
     }
     (json, assets, extra)
+}
+
+/// File and folder paths as a case-insensitive file system sees them (`name_key` per path).
+#[derive(Default)]
+struct PathKeys {
+    files: std::collections::HashSet<String>,
+    folders: std::collections::HashSet<String>,
+}
+
+impl PathKeys {
+    /// Adds a file (`a/b`) or a folder (`a/`); `false` if it clashes with what is there: the same
+    /// key, a file where a folder is, or a folder on its way that is a file.
+    fn add(&mut self, path: &str) -> bool {
+        let folder = path.ends_with('/');
+        let key = name_key(path.trim_end_matches('/'));
+        let parents: Vec<&str> = key.match_indices('/').map(|(i, _)| &key[..i]).collect();
+        if self.files.contains(&key)
+            || (!folder && self.folders.contains(&key))
+            || parents.iter().any(|p| self.files.contains(*p))
+        {
+            return false;
+        }
+        for p in parents {
+            self.folders.insert(p.to_owned());
+        }
+        if folder {
+            self.folders.insert(key);
+        } else {
+            self.files.insert(key);
+        }
+        true
+    }
 }
 
 /// Reads a file with a hard size limit (the metadata may lie or change meanwhile).
@@ -121,9 +176,10 @@ pub fn read_bundle(dir: &Path, limits: &Limits) -> Result<IconFile, FsError> {
         warnings: Vec::new(),
     };
     walk.dir(dir, 0)?;
-    let (json, assets, extra) = split_entries(walk.files);
+    let mut warnings = walk.warnings;
+    let (json, assets, extra) = split_entries(walk.files, &mut warnings);
     let json = json.ok_or_else(|| invalid("no icon.json in the bundle", dir))?;
-    IconFile::from_parts(IconFormat::Bundle, json, assets, extra, walk.warnings, dir)
+    IconFile::from_parts(IconFormat::Bundle, json, assets, extra, warnings, dir)
 }
 
 /// Is `path` a relative path that stays inside the bundle?

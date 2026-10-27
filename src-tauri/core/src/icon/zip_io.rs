@@ -54,20 +54,51 @@ fn find_root(entries: &[(String, Vec<u8>)]) -> Option<String> {
     }
 }
 
+/// Entry count of the end-of-central-directory record (`None`: not found or ZIP64). The zip
+/// crate keeps one entry per name, so the same name twice only shows as a smaller `len()`.
+fn declared_entries(f: &mut fs::File) -> Option<u64> {
+    use std::io::{Read, Seek, SeekFrom};
+    let len = f.metadata().ok()?.len();
+    let tail = len.min(22 + 65_535);
+    f.seek(SeekFrom::Start(len - tail)).ok()?;
+    let mut buf = Vec::with_capacity(tail as usize);
+    Read::by_ref(f).take(tail).read_to_end(&mut buf).ok()?;
+    f.seek(SeekFrom::Start(0)).ok()?;
+    let at = (0..=buf.len().checked_sub(22)?)
+        .rev()
+        .find(|&i| buf[i..i + 4] == *b"PK\x05\x06")?;
+    let n = u16::from_le_bytes([buf[at + 10], buf[at + 11]]);
+    (n != 0xFFFF).then_some(u64::from(n))
+}
+
 /// Reads a zipped `.icon`.
 pub fn read_zip(path: &Path, limits: &Limits) -> Result<IconFile, FsError> {
-    let f = fs::File::open(path).map_err(|e| FsError::from_io(&e, path))?;
+    let mut f = fs::File::open(path).map_err(|e| FsError::from_io(&e, path))?;
+    // the central directory is read in full by `ZipArchive::new`: look at the size first (031)
+    let len = f.metadata().map_err(|e| FsError::from_io(&e, path))?.len();
+    if len > limits.max_total {
+        return Err(too_large("ZIP too large", path));
+    }
+    let declared = declared_entries(&mut f);
     let mut archive = ZipArchive::new(BufReader::new(f)).map_err(|e| zip_error(e, path))?;
+    // the same name twice: which one counts depends on the reader – refuse (prompt 031)
+    if declared.is_some_and(|n| n != archive.len() as u64) {
+        return Err(invalid("duplicate entries in the ZIP", path));
+    }
     if archive.len() > limits.max_entries {
         return Err(too_large("too many entries in the ZIP", path));
     }
     let mut entries = Vec::new();
+    let mut names = std::collections::HashSet::new();
     let mut total = 0u64;
     for i in 0..archive.len() {
         let raw = archive.by_index_raw(i).map_err(|e| zip_error(e, path))?;
         let name = raw.name().to_owned();
         if !is_safe_entry(&name) || raw.enclosed_name().is_none() {
             return Err(invalid(format!("unsafe entry name {name:?}"), path));
+        }
+        if !names.insert(name.clone()) {
+            return Err(invalid(format!("duplicate entry {name:?}"), path));
         }
         if raw.encrypted() {
             return Err(FsError::new(
@@ -100,9 +131,10 @@ pub fn read_zip(path: &Path, limits: &Limits) -> Result<IconFile, FsError> {
         .into_iter()
         .map(|(n, b)| (n[root.len()..].to_owned(), b))
         .collect();
-    let (json, assets, extra) = split_entries(inside);
+    let mut warnings = Vec::new();
+    let (json, assets, extra) = split_entries(inside, &mut warnings);
     let json = json.ok_or_else(|| invalid("no icon.json in the ZIP", path))?;
-    let mut file = IconFile::from_parts(IconFormat::Zip, json, assets, extra, Vec::new(), path)?;
+    let mut file = IconFile::from_parts(IconFormat::Zip, json, assets, extra, warnings, path)?;
     file.zip_root = root;
     file.outside_root = outside
         .into_iter()

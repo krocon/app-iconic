@@ -38,6 +38,10 @@ export class SetText implements DocCommand {
     const els = this.changes.map((c) => target(doc, c.ref));
     for (const el of els) {
       if (el.children.length > 0) throw new CommandError('element has child elements');
+      // style sheets and scripts are not text of the icon (prompt 031)
+      const name = el.localName.toLowerCase();
+      if (name === 'style' || name === 'script')
+        throw new CommandError(`text of ${name} cannot be set`);
     }
     this.old = els.map((el) => el.textContent ?? '');
     this.changes.forEach((c, i) => (els[i].textContent = c.text));

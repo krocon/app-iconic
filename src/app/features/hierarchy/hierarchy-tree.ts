@@ -27,6 +27,7 @@ import {
   isExpanded,
   isSelected,
   targetOf,
+  TreeNode,
   TreeRow,
 } from './hierarchy-model';
 import { HIERARCHY_TEXTS } from './hierarchy-texts';
@@ -73,17 +74,38 @@ export class HierarchyTree {
   protected readonly viewHeight = signal(400);
   readonly rowHeight = signal(ROW_HEIGHT);
 
-  readonly tree = computed(() => buildTree(this.store().document()));
+  private lastTree: { store: DocumentStore; tree: TreeNode } | null = null;
+  /** The tree; while a gesture runs (drag, live field edit) the last one stays (prompt 031). */
+  readonly tree = computed(() => {
+    const store = this.store();
+    const doc = store.document();
+    const last = this.lastTree;
+    if (store.gesture() && last?.store === store) return last.tree;
+    const tree = buildTree(doc);
+    this.lastTree = { store, tree };
+    return tree;
+  });
   readonly rows = computed(() => flatten(this.tree(), this.toggled()));
   protected readonly virtual = computed(() => this.rows().length >= VIRTUAL_FROM);
-  /** First rendered row and the rows to render. */
+  /**
+   * The rows to render and their indices. Virtualised: the visible part plus the row with tab
+   * index 0 when it is scrolled away – Tab must always find a way into the tree (prompt 031).
+   */
   protected readonly window = computed(() => {
     const rows = this.rows();
-    if (!this.virtual()) return { start: 0, rows };
+    if (!this.virtual()) return { rows, indices: rows.map((_, i) => i) };
     const h = this.rowHeight();
     const start = Math.max(0, Math.floor(this.scrollTop() / h) - OVERSCAN);
     const count = Math.ceil(this.viewHeight() / h) + 2 * OVERSCAN;
-    return { start, rows: rows.slice(start, start + count) };
+    const end = Math.min(rows.length, start + count);
+    const indices = Array.from({ length: Math.max(0, end - start) }, (_, i) => start + i);
+    const tab = this.tabRow();
+    const t = tab === null ? -1 : rows.findIndex((r) => r.node.id === tab);
+    if (t >= 0 && (t < start || t >= end)) {
+      if (t < start) indices.unshift(t);
+      else indices.push(t);
+    }
+    return { rows: indices.map((i) => rows[i]), indices };
   });
   protected readonly selectedIds = computed(() => {
     const s = this.store();
@@ -163,7 +185,7 @@ export class HierarchyTree {
   }
 
   protected rowIndex(i: number): number {
-    return this.window().start + i;
+    return this.window().indices[i];
   }
 
   /** Opens the ancestors of the selection and scrolls to it unless a selected row is in view. */

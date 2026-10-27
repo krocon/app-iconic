@@ -1,5 +1,5 @@
 {
-  "_comment": "Unique asset and layer names (design 002 E12, legacy §3). Shared by the Rust tests and a later TypeScript twin. existing = names already in the document.",
+  "_comment": "Unique asset and layer names (design 002 E12, legacy §3; prompt 031: Windows characters and reserved names, at most 200 bytes). Shared by the Rust tests (names.rs) and the TypeScript twin (unique-names.ts). existing = names already in the document.",
   "asset": [
     { "base": "logo.svg", "existing": [], "expected": "logo.svg" },
     { "base": "logo.svg", "existing": ["logo.svg"], "expected": "logo 2.svg" },
@@ -15,7 +15,17 @@
     { "base": "Größe.svg", "existing": ["Größe.svg"], "expected": "Größe 2.svg" },
     { "base": "Ä 😀.svg", "existing": ["ä 😀.svg"], "expected": "Ä 😀 2.svg" },
     { "base": ".svg", "existing": [], "expected": "svg" },
-    { "base": "..", "existing": [], "expected": "layer.svg" }
+    { "base": "..", "existing": [], "expected": "layer.svg" },
+    { "base": "a<b>c\"d|e?f*g.svg", "existing": [], "expected": "a-b-c-d-e-f-g.svg" },
+    { "base": "con.svg", "existing": [], "expected": "_con.svg" },
+    { "base": "NUL", "existing": [], "expected": "_NUL" },
+    { "base": "com1.tar.svg", "existing": [], "expected": "_com1.tar.svg" },
+    { "base": "com10.svg", "existing": [], "expected": "com10.svg" },
+    { "base": "console.svg", "existing": [], "expected": "console.svg" },
+    { "base": "logo. . ", "existing": [], "expected": "logo" },
+    { "base": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.svg", "existing": [], "expected": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.svg" },
+    { "base": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.svg", "existing": ["xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.svg"], "expected": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx 2.svg" },
+    { "base": "üüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüü.svg", "existing": [], "expected": "üüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüüü.svg" }
   ],
   "layer": [
     { "base": "logo", "existing": [], "expected": "logo" },

@@ -78,9 +78,10 @@ impl IconAsset {
         Self { name, bytes, kind }
     }
 
-    /// SVG content as text (BOM removed); `None` for other kinds or non-UTF-8 bytes.
+    /// SVG content as text (BOM removed); `None` for other kinds, non-UTF-8 bytes or more than an
+    /// imported SVG file may have ([`svg_file::MAX_SVG`], prompt 031) – kept as bytes then.
     pub fn text(&self) -> Option<&str> {
-        (self.kind == AssetKind::Svg)
+        (self.kind == AssetKind::Svg && self.bytes.len() as u64 <= svg_file::MAX_SVG)
             .then(|| std::str::from_utf8(strip_bom(&self.bytes)).ok())
             .flatten()
     }
@@ -195,7 +196,7 @@ impl IconFile {
             }
         }
         for a in &assets {
-            if a.kind == AssetKind::Svg && std::str::from_utf8(strip_bom(&a.bytes)).is_err() {
+            if a.kind == AssetKind::Svg && a.text().is_none() {
                 warnings.push(IconWarning {
                     code: IconWarningCode::UnreadableAsset,
                     name: a.name.clone(),
@@ -341,5 +342,25 @@ mod tests {
                 name: "gone.svg".into()
             }]
         );
+    }
+
+    #[test]
+    fn an_svg_asset_over_the_import_limit_stays_bytes() {
+        let json = br#"{"groups":[{"layers":[{"image-name":"big.svg"}]}]}"#;
+        let mut big = b"<svg xmlns=\"http://www.w3.org/2000/svg\">".to_vec();
+        big.resize(svg_file::MAX_SVG as usize + 1, b' ');
+        big.extend(b"</svg>");
+        let f = IconFile::from_parts(
+            IconFormat::Bundle,
+            json.to_vec(),
+            vec![IconAsset::new("big.svg", big.clone())],
+            vec![],
+            vec![],
+            Path::new("/x.icon"),
+        )
+        .unwrap();
+        assert_eq!(f.assets[0].text(), None);
+        assert_eq!(f.assets[0].bytes, big, "kept for the round trip");
+        assert_eq!(f.warnings[0].code, IconWarningCode::UnreadableAsset);
     }
 }

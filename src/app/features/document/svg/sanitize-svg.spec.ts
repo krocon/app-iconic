@@ -29,6 +29,16 @@ describe('sanitizeSvg', () => {
     ['<set attributeName="href" to="javascript:alert(1)"/>', 'script'],
     ['<animate attributeName="onbegin" values="x"/>', 'script'],
     ['<iframe src="https://x"/>', 'script'],
+    // prompt 031
+    ['<html:div xmlns:html="http://www.w3.org/1999/xhtml">evil</html:div>', 'foreign_object'],
+    ['<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>evil</mi></math>', 'foreign_object'],
+    ['<rect style="fill:image-set(\'https://evil/x.png\' 1x)"/>', 'external_ref'],
+    ['<rect style="fill:-webkit-image-set(\'//evil\' 1x)"/>', 'external_ref'],
+    ['<style>rect{fill:\\75 rl(https://evil)}</style>', 'style'],
+    ['<style>rect{background:src("https://evil")}</style>', 'style'],
+    ['<g xml:base="https://evil/"><rect/></g>', 'external_ref'],
+    ['<set attributeName=" href " to="https://evil"/>', 'script'],
+    ['<set attributeName="style" to="fill:url(https://evil)"/>', 'script'],
   ])('removes %s', (markup, kind) => {
     const { found, out } = clean(markup);
     expect(found).toContain(kind);

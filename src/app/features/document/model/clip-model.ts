@@ -149,14 +149,6 @@ export function effectiveClips(el: Element, root: Element): string[] {
   return out;
 }
 
-/** The nearest ancestor of `el` (below the root) that is a clip group, `null` if none. */
-export function clipGroupAround(el: Element, root: Element): Element | null {
-  for (let e = el.parentElement; e && e !== root; e = e.parentElement) {
-    if (isClipGroup(e, root)) return e;
-  }
-  return null;
-}
-
 /** A free clip id (`clip`, `clip-2` …) in the asset. */
 export function uniqueClipId(root: Element, base = 'clip'): string {
   const taken = collectIds(root);

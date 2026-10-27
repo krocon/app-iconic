@@ -237,3 +237,29 @@ Aktion `mcp.disconnect`; kein neuer Dokument-Command (`AiCommand` hüllt vorhand
 | `harfrust` 0.12.0, `skrifa` 0.44.0 (exakt; `skrifa` ohne Default-Features, nur `std`)                                      | Rust (`ai-core`)           | Text → Pfad (013 E9): OpenType-Shaping (HarfBuzz-Port) und Glyphen-Umrisse – dieselben Crates, Versionen und Features, die resvg 0.48 intern nutzt (nichts zusätzlich zu bauen). Statt ttf-parser + eigenem Kerning: Ligaturen, GPOS, komplexe Schriften inklusive                                                                  |
 | `lucide-static` 1.55.0 (exakt; 10.10.2026)                                                                                 | Frontend (lazy, nur Daten) | Symbol-Set „Lucide“ (013 E15, ISC/MIT): `icon-nodes.json` + `tags.json` als eigene Lazy-Chunks (≈ 0,41 + 0,19 MB, Startbundle unverändert). Daten statt Komponenten-Paket: kein Framework, die Elemente werden zu Pfaden im Dokument                                                                                                |
 | `tempfile`                                                                                                                 | Rust (Dev)                 | Dateisystem-Tests                                                                                                                                                                                                                                                                                                                   |
+
+## Performance
+
+Prompt 031, `e2e/hardening.spec.ts` (Zahlen stehen im Testprotokoll): `scripts/big-svg.mjs` erzeugt 20 000 Formen
+(Pfade mit 24 Kurven, Kreise, Rechtecke) in 400 transformierten Gruppen, 6,8 MB; Variante `--plain` ohne `opacity`
+an jedem dritten Element. Gemessen am 27.10.2026 in Headless-Chromium 1.63 im Container (2 vCPU Xeon 2,8 GHz,
+**Software-Rasterung ohne GPU**), Fenster 1440 × 900:
+
+| Schritt                                       | mit `opacity` | ohne   |
+| --------------------------------------------- | ------------- | ------ |
+| Import (Datei → Baum sichtbar)                | 4,2 s         | 3,6 s  |
+| Zoom/Pan je Bild                              | 510 ms        | 414 ms |
+| Klick-Auswahl                                 | 2,1 s         | 1,2 s  |
+| Ziehen mit Magic Snap + Grid je Schritt       | 707 ms        | 188 ms |
+| gerenderte Zeilen im Ebenenbaum (von 20 400+) | 405           | 405    |
+
+- **Was die Zeit kostet** (Chromium-Trace): Rastern und „Layerize“ der ganzen Zeichenfläche bei jeder Änderung; jedes
+  Element mit eigener `opacity` ist eine eigene Ebene, deshalb ist die Variante mit `opacity` beim Ziehen ~4× langsamer.
+- **Maßnahmen in 031:** Zeichenfläche als eigene Ebene (`will-change: transform`), Schatten als Geschwister-Ebene
+  statt `filter` über der Fläche, der Treffertest verwirft Elemente über `getBoundingClientRect` (± 64 px für
+  Striche), bevor `isPointInFill`/`isPointInStroke` laufen, der Ebenenbaum wird während einer Geste nicht neu gebaut
+  (`DocumentStore.gesture`), virtualisierter Baum ab 500 Zeilen (006 E1).
+- **Verworfen:** Zoom per CSS-Skalierung eines fertigen Bildes – Chromium rastert trotzdem neu.
+- **Ziel ≥ 50 fps beim Ziehen** ist ohne GPU nicht erreichbar; die Messung auf einem Mac (WKWebView, GPU) steht aus
+  (Prompt 033). Die Schwellen im Test sind Regressionswächter (Import < 30 s, Bild < 2 s, Schritt < 3 s, Baum < 500
+  Zeilen), keine Zielwerte.

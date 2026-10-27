@@ -75,6 +75,25 @@ function inBox(el: SVGGraphicsElement, p: DOMPoint): boolean {
   }
 }
 
+/** Room around an element's box for its stroke (screen px; wider strokes are rare in icons). */
+export const STROKE_MARGIN_PX = 64;
+
+/**
+ * The client point is within the element's screen box plus room for its stroke – a quick test
+ * before the exact one (no computed styles, no geometry calls on the element's path).
+ */
+export function nearBox(el: Element, clientX: number, clientY: number, tol: number): boolean {
+  const r = el.getBoundingClientRect();
+  if (r.width === 0 && r.height === 0 && r.x === 0 && r.y === 0) return true; // no layout (tests)
+  const m = Math.max(tol, STROKE_MARGIN_PX);
+  return (
+    clientX >= r.left - m &&
+    clientX <= r.right + m &&
+    clientY >= r.top - m &&
+    clientY <= r.bottom + m
+  );
+}
+
 /** The element is under the client point (`tol` screen px around it for strokes). */
 export function hitsElement(
   el: SVGGraphicsElement,
@@ -121,6 +140,8 @@ export function hitTest(
       if (!(el instanceof SVGGraphicsElement) || el instanceof SVGGElement) continue;
       if (el instanceof SVGSVGElement || el.localName === 'a' || el.localName === 'switch')
         continue;
+      // cheap first: far from the element's box (prompt 031 – 20 000 shapes took seconds)
+      if (!nearBox(el, p.clientX, p.clientY, tol)) continue;
       if (!isRendered(el, root)) continue;
       if (!hitsElement(el, p.clientX, p.clientY, tol)) continue;
       if (!insideClips(el, root, p.clientX, p.clientY)) continue;

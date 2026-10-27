@@ -3,6 +3,8 @@
  * `data-ai-id`; `serializeAsset` writes a copy without any `data-ai-*` attribute.
  */
 
+import { sanitizeSvg } from './sanitize-svg';
+
 export const SVG_NS = 'http://www.w3.org/2000/svg';
 export const ID_ATTR = 'data-ai-id';
 const INTERNAL_PREFIX = 'data-ai-';
@@ -100,10 +102,15 @@ export function serializeAsset(svg: SvgText, keepIds = false): string {
   return svg.head + new XMLSerializer().serializeToString(fileCopy(svg, keepIds)) + svg.tail;
 }
 
-/** Parses a fragment of SVG markup (one element) in the SVG namespace; `null` if invalid. */
+/**
+ * Parses a fragment of SVG markup (one element) in the SVG namespace; `null` if invalid. Cleaned
+ * like an import (`sanitizeSvg`): markup from commands (AI, paste, "Edit SVG…") brings nothing
+ * active in either (prompt 031).
+ */
 export function parseFragment(markup: string): Element | null {
   const wrapped = `<svg xmlns="${SVG_NS}" xmlns:xlink="http://www.w3.org/1999/xlink">${markup}</svg>`;
   const parsed = parseSvg(wrapped);
+  if (parsed) sanitizeSvg(parsed.root);
   const children = parsed ? Array.from(parsed.root.children) : [];
   if (children.length !== 1) return null;
   // declarations the wrapper already makes would otherwise stay as attributes in the file

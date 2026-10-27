@@ -24,24 +24,78 @@ pub fn is_valid_asset_name(name: &str) -> bool {
             .any(|c| matches!(c, '/' | '\\' | ':') || c.is_control())
 }
 
+/// Longest new asset name in UTF-8 bytes (file systems allow 255; room for ` 99` and temp names).
+pub const MAX_NAME_BYTES: usize = 200;
+
+/// Characters no new asset name gets: path separators and what Windows refuses (prompt 031).
+fn is_bad_char(c: char) -> bool {
+    matches!(c, '/' | '\\' | ':' | '<' | '>' | '"' | '|' | '?' | '*') || c.is_control()
+}
+
+/// `CON`, `nul.svg`, `com1.tar.svg` … – names Windows reserves, whatever the extension.
+fn is_reserved_on_windows(name: &str) -> bool {
+    let stem = name
+        .split('.')
+        .next()
+        .unwrap_or("")
+        .trim_end()
+        .to_ascii_uppercase();
+    matches!(stem.as_str(), "CON" | "PRN" | "AUX" | "NUL")
+        || ((stem.starts_with("COM") || stem.starts_with("LPT"))
+            && stem.len() == 4
+            && matches!(stem.as_bytes()[3], b'1'..=b'9'))
+}
+
+/// `stem` cut (at a character) so that `stem + tail` fits [`MAX_NAME_BYTES`].
+fn fit(stem: &str, tail: &str) -> String {
+    let room = MAX_NAME_BYTES.saturating_sub(tail.len());
+    let mut end = 0;
+    for (i, c) in stem.char_indices() {
+        if i + c.len_utf8() > room {
+            break;
+        }
+        end = i + c.len_utf8();
+    }
+    format!("{}{tail}", stem[..end].trim_end())
+}
+
+/// Splits `name.ext` (no extension: `ext` is empty).
+fn split_ext(name: &str) -> (&str, &str) {
+    match name.rsplit_once('.') {
+        Some((stem, ext)) if !stem.is_empty() && !ext.is_empty() && ext.len() <= 16 => (stem, ext),
+        _ => (name, ""),
+    }
+}
+
 fn sanitize_asset_base(base: &str) -> String {
     let replaced: String = base
         .trim()
         .chars()
-        .map(|c| {
-            if matches!(c, '/' | '\\' | ':') || c.is_control() {
-                '-'
-            } else {
-                c
-            }
-        })
+        .map(|c| if is_bad_char(c) { '-' } else { c })
         .collect();
-    let trimmed = replaced.trim_start_matches('.').trim();
+    // Windows drops trailing dots and spaces – two names would become one
+    let trimmed = replaced
+        .trim_start_matches('.')
+        .trim()
+        .trim_end_matches(['.', ' ']);
     if trimmed.is_empty() {
-        "layer.svg".to_owned()
+        return "layer.svg".to_owned();
+    }
+    let name = if is_reserved_on_windows(trimmed) {
+        format!("_{trimmed}")
     } else {
         trimmed.to_owned()
+    };
+    if name.len() <= MAX_NAME_BYTES {
+        return name;
     }
+    let (stem, ext) = split_ext(&name);
+    let tail = if ext.is_empty() {
+        String::new()
+    } else {
+        format!(".{ext}")
+    };
+    fit(stem, &tail)
 }
 
 /// A file name for a new asset that no name in `existing` already has.
@@ -51,12 +105,12 @@ pub fn unique_asset_name(base: &str, existing: &[String]) -> String {
     if !taken.contains(&name_key(&base)) {
         return base;
     }
-    let (stem, ext) = match base.rsplit_once('.') {
-        Some((stem, ext)) if !stem.is_empty() && !ext.is_empty() => (stem, ext),
-        _ => (base.as_str(), "svg"),
+    let (stem, ext) = match split_ext(&base) {
+        (stem, "") => (stem, "svg"),
+        other => other,
     };
     (2..)
-        .map(|i| format!("{stem} {i}.{ext}"))
+        .map(|i| fit(stem, &format!(" {i}.{ext}")))
         .find(|c| !taken.contains(&name_key(c)))
         .expect("an unused number exists")
 }

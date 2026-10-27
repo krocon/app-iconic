@@ -14,10 +14,3 @@ export function applyTheme(root: HTMLElement, theme: ThemeChoice): void {
   else root.setAttribute('data-theme', theme);
   if (now !== root.getAttribute('data-theme')) themeChange.update((n) => n + 1);
 }
-
-/** The scheme in effect: the forced one or the system's. */
-export function effectiveTheme(root: HTMLElement): 'light' | 'dark' {
-  const forced = root.getAttribute('data-theme');
-  if (forced === 'light' || forced === 'dark') return forced;
-  return globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}

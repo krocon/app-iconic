@@ -28,7 +28,7 @@
 - [x] Quit ⌘Q fragt alle Fenster mit ungespeicherten Änderungen nacheinander (005; auf dem Mac prüfen)
 - [x] `settings.json` mit Schema-Version und Migration (je Feld nachsichtig, kaputt → `.bad`); „Reset to Default“ mit
       Bestätigung; Änderungen wirken in allen offenen Fenstern (015)
-- [x] Settings-Dialog (⌘,) mit General, Canvas, Snapping, Export, Advanced inkl. Debug „Log Undo Grouping“ (015)
+- [x] Settings-Dialog (⌘,) mit General, Canvas, Snapping, Export, AI control (018), Advanced inkl. Debug „Log Undo Grouping“ (015)
 - [x] Deutsch/Englisch zur Laufzeit, natives Menü folgt _(neu)_ (015; macOS-Menü auf dem Mac prüfen)
 - [x] Hell/Dunkel/System (`data-theme`, Fensterrahmen), Kontraste beider Schemata geprüft _(neu)_ (015)
 
@@ -62,7 +62,7 @@
 ## 5. Elemente hinzufügen
 
 - [x] Group (Icon-Gruppe + Layer + Asset) und Container `<g>` (008; Command Sidebar mit Suche, Menü „Add“, Aktionen mit Argumenten)
-- [x] Circle, Ellipse, Rectangle, Line, Polyline, Polygon, Path, Text mit Defaults der Vorlage (008; zentriert im sichtbaren Ausschnitt, auch in transformierten Gruppen; „… at Center“ seit 019)
+- [x] Circle, Ellipse, Rectangle, Line, Polyline, Polygon, Path, Text mit der Geometrie der Vorlage, Stil dünne Linie ohne Fill bzw. der gemerkte je Formtyp (008, 019 E13; zentriert im sichtbaren Ausschnitt, auch in transformierten Gruppen; „… at Center“ seit 019)
 - [x] Zeichenwerkzeuge wie Fusion _(neu)_ (019): Line, Midpoint Line; Rectangle ▸ 2-Point / 3-Point / Center; Circle ▸
       Center Diameter / 2-Point / 3-Point / 2-Tangent / 3-Tangent; Arc ▸ 3-Point / Center Point / Tangent – Klicks mit
       Grid-/Magic-Snap, Maßfelder (Länge, Winkel, Breite, Höhe, Durchmesser, Radius, Start-/Bogenwinkel; Tab, Enter,
@@ -114,8 +114,10 @@
 
 ## 10. SVG-Unterstützung
 
-- [ ] Elemente aus legacy §10 + `use`, `defs`, Verläufe rendern und bearbeiten (004 rendern, 009 Attribute von
-      `use`/`stop`/`image` bearbeitbar; ein eigener Verlaufseditor fehlt noch → 031)
+- [x] Elemente aus legacy §10 + `use`, `defs`, Verläufe rendern und bearbeiten (004 rendern, 009 Attribute von
+      `use`/`stop`/`image` bearbeitbar, Verläufe über Stops und „Edit SVG…“)
+- [ ] Eigener Verlaufseditor (Richtung, Einheiten, Spread, Stops auf der Fläche) _(neu)_ – begründet offen, die
+      Vorlage hatte nur das Modell: Folge-Prompt [032](../prompts/032-verlaufseditor.md)
 - [x] Inline-`<style>`/Klassen beim Import in Attribute auflösen, Einheiten (003)
 - [x] Unbekannte Attribute/Elemente bleiben erhalten (002 unveränderte Assets byte-genau; 003 bearbeitete SVGs über DOM-Serialisierung)
 - [x] Fremdes SVG wird bereinigt (Skripte, Event-Handler, externe Referenzen) _(neu)_ (003)

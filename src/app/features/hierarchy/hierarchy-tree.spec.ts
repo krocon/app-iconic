@@ -202,11 +202,27 @@ describe('HierarchyTree', () => {
       ],
       warnings: [],
     });
-    const { el } = await render(doc);
+    const { el, fixture } = await render(doc);
     const rendered = el.querySelectorAll('[role="treeitem"]').length;
     expect(rendered).toBeGreaterThan(10);
     expect(rendered).toBeLessThan(200);
     const sheet = el.querySelector<HTMLElement>('.sheet')!;
     expect(parseFloat(sheet.style.height)).toBe((VIRTUAL_FROM + 103) * 24);
+    // scrolled far away: the row with tab index 0 stays in the DOM (prompt 031)
+    const tabbable = () => el.querySelectorAll('[role="treeitem"][tabindex="0"]');
+    expect(tabbable().length).toBe(1);
+    const first = tabbable()[0].getAttribute('data-row');
+    const list = el.querySelector<HTMLElement>('[role="tree"]')!;
+    list.scrollTop = 400 * 24;
+    list.dispatchEvent(new Event('scroll'));
+    await fixture.whenStable();
+    expect(tabbable().length).toBe(1);
+    expect(tabbable()[0].getAttribute('data-row')).toBe(first);
+    expect(el.querySelectorAll('[role="treeitem"]').length).toBeLessThan(200);
+    // the window really moved: the other rendered rows are far down
+    const indices = [...el.querySelectorAll('[role="treeitem"]:not([tabindex="0"])')].map((r) =>
+      Number(r.getAttribute('data-index')),
+    );
+    expect(Math.min(...indices)).toBeGreaterThan(300);
   });
 });

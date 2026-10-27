@@ -8,11 +8,23 @@ use crate::bridge::{
     self, BridgeError, Endpoint, Hello, HelloAnswer, MAX_LINE_BYTES, Request, Response,
 };
 use serde_json::Value;
+use std::collections::HashMap;
 use std::io::{self, BufRead, BufReader, Read, Write};
 use std::net::{Shutdown, TcpListener, TcpStream};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
+
+/// Most open sockets at a time (connected clients and ones still saying hello; prompt 031).
+pub const MAX_OPEN: usize = 16;
+/// Time a new connection has for its hello line.
+pub const HELLO_TIMEOUT: Duration = Duration::from_secs(5);
+/// Longest hello line (a token is 64 hex digits).
+pub const MAX_HELLO_BYTES: usize = 1024;
+
+/// The authenticated connections, by id (for `disconnect`); removed when they end.
+type Streams = Arc<Mutex<HashMap<u64, TcpStream>>>;
 
 /// What runs the tools in the app.
 pub trait Handler: Send + Sync + 'static {
@@ -27,7 +39,7 @@ pub struct Host {
     endpoint_file: PathBuf,
     stop: Arc<AtomicBool>,
     connections: Arc<AtomicUsize>,
-    streams: Arc<Mutex<Vec<TcpStream>>>,
+    streams: Streams,
 }
 
 impl Host {
@@ -45,21 +57,36 @@ impl Host {
         )?;
         let stop = Arc::new(AtomicBool::new(false));
         let connections = Arc::new(AtomicUsize::new(0));
-        let streams = Arc::new(Mutex::new(Vec::new()));
+        let streams: Streams = Arc::new(Mutex::new(HashMap::new()));
         {
             let (stop, connections, streams) = (stop.clone(), connections.clone(), streams.clone());
+            let open = Arc::new(AtomicUsize::new(0));
+            let ids = AtomicU64::new(0);
             std::thread::spawn(move || {
                 for stream in listener.incoming() {
                     if stop.load(Ordering::SeqCst) {
                         break;
                     }
                     let Ok(stream) = stream else { continue };
-                    if let Ok(c) = stream.try_clone() {
-                        streams.lock().unwrap_or_else(|e| e.into_inner()).push(c);
+                    // a cap on open sockets: a flood of connections cannot use up the app's
+                    // file descriptors or threads (prompt 031)
+                    if open.fetch_add(1, Ordering::SeqCst) >= MAX_OPEN {
+                        open.fetch_sub(1, Ordering::SeqCst);
+                        let _ = stream.shutdown(Shutdown::Both);
+                        continue;
                     }
-                    let (handler, token, connections) =
-                        (handler.clone(), token.clone(), connections.clone());
-                    std::thread::spawn(move || serve(stream, &*handler, &token, &connections));
+                    let id = ids.fetch_add(1, Ordering::SeqCst);
+                    let (handler, token, connections, streams, open) = (
+                        handler.clone(),
+                        token.clone(),
+                        connections.clone(),
+                        streams.clone(),
+                        open.clone(),
+                    );
+                    std::thread::spawn(move || {
+                        serve(stream, id, &*handler, &token, &connections, &streams);
+                        open.fetch_sub(1, Ordering::SeqCst);
+                    });
                 }
             });
         }
@@ -78,11 +105,11 @@ impl Host {
 
     /// Closes every connection (the listener stays).
     pub fn disconnect(&self) {
-        for s in self
+        for (_, s) in self
             .streams
             .lock()
             .unwrap_or_else(|e| e.into_inner())
-            .drain(..)
+            .drain()
         {
             let _ = s.shutdown(Shutdown::Both);
         }
@@ -99,24 +126,34 @@ impl Drop for Host {
     }
 }
 
-/// One line, at most [`MAX_LINE_BYTES`]; a longer line is an error (the connection ends).
-fn read_line(r: &mut BufReader<TcpStream>, line: &mut String) -> io::Result<usize> {
+/// One line, at most `max` bytes; a longer line is an error (the connection ends).
+fn read_line(r: &mut BufReader<TcpStream>, line: &mut String, max: usize) -> io::Result<usize> {
     line.clear();
-    let n = r.by_ref().take(MAX_LINE_BYTES as u64 + 1).read_line(line)?;
-    if n > MAX_LINE_BYTES {
+    let n = r.by_ref().take(max as u64 + 1).read_line(line)?;
+    if n > max {
         return Err(io::Error::other("line too long"));
     }
     Ok(n)
 }
 
-/// One connection: token first, then requests until it closes. Never logs contents.
-fn serve(stream: TcpStream, handler: &dyn Handler, token: &str, connections: &AtomicUsize) {
+/// One connection: token first (short line, short time), then requests until it closes. Never
+/// logs contents.
+fn serve(
+    stream: TcpStream,
+    id: u64,
+    handler: &dyn Handler,
+    token: &str,
+    connections: &AtomicUsize,
+    streams: &Streams,
+) {
     let Ok(mut w) = stream.try_clone() else {
         return;
     };
+    let _ = stream.set_read_timeout(Some(HELLO_TIMEOUT));
     let mut r = BufReader::new(stream);
     let mut line = String::new();
-    if read_line(&mut r, &mut line).unwrap_or(0) == 0 {
+    if read_line(&mut r, &mut line, MAX_HELLO_BYTES).unwrap_or(0) == 0 {
+        let _ = w.shutdown(Shutdown::Both);
         return;
     }
     let ok =
@@ -126,9 +163,16 @@ fn serve(stream: TcpStream, handler: &dyn Handler, token: &str, connections: &At
         let _ = w.shutdown(Shutdown::Both);
         return;
     }
+    let _ = r.get_ref().set_read_timeout(None);
+    if let Ok(c) = w.try_clone() {
+        streams
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .insert(id, c);
+    }
     let n = connections.fetch_add(1, Ordering::SeqCst) + 1;
     handler.status(n);
-    while read_line(&mut r, &mut line).unwrap_or(0) > 0 {
+    while read_line(&mut r, &mut line, MAX_LINE_BYTES).unwrap_or(0) > 0 {
         let resp = match serde_json::from_str::<Request>(&line) {
             Ok(req) => match handler.call(&req.tool, &req.args) {
                 Ok(v) => Response {
@@ -153,7 +197,11 @@ fn serve(stream: TcpStream, handler: &dyn Handler, token: &str, connections: &At
             break;
         }
     }
-    // the clone kept for `disconnect` would hold the socket open
+    // the clone kept for `disconnect` goes with the connection (no descriptor left behind)
+    streams
+        .lock()
+        .unwrap_or_else(|e| e.into_inner())
+        .remove(&id);
     let _ = w.shutdown(Shutdown::Both);
     let n = connections.fetch_sub(1, Ordering::SeqCst) - 1;
     handler.status(n);
@@ -266,5 +314,129 @@ mod tests {
         r.read_line(&mut line).unwrap();
         let resp: Response = serde_json::from_str(&line).unwrap();
         assert_eq!(resp.error.unwrap().code, "invalid_request");
+    }
+
+    fn hello(w: &mut TcpStream, r: &mut BufReader<TcpStream>, token: &str) -> String {
+        writeln!(
+            w,
+            "{}",
+            serde_json::to_string(&Hello {
+                token: token.into()
+            })
+            .unwrap()
+        )
+        .unwrap();
+        let mut line = String::new();
+        r.read_line(&mut line).unwrap_or(0);
+        line
+    }
+
+    fn open_fds() -> Option<usize> {
+        std::fs::read_dir("/proc/self/fd").ok().map(|d| d.count())
+    }
+
+    fn wait_until(mut f: impl FnMut() -> bool) -> bool {
+        for _ in 0..200 {
+            if f() {
+                return true;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        f()
+    }
+
+    #[test]
+    fn closed_connections_leave_no_descriptors_behind() {
+        let dir = tempfile::tempdir().unwrap();
+        let file = dir.path().join("mcp.json");
+        let host = Host::start(Arc::new(Echo::default()), &file).unwrap();
+        let ep = bridge::read_endpoint(&file).unwrap();
+        let before = open_fds();
+        for i in 0..50 {
+            let s = TcpStream::connect(("127.0.0.1", ep.port)).unwrap();
+            let mut w = s.try_clone().unwrap();
+            let mut r = BufReader::new(s);
+            // every other one with a wrong token
+            let token = if i % 2 == 0 {
+                ep.token.clone()
+            } else {
+                "x".repeat(64)
+            };
+            hello(&mut w, &mut r, &token);
+        }
+        let streams = host.streams.clone();
+        assert!(
+            wait_until(|| streams.lock().unwrap().is_empty()),
+            "no kept clones"
+        );
+        assert!(wait_until(|| host.connections() == 0));
+        if let Some(before) = before {
+            // sockets close asynchronously; allow a little slack
+            assert!(
+                wait_until(|| open_fds().unwrap() <= before + 2),
+                "descriptors leak"
+            );
+        }
+    }
+
+    #[test]
+    fn a_long_hello_is_refused() {
+        let dir = tempfile::tempdir().unwrap();
+        let file = dir.path().join("mcp.json");
+        let _host = Host::start(Arc::new(Echo::default()), &file).unwrap();
+        let ep = bridge::read_endpoint(&file).unwrap();
+        let s = TcpStream::connect(("127.0.0.1", ep.port)).unwrap();
+        let mut w = s.try_clone().unwrap();
+        let mut r = BufReader::new(s);
+        let _ = w.write_all(&vec![b'x'; MAX_HELLO_BYTES + 10]);
+        let _ = writeln!(w);
+        let mut line = String::new();
+        assert_eq!(
+            r.read_line(&mut line).unwrap_or(0),
+            0,
+            "closed without an answer"
+        );
+    }
+
+    #[test]
+    fn a_silent_client_is_dropped_after_the_hello_timeout() {
+        let dir = tempfile::tempdir().unwrap();
+        let file = dir.path().join("mcp.json");
+        let _host = Host::start(Arc::new(Echo::default()), &file).unwrap();
+        let ep = bridge::read_endpoint(&file).unwrap();
+        let s = TcpStream::connect(("127.0.0.1", ep.port)).unwrap();
+        s.set_read_timeout(Some(HELLO_TIMEOUT * 3)).unwrap();
+        let t = std::time::Instant::now();
+        let mut line = String::new();
+        let n = BufReader::new(s).read_line(&mut line).unwrap_or(0);
+        assert_eq!(n, 0);
+        assert!(t.elapsed() < HELLO_TIMEOUT * 2);
+    }
+
+    #[test]
+    fn too_many_open_sockets_are_turned_away() {
+        let dir = tempfile::tempdir().unwrap();
+        let file = dir.path().join("mcp.json");
+        let _host = Host::start(Arc::new(Echo::default()), &file).unwrap();
+        let ep = bridge::read_endpoint(&file).unwrap();
+        // MAX_OPEN silent sockets hold every place
+        let held: Vec<_> = (0..MAX_OPEN)
+            .map(|_| TcpStream::connect(("127.0.0.1", ep.port)).unwrap())
+            .collect();
+        std::thread::sleep(Duration::from_millis(100));
+        let s = TcpStream::connect(("127.0.0.1", ep.port)).unwrap();
+        s.set_read_timeout(Some(Duration::from_secs(2))).unwrap();
+        let mut line = String::new();
+        let n = BufReader::new(s).read_line(&mut line).unwrap_or(0);
+        assert_eq!(n, 0, "closed at once");
+        drop(held);
+        // places free up again
+        let ok = wait_until(|| {
+            let s = TcpStream::connect(("127.0.0.1", ep.port)).unwrap();
+            let mut w = s.try_clone().unwrap();
+            let mut r = BufReader::new(s);
+            hello(&mut w, &mut r, &ep.token).contains("true")
+        });
+        assert!(ok);
     }
 }

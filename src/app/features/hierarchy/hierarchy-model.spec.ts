@@ -157,7 +157,9 @@ describe('swatches (design 006 E3)', () => {
       css: 'color-mix(in srgb, red 50%, transparent)',
     });
     expect(swatchOf(b, 'fill', r)).toEqual({ kind: 'pattern' });
-    expect(swatchOf(c, 'fill', r)).toEqual({ kind: 'inherit' });
+    // the import sanitizer already removes the value (prompt 031): no swatch at all
+    expect(c.hasAttribute('fill')).toBe(false);
+    expect(swatchOf(c, 'fill', r)).toBeNull();
   });
 });
 

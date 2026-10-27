@@ -121,14 +121,19 @@ pub fn write_endpoint(path: &Path, e: &Endpoint) -> io::Result<()> {
     f.sync_all()
 }
 
-/// 256 random bits as hex: four 64-bit values from `RandomState`, whose keys the standard
-/// library draws from the operating system's random source.
+/// 256 random bits as hex: four 64-bit values from `RandomState`. The standard library draws its
+/// keys from the operating system's random source once per thread and then only counts up, so
+/// every value comes from its own short-lived thread – four independent 128-bit keys (prompt 031).
 pub fn new_token() -> String {
-    (0..4)
+    (0..4u64)
         .map(|i| {
-            let mut h = RandomState::new().build_hasher();
-            h.write_u64(i);
-            format!("{:016x}", h.finish())
+            std::thread::spawn(move || {
+                let mut h = RandomState::new().build_hasher();
+                h.write_u64(i);
+                format!("{:016x}", h.finish())
+            })
+            .join()
+            .expect("token thread")
         })
         .collect()
 }

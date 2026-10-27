@@ -37,8 +37,3 @@ export function sameTarget(a: TreeTarget, b: TreeTarget): boolean {
   }
   return sameItem(a, b);
 }
-
-/** The move target of a selected item (`root` cannot move). */
-export function itemTarget(item: IconItem): TreeTarget | null {
-  return item.kind === 'root' ? null : item;
-}

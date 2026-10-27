@@ -9,6 +9,24 @@ use resvg::usvg::fontdb::{Database, Family};
 use resvg::usvg::{ImageHrefResolver, Options, Tree};
 use std::sync::Arc;
 
+/// Stack of the thread that parses and renders: usvg and resvg recurse once per nesting level,
+/// and a few hundred `<g>` already overflow the 2 MiB of a worker thread – which aborts the whole
+/// app (prompt 031). Reserved address space only; the pages are used as deep as the SVG goes.
+pub const RENDER_STACK: usize = 256 << 20;
+
+/// Runs `f` on a thread with [`RENDER_STACK`] and waits for it.
+pub fn deep<T: Send>(f: impl FnOnce() -> Result<T, FsError> + Send) -> Result<T, FsError> {
+    std::thread::scope(|s| {
+        std::thread::Builder::new()
+            .name("render".into())
+            .stack_size(RENDER_STACK)
+            .spawn_scoped(s, f)
+            .map_err(|e| FsError::new(FsErrorCode::Io, e.to_string(), None))?
+            .join()
+            .unwrap_or_else(|_| Err(FsError::new(FsErrorCode::Io, "rendering failed", None)))
+    })
+}
+
 /// Parser options for untrusted SVG text: data URLs only, the given fonts.
 pub fn safe_options(fonts: Arc<Database>) -> Options<'static> {
     // text without `font-family` uses the serif font, like a browser (not a fixed "Times New Roman")
@@ -35,8 +53,10 @@ pub fn parse(svg: &str, fonts: Arc<Database>) -> Result<Tree, FsError> {
             None,
         ));
     }
-    Tree::from_str(svg, &safe_options(fonts))
-        .map_err(|e| FsError::new(FsErrorCode::InvalidSvg, e.to_string(), None))
+    deep(|| {
+        Tree::from_str(svg, &safe_options(fonts))
+            .map_err(|e| FsError::new(FsErrorCode::InvalidSvg, e.to_string(), None))
+    })
 }
 
 /// Renders `tree` into a square of `size` pixels (scaled to fit, transparent background).
@@ -45,11 +65,14 @@ pub fn render(tree: &Tree, size: u32) -> Result<Pixmap, FsError> {
         .ok_or_else(|| FsError::new(FsErrorCode::InvalidPath, "invalid size", None))?;
     let s = tree.size();
     let scale = (size as f32 / s.width()).min(size as f32 / s.height());
-    resvg::render(
-        tree,
-        Transform::from_scale(scale, scale),
-        &mut pixmap.as_mut(),
-    );
+    deep(|| {
+        resvg::render(
+            tree,
+            Transform::from_scale(scale, scale),
+            &mut pixmap.as_mut(),
+        );
+        Ok(())
+    })?;
     Ok(pixmap)
 }
 
@@ -97,6 +120,30 @@ pub fn preview_base64(
 mod tests {
     use super::*;
     use crate::export::fonts::system_fonts;
+
+    #[test]
+    fn deep_nesting_renders_even_from_a_small_worker_stack() {
+        // a 2 MiB thread like tokio's blocking pool; 1 000 groups aborted the process before (031)
+        let nested = |depth: usize| {
+            format!(
+                r#"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">{}<rect width="5" height="5"/>{}</svg>"#,
+                r#"<g opacity="0.99">"#.repeat(depth),
+                "</g>".repeat(depth)
+            )
+        };
+        let results = std::thread::Builder::new()
+            .stack_size(2 << 20)
+            .spawn(move || {
+                [1_000, 50_000].map(|d| render_png(&nested(d), 32, Arc::new(Database::new())))
+            })
+            .unwrap()
+            .join()
+            .unwrap();
+        let [ok, too_deep] = results;
+        assert!(ok.is_ok(), "{:?}", ok.err());
+        // deeper than the XML parser allows: an error, no crash
+        assert_eq!(too_deep.unwrap_err().code, FsErrorCode::InvalidSvg);
+    }
 
     fn empty_fonts() -> Arc<Database> {
         Arc::new(Database::new())

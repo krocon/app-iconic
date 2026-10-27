@@ -156,7 +156,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               browser-hook.ts = `window.__appIconic` für Playwright)
   testing/fixtures/           generiert aus testdata/ (camscanner.icon, all-fields.icon, svg/, unique-names.json;
                               `pnpm fixtures`)
-e2e/                          Playwright-Tests gegen den Dev-Server
+e2e/                          Playwright-Tests gegen den Dev-Server (hardening: großes/tiefes SVG, a11y: Tab-Weg,
+                              Fokus, Dialoge – 031)
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
@@ -201,10 +202,12 @@ testdata/settings-cases.json  Standardwerte + Fälle von settings.json (Rust `se
 scripts/                      version.mjs, release-notes.mjs, notices.mjs, licenses.mjs, collect-packages.mjs (030, aus
                               editlicious, je mit Test); fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test, keymaps.test.mjs,
                               theme-contrast.test.mjs (Tokens light/dark, Kontraste, 015); mcp-sidecar.mjs (+ Test,
-                              Sidecar bauen), mcp-e2e.mjs (Sidecar gegen die laufende App, 018)
+                              Sidecar bauen), mcp-e2e.mjs (Sidecar gegen die laufende App, 018); big-svg.mjs
+                              (+ Test, großes SVG für die Leistungsmessung, 031)
 docs/                         architecture.md (Entscheidungen, Commands, Abhängigkeiten), legacy-analysis.md, legacy/,
                               release.md (Release, Pakete, Signierung, Dateizuordnung), licenses.md (Lizenzbericht),
-                              FEATURES.md (Checkliste), mcp.md (KI-Steuerung: Einrichtung, Tools, Sicherheit)
+                              FEATURES.md (Checkliste), parity.md (Paritätsmatrix gegen Vorlage + Checkliste, 031),
+                              mcp.md (KI-Steuerung: Einrichtung, Tools, Sicherheit), screenshots/ (README)
 prompts/                      Feature-Prompts (Index README.md), done/
 THIRD-PARTY-NOTICES.txt       Lizenzen aller ausgelieferten Teile (`pnpm notices`, im Paket und im About-Dialog)
 ```

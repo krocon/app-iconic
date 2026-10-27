@@ -78,9 +78,15 @@ export class McpTools {
     switch (tool) {
       case 'describe':
         return summary(this.store(), this.untitled());
-      case 'open':
-        await this.files.openQuietly(String(a['path']));
+      case 'open': {
+        // reading a file is a file access too: the user decides (prompt 031)
+        const path = String(a['path']);
+        if (!(await this.allowed(T.askOpen(path)))) {
+          throw mcpError('denied', 'the user did not allow opening this file');
+        }
+        await this.files.openQuietly(path);
         return summary(this.store(), this.untitled());
+      }
       case 'discard':
         await this.files.close();
         return {};

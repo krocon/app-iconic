@@ -189,7 +189,12 @@ describe('McpStore (design 018)', () => {
   });
 
   it('saves to a new path and exports only with the permission of the user', async () => {
-    // a file the fake backend knows (session), opened quietly like open_document does
+    // a file the fake backend knows (session), opened quietly like open_document does – also
+    // only with the permission of the user (prompt 031)
+    expect(await call('open', { path: FakeIconFileApi.CAMSCANNER })).toMatchObject({
+      error: { code: 'denied' },
+    });
+    answers.push('allow');
     expect(await call('open', { path: FakeIconFileApi.CAMSCANNER })).toMatchObject({
       path: FakeIconFileApi.CAMSCANNER,
     });

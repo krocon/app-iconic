@@ -97,7 +97,7 @@ export class ExportService {
     const store = this.files.store();
     if (!store) return { kind: 'noDocument' };
     if (!req.targetDir) return { kind: 'noTarget' };
-    if (this.running()) return { kind: 'error', message: T.failed('busy') };
+    if (this.running()) return { kind: 'error', message: T.busy };
     this.running.set(true);
     this.progress.set(null);
     this.stopRequested = false;

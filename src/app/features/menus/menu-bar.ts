@@ -40,7 +40,10 @@ function rows(items: ResolvedItem[]): Row[] {
   templateUrl: './menu-bar.html',
   styleUrl: './menu-bar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '(document:pointerdown)': 'onDocumentPointer($event)' },
+  host: {
+    '(document:pointerdown)': 'onDocumentPointer($event)',
+    '(document:focusin)': 'onFocusIn($event)',
+  },
 })
 export class MenuBar {
   private readonly menuService = inject(MenuService);
@@ -70,6 +73,15 @@ export class MenuBar {
   private remember(): void {
     const a = this.host.nativeElement.ownerDocument.activeElement;
     if (a instanceof HTMLElement && !this.host.nativeElement.contains(a)) this.before = a;
+  }
+
+  /**
+   * The last focus outside the bar: a mouse click on a menu title focuses the title before
+   * `toggle` runs, so `remember` alone would lose it (prompt 031, e2e/a11y.spec.ts).
+   */
+  protected onFocusIn(e: FocusEvent): void {
+    const t = e.target;
+    if (t instanceof HTMLElement && !this.host.nativeElement.contains(t)) this.before = t;
   }
 
   private tops(): HTMLElement[] {

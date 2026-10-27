@@ -58,10 +58,8 @@ export function vectorFromDeg(deg: number): Point {
   return { x: Math.cos(a), y: Math.sin(a) };
 }
 
-/** Document angle (radians, atan2) ↔ field degrees (counter-clockwise). */
+/** Field degrees (counter-clockwise) → document angle (radians, atan2). */
 export const docAngleFromDeg = (deg: number): number => (-deg * Math.PI) / 180;
-export const degFromDocAngle = (a: number): number =>
-  degFromVector({ x: Math.cos(a), y: Math.sin(a) });
 
 /** The four corners of a rectangle, in order around it. */
 export function rectCorners(r: { c: Point; w: number; h: number; angle: number }): Point[] {

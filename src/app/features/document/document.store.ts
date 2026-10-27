@@ -139,8 +139,15 @@ export class DocumentStore {
     if (this.undoService.redo()) this.pruneSelection();
   }
 
+  /**
+   * A gesture is running (reactive): views that rebuild from the whole document (the tree) can wait
+   * for its end – a drag changes only attributes (prompt 031, 20 000 nodes).
+   */
+  readonly gesture = signal(false);
+
   begin(label: UndoLabel): void {
     this.undoService.begin(label);
+    this.gesture.set(true);
   }
 
   update(command: DocCommand): void {
@@ -149,10 +156,12 @@ export class DocumentStore {
 
   commit(): void {
     this.undoService.commit();
+    this.gesture.set(false);
   }
 
   cancel(): void {
     this.undoService.cancel();
+    this.gesture.set(false);
     this.pruneSelection();
   }
 

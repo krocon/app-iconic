@@ -10,7 +10,6 @@ import { signal } from '@angular/core';
  * (`const T = TOOLS_TEXTS.symbol`) follows the language too.
  */
 export type Language = 'en' | 'de';
-export const LANGUAGES: readonly Language[] = ['en', 'de'];
 
 /** Same keys and signatures as the English catalog, strings widened. */
 export type Translation<T> = T extends (...args: infer A) => infer R

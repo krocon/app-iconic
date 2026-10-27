@@ -127,3 +127,19 @@
 2. Fensterlabel (main, doc-2) als Dokument-Id ok?
 3. **Mac**: `claude mcp add` einmal prüfen (Signierung des Sidecars kommt mit 030); Einrichtungszeilen in docs/mcp.md gegen aktuelle Claude-Code-Doku prüfen.
 4. System-Zwischenablage für die KI gesperrt lassen?
+
+## Prompt 030
+
+1. **Mac**: `mdls -name kMDItemContentType <datei>.icon` – welcher UTI steht dort? (Dann `LSItemContentTypes`
+   statt nur der Endung.)
+2. **Mac**: Nach Installation des dmg: „Öffnen mit › AppIconic“ für ein `.icon`, Icon Composer bleibt Standard?
+3. Signier-Secrets anlegen, wenn signiert werden soll (Liste in `docs/release.md`).
+
+## Prompt 031
+
+1. Leistung auf dem Mac messen (`pnpm e2e e2e/hardening.spec.ts` gibt die Zahlen aus; in der echten App: großes SVG
+   aus `node scripts/big-svg.mjs > big.svg` importieren, mit Snap ziehen) – Grundlage für Prompt 033.
+2. Beim ersten Bearbeiten eines Assets normalisiert die DOM-Serialisierung Leerraum in Tags und leere Elemente
+   (danach ändert jede Bearbeitung nur ihre Stelle) – akzeptabel, oder ein formerhaltender Serializer?
+3. Verlaufseditor (Prompt 032) und Review-Folgen (Prompt 033) – Reihenfolge/Umfang so recht?
+

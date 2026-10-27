@@ -5,6 +5,7 @@ import { CommandJson, opt } from './command-json';
 import {
   attributesOf,
   checkName,
+  checkValue,
   readAttr,
   restoreAttributes,
   sameRef,
@@ -46,6 +47,7 @@ export class SetAttributes implements DocCommand {
     const seen = new Set<string>();
     for (const c of changes) {
       checkName(c.name);
+      checkValue(c.name, c.value);
       const key = `${c.ref.asset}\u0000${c.ref.id}\u0000${c.name}`;
       if (seen.has(key)) throw new CommandError(`duplicate change ${c.name}`);
       seen.add(key);

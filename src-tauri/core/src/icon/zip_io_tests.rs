@@ -233,3 +233,81 @@ fn zip_over_a_bundle_folder_and_bundle_over_zip() {
     assert_eq!(tree(&target), tree(&camscanner()));
     assert_eq!(fs::read_dir(dir.path()).unwrap().count(), 1);
 }
+
+/// Replaces every occurrence of `from` by `to` (same length) – names in local and central headers.
+fn rename_in_place(zip: &mut [u8], from: &[u8], to: &[u8]) {
+    assert_eq!(from.len(), to.len());
+    let mut i = 0;
+    while i + from.len() <= zip.len() {
+        if &zip[i..i + from.len()] == from {
+            zip[i..i + from.len()].copy_from_slice(to);
+        }
+        i += 1;
+    }
+}
+
+#[test]
+fn the_same_entry_twice_is_invalid() {
+    let json = br#"{"groups":[]}"#;
+    let mut zip = make_zip(&[
+        ("icon.json", json),
+        ("Assets/a.svg", b"1"),
+        ("Assets/b.svg", b"2"),
+    ]);
+    rename_in_place(&mut zip, b"Assets/b.svg", b"Assets/a.svg");
+    assert_eq!(code(&zip, &Limits::default()), FsErrorCode::InvalidIcon);
+}
+
+#[test]
+fn a_file_bigger_than_the_total_limit_is_not_opened() {
+    let json = br#"{"groups":[]}"#;
+    let mut zip = make_zip(&[("icon.json", json)]);
+    zip.extend(vec![0u8; 4096]); // junk after the archive still counts
+    let small = Limits {
+        max_total: 1024,
+        ..Limits::default()
+    };
+    assert_eq!(code(&zip, &small), FsErrorCode::TooLarge);
+}
+
+#[test]
+fn names_a_case_insensitive_file_system_cannot_keep_apart_are_left_out() {
+    let json = br#"{"groups":[]}"#;
+    let zip = make_zip(&[
+        ("icon.json", json),
+        ("Assets/a.svg", b"1"),
+        ("Assets/A.svg", b"2"),
+        ("ICON.JSON", b"3"),
+        ("assets", b"4"),
+        ("notes.txt", b"5"),
+        ("notes.txt/x", b"6"),
+        ("NOTES.TXT", b"7"),
+        ("extra/one", b"8"),
+        ("Extra/two", b"9"),
+    ]);
+    let dir = tempdir().unwrap();
+    let f = read_zip(&write_tmp(dir.path(), "x.icon", &zip), &Limits::default()).unwrap();
+    let assets: Vec<_> = f.assets.iter().map(|a| a.name.as_str()).collect();
+    assert_eq!(assets, ["a.svg"]);
+    let extra: Vec<_> = f.extra_files.iter().map(|e| e.path.as_str()).collect();
+    assert_eq!(extra, ["notes.txt", "extra/one", "Extra/two"]);
+    let ignored: Vec<_> = f
+        .warnings
+        .iter()
+        .filter(|w| w.code == IconWarningCode::IgnoredEntry)
+        .map(|w| w.name.as_str())
+        .collect();
+    assert_eq!(
+        ignored,
+        [
+            "Assets/A.svg",
+            "ICON.JSON",
+            "assets",
+            "notes.txt/x",
+            "NOTES.TXT"
+        ]
+    );
+    // and it saves as a bundle without one file overwriting another
+    let out = dir.path().join("out.icon");
+    crate::icon::bundle::write_bundle(&out, &f).unwrap();
+}

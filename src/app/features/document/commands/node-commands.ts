@@ -1,3 +1,4 @@
+import { unsafeAttribute } from '../svg/sanitize-svg';
 import { IconDocument, NodeRef } from '../icon-document';
 import { ID_ATTR, parseFragment } from '../svg/node-ids';
 import { UndoLabel } from '../undo/undo-texts';
@@ -34,6 +35,13 @@ export function writeAttr(el: Element, name: string, value: string | null): void
   }
 }
 
+/** Refuses a value the import sanitizer would remove (`javascript:`, external links/URLs, prompt 031). */
+export function checkValue(name: string, value: string | null): void {
+  if (value === null) return;
+  const local = name.includes(':') ? name.slice(name.indexOf(':') + 1) : name;
+  if (unsafeAttribute(local, value)) throw new CommandError(`value of ${name} is not allowed`);
+}
+
 export function checkName(name: string): void {
   // internal ids are never changed by commands; handlers never get in (design 003 E4)
   if (!name || name.startsWith('data-ai-') || /^on/i.test(name)) {
@@ -52,6 +60,7 @@ export class SetAttribute implements DocCommand {
     readonly label: UndoLabel = 'changeAttribute',
   ) {
     checkName(name);
+    checkValue(name, value);
   }
 
   do(doc: IconDocument): void {

@@ -20,7 +20,7 @@ grün, Commit + Push auf `main`, Prompt samt Design nach [`done/`](done/).
 
 Kritischer Pfad zum ersten nutzbaren Editor: **001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009**.
 Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 jederzeit nach 005, 030 nach 012,
-031 schließt ab (die Nummern dazwischen bleiben für weitere Prompts frei).
+031 schließt ab (die Nummern dazwischen bleiben für weitere Prompts frei); 032 und 033 sind Folgen aus 031.
 
 | Nr. | Prompt | Inhalt | Braucht | Umfang | Status |
 |---|---|---|---|---|---|
@@ -42,8 +42,10 @@ Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 je
 | 015 | [015-einstellungen-layout-i18n.md](done/015-einstellungen-layout-i18n.md) | `settings.json` (Schema, Migration, Reset), Seitenleisten ein-/ausblendbar und in der Breite ziehbar, View-Options persistent, Settings-Dialog, Deutsch/Englisch zur Laufzeit, Hell/Dunkel | 005 | M | ✅ 27.10.2026 |
 | 018 | [018-mcp-server.md](done/018-mcp-server.md) | MCP-Server: KI steuert den laufenden AppIconic über serialisierbare Commands und Aktionen (Sidecar + lokale Brücke wie editlicious), Lesen, Ändern, Vorschau, Export; Standard aus | 005, 009, 012 | M–L | ✅ 27.10.2026 (freigegeben von Marc) |
 | 019 | [019-zeichenwerkzeuge.md](done/019-zeichenwerkzeuge.md) | Zeichenwerkzeuge wie Fusion: Line/Midpoint Line, Rectangle ▸ (2-Point, 3-Point, Center), Circle ▸ (Center Diameter, 2-/3-Point, 2-/3-Tangent), Arc ▸ (3-Point, Center Point, Tangent), Maßeingabe beim Zeichnen, Stil-Gedächtnis je Formtyp | 007, 008, 009, 013, 015 | L | ✅ 27.10.2026 |
-| 030 | [030-release-distribution.md](030-release-distribution.md) | Version aus einer Quelle, Lizenzhinweise, Pakete je OS, Dateizuordnung `.icon`, Release-Workflow (Probelauf), Signierung/Notarisierung vorbereitet, Share (macOS) | 012 | M | offen |
-| 031 | [031-haertung-paritaet.md](031-haertung-paritaet.md) | Parität gegen `docs/FEATURES.md`, Review durch separaten Agenten, feindliche Dateien, Performance großer SVGs, Barrierefreiheit, Doku | 002–030 | M | offen |
+| 030 | [030-release-distribution.md](done/030-release-distribution.md) | Version aus einer Quelle, Lizenzhinweise, Pakete je OS, Dateizuordnung `.icon`, Release-Workflow (Probelauf), Signierung/Notarisierung vorbereitet, „Im Ordner zeigen“ statt Share (E6) | 012 | M | ✅ 27.10.2026 |
+| 031 | [031-haertung-paritaet.md](done/031-haertung-paritaet.md) | Parität gegen `docs/FEATURES.md`, Review durch separaten Agenten, feindliche Dateien, Performance großer SVGs, Barrierefreiheit, Doku | 002–030 | M | ✅ 27.10.2026 |
+| 032 | [032-verlaufseditor.md](032-verlaufseditor.md) | Verlaufseditor: Panel-Abschnitt Gradient (Art, Units, Spread, Transform, Stop-Leiste), Griffe auf der Fläche, geteilte Verläufe, `gradient.*` | 009, 011 | M | offen |
+| 033 | [033-haertung-folgen.md](033-haertung-folgen.md) | Folgen aus dem Review von 031: Pfade nur aus vertrauten Quellen, Transform-Rechnung über den Browser, Dateien teilen, Leistung auf dem Mac messen | 031 | M | offen |
 
 ## Folge-Ideen (noch ohne Prompt)
 

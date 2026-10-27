@@ -67,6 +67,23 @@ describe('SetAttributes (design 007 E10)', () => {
         ]),
     ).toThrow(CommandError);
     expect(() => new SetAttributes([{ ref: r('n3'), name: 'onclick', value: 'x()' }])).toThrow();
+    // values the import sanitizer would remove (prompt 031)
+    for (const [name, value] of [
+      ['href', 'javascript:alert(1)'],
+      ['xlink:href', 'https://evil.example/x.svg#a'],
+      ['fill', 'url(https://evil.example/p)'],
+      ['style', 'fill:\\75 rl(//evil)'],
+      ['xml:base', 'https://evil.example/'],
+    ]) {
+      expect(() => new SetAttributes([{ ref: r('n3'), name, value }])).toThrow(CommandError);
+      expect(() => commandFromJson({ type: 'setAttribute', ref: r('n3'), name, value })).toThrow(
+        CommandError,
+      );
+    }
+    expect(
+      () => new SetAttributes([{ ref: r('n3'), name: 'fill', value: 'url(#g)' }]),
+    ).not.toThrow();
+    expect(() => new SetAttributes([{ ref: r('n3'), name: 'href', value: '#g' }])).not.toThrow();
     for (const bad of [
       { type: 'setAttributes', changes: [] },
       { type: 'setAttributes', changes: [{ ref: r('n3'), name: 'x' }] },

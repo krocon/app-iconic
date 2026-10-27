@@ -17,7 +17,7 @@ function textDocument(): IconDocument {
         kind: 'svg',
         text:
           '<svg xmlns="http://www.w3.org/2000/svg"><text>Hi</text><text>A<tspan>B</tspan></text>' +
-          '<text/></svg>',
+          '<text/><style>.a{}</style></svg>',
       },
     ],
     warnings: [],
@@ -57,6 +57,17 @@ describe('SetText (design 009 E3)', () => {
       CommandError,
     );
     expect(store.document().snapshot()).toBe(before);
+  });
+
+  it('refuses the text of a style sheet (prompt 031)', () => {
+    const doc = textDocument();
+    const store = new DocumentStore(doc);
+    const style = doc.assets.get('t.svg')!.svg!.root.querySelector('style')!;
+    const ref = doc.refOf(style)!;
+    expect(() =>
+      store.execute(new SetText([{ ref, text: 'rect{fill:url(https://evil)}' }])),
+    ).toThrow(CommandError);
+    expect(style.textContent).toBe('.a{}');
   });
 
   it('JSON is checked strictly', () => {

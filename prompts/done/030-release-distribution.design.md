@@ -1,6 +1,6 @@
 # Design 030: Release und Distribution
 
-Status: in Arbeit · Datum: 27.10.2026 · Vorbild: editlicious Design 012 + 014 (dort aus comic-commander-tauri und
+Status: umgesetzt · Datum: 27.10.2026 · Vorbild: editlicious Design 012 + 014 (dort aus comic-commander-tauri und
 files-and-folders-tauri übernommen, MIT, gleicher Autor). Abläufe für Menschen in `docs/release.md`.
 
 ## Entscheidungen
@@ -64,6 +64,14 @@ files-and-folders-tauri übernommen, MIT, gleicher Autor). Abläufe für Mensche
 - Ende-zu-Ende: Workflow `dry-run` auf GitHub für alle drei OS (Link im Bericht), dort `.deb`-Inhalt mit
   `.desktop` + Mime-XML und `Info.plist` mit `LSTypeIsPackage`/`Alternate` geprüft; Doppelklick auf dem Mac prüft
   Marc.
+
+## Ergebnis
+
+- Probelauf `dry-run` (Run 40492570092, https://github.com/krocon/app-iconic/actions/runs/40492570092): Pre-flight,
+  Pakete für macOS, Windows und Linux und `SHA256SUMS.txt` grün. Der erste Linux-Versuch hing am apt-Spiegel
+  (Schritt „Linux system dependencies“, Zeitlimit greift) – „Re-run failed jobs“ lief durch.
+- Geprüft in der echten App (Xvfb, Linux): `.icon` aus argv öffnet im Startfenster; ein Zweitstart reicht seine Datei
+  an die laufende Instanz (zwei Fenster, ein Prozess).
 
 ## Fragen an Marc
 

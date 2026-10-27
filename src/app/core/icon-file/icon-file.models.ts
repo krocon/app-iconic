@@ -6,7 +6,6 @@
 /** Any JSON value – `icon.json` is passed through as is (unknown fields included). */
 export type JsonValue =
   string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
-export type JsonObject = Record<string, JsonValue>;
 
 /** Typed view of the known `icon.json` fields (design 002 E1); everything else stays as is. */
 export interface IconJson {

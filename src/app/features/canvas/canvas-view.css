@@ -63,7 +63,20 @@
   top: 0;
   left: 0;
   transform-origin: 0 0;
+  /* own compositor layer: panning moves the painted bitmap instead of painting again (031) */
+  will-change: transform;
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
   filter: drop-shadow(var(--ai-artboard-shadow));
+}
+
+.shade-shape {
+  position: absolute;
+  inset: 0;
+  background: var(--ai-checker-a);
 }
 
 .paper {

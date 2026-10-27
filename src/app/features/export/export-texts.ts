@@ -36,6 +36,7 @@ const EN = {
   reveal: 'Show in Folder',
   revealFailed: (reason: string) => `The file could not be shown: ${reason}`,
   noDocument: 'There is no document to export.',
+  busy: 'An export is already running.',
   badArguments: 'unknown appearance or size',
   transparentWarning:
     'Some PNGs contain transparent pixels. Apple expects app icons without transparency – ' +
@@ -76,6 +77,7 @@ export const EXPORT_TEXTS = translatable('export', EN, {
     reveal: 'Im Ordner zeigen',
     revealFailed: (reason: string) => `Die Datei konnte nicht gezeigt werden: ${reason}`,
     noDocument: 'Es gibt kein Dokument zum Exportieren.',
+    busy: 'Es läuft schon ein Export.',
     badArguments: 'unbekanntes Erscheinungsbild oder unbekannte Größe',
     transparentWarning:
       'Einige PNGs enthalten transparente Pixel. Apple erwartet App-Icons ohne Transparenz – ' +
