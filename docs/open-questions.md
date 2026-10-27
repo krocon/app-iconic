@@ -110,5 +110,5 @@
 ## Prompt 018 (a49601c)
 1. „Vor Dateizugriff fragen“ standardmäßig an lassen?
 2. Fensterlabel (main, doc-2) als Dokument-Id ok?
-3. **Mac**: `claude mcp add` einmal prüfen (Signierung des Sidecars kommt mit 016); Einrichtungszeilen in docs/mcp.md gegen aktuelle Claude-Code-Doku prüfen.
+3. **Mac**: `claude mcp add` einmal prüfen (Signierung des Sidecars kommt mit 030); Einrichtungszeilen in docs/mcp.md gegen aktuelle Claude-Code-Doku prüfen.
 4. System-Zwischenablage für die KI gesperrt lassen?

@@ -112,7 +112,7 @@ Systemschriften als `fontdb::Database` einmal je Prozess (`export::fonts::system
 ### Lizenzen
 
 - **E22** `THIRD-PARTY-NOTICES.txt` im Repo-Wurzelordner (Lucide ISC + Feather MIT, Caladea OFL nur Testdaten,
-  Rust-Crates nicht einzeln – das folgt mit Prompt 016), About-Dialog zeigt „Symbols: Lucide (ISC License)“ mit
+  Rust-Crates nicht einzeln – das folgt mit Prompt 030), About-Dialog zeigt „Symbols: Lucide (ISC License)“ mit
   Link. Testschrift **Caladea Regular** (SIL OFL 1.1, 81 KB, Latein inkl. Umlaute, ohne Emoji) unter
   `testdata/fonts/` mit `OFL.txt` – nur für Rust-Tests, nicht im Bundle.
 

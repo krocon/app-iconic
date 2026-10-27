@@ -94,6 +94,6 @@ was edited in between: the call fails with `revision_conflict` and the current s
   `src/app/features/mcp/` (tools in the window). Design: `prompts/done/018-mcp-server.design.md`.
 - Development: `pnpm mcp:sidecar:dev` builds `src-tauri/target/debug/app-iconic-mcp` next to the debug app.
   Releases: `node scripts/mcp-sidecar.mjs [<target triple>]` puts the sidecar into `src-tauri/binaries/`, and
-  `tauri build --config src-tauri/tauri.sidecar.conf.json` bundles it (`bundle.externalBin`, prompt 016).
+  `tauri build --config src-tauri/tauri.sidecar.conf.json` bundles it (`bundle.externalBin`, prompt 030).
 - End to end: `node scripts/mcp-e2e.mjs <sidecar> <out-dir>` drives a running AppIconic (AI control on) through the
   sidecar; `--expect-off` checks the error when it is off.

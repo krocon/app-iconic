@@ -1,6 +1,6 @@
-# Prompt 017: Härtung und Feature-Parität
+# Prompt 031: Härtung und Feature-Parität
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 002–016 · legacy §1–§13
+> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 002–030 · legacy §1–§13
 
 ## Ziel
 

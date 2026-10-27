@@ -36,7 +36,7 @@ Antwort.
 | E15 | **Grenzen:** `get_asset_svg.max_chars` 1…200 000 (Standard 20 000), `get_tree.max_nodes` 1…5 000 (Standard 500), Attribute in `get_node` je Wert ≤ 2 000 Zeichen, `insert_svg.markup` ≤ 1 MiB, `command` ≤ 4 MiB (Rust prüft vor dem Weiterleiten), Antwort eines Fensters ≤ 8 MiB, Brückenzeile ≤ 16 MiB. Markup der KI wird wie jedes fremde SVG bereinigt (Registry + Snippet-Weg, 003 E4/008 E9) | Prompt; ein großes Asset geht nie ganz über die Brücke |
 | E16 | **Einstellungen:** `mcp: { enabled: false, confirmFiles: true }` in `settings.json` (Rust + TS + `settings-cases.json`); Abschnitt „AI control (MCP)“ im Settings-Dialog: Schalter, Rückfrage-Schalter, Konfig-Zeile `claude mcp add app-iconic -- "<Pfad>"` mit „Copy“, Status („Not connected“ / „AI connected (n)“), Knopf „Disconnect AI“ (Aktion `mcp.disconnect`). Kopfzeile des Fensters zeigt „AI“ solange verbunden. `settings.set` darf `mcp.*` nicht über die KI ändern (E12) | Prompt; Status wie editlicious E9 |
 | E17 | **Sidecar-Pfad:** neben dem App-Programm (`current_exe().parent()/app-iconic-mcp[.exe]`); fehlt er (Dev-Build ohne `pnpm mcp:sidecar --dev`), zeigt der Dialog „sidecar missing“ ohne Zeile | Distribution über `bundle.externalBin` legt ihn genau dorthin |
-| E18 | **Distribution vorbereitet:** `scripts/mcp-sidecar.mjs` (aus editlicious: Release-Build je Target-Triple nach `src-tauri/binaries/app-iconic-mcp-<triple>[.exe]`, universal macOS per `lipo`, `--dev` baut neben die Debug-App) + `src-tauri/tauri.sidecar.conf.json` (`bundle.externalBin`). Der Alltag (`tauri dev`, CI) bleibt ohne Sidecar-Konfiguration; die Release-Pipeline (016) nimmt sie mit `--config` dazu | Prompt: Pipeline selbst ist 016 |
+| E18 | **Distribution vorbereitet:** `scripts/mcp-sidecar.mjs` (aus editlicious: Release-Build je Target-Triple nach `src-tauri/binaries/app-iconic-mcp-<triple>[.exe]`, universal macOS per `lipo`, `--dev` baut neben die Debug-App) + `src-tauri/tauri.sidecar.conf.json` (`bundle.externalBin`). Der Alltag (`tauri dev`, CI) bleibt ohne Sidecar-Konfiguration; die Release-Pipeline (030) nimmt sie mit `--config` dazu | Prompt: Pipeline selbst ist 030 |
 | E19 | **Browser-Modus/Tests:** `FakeMcpApi`; der Test-Hook `window.__appIconic.mcp(tool, args)` ruft dieselbe Ausführung wie ein Brückenaufruf (Playwright prüft `get_node`-BBox, Undo-Gruppe, Revision im echten DOM). Ende-zu-Ende: `scripts/mcp-e2e.mjs` startet das Sidecar über stdio gegen die echte App unter Xvfb | Geometrie braucht Layout (004 E16); der echte Weg einmal komplett |
 
 ## Verträge
@@ -111,7 +111,7 @@ ActionService.runAsync(id, args?): Promise<boolean>
 1. **Rückfrage bei Datei-Zugriffen (E13) standardmäßig an** – für Skripte abschaltbar. Passt das, oder lieber aus?
 2. **Dokument-Id = Fenster-Label** (`main`, `doc-2`) statt Zahlen wie in editlicious – ok?
 3. **macOS:** `claude mcp add app-iconic -- "/Applications/AppIconic.app/Contents/MacOS/app-iconic-mcp"` einmal mit
-   Claude Code/Claude Desktop prüfen (im Container nur Linux); Signierung des Sidecars kommt mit 016.
+   Claude Code/Claude Desktop prüfen (im Container nur Linux); Signierung des Sidecars kommt mit 030.
 4. Sperrliste (E12): Zwischenablage für die KI gesperrt – gewünscht?
 
 ## Fortschritt
@@ -141,7 +141,7 @@ Fenster nach vorn, eine fehlende Datei → `not_found`, das dafür geöffnete Fe
 - Eigene JSON-RPC-Schicht statt `rmcp` (E2) – wie editlicious, keine neue Abhängigkeit.
 - `get_asset_svg` hat zusätzlich `node_ids` (die internen Ids, die `get_tree` verwendet).
 - Die Tools tragen `expected_revision` statt eines Pflichtfelds; ohne Angabe wird nicht geprüft (wie editlicious).
-- Die Release-Pipeline (Sidecar bauen, signieren, `--config src-tauri/tauri.sidecar.conf.json`) ist Prompt 016;
+- Die Release-Pipeline (Sidecar bauen, signieren, `--config src-tauri/tauri.sidecar.conf.json`) ist Prompt 030;
   hier vorbereitet und getestet sind Skript und Konfiguration.
 - Die Claude-Code-Dokumentation (`docs.anthropic.com/en/docs/claude-code/mcp`) war in der Sitzung nicht abrufbar;
   `docs/mcp.md` nutzt die übliche Form `claude mcp add <name> -- <Programm>` und `mcpServers` in

@@ -69,7 +69,7 @@ Status: umgesetzt · Datum: 26.10.2026
   "shared"}` wie Icon Composer (nicht die Legacy-Werte iOS/macOS). Als Command `new_icon` (Pfad `null`).
 - **E14 Dateidialoge:** `pick_open_icon(folder)` – Datei-Dialog mit Filter `icon`/`zip`; unter macOS erscheinen
   `.icon`-Bundles als Datei, wenn der Typ als Paket bekannt ist (Icon Composer installiert bzw. Dateizuordnung mit
-  `LSTypeIsPackage` in 016). Linux/Windows können Ordner im Datei-Dialog nicht wählen → `folder: true` öffnet den
+  `LSTypeIsPackage` in 030). Linux/Windows können Ordner im Datei-Dialog nicht wählen → `folder: true` öffnet den
   Ordner-Dialog („Bundle-Ordner öffnen…“, 003 entscheidet über den Menüpunkt). `pick_save_icon(suggestedName,
   format)`, `pick_svg_file()`. Alle `None` bei Abbruch.
 - **E15 `read_svg_file`:** ≤ 16 MiB (`too_large`), UTF-8 mit/ohne BOM; anderes → neuer Code `invalid_svg`. Das
@@ -154,7 +154,7 @@ Neue Fehlercodes: `invalid_icon`, `unsupported_icon`, `too_large`, `missing_asse
 2. Geänderte Dokumente: Schlüsselreihenfolge wie gelesen (so umgesetzt) oder immer alphabetisch wie Icon Composer?
 3. Leere Arrays schreibt Icon Composer evtl. als `[\n\n]` und `/` evtl. als `\/` (JSONEncoder-Standard) – mangels
    Beleg schreiben wir `[]` und `/`. Hast du eine Datei mit leerem Array oder `/` im Namen?
-4. Bundle-Tausch: unter macOS echtes atomares Tauschen mit `renamex_np(RENAME_SWAP)` nachrüsten (016/017)?
+4. Bundle-Tausch: unter macOS echtes atomares Tauschen mit `renamex_np(RENAME_SWAP)` nachrüsten (030/031)?
 5. Auf dem Mac prüfen: Öffnen-Dialog zeigt `.icon`-Bundles als Datei (nur wenn der Typ als Paket registriert ist).
 
 ## Fortschritt

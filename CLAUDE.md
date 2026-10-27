@@ -179,7 +179,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
                               (Familien/Stile/Ids), outline (Text → Pfad: harfrust-Shaping, skrifa-Umrisse, BBox)
   mcp/                        Crate `ai-mcp` + Binary `app-iconic-mcp` (018, aus editlicious ed-mcp): server (MCP über
                               stdio), tools (Schemas, Schnappschuss tools.snapshot.json), bridge, client, host
-  tauri.sidecar.conf.json     bundle.externalBin für das Sidecar (nur Release, 016)
+  tauri.sidecar.conf.json     bundle.externalBin für das Sidecar (nur Release, 030)
   icons/source/app-icon.svg   Quelle des App-Icons
 testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverändert); all-fields.icon (010: alle
                               belegten Felder + unbekannte)

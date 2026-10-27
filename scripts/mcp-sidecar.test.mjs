@@ -1,4 +1,4 @@
-// From editlicious scripts/mcp-sidecar.test.mjs (design 016); the release workflow is prompt 016.
+// From editlicious scripts/mcp-sidecar.test.mjs (design 016); the release workflow is prompt 030.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';

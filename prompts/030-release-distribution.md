@@ -1,4 +1,4 @@
-# Prompt 016: Release und Distribution
+# Prompt 030: Release und Distribution
 
 > Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 012 · Meilenstein 9 aus `000-init.md` ·
 > Vorbild: editlicious 012 + 014 (Skripte und Workflows übernehmen, mit Herkunftsvermerk)

@@ -186,4 +186,4 @@ Aktionen: `edit.editSvg { markup? }`, `path.optimize { epsilon?, precision? }` (
 - In der echten App (WebKitGTK unter Xvfb) zeigt die Canvas-Vorschau mit eingeschalteter **„Effects Preview“ (010
   E13)** die Layer-Inhalte nicht (ein neuer Kreis bleibt unsichtbar); ohne Effects Preview erscheint er. Chromium
   (Playwright) zeigt beides. Vermutlich Filter/`mask-image` im Shadow Root unter WebKit – auf dem Mac (WKWebView)
-  prüfen; ein eigener Fix gehört zu 010/017.
+  prüfen; ein eigener Fix gehört zu 010/031.

@@ -13,7 +13,7 @@
 - [x] Verlustfreier Roundtrip von `icon.json` inkl. unbekannter Felder und Layer-`opacity` *(neu)* (002, 003)
 - [x] Dirty-Tracking, Fenstertitel = Dateiname + Marker (003; macOS-Punkt im Schließknopf auf dem Mac prüfen)
 - [x] Mehrere Fenster/Dokumente (003; macOS: App bleibt ohne Fenster offen – auf dem Mac prüfen)
-- [ ] `.icon` als Dateizuordnung / Öffnen per Doppelklick *(neu)* (016)
+- [ ] `.icon` als Dateizuordnung / Öffnen per Doppelklick *(neu)* (030)
 
 ## 2. Layout & Einstellungen
 - [x] Drei ein-/ausblendbare Seitenleisten ⌘1/⌘2/⌘3 (005), Breite 160–480 px per Splitter (Maus und Tastatur),
@@ -98,7 +98,7 @@
 
 ## 10. SVG-Unterstützung
 - [ ] Elemente aus legacy §10 + `use`, `defs`, Verläufe rendern und bearbeiten (004 rendern, 009 Attribute von
-      `use`/`stop`/`image` bearbeitbar; ein eigener Verlaufseditor fehlt noch → 017)
+      `use`/`stop`/`image` bearbeitbar; ein eigener Verlaufseditor fehlt noch → 031)
 - [x] Inline-`<style>`/Klassen beim Import in Attribute auflösen, Einheiten (003)
 - [x] Unbekannte Attribute/Elemente bleiben erhalten (002 unveränderte Assets byte-genau; 003 bearbeitete SVGs über DOM-Serialisierung)
 - [x] Fremdes SVG wird bereinigt (Skripte, Event-Handler, externe Referenzen) *(neu)* (003)
@@ -107,13 +107,13 @@
 - [x] Export SVG je Appearance (Light/Dark) inkl. Hintergrund, Gruppen, Layer, Layer-Opacity (012)
 - [x] Export PNG mit resvg, Größen-Set 1024/512/256/128/64/32/16 *(neu: Größen)* (012; Fortschritt, Abbruch, Apple-Hinweis zur Transparenz)
 - [x] Optional mit Plattform-Maske *(neu)* (012; dazu Schatten/Effekte als Annäherung, Schalter)
-- [ ] Share Export (macOS, optional) (016)
+- [ ] Share Export (macOS, optional) (030)
 
 ## 11a. KI-Steuerung (MCP) *(neu)*
 - [x] Sidecar `app-iconic-mcp` (stdio) + lokale Brücke (127.0.0.1, Token je Start), Einstellung „KI-Steuerung (MCP) erlauben“ (Standard aus), Konfig-Zeile für Claude Code, Status „KI verbunden“, „KI trennen“ (018)
 - [x] Tools: Dokumente, Lesen (icon.json, Baum, Node mit BBox, Asset-SVG, Auswahl), Schreiben (Commands, Aktionen, SVG, Auswahl), Vorschau als PNG, Export, Speichern (018)
 - [x] Jeder KI-Aufruf ein Undo-Schritt („Undo AI: …“), erwartete Revision, Rückfrage vor Speichern an neuem Ort/Export, Sperrliste (018)
-- [ ] Sidecar in den Paketen, signiert wie die App (vorbereitet: `tauri.sidecar.conf.json`, `scripts/mcp-sidecar.mjs`; Pipeline 016)
+- [ ] Sidecar in den Paketen, signiert wie die App (vorbereitet: `tauri.sidecar.conf.json`, `scripts/mcp-sidecar.mjs`; Pipeline 030)
 
 ## 12. Undo/Redo
 - [x] Benannte Aktionen im Menü („Undo Move“ …), ⌘Z / ⇧⌘Z (003 Namen, 005 Menü und Kürzel)

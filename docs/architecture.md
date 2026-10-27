@@ -122,7 +122,7 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 018 E8 | `render_preview`: das Fenster baut das Export-SVG, Rust rendert es mit resvg, Rückgabe als MCP-Bildinhalt | gleicher Weg wie „Export PNG“ |
 | 018 E9–E11 | Schreibende Tools mit `expected_revision` (`revision_conflict`); alle Schritte eines Aufrufs → ein Undo-Schritt `AiCommand` („Undo AI: Add Circle“, `UndoService.groupSince`); `ActionService.runAsync` wartet auf das Promise der Handler | Prompt; ⌘Z nimmt jeden KI-Schritt einzeln zurück |
 | 018 E12/E13 | Sperrliste für `run_action` (Beenden, `file.*`, Zwischenablage, `settings.reset`, `settings.set mcp.*`, Tastatur-Aktionen); Speichern an neuen Pfad und Export fragen im UI (`mcp.confirmFiles`, Standard an) | kein Datei-/Shell-Zugriff am geprüften Weg vorbei, die KI kann sich nicht selbst freischalten |
-| 018 E18 | Sidecar als `bundle.externalBin` über `tauri.sidecar.conf.json` + `scripts/mcp-sidecar.mjs` (Release-Pipeline 016) | Alltag und CI ohne Sidecar-Build |
+| 018 E18 | Sidecar als `bundle.externalBin` über `tauri.sidecar.conf.json` + `scripts/mcp-sidecar.mjs` (Release-Pipeline 030) | Alltag und CI ohne Sidecar-Build |
 | 009 E10/E11 | Generische Editoren in `shared/controls/` (Zahl mit Stepped Slider, Farbe, Auswahl, Text, Schalter; Ausgaben `edited`/`committed`/`reverted`), Aktionen `properties.set/reset/resetAll` | wiederverwendbar für den Icon-Inspector (010); die KI setzt, was das Panel setzt |
 
 ## Schichten

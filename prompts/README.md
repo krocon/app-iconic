@@ -19,8 +19,8 @@ grün, Commit + Push auf `main`, Prompt samt Design nach [`done/`](done/).
 ## Reihenfolge
 
 Kritischer Pfad zum ersten nutzbaren Editor: **001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009**.
-Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 jederzeit nach 005, 016 nach 012,
-017 schließt ab.
+Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 jederzeit nach 005, 030 nach 012,
+031 schließt ab (die Nummern dazwischen bleiben für weitere Prompts frei).
 
 | Nr. | Prompt | Inhalt | Braucht | Umfang | Status |
 |---|---|---|---|---|---|
@@ -40,9 +40,9 @@ Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 je
 | 013 | [013-werkzeuge.md](done/013-werkzeuge.md) | Freehand (RDP + Glättung), Text → Pfad (fontdb + harfrust/skrifa), Symbol-Picker mit freiem Icon-Set (Lucide, Plugin-Schnittstelle) | 008 | L | ✅ 27.10.2026 |
 | 014 | [014-clip-paths.md](done/014-clip-paths.md) | Clip Paths fertig: Picker, Anlegen je Layer, Bearbeitungsmodus, Vererbung Layer → Node, `clipPathUnits`, nicht selektierbar | 009 | M | ✅ 27.10.2026 |
 | 015 | [015-einstellungen-layout-i18n.md](done/015-einstellungen-layout-i18n.md) | `settings.json` (Schema, Migration, Reset), Seitenleisten ein-/ausblendbar und in der Breite ziehbar, View-Options persistent, Settings-Dialog, Deutsch/Englisch zur Laufzeit, Hell/Dunkel | 005 | M | ✅ 27.10.2026 |
-| 016 | [016-release-distribution.md](016-release-distribution.md) | Version aus einer Quelle, Lizenzhinweise, Pakete je OS, Dateizuordnung `.icon`, Release-Workflow (Probelauf), Signierung/Notarisierung vorbereitet, Share (macOS) | 012 | M | offen |
 | 018 | [018-mcp-server.md](done/018-mcp-server.md) | MCP-Server: KI steuert den laufenden AppIconic über serialisierbare Commands und Aktionen (Sidecar + lokale Brücke wie editlicious), Lesen, Ändern, Vorschau, Export; Standard aus | 005, 009, 012 | M–L | ✅ 27.10.2026 (freigegeben von Marc) |
-| 017 | [017-haertung-paritaet.md](017-haertung-paritaet.md) | Parität gegen `docs/FEATURES.md`, Review durch separaten Agenten, feindliche Dateien, Performance großer SVGs, Barrierefreiheit, Doku | 002–016 | M | offen |
+| 030 | [030-release-distribution.md](030-release-distribution.md) | Version aus einer Quelle, Lizenzhinweise, Pakete je OS, Dateizuordnung `.icon`, Release-Workflow (Probelauf), Signierung/Notarisierung vorbereitet, Share (macOS) | 012 | M | offen |
+| 031 | [031-haertung-paritaet.md](031-haertung-paritaet.md) | Parität gegen `docs/FEATURES.md`, Review durch separaten Agenten, feindliche Dateien, Performance großer SVGs, Barrierefreiheit, Doku | 002–030 | M | offen |
 
 ## Folge-Ideen (noch ohne Prompt)
 

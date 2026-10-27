@@ -33,7 +33,7 @@ Mausklicks. Jede KI-Änderung landet im Undo-Stack.
   aktuellem Zustand. Jeder MCP-Aufruf ist eine Undo-Gruppe (Name z. B. „AI: Add Circle“).
 - **Einstellungen (015):** „KI-Steuerung (MCP) erlauben“ – Standard **aus**; Konfig-Zeile zum Kopieren
   (`claude mcp add app-iconic -- <pfad>/app-iconic-mcp`); Statusanzeige „KI verbunden“, Aktion „KI trennen“.
-- **Distribution:** Sidecar als `externalBin` (016), signiert wie die App.
+- **Distribution:** Sidecar als `externalBin` (030), signiert wie die App.
 
 ## Sicherheit
 

@@ -204,8 +204,8 @@ Alle Befehle fügen ins aktuell gewählte Layer/Container ein (oder ins erste pa
 
 ## Vorgehen (Meilensteine, nach jedem Meilenstein lauffähig + Tests grün + Commit)
 
-*(korrigiert)* Die Meilensteine sind als Prompts 001–017 ausgearbeitet ([README.md](README.md)). Zuordnung: 1 → 001,
-2 → 002/003, 3 → 003/004/005, 4 → 007, 5 → 006/008, 6 → 009/010, 7 → 012, 8 → 011/013/014, 9 → 015/016, Abschluss → 017.
+*(korrigiert)* Die Meilensteine sind als Prompts 001–018, 030 und 031 ausgearbeitet ([README.md](README.md)). Zuordnung: 1 → 001,
+2 → 002/003, 3 → 003/004/005, 4 → 007, 5 → 006/008, 6 → 009/010, 7 → 012, 8 → 011/013/014, 9 → 015/030, Abschluss → 031.
 
 1. **Setup**: Tauri-2-App mit Angular 22 (zoneless, Signals, strict), Lint/Format, Vitest, Playwright, `cargo test`, GitHub Actions (Build macOS/Windows/Linux, Tests). README mit Dev-Befehlen. Ein `AGENTS.md`/`CLAUDE.md` mit Architekturregeln anlegen.
 2. **Datei-Kern (Rust)**: `open_icon`, `save_icon` (Bundle + ZIP), `import_svg`, Roundtrip-Tests mit den Fixtures; Recent Files; Dirty-Tracking.
