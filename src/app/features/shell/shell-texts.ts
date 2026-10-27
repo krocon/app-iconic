@@ -10,7 +10,6 @@ export const SHELL_TEXTS = {
   properties: 'Properties',
   canvas: 'Canvas',
   noDocument: 'No document open',
-  nothingSelected: 'Nothing selected',
   undo: 'Undo',
   redo: 'Redo',
 } as const;

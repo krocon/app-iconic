@@ -9,7 +9,7 @@ import {
   toRgba,
   urlId,
   withPicked,
-} from './color-value';
+} from '../../shared/controls/color-value';
 import { combine } from './mixed';
 import {
   ALL_PROPERTIES,

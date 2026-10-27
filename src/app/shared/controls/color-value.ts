@@ -116,13 +116,17 @@ export function withPicked(old: string | null | undefined, picked: string): stri
   return toHex({ ...c, a: before?.a ?? 1 });
 }
 
+/** The scratch canvas of `browserColor` (made once; `null` where there is none, e.g. jsdom). */
+let scratch: CanvasRenderingContext2D | null | undefined;
+
 /**
  * The browser's own colour parser (canvas `fillStyle` normalises every CSS colour to `#rrggbb` /
  * `rgba(…)`); `null` without a canvas (jsdom) or for an invalid colour.
  */
 export function browserColor(css: string): string | null {
   try {
-    const ctx = document.createElement('canvas').getContext('2d');
+    if (scratch === undefined) scratch = document.createElement('canvas').getContext('2d');
+    const ctx = scratch;
     if (!ctx) return null;
     ctx.fillStyle = '#010203';
     ctx.fillStyle = css;
@@ -130,6 +134,7 @@ export function browserColor(css: string): string | null {
     if (out === '#010203' && css.trim().toLowerCase() !== '#010203') return null;
     return out;
   } catch {
+    scratch = null;
     return null;
   }
 }

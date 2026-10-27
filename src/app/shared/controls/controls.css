@@ -1,0 +1,118 @@
+/* Generic property editors (design 009 E10): the host is `display: contents`, its label and editor
+   are cells of the row grid of the caller. Tokens from styles.css only. */
+:host {
+  display: contents;
+}
+
+.label {
+  align-self: center;
+  overflow: hidden;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  user-select: none;
+
+  &.drag {
+    cursor: ew-resize;
+    touch-action: none;
+  }
+}
+
+.editor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-small);
+
+  &::placeholder {
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+}
+
+textarea.input {
+  height: auto;
+  min-height: 4.5em;
+  padding: var(--space-1);
+  font-family: var(--font-mono);
+  resize: vertical;
+}
+
+select.input {
+  padding-right: 0;
+}
+
+.unit {
+  flex: none;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.slider {
+  flex: 1.2;
+  min-width: 0;
+  accent-color: var(--color-accent);
+}
+
+.swatch {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+
+  &::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+  &::-webkit-color-swatch {
+    border: none;
+  }
+}
+
+.chip {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+
+  &.none {
+    background: linear-gradient(
+      to top right,
+      transparent calc(50% - 1px),
+      var(--color-error) 50%,
+      transparent calc(50% + 1px)
+    );
+  }
+  &.mixed {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--color-surface-2) 0 3px,
+      var(--color-border) 3px 6px
+    );
+  }
+}
+
+.keyword {
+  flex: none;
+  width: 22px;
+}
+
+.check {
+  justify-self: start;
+  margin: 0;
+  accent-color: var(--color-accent);
+}

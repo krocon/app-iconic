@@ -140,6 +140,31 @@ export const ACTIONS: readonly ActionDef[] = [
       properties: { command: { type: 'json' } },
     },
   }),
+  // properties panel (design 009 E11): the AI sets what the panel sets
+  EDIT('properties.set', 'Set Property', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['name', 'value'],
+      properties: {
+        name: { type: 'string', maxLength: 255 },
+        value: { type: 'string', maxLength: 16 << 20 },
+        constrain: { type: 'boolean' },
+      },
+    },
+  }),
+  EDIT('properties.reset', 'Reset Property', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['name'],
+      properties: { name: { type: 'string', maxLength: 255 } },
+    },
+  }),
+  EDIT('properties.resetAll', 'Reset All Properties…', {
+    // `confirm: false` resets without asking (AI, tests)
+    args: { type: 'object', properties: { confirm: { type: 'boolean' } } },
+  }),
   // view (legacy §4, §5, §9)
   VIEW('view.commandSidebar', 'Command Sidebar'),
   VIEW('view.hierarchy', 'Hierarchy'),

@@ -9,6 +9,7 @@ import { MenuService } from '../app/features/menus/menu.service';
 import { DocumentStore } from '../app/features/document/document.store';
 import { serializeAsset } from '../app/features/document/svg/node-ids';
 import { FilesService } from '../app/features/files/files.service';
+import { listMatrix, parseTransformList } from '../app/features/properties/transform-list';
 import { CanvasViewStore } from '../app/features/canvas/canvas-view.store';
 import { Hit, hitTest } from '../app/features/canvas/hit-test';
 import {
@@ -67,6 +68,8 @@ export interface AppIconicHook {
   lastCommand(): CommandJson | null;
   /** The spec the native menu would get. */
   menuSpec(): MenuSpec;
+  /** `listMatrix(parseTransformList(text))` as `[a, b, c, d, e, f]` (design 009 E7). */
+  transformListMatrix(text: string): number[] | null;
 }
 
 declare global {
@@ -134,5 +137,11 @@ export function installTestHook(): void {
     },
     lastCommand: () => store()?.lastCommandJson() ?? null,
     menuSpec: () => menus.spec(),
+    transformListMatrix: (text) => {
+      const steps = parseTransformList(text);
+      if (!steps) return null;
+      const m = listMatrix(steps);
+      return [m.a, m.b, m.c, m.d, m.e, m.f];
+    },
   };
 }

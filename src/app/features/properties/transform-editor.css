@@ -1,0 +1,144 @@
+/* Transform list (design 009 E7). Shared by the editor and its step rows. */
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+:host(.step) {
+  display: block;
+  padding: var(--space-1);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.note {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drop {
+  height: 2px;
+  margin: -2px 0;
+  background: var(--color-accent);
+  border-radius: 1px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-small);
+}
+
+.kind {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.pivot {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-text-muted);
+
+  input {
+    margin: 0;
+    accent-color: var(--color-accent);
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+.args {
+  display: grid;
+  grid-template-columns: 3.6rem minmax(0, 1fr);
+  gap: var(--space-1) var(--space-2);
+  margin-top: var(--space-1);
+
+  &.matrix {
+    grid-template-columns: 1rem minmax(0, 1fr) 1rem minmax(0, 1fr);
+  }
+}
+
+.tool {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--color-hover);
+    color: var(--color-text);
+  }
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  &.grip {
+    cursor: grab;
+    touch-action: none;
+  }
+  svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.bar {
+  display: flex;
+}
+
+.input {
+  height: 24px;
+  padding: 0 var(--space-1);
+  font-size: var(--font-size-small);
+}
+
+.add {
+  width: auto;
+}
+
+.raw-label {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.raw {
+  width: 100%;
+  font-family: var(--font-mono);
+
+  &[aria-invalid='true'] {
+    border-color: var(--color-error);
+  }
+}
+
+.error {
+  margin: 0;
+  font-size: var(--font-size-small);
+  color: var(--color-error);
+}
