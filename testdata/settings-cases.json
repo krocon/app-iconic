@@ -1,0 +1,126 @@
+{
+  "comment": "settings.json (prompt 015): defaults and how a file is read leniently (design 015 E2). Used by Rust ai-core::settings and TS setting-keys.spec.ts. `expect` lists [path, value] of the result.",
+  "defaults": {
+    "schemaVersion": 1,
+    "theme": "system",
+    "language": "system",
+    "panels": {
+      "commands": { "visible": true, "width": 260 },
+      "hierarchy": { "visible": true, "width": 260 },
+      "properties": { "visible": true, "width": 300 }
+    },
+    "canvas": {
+      "rulers": true,
+      "guides": true,
+      "background": true,
+      "effects": true,
+      "crossCursor": true,
+      "handles": true,
+      "snapToGrid": false,
+      "magicSnap": true,
+      "gridSize": 10,
+      "gridOrigin": "worldZero",
+      "selectionMode": "point",
+      "zoom": 0,
+      "appearance": "system",
+      "mask": "squircle"
+    },
+    "export": {
+      "format": "png",
+      "appearances": ["light", "dark"],
+      "sizes": [1024],
+      "mask": "none",
+      "effects": false,
+      "targetDir": null
+    },
+    "freehand": { "epsilon": 2.5, "strokeWidth": 8, "closed": false },
+    "debug": { "logUndoGrouping": false }
+  },
+  "cases": [
+    {
+      "name": "empty object = defaults",
+      "input": {},
+      "expect": [["schemaVersion", 1], ["panels.commands.width", 260]]
+    },
+    {
+      "name": "panel widths are clamped to 160…480",
+      "input": { "panels": { "commands": { "width": 20 }, "hierarchy": { "width": 9000 }, "properties": { "width": 333, "visible": false } } },
+      "expect": [["panels.commands.width", 160], ["panels.hierarchy.width", 480], ["panels.properties.width", 333], ["panels.properties.visible", false], ["panels.commands.visible", true]]
+    },
+    {
+      "name": "a wrong kind falls back field by field",
+      "input": { "canvas": { "rulers": "yes", "guides": false, "gridSize": 12.5, "zoom": "big" }, "theme": 3 },
+      "expect": [["canvas.rulers", true], ["canvas.guides", false], ["canvas.gridSize", 10], ["canvas.zoom", 0], ["theme", "system"]]
+    },
+    {
+      "name": "unknown enum values fall back",
+      "input": { "theme": "sepia", "language": "fr", "canvas": { "gridOrigin": "middle", "selectionMode": "lasso", "appearance": "tinted", "mask": "star" }, "export": { "format": "pdf", "mask": "x" } },
+      "expect": [["theme", "system"], ["language", "system"], ["canvas.gridOrigin", "worldZero"], ["canvas.selectionMode", "point"], ["canvas.appearance", "system"], ["canvas.mask", "squircle"], ["export.format", "png"], ["export.mask", "none"]]
+    },
+    {
+      "name": "valid enum values are kept",
+      "input": { "theme": "dark", "language": "de", "canvas": { "gridOrigin": "svgCenter", "selectionMode": "boxed", "appearance": "light", "mask": "circle" }, "export": { "format": "svg", "mask": "squircle" } },
+      "expect": [["theme", "dark"], ["language", "de"], ["canvas.gridOrigin", "svgCenter"], ["canvas.selectionMode", "boxed"], ["canvas.appearance", "light"], ["canvas.mask", "circle"], ["export.format", "svg"], ["export.mask", "squircle"]]
+    },
+    {
+      "name": "zoom: 0 = fit, else 0.25…2",
+      "input": { "canvas": { "zoom": 5 } },
+      "expect": [["canvas.zoom", 2]]
+    },
+    {
+      "name": "zoom below the range",
+      "input": { "canvas": { "zoom": 0.1 } },
+      "expect": [["canvas.zoom", 0.25]]
+    },
+    {
+      "name": "grid size 1…256",
+      "input": { "canvas": { "gridSize": 0 } },
+      "expect": [["canvas.gridSize", 1]]
+    },
+    {
+      "name": "export lists: allowed values in their order, no duplicates",
+      "input": { "export": { "appearances": ["dark", "tinted", "dark"], "sizes": [16, 1024, 1000, 16, "x"] } },
+      "expect": [["export.appearances", ["dark"]], ["export.sizes", [1024, 16]]]
+    },
+    {
+      "name": "empty export lists fall back",
+      "input": { "export": { "appearances": [], "sizes": [3] } },
+      "expect": [["export.appearances", ["light", "dark"]], ["export.sizes", [1024]]]
+    },
+    {
+      "name": "export target folder: a text or null",
+      "input": { "export": { "targetDir": "/Users/marc/Icons" } },
+      "expect": [["export.targetDir", "/Users/marc/Icons"]]
+    },
+    {
+      "name": "export target folder: anything else is null",
+      "input": { "export": { "targetDir": 42 } },
+      "expect": [["export.targetDir", null]]
+    },
+    {
+      "name": "freehand options are clamped",
+      "input": { "freehand": { "epsilon": 99, "strokeWidth": 0, "closed": true } },
+      "expect": [["freehand.epsilon", 20], ["freehand.strokeWidth", 1], ["freehand.closed", true]]
+    },
+    {
+      "name": "debug flag",
+      "input": { "debug": { "logUndoGrouping": true } },
+      "expect": [["debug.logUndoGrouping", true]]
+    },
+    {
+      "name": "unknown fields are ignored",
+      "input": { "future": { "x": 1 }, "canvas": { "laser": true, "rulers": false } },
+      "expect": [["canvas.rulers", false]]
+    },
+    {
+      "name": "a newer schema version is read leniently and written as the current one",
+      "input": { "schemaVersion": 7, "canvas": { "guides": false } },
+      "expect": [["schemaVersion", 1], ["canvas.guides", false]]
+    },
+    {
+      "name": "a section of the wrong kind is the default section",
+      "input": { "panels": [1, 2], "canvas": true },
+      "expect": [["panels.hierarchy.width", 260], ["canvas.rulers", true]]
+    }
+  ]
+}

@@ -10,6 +10,7 @@
 //! - [`app_menu`]      native macOS menu bar from the menu model of the focused window (005)
 //! - [`export_commands`] export SVG/PNG (resvg), folder dialog, progress and cancel per window (012)
 //! - [`font_commands`] font list and text to path (013)
+//! - [`settings_commands`] `settings.json` for every window: load, patches, reset, theme (015)
 //!
 //! The engine (icon documents, file I/O, export, fonts) lives in the Tauri-free crate
 //! `ai-core` (`src-tauri/core`); `error` is re-exported from there.
@@ -21,6 +22,7 @@ pub mod export_commands;
 pub mod font_commands;
 pub mod model;
 pub mod sessions;
+pub mod settings_commands;
 pub mod windows;
 
 pub use ai_core::error;
@@ -36,6 +38,7 @@ pub fn run() {
         .manage(commands::RecentLock::default())
         .manage(app_menu::MenuSpecs::default())
         .manage(export_commands::ExportJobs::default())
+        .manage(settings_commands::SettingsState::default())
         .setup(|_| {
             // system fonts for text to path and the PNG export, scanned in the background
             font_commands::warm_up();
@@ -99,6 +102,10 @@ pub fn run() {
             export_commands::cancel_export,
             font_commands::list_fonts,
             font_commands::text_to_path,
+            settings_commands::load_settings,
+            settings_commands::save_settings,
+            settings_commands::reset_settings,
+            settings_commands::set_window_theme,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
