@@ -89,6 +89,14 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 011 E8/E9 | Formatierer `svg-format.ts` (rein): 2 Leerzeichen, ein Element je Zeile, Attribute Namensräume → `id` → Geometrie → `transform` → alphabetisch, Zahlen gerundet (Default 3) nur in Zahl-Attributen, `d` über den Pfad-Tokenizer, Text/CDATA/`xml:space` unverändert, idempotent; „Copy XML“ formatiert, „Copy“ und Speichern nie | lesbar und stabil, ohne Roundtrip-Verlust beim Speichern |
 | 011 E10/E11 | Pfad-Optimierer `path-optimize.ts` (aus `SVGPathOptimizer.swift`): RDP mit Eckenschutz auf **jeder** Linienfolge, Kurven bleiben, Null-Segmente weg, runden statt abschneiden, kürzeste Form (`path-write.ts`: relativ aus gerundeten absoluten Punkten) | Fehler der Vorlage behoben (Abschneiden, `L` nach Kurve entfernt), Abweichung ≤ epsilon + Rundung (Eigenschaftstest) |
 | 011 E12/E13 | Aktionen `edit.editSvg { markup? }` und `path.optimize { epsilon?, precision? }`: ohne Argumente Dialog (mit Vorschau), mit Argumenten direkt (KI); Ergebnis ein Command (`replaceNode`/`replaceAssetMarkup` bzw. `setAttributes` „Optimize Path“); erreichbar über Menü, Kontextmenü, Properties | KI-Regel; ein Undo-Schritt |
+| 010 E13 (Nachtrag) | `LayerStack` setzt `position: absolute; inset: 0` an Gruppen-Containern **inline** | Angulars emulierte Kapselung erreicht zur Laufzeit gebaute Elemente nicht; eine 0 px hohe Gruppe mit `mask-image` maskierte WebKit (WKWebView/WebKitGTK) ganz weg |
+| 012 E1/E2 | Export-SVG im Frontend aus denselben Quellen wie der Canvas (`stackOf`, `fillPreview`), gleiche Struktur (Gruppe → Layer-`<g>` → Platzierungs-`<svg>` → Kopie der Asset-Wurzel); IDs je Layer mit Präfix `l<n>-`, Referenzen (`url()`, `href`, `<style>`) folgen, `data-ai-*` weg | gleiche Geometrie wie im Canvas ohne eigene Transform-Kette; dasselbe Asset in zwei Layern ohne doppelte IDs |
+| 012 E3 | Exportfarben als sRGB-`#rrggbb` + Opacity, Display P3 umgerechnet und geklemmt (`svgColor`); `fill-preview.ts` generisch über die Farbform | resvg kennt kein `color(display-p3 …)` |
+| 012 E5/E6 | Maske (`none`/`squircle`/`circle`, Default `none`) als `clipPath`; Effekte (Schatten-Filter, Transluzenz als `<mask mask-type="alpha">`, Blend-Modes) nur mit Schalter, Default aus; Opacity immer | Apple maskiert selbst; Effekte sind Annäherungen |
+| 012 E8/E9 | PNG in Rust mit `resvg` 0.48.1 (usvg, tiny-skia, fontdb über Re-Exporte), Systemschriften einmal je Prozess; `usvg::Options` ohne `resources_dir`, Bilder nur aus Data-URLs (auch in verschachtelten SVGs), SVG ≤ 64 MiB | keine externen Referenzen beim Rendern (fremde Dateien sind feindlich) |
+| 012 E10/E11 | Ziel ist ein **Ordner** für beide Formate (`export_svg` statt `write_text_file` über Save-Dialog), Namen `<name>-<appearance>[-<size>].<ext>` bildet Rust; vor dem ersten Schreiben werden alle Ziele geprüft, `already_exists` ohne `overwrite`, jede Datei atomar | zwei Dateien je Export; Pfade bleiben opak; nie halb überschriebene Exporte |
+| 012 E12/E13 | Fortschritt je Datei über `tauri::ipc::Channel`, Abbruch-Flag je Fenster (`cancel_export`), Stopp vor Auftragsbeginn im Frontend; Rust meldet je PNG `transparent`, der Dialog warnt ohne Maske | Apple-Hinweis der Vorlage (App-Icons ohne Transparenz) |
+| 012 E14/E15 | `file.exportSvg`/`file.exportPng` ohne Argumente → Dialog, mit `{ appearances?, sizes?, mask?, effects?, targetDir?, overwrite? }` → direkt (KI), Ergebnis als Hinweis; letzte Wahl im Root-Dienst (dauerhaft mit 015) | KI-Regel; ein Weg für Menü, Palette und KI |
 | 009 E10/E11 | Generische Editoren in `shared/controls/` (Zahl mit Stepped Slider, Farbe, Auswahl, Text, Schalter; Ausgaben `edited`/`committed`/`reverted`), Aktionen `properties.set/reset/resetAll` | wiederverwendbar für den Icon-Inspector (010); die KI setzt, was das Panel setzt |
 
 ## Schichten
@@ -124,6 +132,10 @@ Angular (WebView)                                   Rust
 | `load_keymap_overrides()` | 005 | `keymap.json` im Config-Ordner → `KeymapOverrides { bindings, warning }` |
 | `quit_app()`, `cancel_quit()` | 005 | Quit-Folge über alle Fenster (`close-requested` nacheinander) bzw. Abbruch durch das gefragte Fenster |
 | `window_start_action()` | 005 | Aktion, die ein ohne Fenster gewählter Menüeintrag (macOS) im neuen Fenster ausführt |
+| `pick_export_dir()` | 012 | nativer Ordner-Dialog fürs Export-Ziel, `null` bei Abbruch |
+| `export_svg(variants, targetDir, options)` | 012 | `variants: [{ appearance, svg }]`, `options: { baseName, overwrite }` → `<name>-<appearance>.svg` → `ExportReport { files: [{ name, path, transparent }], cancelled }`; Fehler `already_exists` |
+| `export_png(variants, sizes, targetDir, options, onProgress)` | 012 | resvg je Appearance und Größe (1024 … 16) → `<name>-<appearance>-<size>.png`, Fortschritt `{ done, total, name }` über `Channel` |
+| `cancel_export()` | 012 | laufenden PNG-Export des aufrufenden Fensters nach der aktuellen Datei beenden |
 | `pick_image_file()` | 008 | nativer Dialog für ein Bild (PNG, JPEG, WebP, SVG), `null` bei Abbruch |
 | `read_image_file(path)` | 008 | Bild ≤ 20 MiB → `ImageFileDto { name, mime, dataUrl, width?, height? }` (Art aus Magic Bytes, Größe aus dem Kopf); Fehler `too_large`, `invalid_image` |
 
@@ -139,8 +151,11 @@ Aktionen `icon.setFill`, `icon.set`, `icon.removeVariant`, `icon.renameGroup`, `
 keine neue Abhängigkeit. 011: kein Rust-Command; Dokument-Command `replaceNode { ref, markup }`, Aktionen
 `edit.editSvg { markup? }`, `path.optimize { epsilon?, precision? }`, Undo-Label `optimizePath`; Abhängigkeit CodeMirror 6.
 
-Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `export_svg`,
-`export_png` (012), `list_fonts`, `text_to_path` (013), `load_settings`/`save_settings` (015).
+012: Commands oben (eigenes Modul `export_commands.rs`), Fehlercode `already_exists`, Aktionen `file.exportSvg`/
+`file.exportPng` mit Argumenten, Abhängigkeit `resvg`; kein neuer Dokument-Command (Export ändert nichts).
+
+Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `list_fonts`,
+`text_to_path` (013), `load_settings`/`save_settings` (015).
 
 ## Abhängigkeiten
 
@@ -160,4 +175,5 @@ Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts f
 | `unicode-normalization` | Rust (`ai-core`) | Asset-Namen NFC vergleichen (HFS+ speichert NFD, 002 E11/E12) |
 | `base64` | Rust (`ai-core`) | PNG-Assets als Data-URL ans Frontend (002 E9) |
 | `objc2` 0.6 (nur macOS) | Rust | `-[NSWindow setDocumentEdited:]` für den Änderungspunkt im Schließknopf (003 E11); Tauri hat dafür keine API, die Crate ist über tao ohnehin im Baum |
+| `resvg` 0.48.1 (exakt; Features `text`, `system-fonts`, `memmap-fonts`, `raster-images`) | Rust (`ai-core`) | PNG-Export (012 E8): ausgereifter reiner Rust-Renderer für SVG 1.1 inkl. Filter, Masken, Text; `usvg` (Parser), `tiny-skia` (Raster) und `fontdb` (Systemschriften) über seine Re-Exporte – keine Versionskonflikte. Kein Browser-Rendern: offscreen-WebView ist je OS verschieden und nicht testbar. 0.49.0 war erst drei Tage alt |
 | `tempfile` | Rust (Dev) | Dateisystem-Tests |

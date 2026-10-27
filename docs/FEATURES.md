@@ -97,9 +97,9 @@
 - [x] Fremdes SVG wird bereinigt (Skripte, Event-Handler, externe Referenzen) *(neu)* (003)
 
 ## 11. Export
-- [ ] Export SVG je Appearance (Light/Dark) inkl. Hintergrund, Gruppen, Layer, Layer-Opacity (012)
-- [ ] Export PNG mit resvg, Größen-Set 1024/512/256/128/64/32/16 *(neu: Größen)* (012)
-- [ ] Optional mit Plattform-Maske *(neu)* (012)
+- [x] Export SVG je Appearance (Light/Dark) inkl. Hintergrund, Gruppen, Layer, Layer-Opacity (012)
+- [x] Export PNG mit resvg, Größen-Set 1024/512/256/128/64/32/16 *(neu: Größen)* (012; Fortschritt, Abbruch, Apple-Hinweis zur Transparenz)
+- [x] Optional mit Plattform-Maske *(neu)* (012; dazu Schatten/Effekte als Annäherung, Schalter)
 - [ ] Share Export (macOS, optional) (016)
 
 ## 12. Undo/Redo

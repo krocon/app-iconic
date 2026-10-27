@@ -14,6 +14,7 @@ import {
 } from '../app/core/icon-file/icon-file.models';
 import { FsError } from '../app/core/errors/fs-error';
 import { CAMSCANNER_ICON } from './fixtures/camscanner-icon';
+import { ALL_FIELDS_ICON } from './fixtures/all-fields-icon';
 import { FixtureIcon } from './fixtures/fixture-icon';
 
 /** A `.icon` file in the fake's memory. */
@@ -79,6 +80,8 @@ function jsonEqual(a: unknown, b: unknown): boolean {
 @Injectable()
 export class FakeIconFileApi extends IconFileApi {
   static readonly CAMSCANNER = '/fixtures/camscanner.icon';
+  /** `testdata/fixtures/all-fields.icon` (design 010 E11; export contact sheet, 012). */
+  static readonly ALL_FIELDS = '/fixtures/all-fields.icon';
 
   /** "Disk": path → file. */
   readonly files = new Map<string, FakeIconFile>();
@@ -105,6 +108,7 @@ export class FakeIconFileApi extends IconFileApi {
   constructor() {
     super();
     this.files.set(FakeIconFileApi.CAMSCANNER, fromFixture(CAMSCANNER_ICON));
+    this.files.set(FakeIconFileApi.ALL_FIELDS, fromFixture(ALL_FIELDS_ICON));
   }
 
   /** Puts a one-layer `.icon` with the SVG `text` at `path` (browser mode: every SVG fixture). */

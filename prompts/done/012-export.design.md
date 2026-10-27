@@ -28,7 +28,7 @@ Vorab (eigener `fix:`-Commit): WebKit zeigte bei „Effects Preview“ keine Lay
 - **E3 Farben für resvg.** CSS `color(display-p3 …)` versteht resvg nicht. Der Export schreibt Farben als
   `#rrggbb` + `stop-opacity`/`fill-opacity`; Display-P3 wird nach sRGB umgerechnet (lineare Matrix, Gamma),
   Werte außerhalb 0…1 werden geklemmt (8 Bit). `fill-preview.ts` wird dafür generisch (`previewOf(fill, appearance,
-  color)`): Canvas → CSS-Farbe, Export → `SvgColor { hex, opacity }`.
+color)`): Canvas → CSS-Farbe, Export → `SvgColor { hex, opacity }`.
 - **E4 Auto-Verlauf** wie legacy §3 und Canvas (Basis +16 % → −14 %, oben → unten) – Annäherung an Icon Composer.
   `automatic`/`system-*` wie der Canvas (004 E7).
 - **E5 Maske** optional (`none` | `squircle` | `circle`, Default `none` – Apple maskiert App-Icons selbst):
@@ -93,17 +93,17 @@ Neuer Fehlercode `already_exists` (Rust `error.rs`, TS `fs-error.ts`, `describeF
 
 ### Commands (`src-tauri/src/export_commands.rs`, alle `async`)
 
-| Command | Zweck |
-|---|---|
-| `pick_export_dir() -> Option<String>` | nativer Ordner-Dialog |
-| `export_svg(variants, targetDir, options) -> ExportReport` | SVG-Texte als Dateien |
-| `export_png(variants, sizes, targetDir, options, onProgress: Channel<ExportProgress>) -> ExportReport` | resvg |
-| `cancel_export()` | Abbruch-Flag des aufrufenden Fensters setzen |
+| Command                                                                                                | Zweck                                        |
+| ------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| `pick_export_dir() -> Option<String>`                                                                  | nativer Ordner-Dialog                        |
+| `export_svg(variants, targetDir, options) -> ExportReport`                                             | SVG-Texte als Dateien                        |
+| `export_png(variants, sizes, targetDir, options, onProgress: Channel<ExportProgress>) -> ExportReport` | resvg                                        |
+| `cancel_export()`                                                                                      | Abbruch-Flag des aufrufenden Fensters setzen |
 
 ### Frontend
 
 - `core/export/export-api.ts`: `ExportApi { pickExportDir(), exportSvg(variants, dir, options),
-  exportPng(variants, sizes, dir, options, onProgress), cancelExport() }`, DTOs `export.models.ts`; `TauriExportApi`
+exportPng(variants, sizes, dir, options, onProgress), cancelExport() }`, DTOs `export.models.ts`; `TauriExportApi`
   (Channel aus `@tauri-apps/api/core`, `invoke` weiter nur in `call.ts`); `FakeExportApi` in `testing/`.
 - `features/export/export-svg.ts`: `exportSvg(doc, appearance, opts: { mask, effects }, rasterSizes?) → string`.
 - `features/export/export-options.ts` (rein): `ExportChoice`, Defaults, `exportArgs(args)`, `fileBaseName(docName)`.
@@ -129,6 +129,18 @@ Neuer Fehlercode `already_exists` (Rust `error.rs`, TS `fs-error.ts`, `describeF
 2. Maske Default „none“ (App Store) – oder lieber wie der Canvas (Squircle)?
 3. Transluzenz/Blend im Export nur mit dem Effekte-Schalter (Default aus) – ok?
 4. Auf dem Mac prüfen: Ordner-Dialog, Fortschritt, Systemschriften (SF Pro u. a.) im PNG.
+
+## Abweichungen und Grenzen
+
+- **Ziel-Ordner statt Save-Dialog** für SVG (E10): `export_svg` ersetzt das im Prompt genannte `write_text_file`.
+- **Letzte Wahl** nur für die Sitzung (E15); dauerhaft mit `settings.json` in 015.
+- `<style>`-Elemente eines Assets wirken im Export-SVG dokumentweit (Klassen-Selektoren könnten andere Layer treffen);
+  `#id`-Selektoren und `url()` werden umgeschrieben. Import löst Stile ohnehin auf (003 E5), daher selten.
+- Display P3 außerhalb sRGB wird geklemmt (8-Bit-PNG ohne Farbprofil).
+- Effekte bleiben Annäherungen (010 E13); Blend `multiply` mit weißen Layern ist im Export (wie im Canvas) unsichtbar
+  (`all-fields.icon`, Kontaktbogen).
+- Playwright-WebKit ist im Container nicht installiert; die echte App (WebKitGTK) wurde unter Xvfb geprüft: Dialog,
+  GTK-Ordnerwahl, Export von 4 PNGs (1024/512, light/dark).
 
 ## Fortschritt
 

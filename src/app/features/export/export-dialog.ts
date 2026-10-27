@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { ExportAppearance, PNG_SIZES, PngSize } from '../../core/export/export.models';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { Modal } from '../../shared/dialog/modal';
@@ -103,7 +111,7 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
               data-testid="export-target"
               aria-labelledby="export-target-label"
               [title]="choice().targetDir ?? ''"
-              >{{ choice().targetDir ?? t.noTarget }}</span
+              ><bdi>{{ choice().targetDir ?? t.noTarget }}</bdi></span
             >
             <button
               type="button"
@@ -141,7 +149,7 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
           }
         }
       </div>
-      <div class="actions">
+      <div class="actions" #actions>
         @switch (phase()) {
           @case ('running') {
             <button type="button" class="btn" data-testid="export-stop" (click)="service.cancel()">
@@ -149,7 +157,7 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
             </button>
           }
           @case ('exists') {
-            <button type="button" class="btn" (click)="phase.set('edit')">{{ t.cancel }}</button>
+            <button type="button" class="btn" (click)="setPhase('edit')">{{ t.cancel }}</button>
             <button
               type="button"
               class="btn primary"
@@ -221,6 +229,7 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
       color: var(--color-text-muted);
       text-overflow: ellipsis;
       white-space: nowrap;
+      /* rtl: a long path is cut at its start, the folder name stays visible; <bdi> keeps it ltr */
       direction: rtl;
       text-align: left;
     }
@@ -291,11 +300,24 @@ export class ExportDialog {
     this.service.update({ mask: (e.target as HTMLSelectElement).value as MaskShape });
   }
 
+  private readonly actionsEl = viewChild.required<ElementRef<HTMLElement>>('actions');
+
   protected async run(overwrite: boolean): Promise<void> {
-    this.phase.set('running');
+    this.setPhase('running');
     const o = await this.service.export({ ...this.choice(), overwrite });
     this.outcome.set(o);
-    this.phase.set(o.kind === 'exists' ? 'exists' : 'result');
+    this.setPhase(o.kind === 'exists' ? 'exists' : 'result');
+  }
+
+  /**
+   * The focused button disappears with the phase – the focus stays in the dialog, on the first
+   * button (Stop, Cancel or Close – never Replace or Export by an accidental Enter).
+   */
+  protected setPhase(p: Phase): void {
+    this.phase.set(p);
+    setTimeout(() => {
+      this.actionsEl().nativeElement.querySelector('button')?.focus();
+    });
   }
 
   protected close(): void {

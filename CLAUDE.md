@@ -49,9 +49,10 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/recent/            RecentFilesApi („Open Recent“, 003)
   app/core/actions/           Aktionskatalog, Keymaps (base/mac/other.json), ActionService (run(id, args?)),
                               KeyboardDispatcher (einziger keydown-Listener), shortcut, action-args (005),
-                              add-action-args (Schema der Add-Argumente, 008)
+                              add-action-args (Schema der Add-Argumente, 008), export-action-args (012)
   app/core/menu/              MenuApi (natives Menü, menu-action), KeymapApi (keymap.json), MenuSpec (005)
   app/core/clipboard/         ClipboardApi (Text der System-Zwischenablage über navigator.clipboard, 006)
+  app/core/export/            ExportApi (Ordner-Dialog, export_svg, export_png mit Channel, cancel), DTOs (012)
   app/backend-providers.ts    Bindung der Fassaden; Dev-Build: backend-providers.dev.ts (Fakes im Browser, 003 E14)
   app/features/document/      IconDocument, DocumentStore (runCommand), UndoService (undo/), Commands (commands/:
                               serialisierbar, command-json.ts + registry.ts commandFromJson, 005; tree-commands:
@@ -84,6 +85,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               Optimizer-Command), svg-source-check (rein: DOMParser-Fehlerposition), selection-map
                               (rein), SvgSourceDialog (+ code-editor: CodeMirror 6, nur lazy), OptimizePathDialog,
                               svg-source-actions (edit.editSvg, path.optimize), Texte
+  app/features/export/        Export (012): export-svg (Export-SVG aus stackOf/fillPreview, ID-Präfixe), export-options
+                              (rein: Wahl, Argumente der KI, Dateiname), ExportService (Wahl der Sitzung, Fortschritt,
+                              Abbruch, Hinweise), ExportDialog, export-actions (file.exportSvg/Png), Texte
   app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3), Texte der Fensterhülle
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
@@ -105,8 +109,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)
   app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,
-                              command-cases.ts, tree-documents.ts, fake-clipboard-api.ts, browser-hook.ts =
-                              `window.__appIconic` für Playwright)
+                              command-cases.ts, tree-documents.ts, fake-clipboard-api.ts, fake-export-api.ts,
+                              browser-hook.ts = `window.__appIconic` für Playwright)
   testing/fixtures/           generiert aus testdata/ (camscanner.icon, all-fields.icon, svg/, unique-names.json;
                               `pnpm fixtures`)
 e2e/                          Playwright-Tests gegen den Dev-Server
@@ -118,6 +122,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/windows.rs              DocWindows: Labels doc-<n>, Startpfade/-aktionen, Pfad je Fenster, Schließen-Übernahme
                               (003), QuitQueue (005)
   src/app_menu.rs             natives macOS-Menü: Spec je Fenster, fokussiertes zeigt seins, Klicks routen (005)
+  src/export_commands.rs      Export-Commands (pick_export_dir, export_svg, export_png, cancel_export), ExportJobs (012)
   src/about.rs, model.rs      AppInfo, DTOs (serde camelCase)
   core/                       Crate `ai-core` (Workspace-Mitglied): Engine ohne Tauri
     src/error.rs              FsError { code, message, path }
@@ -127,6 +132,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
     src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
     src/menu_spec.rs          MenuSpec prüfen, Accelerators, Menü ohne Fenster (005)
     src/keymap_file.rs        keymap.json laden (005)
+    src/export/               Export (012): png (resvg, sichere usvg-Optionen), fonts (Systemschriften), files (Namen,
+                              Überschreiben, atomar, Fortschritt, Abbruch)
   icons/source/app-icon.svg   Quelle des App-Icons
 testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverändert); all-fields.icon (010: alle
                               belegten Felder + unbekannte)
