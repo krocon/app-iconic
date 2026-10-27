@@ -82,6 +82,13 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 010 E11 | Rust schreibt leere Listen wie Icon Composer (`[\n\n  ]`, `New.icon`) | belegt; leere Objekte mangels Beleg weiter `{}` |
 | 010 E13 | Canvas-Vorschau der Gruppen-Effekte als **Annäherung** (Ansichtsoption „Effects Preview“): Schatten als SVG-Filter je Layer (`feDropShadow` bzw. abgedunkelte Weichzeichnung), Transluzenz als Opacity-Verlauf (`mask-image`), Blend-Modes als `mix-blend-mode`; Werte je Appearance | Liquid Glass wird nicht nachgebaut; Filter im Shadow Root des Layers sind zoomfest |
 | 010 E15 | `styleWithout` entfernt nur die eine Deklaration textuell, der Rest des `style`-Attributs bleibt Zeichen für Zeichen | Roundtrip-Regel (009 entfernte über das CSSOM und verlor unbekannte Deklarationen) |
+| 011 E1 | CodeMirror 6 nur im Dialog „Edit SVG…“, per `import()` als eigener Chunk (`features/svg-source/code-editor.ts`), Farben über CSS-Variablen (`--code-*`) | Startbundle bleibt klein (Initial ≈ 0,56 MB, Editor-Chunk ≈ 0,38 MB); hell/dunkel ohne Neuaufbau |
+| 011 E3/E4 | Der Dialog zeigt den echten Quelltext (Node: `serializeElement`, Asset: Datei), „Format“ nur auf Knopfdruck; Prüfung live mit `DOMParser`, Fehlerposition aus der Parser-Meldung (Chromium/WebKit, Firefox, jsdom) als Lint-Marker; Apply nur für gültigen, geänderten Text | Roundtrip-Regel: eine Farbänderung rundet nicht alle Zahlen; kein eigener XML-Parser |
+| 011 E5/E6 | Neuer Command `replaceNode { ref, markup }` (bereinigt, neue IDs), Asset über `replaceAssetMarkup`; Auswahl über den Index-Pfad wiedergefunden | serialisierbar (KI-Regel); Undo „Edit SVG Code“ |
+| 011 E7 | Esc fragt bei Änderungen **im** Dialog; `Modal` übergeht `keydown`, das schon `defaultPrevented` ist (CodeMirror-Suchleiste) | `DialogService` kennt nur einen Dialog zugleich |
+| 011 E8/E9 | Formatierer `svg-format.ts` (rein): 2 Leerzeichen, ein Element je Zeile, Attribute Namensräume → `id` → Geometrie → `transform` → alphabetisch, Zahlen gerundet (Default 3) nur in Zahl-Attributen, `d` über den Pfad-Tokenizer, Text/CDATA/`xml:space` unverändert, idempotent; „Copy XML“ formatiert, „Copy“ und Speichern nie | lesbar und stabil, ohne Roundtrip-Verlust beim Speichern |
+| 011 E10/E11 | Pfad-Optimierer `path-optimize.ts` (aus `SVGPathOptimizer.swift`): RDP mit Eckenschutz auf **jeder** Linienfolge, Kurven bleiben, Null-Segmente weg, runden statt abschneiden, kürzeste Form (`path-write.ts`: relativ aus gerundeten absoluten Punkten) | Fehler der Vorlage behoben (Abschneiden, `L` nach Kurve entfernt), Abweichung ≤ epsilon + Rundung (Eigenschaftstest) |
+| 011 E12/E13 | Aktionen `edit.editSvg { markup? }` und `path.optimize { epsilon?, precision? }`: ohne Argumente Dialog (mit Vorschau), mit Argumenten direkt (KI); Ergebnis ein Command (`replaceNode`/`replaceAssetMarkup` bzw. `setAttributes` „Optimize Path“); erreichbar über Menü, Kontextmenü, Properties | KI-Regel; ein Undo-Schritt |
 | 009 E10/E11 | Generische Editoren in `shared/controls/` (Zahl mit Stepped Slider, Farbe, Auswahl, Text, Schalter; Ausgaben `edited`/`committed`/`reverted`), Aktionen `properties.set/reset/resetAll` | wiederverwendbar für den Icon-Inspector (010); die KI setzt, was das Panel setzt |
 
 ## Schichten
@@ -129,7 +136,8 @@ entfernen) und neu `setText { changes: [{ ref, text }] }`; keine neue Abhängigk
 unverändertes Asset), Formatter mit Icon-Composer-Leerlisten; Dokument-Command `renameAsset { from, to }`;
 Aktionen `icon.setFill`, `icon.set`, `icon.removeVariant`, `icon.renameGroup`, `icon.renameLayer`,
 `icon.renameAsset`, `icon.setPlatforms`, `icon.setColorSpace`, `icon.editAppearance`, `icon.copyJson`, `view.effects`;
-keine neue Abhängigkeit.
+keine neue Abhängigkeit. 011: kein Rust-Command; Dokument-Command `replaceNode { ref, markup }`, Aktionen
+`edit.editSvg { markup? }`, `path.optimize { epsilon?, precision? }`, Undo-Label `optimizePath`; Abhängigkeit CodeMirror 6.
 
 Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `export_svg`,
 `export_png` (012), `list_fonts`, `text_to_path` (013), `load_settings`/`save_settings` (015).
@@ -142,6 +150,7 @@ Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts f
 | `@tauri-apps/api` | Frontend | `invoke`, `isTauri` – nur in `call.ts` |
 | `vitest`, `jsdom` | Dev | Unit-Tests über `ng test` |
 | `@playwright/test` 1.63.0 | Dev | E2E im Browser (001 E6) |
+| `@codemirror/state`, `view`, `commands`, `search`, `lint`, `language`, `lang-xml`, `@lezer/highlight` (6.x, exakt gepinnt) | Frontend (lazy) | Quelltext-Editor „Edit SVG…“ (011 E1): Zeilennummern, XML-Hervorhebung, Suche, Lint-Marker; nur im Lazy-Chunk. Kein Editor-Eigenbau (Auswahl, IME, Undo, Barrierefreiheit). `pnpm.overrides` hält zwei transitive Pakete auf Versionen, die mindestens zwei Wochen alt sind |
 | `eslint`, `angular-eslint`, `typescript-eslint`, `prettier` | Dev | Lint/Format |
 | `tauri` 2, `tauri-build` | Rust | Desktop-Hülle |
 | `tauri-plugin-dialog` | Rust | Datei-Dialoge über die Rust-API (001 E4) |

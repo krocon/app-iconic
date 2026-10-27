@@ -1,6 +1,6 @@
 # Design 011: SVG-Quelltext, Formatierer, Pfad-Optimierer
 
-Status: in Arbeit · Datum: 27.10.2026
+Status: umgesetzt · Datum: 27.10.2026
 
 ## Vorlage
 
@@ -157,11 +157,33 @@ Aktionen: `edit.editSvg { markup? }`, `path.optimize { epsilon?, precision? }` (
 1. „Edit SVG…“ zeigt den Rohtext (E3) mit Knopf „Format“ – oder lieber gleich formatiert (rundet Zahlen)?
 2. Optimierer: runden statt abschneiden und Linienfolgen auch in Kurvenpfaden vereinfachen (E11) – ok?
 3. „Copy“ bleibt roh, „Copy XML“ formatiert (E9) – passt die Trennung?
+4. Bitte auf dem Mac prüfen: Canvas mit „Effects Preview“ (010) zeigt in WebKitGTK die Layer nicht (siehe unten).
 
 ## Fortschritt
 
-- [ ] Design
-- [ ] Reine Module + Tests (Formatierer, Optimierer, Prüfung, Auswahl-Abbildung, `replaceNode`)
-- [ ] Dialoge, Aktionen, Menü, Kontextmenü, Properties
-- [ ] Playwright, echte App
-- [ ] Doku
+- [x] Design
+- [x] Reine Module + Tests (Formatierer, Optimierer, Prüfung, Auswahl-Abbildung, `replaceNode`)
+- [x] Dialoge, Aktionen, Menü, Kontextmenü, Properties
+- [x] Playwright (4 Tests in `e2e/svg-source.spec.ts`), echte App unter Xvfb (WebKitGTK: Editor lädt trotz CSP,
+  Format, ⌘Enter, Undo „Edit SVG Code“ im Menü)
+- [x] Doku
+
+## Abweichungen und Grenzen
+
+- Optimierer: runden statt abschneiden, Linienfolgen auch in Kurvenpfaden, Abstand zur Strecke statt zur Geraden,
+  kürzeste Form (E10/E11) – die Ergebnisse der Vorlage stehen in der Testtabelle daneben. Nach einem `M` bleibt
+  das `L` stehen (lesbar), sonst werden wiederholte Buchstaben weggelassen.
+- `CGPathSimplify.swift` (Kurven abflachen) wurde bewusst nicht übertragen: es macht Kurven zu Polylinien und
+  gehört zu Text → Pfad / Freehand (013).
+- Der Dialog bereinigt beim Apply wie Import/Einfügen (`prepare`), löst aber kein `<style>` in Attribute auf
+  (wie „SVG Snippet“, 008) – die Stile bleiben im Asset, das Canvas zeigt sie im Shadow Root.
+- Die Fehlermeldung des Parsers (Detailtext) kommt in der Sprache der Engine (Englisch); Zeile/Spalte und der
+  Rahmen stammen aus dem Textkatalog.
+- Mehr als 10 000 Pfade in einem Optimize-Schritt werden auf die ersten 10 000 begrenzt (`MAX_CHANGES`).
+
+## Beobachtung außerhalb von 011
+
+- In der echten App (WebKitGTK unter Xvfb) zeigt die Canvas-Vorschau mit eingeschalteter **„Effects Preview“ (010
+  E13)** die Layer-Inhalte nicht (ein neuer Kreis bleibt unsichtbar); ohne Effects Preview erscheint er. Chromium
+  (Playwright) zeigt beides. Vermutlich Filter/`mask-image` im Shadow Root unter WebKit – auf dem Mac (WKWebView)
+  prüfen; ein eigener Fix gehört zu 010/017.

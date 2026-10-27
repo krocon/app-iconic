@@ -86,9 +86,9 @@
 - [x] Canvas-Vorschau: Fill je Appearance, Schatten/Transluzenz/Blend-Modes als Annäherung (Ansichtsoption) (010)
 
 ## 9. SVG-Quelltext
-- [ ] Edit SVG… mit CodeMirror, Fehleranzeige, Übernahme nur bei gültigem Markup, Undo (011)
-- [ ] Code-Formatierung (Zahlen runden, Einrückung) (011)
-- [ ] Pfad-Optimierer (RDP mit Eckenschutz, epsilon einstellbar) (011)
+- [x] Edit SVG… mit CodeMirror, Fehleranzeige, Übernahme nur bei gültigem Markup, Undo (011: Node oder Asset, Lint-Marker mit Zeile/Spalte, ⌘Enter/Esc, Auswahl bleibt)
+- [x] Code-Formatierung (Zahlen runden, Einrückung) (011: Knopf „Format“ im Dialog, „Copy XML“)
+- [x] Pfad-Optimierer (RDP mit Eckenschutz, epsilon einstellbar) (011: Aktion „Optimize Path…“ mit Vorschau, kürzeste Form)
 
 ## 10. SVG-Unterstützung
 - [ ] Elemente aus legacy §10 + `use`, `defs`, Verläufe rendern und bearbeiten (004, 009)

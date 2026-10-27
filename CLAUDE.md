@@ -57,7 +57,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               serialisierbar, command-json.ts + registry.ts commandFromJson, 005; tree-commands:
                               ReorderNode/GroupNodes/Ungroup, 006; set-attributes: Ergebnis einer Geste, 007),
                               model/ (icon-json, unique-names, selection, reorder-rules, specializations 010),
-                              svg/ (node-ids, sanitize-svg, resolve-styles, svg-references, style-props) (003–010)
+                              svg/ (node-ids, sanitize-svg, resolve-styles, svg-references, style-props,
+                              svg-format 011) (003–011); commands/replace-node (011)
   app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster/Quit), Recent,
                               file-actions (Aktionen der Datei-Funktionen), Texte (003, 005)
   app/features/menus/         Menümodell (rein), MenuService (nativ/HTML), MenuBar (Windows/Linux), Befehlspalette,
@@ -79,6 +80,10 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               (Felder → SetIconJsonValue, Umbenennen), IconInspectorService + icon-actions (icon.*),
                               Komponenten icon-inspector, inspector-section/-row, variant-tools, fill-editor,
                               icon-color-field, json-preview
+  app/features/svg-source/    „Edit SVG…“ + „Optimize Path…“ (011): SvgSourceService (Ziel, Apply, Auswahl,
+                              Optimizer-Command), svg-source-check (rein: DOMParser-Fehlerposition), selection-map
+                              (rein), SvgSourceDialog (+ code-editor: CodeMirror 6, nur lazy), OptimizePathDialog,
+                              svg-source-actions (edit.editSvg, path.optimize), Texte
   app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3), Texte der Fensterhülle
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
@@ -93,7 +98,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/shared/geometry/        Geometrie: icon-guides, view-transform, zoom-steps, ruler-ticks, squircle, align (rein);
                               dom-geometry (clientToDocument, nodeToDocument über Screen-CTMs, 004); 007 (rein):
                               matrix, snapping, bounds-guard, box-math, box-selection, transform-text,
-                              path-data (Tokenizer für `d`), path-edit
+                              path-data (Tokenizer für `d`), path-edit; 011 (rein): path-write (runden, Form
+                              behalten / kürzeste Form), path-optimize (RDP mit Eckenschutz)
   app/shared/controls/        Generische Editoren (009): DraftField (Basis: live/commit/cancel), NumberField (Stepped
                               Slider), ColorField + color-value (rein), SelectField, TextField, ToggleField, step-value
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)

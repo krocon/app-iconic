@@ -35,7 +35,7 @@ Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 je
 | 008 | [008-elemente-hinzufuegen.md](done/008-elemente-hinzufuegen.md) | Command Sidebar + Menü „Add“: Icon-Gruppe, Container, Grundformen mit Legacy-Defaults, Text, Bild (⌘I), SVG-Snippet | 006 | M | ✅ 27.10.2026 |
 | 009 | [009-properties-panel.md](done/009-properties-panel.md) | Properties aus Property-Specs, Farbeingabe, Stepped Slider, Mehrfachauswahl (mixed), Constrain, Transform-Liste mit Pivot, Reset | 006, 007 | L | ✅ 27.10.2026 |
 | 010 | [010-icon-eigenschaften.md](done/010-icon-eigenschaften.md) | Icon-Inspector im Apple-Format: Fill (alle Arten), Specializations, Gruppen (Shadow, Translucency …), Layer (Name, Opacity), Plattformen, icon.json-Vorschau; Vorschau-Annäherung von Schatten/Transluzenz | 004, 009 | M | ✅ 27.10.2026 |
-| 011 | [011-svg-quelltext.md](011-svg-quelltext.md) | „Edit SVG…“ mit CodeMirror 6 (Validierung, Undo), Formatierer, Pfad-Optimierer (RDP mit Eckenschutz) | 006 | M | offen |
+| 011 | [011-svg-quelltext.md](done/011-svg-quelltext.md) | „Edit SVG…“ mit CodeMirror 6 (Validierung, Undo), Formatierer, Pfad-Optimierer (RDP mit Eckenschutz) | 006 | M | ✅ 27.10.2026 |
 | 012 | [012-export.md](012-export.md) | Export SVG je Appearance, PNG in Rust (resvg) mit Größen-Set, optionale Plattform-Maske, Fortschritt | 004, 010 | M | offen |
 | 013 | [013-werkzeuge.md](013-werkzeuge.md) | Freehand (RDP + Glättung), Text → Pfad (fontdb + ttf-parser), Symbol-Picker mit freiem Icon-Set (Plugin-Schnittstelle) | 008 | L | offen |
 | 014 | [014-clip-paths.md](014-clip-paths.md) | Clip Paths fertig: Picker, Anlegen je Layer, Bearbeitungsmodus, Vererbung Layer → Node, `clipPathUnits`, nicht selektierbar | 009 | M | offen |
