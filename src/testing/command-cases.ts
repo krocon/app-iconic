@@ -22,6 +22,7 @@ import {
   SetAttribute,
   SetAttributes,
   SetIconJsonValue,
+  SetText,
   Ungroup,
 } from '../app/features/document/commands';
 import { smallDocument } from './documents';
@@ -61,6 +62,19 @@ export const CASES: [string, (doc: IconDocument) => DocCommand][] = [
   ],
   ['RemoveAttribute', () => new RemoveAttribute(a('n3'), 'fill')],
   ['InsertNode', () => new InsertNode(a('n2'), '<ellipse rx="1" onclick="x()"/>', 0)],
+  [
+    'SetAttributes (remove + set, design 009 E3)',
+    () =>
+      new SetAttributes(
+        [
+          { ref: a('n3'), name: 'fill', value: null },
+          { ref: a('n3'), name: 'stroke', value: 'red' },
+        ],
+        'resetProperty',
+      ),
+  ],
+  // (the rect has no element children; the panel only offers it for `text`)
+  ['SetText (design 009 E3)', () => new SetText([{ ref: a('n3'), text: 'Hello' }])],
   ['InsertNode (end)', () => new InsertNode(a('n1'), '<rect/>')],
   ['RemoveNode', () => new RemoveNode(a('n3'))],
   ['MoveNode', () => new MoveNode(a('n4'), a('n1'), 0)],

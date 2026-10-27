@@ -18,9 +18,12 @@ export type CommandJson =
   /** Several attributes as one step – the result of a canvas gesture (design 007 E10). */
   | {
       type: 'setAttributes';
-      changes: { ref: NodeRef; name: string; value: string }[];
+      /** `value: null` removes the attribute (design 009 E3). */
+      changes: { ref: NodeRef; name: string; value: string | null }[];
       label?: UndoLabel;
     }
+  /** Text content of elements without element children (design 009 E3). */
+  | { type: 'setText'; changes: { ref: NodeRef; text: string }[] }
   | { type: 'removeAttribute'; ref: NodeRef; name: string }
   | { type: 'insertNode'; parent: NodeRef; markup: string; index?: number; label?: UndoLabel }
   | { type: 'removeNode'; ref: NodeRef }

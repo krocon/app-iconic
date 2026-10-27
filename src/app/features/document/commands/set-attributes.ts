@@ -2,13 +2,21 @@ import { IconDocument, NodeRef } from '../icon-document';
 import { UndoLabel } from '../undo/undo-texts';
 import { CommandError, DocCommand } from './command';
 import { CommandJson, opt } from './command-json';
-import { checkName, readAttr, sameRef, target, writeAttr } from './node-commands';
+import {
+  attributesOf,
+  checkName,
+  readAttr,
+  restoreAttributes,
+  sameRef,
+  target,
+  writeAttr,
+} from './node-commands';
 
-/** One attribute of one node. */
+/** One attribute of one node; `null` removes it (Reset, `style` without a property – design 009 E3). */
 export interface AttributeChange {
   ref: NodeRef;
   name: string;
-  value: string;
+  value: string | null;
 }
 
 /** Most attributes one command may change. */
@@ -19,10 +27,13 @@ export const MAX_CHANGES = 10_000;
  * (drag a handle, move a selection, scale a box, nudge) – serialisable like every command (AI
  * rule). `merge` takes over a following command with the same targets (refs + names in the same
  * order) and keeps the values before the first, so a committed gesture is one `setAttributes` with
- * the end values. Undo writes the old values back (missing ones are removed again).
+ * the end values. Undo writes the old values back (missing ones are removed again). A `null` value
+ * removes the attribute (design 009 E3).
  */
 export class SetAttributes implements DocCommand {
   private old: (string | null)[] = [];
+  /** All attributes of elements that lose one (undo puts it back at its place). */
+  private whole = new Map<Element, ReturnType<typeof attributesOf>>();
   readonly changes: AttributeChange[];
 
   constructor(
@@ -45,6 +56,10 @@ export class SetAttributes implements DocCommand {
   do(doc: IconDocument): void {
     const els = this.changes.map((c) => target(doc, c.ref)); // all targets first: nothing half done
     this.old = this.changes.map((c, i) => readAttr(els[i], c.name));
+    this.whole = new Map();
+    this.changes.forEach((c, i) => {
+      if (c.value === null && !this.whole.has(els[i])) this.whole.set(els[i], attributesOf(els[i]));
+    });
     this.changes.forEach((c, i) => writeAttr(els[i], c.name, c.value));
   }
 
@@ -53,6 +68,7 @@ export class SetAttributes implements DocCommand {
       const c = this.changes[i];
       writeAttr(target(doc, c.ref), c.name, this.old[i]);
     }
+    for (const [el, attrs] of this.whole) restoreAttributes(el, attrs);
   }
 
   merge(next: DocCommand): boolean {

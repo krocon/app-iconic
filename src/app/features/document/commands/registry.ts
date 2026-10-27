@@ -16,6 +16,7 @@ import {
 } from './json-commands';
 import { InsertNode, MoveNode, RemoveAttribute, RemoveNode, SetAttribute } from './node-commands';
 import { MAX_CHANGES, SetAttributes } from './set-attributes';
+import { SetText } from './set-text';
 import { GroupNodes, ReorderNode, Ungroup } from './tree-commands';
 
 /**
@@ -172,10 +173,22 @@ const PARSERS: Record<CommandType, Parser> = {
       return {
         ref: ref(x['ref'], 'ref'),
         name: attrName(x['name']),
-        value: str(x['value'], 'value', MAX_MARKUP),
+        value: x['value'] === null ? null : str(x['value'], 'value', MAX_MARKUP),
       };
     });
     return new SetAttributes(changes, label(o['label']));
+  },
+  setText: (o) => {
+    keys(o, ['changes']);
+    const list = o['changes'];
+    if (!Array.isArray(list) || list.length === 0 || list.length > MAX_CHANGES) fail('changes');
+    return new SetText(
+      list.map((c) => {
+        const x = obj(c, 'changes');
+        keys(x, ['ref', 'text']);
+        return { ref: ref(x['ref'], 'ref'), text: str(x['text'], 'text', MAX_MARKUP) };
+      }),
+    );
   },
   removeAttribute: (o) => {
     keys(o, ['ref', 'name']);

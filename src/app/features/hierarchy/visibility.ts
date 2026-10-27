@@ -8,7 +8,8 @@ import {
 import { IconDocument } from '../document/icon-document';
 import { groups, layers } from '../document/model/icon-json';
 import { IconItem } from '../document/model/selection';
-import { elementsOf, SVG_NS } from '../document/svg/node-ids';
+import { elementsOf } from '../document/svg/node-ids';
+import { styleValue, styleWithout } from '../document/svg/style-props';
 import { Selection } from './follow-up';
 import { isHiddenElement } from './hierarchy-model';
 
@@ -18,15 +19,6 @@ import { isHiddenElement } from './hierarchy-model';
  * everything inside, all to the new state of the first target. One undo step.
  */
 
-/** `style` without its `display` declaration (the browser parses it), `null` if empty. */
-function styleWithoutDisplay(el: Element): string | null {
-  const tmp = el.ownerDocument.createElementNS(SVG_NS, 'g') as SVGGElement;
-  tmp.setAttribute('style', el.getAttribute('style') ?? '');
-  tmp.style.removeProperty('display');
-  const s = tmp.getAttribute('style')?.trim();
-  return s ? s : null;
-}
-
 function nodeCommands(doc: IconDocument, el: Element, hide: boolean): DocCommand[] {
   const ref = doc.refOf(el)!;
   if (hide)
@@ -35,9 +27,8 @@ function nodeCommands(doc: IconDocument, el: Element, hide: boolean): DocCommand
       : [new SetAttribute(ref, 'display', 'none', 'toggleVisibility')];
   const cmds: DocCommand[] = [];
   if (el.getAttribute('display')?.trim() === 'none') cmds.push(new RemoveAttribute(ref, 'display'));
-  const style = (el as Partial<ElementCSSInlineStyle>).style;
-  if (style?.getPropertyValue('display')?.trim() === 'none') {
-    const rest = styleWithoutDisplay(el);
+  if (styleValue(el, 'display') === 'none') {
+    const rest = styleWithout(el, 'display');
     cmds.push(
       rest
         ? new SetAttribute(ref, 'style', rest, 'toggleVisibility')

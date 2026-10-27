@@ -28,6 +28,7 @@ export const UNDO_TEXTS = {
   delete: 'Delete',
   toggleVisibility: 'Toggle Visibility',
   resetAllProperties: 'Reset All Properties',
+  resetProperty: 'Reset Property',
   // rewrite (design 003)
   removeAttribute: 'Remove Attribute',
   insertNode: 'Insert Node',

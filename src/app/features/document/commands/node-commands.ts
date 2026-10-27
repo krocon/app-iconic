@@ -84,7 +84,7 @@ export class SetAttribute implements DocCommand {
 }
 
 /** All attributes in order – undo of a removal puts the attribute back at its place. */
-function attributesOf(el: Element): { ns: string | null; name: string; value: string }[] {
+export function attributesOf(el: Element): { ns: string | null; name: string; value: string }[] {
   return Array.from(el.attributes).map((a) => ({
     ns: a.namespaceURI,
     name: a.name,
@@ -92,7 +92,7 @@ function attributesOf(el: Element): { ns: string | null; name: string; value: st
   }));
 }
 
-function restoreAttributes(el: Element, list: ReturnType<typeof attributesOf>): void {
+export function restoreAttributes(el: Element, list: ReturnType<typeof attributesOf>): void {
   for (const a of Array.from(el.attributes)) el.removeAttributeNode(a);
   for (const a of list) el.setAttributeNS(a.ns, a.name, a.value);
 }
