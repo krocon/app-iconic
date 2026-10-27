@@ -1,5 +1,6 @@
 import { IconDocumentDto } from '../app/core/icon-file/icon-file.models';
 import { IconDocument } from '../app/features/document/icon-document';
+import { ALL_FIELDS_ICON } from './fixtures/all-fields-icon';
 import { CAMSCANNER_ICON } from './fixtures/camscanner-icon';
 
 /** The camscanner fixture as the backend would send it after `open_icon`. */
@@ -16,6 +17,18 @@ export function camscannerDto(path: string | null = '/fixtures/camscanner.icon')
 
 export function camscannerDocument(path?: string | null): IconDocument {
   return IconDocument.fromDto(camscannerDto(path));
+}
+
+/** `testdata/fixtures/all-fields.icon` (design 010 E11): every documented field. */
+export function allFieldsDocument(path: string | null = '/fixtures/all-fields.icon'): IconDocument {
+  return IconDocument.fromDto({
+    path,
+    name: path === null ? null : 'all-fields.icon',
+    format: 'bundle',
+    iconJson: JSON.parse(ALL_FIELDS_ICON.iconJson),
+    assets: ALL_FIELDS_ICON.assets.map((a) => ({ name: a.name, kind: 'svg', text: a.text })),
+    warnings: [],
+  });
 }
 
 /** A small document: one group, one layer, one SVG asset `a.svg` with ids n1 (svg), n2 (g), n3, n4. */

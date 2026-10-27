@@ -21,6 +21,11 @@ export const MODULES = [
     constName: 'CAMSCANNER_ICON',
   },
   {
+    bundle: 'testdata/fixtures/all-fields.icon',
+    out: 'src/testing/fixtures/all-fields-icon.ts',
+    constName: 'ALL_FIELDS_ICON',
+  },
+  {
     svgDir: 'testdata/fixtures/svg',
     out: 'src/testing/fixtures/svg-fixtures.ts',
     constName: 'SVG_FIXTURES',

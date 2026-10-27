@@ -3,8 +3,21 @@ import { AssetState, IconDocument } from '../document/icon-document';
 import { groups, layers } from '../document/model/icon-json';
 import { SVG_NS } from '../document/svg/node-ids';
 import { CANVAS_SIZE } from '../../shared/geometry/icon-guides';
-import { Appearance, specialized } from './appearance';
-import { assetPlacement, layerTransform } from './asset-placement';
+import { Appearance, fieldFor, specialized } from './appearance';
+import { assetPlacement } from './asset-placement';
+import {
+  blendCss,
+  chromaticMatrix,
+  groupEffects,
+  SHADOW_BLUR,
+  SHADOW_OFFSET,
+  ShadowEffect,
+  stackTransform,
+  translucencyMask,
+} from './effects';
+
+/** Id of the shadow filter inside a layer's shadow root (own tree scope per layer). */
+const SHADOW_ID = 'ai-fx-shadow';
 
 /** Styles inside every layer's shadow root (design 004 E2). */
 const LAYER_CSS =
@@ -18,6 +31,10 @@ export interface StackLayer {
   asset: AssetState;
   opacity: number | null;
   transform: string | null;
+  /** CSS `mix-blend-mode` (design 010 E13). */
+  blend: string | null;
+  /** The group's shadow, drawn per layer (preview approximation, design 010 E13). */
+  shadow: ShadowEffect | null;
   /** This layer shows the live root; others of the same asset get a copy (design 004 E5). */
   live: boolean;
 }
@@ -25,12 +42,16 @@ export interface StackLayer {
 export interface StackGroup {
   group: number;
   opacity: number | null;
+  blend: string | null;
+  /** Translucency amount (opacity gradient), `null` = none. */
+  translucency: number | null;
   /** Bottom first. */
   layers: StackLayer[];
 }
 
 const opacityOf = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
-const hidden = (v: IconGroup | IconLayer) => v['hidden'] === true;
+const hiddenFor = (v: IconGroup | IconLayer, a: Appearance) =>
+  fieldFor(v, 'hidden', a, false) === true;
 
 /** The asset a layer shows for `appearance` (`image-name-specializations` first). */
 export function layerAsset(
@@ -45,15 +66,17 @@ export function layerAsset(
 /**
  * The paint order of the document (design 004 E3): first group / first layer of `icon.json` on
  * top, so the result is reversed (bottom first). Hidden groups and layers and layers without an
- * asset are left out. Pure (reads the document).
+ * asset are left out. Values per appearance (design 010 E13); `effects` = the approximated group
+ * effects (shadow, translucency, blend modes). Pure (reads the document).
  */
-export function stackOf(doc: IconDocument, appearance: Appearance): StackGroup[] {
+export function stackOf(doc: IconDocument, appearance: Appearance, effects = true): StackGroup[] {
   const seen = new Set<AssetState>();
   const top = groups(doc.iconJson).map((g, gi): StackGroup => {
-    const ls = hidden(g)
+    const fx = effects ? groupEffects(g, appearance) : null;
+    const ls = hiddenFor(g, appearance)
       ? []
       : layers(g).flatMap((l, li): StackLayer[] => {
-          const asset = hidden(l) ? undefined : layerAsset(doc, l, appearance);
+          const asset = hiddenFor(l, appearance) ? undefined : layerAsset(doc, l, appearance);
           if (!asset || (!asset.svg && !asset.dataUrl)) return [];
           const live = !seen.has(asset);
           seen.add(asset);
@@ -62,13 +85,21 @@ export function stackOf(doc: IconDocument, appearance: Appearance): StackGroup[]
               group: gi,
               layer: li,
               asset,
-              opacity: opacityOf(l.opacity),
-              transform: layerTransform(l),
+              opacity: opacityOf(fieldFor(l, 'opacity', appearance, null)),
+              transform: stackTransform(g, l, appearance),
+              blend: effects ? blendCss(fieldFor(l, 'blend-mode', appearance, 'normal')) : null,
+              shadow: fx?.shadow ?? null,
               live,
             },
           ];
         });
-    return { group: gi, opacity: opacityOf(g['opacity']), layers: ls.reverse() };
+    return {
+      group: gi,
+      opacity: opacityOf(fieldFor(g, 'opacity', appearance, null)),
+      blend: fx?.blend ?? null,
+      translucency: fx?.translucency ?? null,
+      layers: ls.reverse(),
+    };
   });
   return top.filter((g) => g.layers.length > 0).reverse();
 }
@@ -87,8 +118,8 @@ export class LayerStack {
 
   constructor(private readonly box: HTMLElement) {}
 
-  update(doc: IconDocument | null, appearance: Appearance): void {
-    const stack = doc ? stackOf(doc, appearance) : [];
+  update(doc: IconDocument | null, appearance: Appearance, effects = true): void {
+    const stack = doc ? stackOf(doc, appearance, effects) : [];
     const signature = this.signatureOf(stack);
     if (signature === this.signature) {
       this.refreshCopies();
@@ -110,12 +141,16 @@ export class LayerStack {
       stack.map((g) => [
         g.group,
         g.opacity,
+        g.blend,
+        g.translucency,
         g.layers.map((l) => [
           l.layer,
           l.asset.name,
           this.identity(l.asset.svg?.root ?? l.asset),
           l.opacity,
           l.transform,
+          l.blend,
+          l.shadow,
           l.live,
         ]),
       ]),
@@ -136,6 +171,14 @@ export class LayerStack {
     el.className = 'group';
     el.dataset['group'] = String(g.group);
     if (g.opacity !== null) el.style.opacity = String(g.opacity);
+    if (g.blend) el.style.mixBlendMode = g.blend;
+    if (g.layers.some((l) => l.blend)) el.style.isolation = 'isolate';
+    if (g.translucency !== null) {
+      const mask = translucencyMask(g.translucency);
+      el.style.setProperty('mask-image', mask);
+      el.style.setProperty('-webkit-mask-image', mask);
+      el.dataset['translucency'] = String(g.translucency);
+    }
     el.append(...g.layers.map((l) => this.layerElement(l)));
     return el;
   }
@@ -147,6 +190,7 @@ export class LayerStack {
     host.dataset['group'] = String(l.group);
     host.dataset['layer'] = String(l.layer);
     host.dataset['asset'] = l.asset.name;
+    if (l.blend) host.style.mixBlendMode = l.blend;
     const shadow = host.attachShadow({ mode: 'open' });
     const style = d.createElement('style');
     style.textContent = LAYER_CSS;
@@ -156,10 +200,65 @@ export class LayerStack {
     const g = d.createElementNS(SVG_NS, 'g');
     if (l.opacity !== null) g.setAttribute('opacity', String(l.opacity));
     if (l.transform) g.setAttribute('transform', l.transform);
+    if (l.shadow) {
+      svg.append(this.shadowFilter(l.shadow));
+      g.setAttribute('filter', `url(#${SHADOW_ID})`);
+    }
     g.append(l.asset.svg ? this.svgContent(l) : this.imageContent(l.asset.dataUrl ?? ''));
     svg.append(g);
     shadow.append(style, svg);
     return host;
+  }
+
+  /**
+   * The group's shadow for one layer (design 010 E13, approximation): `feDropShadow` in black
+   * (`neutral`), or the blurred layer itself, darkened (`layer-color`). In the layer's own shadow
+   * root, in canvas units – it scales with the zoom.
+   */
+  private shadowFilter(s: ShadowEffect): Element {
+    const d = this.box.ownerDocument;
+    const el = (name: string, attrs: Record<string, string | number>) => {
+      const e = d.createElementNS(SVG_NS, name);
+      for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v));
+      return e;
+    };
+    const defs = el('defs', {});
+    const filter = el('filter', {
+      id: SHADOW_ID,
+      x: '-25%',
+      y: '-25%',
+      width: '150%',
+      height: '160%',
+      'color-interpolation-filters': 'sRGB',
+      'data-kind': s.kind,
+    });
+    if (s.kind === 'neutral') {
+      filter.append(
+        el('feDropShadow', {
+          dx: 0,
+          dy: SHADOW_OFFSET,
+          stdDeviation: SHADOW_BLUR,
+          'flood-color': '#000',
+          'flood-opacity': s.opacity,
+        }),
+      );
+    } else {
+      const merge = el('feMerge', {});
+      merge.append(el('feMergeNode', { in: 'shadow' }), el('feMergeNode', { in: 'SourceGraphic' }));
+      filter.append(
+        el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: SHADOW_BLUR, result: 'blur' }),
+        el('feOffset', { in: 'blur', dy: SHADOW_OFFSET, result: 'moved' }),
+        el('feColorMatrix', {
+          in: 'moved',
+          type: 'matrix',
+          values: chromaticMatrix(s.opacity),
+          result: 'shadow',
+        }),
+        merge,
+      );
+    }
+    defs.append(filter);
+    return defs;
   }
 
   /** Placement `<svg>` (design 004 E4) with the live root or a copy of it. */

@@ -21,6 +21,8 @@ export interface CanvasOptions {
   rulers: boolean;
   guides: boolean;
   background: boolean;
+  /** Group effects as a preview approximation (shadow, translucency, blend; design 010 E13). */
+  effects: boolean;
   crossCursor: boolean;
   /** Handles of the selection (design 007 E5). */
   handles: boolean;
@@ -35,7 +37,14 @@ export interface CanvasOptions {
 }
 
 export type CanvasToggle =
-  'rulers' | 'guides' | 'background' | 'crossCursor' | 'handles' | 'snapToGrid' | 'magicSnap';
+  | 'rulers'
+  | 'guides'
+  | 'background'
+  | 'effects'
+  | 'crossCursor'
+  | 'handles'
+  | 'snapToGrid'
+  | 'magicSnap';
 
 function systemAppearance(): Appearance {
   return globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -57,6 +66,7 @@ export class CanvasViewStore {
     rulers: true,
     guides: true,
     background: true,
+    effects: true,
     crossCursor: false,
     handles: true,
     snapToGrid: false,

@@ -17,6 +17,7 @@ const ROWS: Row[] = [
   { kind: 'item', id: 'view.rulers' },
   { kind: 'item', id: 'view.guides' },
   { kind: 'item', id: 'view.background' },
+  { kind: 'item', id: 'view.effects' },
   { kind: 'item', id: 'view.crossCursor' },
   { kind: 'item', id: 'view.handles' },
   { kind: 'item', id: 'view.snapToGrid' },

@@ -172,6 +172,7 @@ export const ACTIONS: readonly ActionDef[] = [
   VIEW('view.rulers', 'Rulers'),
   VIEW('view.guides', 'Guides'),
   VIEW('view.background', 'Background'),
+  VIEW('view.effects', 'Effects Preview (approximation)'),
   VIEW('view.crossCursor', 'Cross Cursor'),
   VIEW('view.handles', 'Show Handles'),
   VIEW('view.snapToGrid', 'Snap to Grid'),

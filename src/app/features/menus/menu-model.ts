@@ -79,6 +79,7 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('view.rulers'),
     a('view.guides'),
     a('view.background'),
+    a('view.effects'),
     a('view.crossCursor'),
     a('view.handles'),
     sep,

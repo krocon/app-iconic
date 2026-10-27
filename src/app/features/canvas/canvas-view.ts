@@ -192,7 +192,8 @@ export class CanvasView {
     effect(() => {
       const box = this.layersEl().nativeElement;
       this.stack ??= new LayerStack(box);
-      this.stack.update(this.store()?.document() ?? null, this.opt().appearance);
+      const o = this.opt();
+      this.stack.update(this.store()?.document() ?? null, o.appearance, o.effects);
     });
     // the selection (frames, handles): measured after the layers are painted (needs layout)
     let frame = 0;

@@ -41,6 +41,7 @@ export function canvasActions(view: CanvasViewStore): Record<string, ActionHandl
     'view.rulers': toggle('rulers'),
     'view.guides': toggle('guides'),
     'view.background': toggle('background'),
+    'view.effects': toggle('effects'),
     'view.crossCursor': toggle('crossCursor'),
     'view.handles': toggle('handles'),
     'view.snapToGrid': toggle('snapToGrid'),
