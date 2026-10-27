@@ -17,11 +17,13 @@ import { SHELL_TEXTS } from './shell-texts';
     :host {
       position: relative;
       flex: none;
-      width: 5px;
-      margin: 0 -2px;
+      /* takes no room: the layout (and the canvas size) is as without splitters */
+      width: 6px;
+      margin: 0 -3px;
       z-index: 2;
       cursor: col-resize;
       touch-action: none;
+      user-select: none;
       outline: none;
     }
     .grip {
@@ -77,7 +79,6 @@ export class Splitter {
 
   protected down(e: PointerEvent): void {
     if (e.button !== 0) return;
-    e.preventDefault();
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
     (e.currentTarget as HTMLElement).focus();
     this.drag.set({ x: e.clientX, width: this.width(), id: e.pointerId });

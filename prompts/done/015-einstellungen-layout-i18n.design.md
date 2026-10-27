@@ -115,7 +115,23 @@ translatable(), phrasebook(), language, setLanguage, systemLanguage, CATALOGS
 ## Fortschritt
 
 - [x] Design
-- [ ] Rust `ai-core::settings` + Commands
-- [ ] i18n + Kataloge Deutsch + Aktionsnamen
-- [ ] SettingsStore/Sync, Splitter, Dialog, Aktionen, Theme
-- [ ] E2E, echte App, Doku
+- [x] Rust `ai-core::settings` + Commands (`settings_commands.rs`), `MenuSpec.app` (Texte des App-/Fenstermenüs)
+- [x] i18n + Kataloge Deutsch + Aktionsnamen + Phrasenbuch der Property-Namen
+- [x] SettingsStore/Sync, Splitter, Dialog, Aktionen, Theme, Undo-Log
+- [x] E2E (`e2e/settings.spec.ts`), echte App unter Xvfb, Doku
+
+## Abweichungen und Hinweise
+
+- Bestehende Tests angepasst, weil der Cross Cursor jetzt standardmäßig an ist (E9): `canvas-view.spec`,
+  `app.spec`, `e2e/canvas.spec` (Fadenkreuz erst sichtbar, dann aus); Pixel-Proben ziehen den Zeiger vorher aus
+  der Fläche (`e2e/canvas-helpers.ts`), der Masken-Pixeltest vergleicht mit ±2 je Kanal (der zusätzliche
+  Compositing-Layer der Splitter rundet einen Verlauf um eine Stufe anders).
+- Lineal-Schrift hell `--ai-ruler-text` von `#7a7e86` auf `#62666e` (Kontrast 3,6 → ≥ 4,5:1, neuer Test).
+- „Gebündelt speichern“ geschieht im Frontend (400 ms, außerdem beim Verlassen/Fokusverlust des Fensters); Rust
+  schreibt jeden Patch sofort atomar.
+- Die Fenstergröße/-position speicherte `tauri-plugin-window-state` schon seit 001 – unverändert.
+- Ein Zoom aus einem anderen Fenster wird nicht übernommen (E7), alle anderen Werte schon.
+- Echte App (Debug-Build, Xvfb, eigener `XDG_CONFIG_HOME`): eine `settings.json` mit `language: de`, `theme: dark`,
+  Hierarchie 340 px und einem kaputten Wert (`rulers: "bad"`) startet deutsch, dunkel, 340 px, Lineale an; ⌘, öffnet
+  den Dialog; ein Haken schreibt die Datei sofort (gebündelt); ein zweites Fenster startet mit dem Stand, ⌘1 dort
+  blendet die Befehlsleiste in **beiden** Fenstern aus/ein.

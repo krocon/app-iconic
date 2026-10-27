@@ -47,7 +47,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/icon-file/         IconFileApi (open/save/new/close .icon, read SVG/Bild, Dialoge), DTOs, findAsset (002, 008)
   app/core/window/            WindowApi (Titel, Fenster, Schließen-Frage, 003)
   app/core/recent/            RecentFilesApi („Open Recent“, 003)
-  app/core/actions/           Aktionskatalog, Keymaps (base/mac/other.json), ActionService (run(id, args?)),
+  app/core/actions/           Aktionskatalog (+ action-catalog.de.ts: deutsche Namen, 015), Keymaps
+                              (base/mac/other.json), ActionService (run(id, args?)),
                               KeyboardDispatcher (einziger keydown-Listener), shortcut, action-args (005),
                               add-action-args (Schema der Add-Argumente, 008), export-action-args (012),
                               tool-action-args (Freehand/Text to Path/Symbol, 013), clip-action-args (014)
@@ -55,6 +56,10 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/clipboard/         ClipboardApi (Text der System-Zwischenablage über navigator.clipboard, 006)
   app/core/export/            ExportApi (Ordner-Dialog, export_svg, export_png mit Channel, cancel), DTOs (012)
   app/core/fonts/             FontApi (list_fonts, text_to_path), DTOs + Grenzen (013)
+  app/core/i18n/              translatable() (tiefer Proxy), phrasebook(), Sprach-Signal, systemLanguage,
+                              catalogs.spec (Vollständigkeit aller Kataloge + Aktionsnamen, 015)
+  app/core/settings/          SettingsApi (load/save(patch)/reset, settings-changed, Fenster-Theme), DTOs,
+                              settings-rules (TS-Spiegel von Rust merge/sanitize, SETTING_KEYS), theme (015)
   app/backend-providers.ts    Bindung der Fassaden; Dev-Build: backend-providers.dev.ts (Fakes im Browser, 003 E14)
   app/features/document/      IconDocument, DocumentStore (runCommand), UndoService (undo/), Commands (commands/:
                               serialisierbar, command-json.ts + registry.ts commandFromJson, 005; tree-commands:
@@ -98,7 +103,13 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/symbols/       Symbole (013): symbol-provider (Plugin-Schnittstelle), symbol-providers (Registry),
                               lucide-provider (Daten lazy aus lucide-static), symbol-search, symbol-grid (rein),
                               SymbolService (placeSymbol, Einfügen), SymbolPickerDialog
-  app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3), Texte der Fensterhülle
+  app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3, Breiten), Splitter (APG Window
+                              Splitter) + panel-width (rein), Texte der Fensterhülle (015)
+  app/features/settings/      Einstellungen (015): SettingsStore (sofort anwenden, gebündelt speichern, andere
+                              Fenster), SettingsSync (Stores ↔ Einstellungen, Theme, Sprache, Undo-Log),
+                              SettingsDialog (⌘,, Tabs) + settings-view, settings-actions (app.settings,
+                              settings.set/reset), Texte
+  app/features/about/         About-Dialog + Texte
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
                               icon-color, asset-placement (004), effects (Vorschau-Annäherung, 010),
@@ -111,7 +122,6 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/clip/          Clip Paths (014): ClipEditStore (Bearbeitungsmodus), ClipEditLayer (Formen in der
                               Host-<svg>), ClipService + clip-actions (clip.*), clip-panel-model (rein),
                               ClipPathSection (Properties), clip-references (Copy/Duplicate/Delete), Texte
-  app/features/about/         About-Dialog
   app/shared/geometry/        Geometrie: icon-guides, view-transform, zoom-steps, ruler-ticks, squircle, align (rein);
                               dom-geometry (clientToDocument, nodeToDocument über Screen-CTMs, 004); 007 (rein):
                               matrix, snapping, bounds-guard, box-math, box-selection, transform-text,
@@ -125,7 +135,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,
                               command-cases.ts, tree-documents.ts, fake-clipboard-api.ts, fake-export-api.ts,
-                              fake-font-api.ts (Kästchen-Schrift, gleiche Fehlercodes),
+                              fake-font-api.ts (Kästchen-Schrift, gleiche Fehlercodes), fake-settings-api.ts
+                              (Regeln wie Rust, im Browser-Modus in localStorage),
                               browser-hook.ts = `window.__appIconic` für Playwright)
   testing/fixtures/           generiert aus testdata/ (camscanner.icon, all-fields.icon, svg/, unique-names.json;
                               `pnpm fixtures`)
@@ -140,6 +151,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/app_menu.rs             natives macOS-Menü: Spec je Fenster, fokussiertes zeigt seins, Klicks routen (005)
   src/export_commands.rs      Export-Commands (pick_export_dir, export_svg, export_png, cancel_export), ExportJobs (012)
   src/font_commands.rs        list_fonts, text_to_path, Vorladen der Schriften beim Start (013)
+  src/settings_commands.rs    load_settings, save_settings(patch), reset_settings, set_window_theme; SettingsState,
+                              Ereignis settings-changed an alle Fenster (015)
   src/about.rs, model.rs      AppInfo, DTOs (serde camelCase)
   core/                       Crate `ai-core` (Workspace-Mitglied): Engine ohne Tauri
     src/error.rs              FsError { code, message, path }
@@ -149,6 +162,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
     src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
     src/menu_spec.rs          MenuSpec prüfen, Accelerators, Menü ohne Fenster (005)
     src/keymap_file.rs        keymap.json laden (005)
+    src/settings.rs           settings.json: je Feld nachsichtig (merge), sanitize, migrate, apply_patch (015)
     src/export/               Export (012): png (resvg, sichere usvg-Optionen), files (Namen, Überschreiben, atomar,
                               Fortschritt, Abbruch); `export::fonts` = Re-Export von `fonts::system`
     src/fonts/                Schriften (012, 013): system (fontdb einmal je Prozess, generische Familien), FontCatalog
@@ -158,7 +172,9 @@ testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverän
                               belegten Felder + unbekannte)
 testdata/fonts/               Caladea-Regular.ttf + OFL.txt (Testschrift für Rust-Tests, nicht im Bundle, 013)
 testdata/unique-names.json    Tabelle der eindeutigen Asset-/Layer-Namen (Rust `names.rs` und TS `unique-names.ts`)
-scripts/                      fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test, keymaps.test.mjs
+testdata/settings-cases.json  Standardwerte + Fälle von settings.json (Rust `settings.rs` und TS `settings-rules`, 015)
+scripts/                      fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test, keymaps.test.mjs,
+                              theme-contrast.test.mjs (Tokens light/dark, Kontraste, 015)
 docs/                         architecture.md (Entscheidungen, Commands, Abhängigkeiten), legacy-analysis.md, legacy/,
                               FEATURES.md (Checkliste)
 prompts/                      Feature-Prompts (Index README.md), done/
@@ -201,7 +217,8 @@ THIRD-PARTY-NOTICES.txt       Lizenzen fremder Werke (Lucide/Feather, Testschrif
   ein einziger globaler `keydown`-Listener (`KeyboardDispatcher`).
 - **Neue Abhängigkeiten** (npm oder crates) nur mit kurzer Begründung in `docs/architecture.md`. Keine
   UI-Frameworks; Styling mit CSS (natives Nesting) + Tokens aus `src/styles.css` – kein SCSS.
-- **Texte** nur aus Katalogen (`*-texts.ts`, Englisch = Quelle; Deutsch + Umschalten ab Prompt 015).
+- **Texte** nur aus Katalogen (`*-texts.ts` mit `translatable()`, Englisch = Quelle, Deutsch daneben; neue Aktionen
+  bekommen einen Namen in `action-catalog.de.ts` – `catalogs.spec.ts` prüft beides).
 - **Barrierefreiheit**: sichtbarer Fokus, alles per Tastatur, Dialoge mit `role="dialog"`/`aria-modal` und
   Fokusfalle, Kontraste in light und dark.
 

@@ -11,6 +11,9 @@ browser renders, parses and measures); Rust handles files, `.icon` bundles and Z
 > Status: early development – see [prompts/README.md](prompts/README.md) for the roadmap and
 > [docs/FEATURES.md](docs/FEATURES.md) for the feature checklist.
 
+The UI speaks English and German (switchable at runtime), light and dark. Settings (⌘, / Ctrl+,) are kept in
+`settings.json`, your own shortcuts in `keymap.json` – both in the app's config folder.
+
 ## Development
 
 Requirements: Node ≥ 22.22.3, pnpm 10, Rust stable ≥ 1.93, and the

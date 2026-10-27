@@ -69,6 +69,8 @@ export async function importSvg(page: Page, name: string, text: string): Promise
 
 /** RGBA of the screen pixel at a client position (decoded in the page, no PNG library). */
 export async function pixel(page: Page, clientX: number, clientY: number): Promise<number[]> {
+  // the cross cursor (on by default since design 015 E9) follows the pointer: move it away
+  await page.mouse.move(1, 1);
   const png = await page.screenshot({
     clip: { x: Math.round(clientX), y: Math.round(clientY), width: 1, height: 1 },
   });

@@ -110,6 +110,13 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 014 E7/E8 | Bearbeitungsmodus (`ClipEditStore`): Inhalt abgeblendet, Formen als Kopie in der Host-`<svg>`, Klick/Rahmen/Handles/Pfeiltasten/Snapping/Add nur auf den Clip; Geometrie der Formen über das erste benutzende Element (Owner): `getScreenCTM(owner)` · `transform` des `clipPath` · OBB-Matrix · Transforms bis zur Form (`clip-geometry.ts`), in `nodeToDocument` eingehängt | Chromium liefert für Clip-Kinder eine falsche Screen-CTM (als stünde der `clipPath` im Baum); nur Browser-Matrizen |
 | 014 E9/E10 | Treffer respektieren Clips (`isPointInFill` der Clip-Formen im Clip-Raum), Clip-Formen außerhalb des Modus nie treffbar/snapbar; Löschen eines benutzten Clips fragt und entfernt Verweise, Duplicate kopiert Clips mit neuer ID, Copy nimmt sie als `<defs>` mit, Paste legt `<defs>` in die Wurzel-`<defs>` | Klick auf weggeschnittene Fläche trifft, was darunter liegt; keine toten Verweise |
 | 014 E14 | Aktionen `clip.create/assign/edit/done/remove/setUnits` mit Argumenten (`node`/`layer` statt Auswahl); `ActionHandler.enabled(args)` bekommt die Argumente | die KI braucht keine Auswahl vorher |
+| 015 E1–E4 | `settings.json` in `ai-core::settings`: je Feld nachsichtig (gegen die Standardwerte gelegt, falsche Art → einzeln Standard), `sanitize` (Breiten 160…480, Grid 1…256, Zoom 0 = Fit oder 0,25…2, Listen gefiltert), `schemaVersion` 1 mit `migrate`, kaputt → `.bad`; Fenster senden **Patches**, Rust hält den Stand (`SettingsState`), schreibt atomar und schickt `settings-changed` an alle Fenster | ein Tippfehler kostet nicht alle Einstellungen; zwei Fenster überschreiben sich nicht; neue Fenster starten mit dem aktuellen Stand |
+| 015 E5/E6 | `SettingsStore` (Root): sofort anwenden, 400 ms gebündelt speichern; `SettingsSync` bindet `LayoutStore`, `CanvasViewStore`, Export-Wahl, Freehand und Undo-Log in beide Richtungen (nur Geändertes, mit Vergleich – kein Echo) | vorhandene Stores bleiben; Menüs/Aktionen/Tests aus 004–014 unverändert gültig |
+| 015 E7 | Gespeichert wird der zuletzt **gewählte** Zoom (0 = Fit); neue Fenster starten damit, offene Fenster behalten ihren | Start „Fit ≤ 100 %“ aus 004 E9 bleibt Standard |
+| 015 E10 | Splitter = APG „Window Splitter“ (`role=separator`, Wert = Breite, ←/→ 10 px, ⇧ 40, Home/End, Enter/Doppelklick = Standard); er behandelt seine Tasten selbst vor dem Dispatcher (wie Slider) | Tastatur ohne eigenen Kontext |
+| 015 E11 | Aktionen `app.settings` (⌘,), `settings.set { key, value }` (Pfad aus `SETTING_KEYS`, TS-Spiegel der Rust-Regeln, gemeinsame Fälle `testdata/settings-cases.json`), `settings.reset { confirm? }`, `view.panelWidth { panel, width? }` | KI-Regel |
+| 015 E13/E14 | i18n aus editlicious (`translatable()`, Sprach-Signal) mit **tiefem** Proxy; alle Kataloge, Fehlertexte, About und Aktionsnamen (`action-catalog.de.ts`) deutsch; Property-Namen über ein Phrasenbuch; das native Menü (auch App-/Fenster-Menü über `MenuSpec.app`) folgt der Sprache, weil die Spec ein `computed` über die Texte ist | Sprachwechsel ohne Neustart, Vollständigkeit per Test |
+| 015 E15 | Theme: `data-theme` auf `<html>` + `set_window_theme` (Rahmen, `prefers-color-scheme` der WebView); Kontraste beider Schemata in `scripts/theme-contrast.test.mjs` | Tokens seit 001 vorbereitet |
 | 009 E10/E11 | Generische Editoren in `shared/controls/` (Zahl mit Stepped Slider, Farbe, Auswahl, Text, Schalter; Ausgaben `edited`/`committed`/`reverted`), Aktionen `properties.set/reset/resetAll` | wiederverwendbar für den Icon-Inspector (010); die KI setzt, was das Panel setzt |
 
 ## Schichten
@@ -181,7 +188,11 @@ Dokument-Commands `insertDefinition { asset, markup }`, `assignClip { ref, mode:
 `clip.setUnits { units, … }`; Undo-Labels `createClipPath`, `assignClip`, `layerClip`, `removeClipPath`,
 `changeClipUnits`; keine neue Abhängigkeit.
 
-Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `load_settings`/`save_settings` (015).
+015: Commands (eigenes Modul `settings_commands.rs`) `load_settings()` → `LoadedSettings { value, warning }`,
+`save_settings(patch)` → `Settings` (Ereignis `settings-changed { settings, from }` an alle Fenster),
+`reset_settings()` → `Settings`, `set_window_theme(theme)`; `MenuSpec.app` (Texte des macOS-App- und Fenstermenüs,
+Settings… mit ⌘,); Aktionen `app.settings`, `settings.set { key, value }`, `settings.reset { confirm? }`,
+`view.panelWidth { panel, width? }`; keine neue Abhängigkeit, kein neuer Dokument-Command.
 
 ## Abhängigkeiten
 

@@ -206,6 +206,8 @@ test('platform mask cuts the corners; background and appearance switch', async (
     c.set('appearance', 'light');
     c.set('mask', 'none');
     c.set('guides', false);
+    // the cross cursor (on by default since 015) would paint over the probed pixels
+    c.set('crossCursor', false);
   });
   await setView(page, 0.5, 40, 40);
   const corner = () => docPixel(page, 6, 6);
@@ -214,10 +216,12 @@ test('platform mask cuts the corners; background and appearance switch', async (
   await menu(page, 'View', 'iOS / macOS');
   const masked = await corner();
   expect(masked.slice(0, 3)).not.toEqual(open.slice(0, 3));
-  expect(await docPixel(page, 512, 6)).toEqual(open); // the edge middle is inside the mask
+  // ±2 per channel: the compositor may round the gradient differently by one level
+  const near = (a: number[], b: number[]) => a.every((v, i) => Math.abs(v - b[i]) <= 2);
+  expect(near(await docPixel(page, 512, 6), open)).toBe(true); // the edge middle is inside the mask
   await menu(page, 'View', 'watchOS');
-  expect(await docPixel(page, 512, 6)).toEqual(open);
-  expect(await docPixel(page, 100, 100)).toEqual(masked);
+  expect(near(await docPixel(page, 512, 6), open)).toBe(true);
+  expect(near(await docPixel(page, 100, 100), masked)).toBe(true);
   await menu(page, 'View', 'Dark');
   const dark = await docPixel(page, 512, 20);
   expect(dark.slice(0, 3).every((v) => v < 90)).toBe(true);

@@ -16,15 +16,19 @@
 - [ ] `.icon` als Dateizuordnung / Öffnen per Doppelklick *(neu)* (016)
 
 ## 2. Layout & Einstellungen
-- [ ] Drei ein-/ausblendbare Seitenleisten ⌘1/⌘2/⌘3 (005 ✓), Breite 160–480 px, Defaults 260/260/300 (015)
-- [ ] View Options: Command Sidebar, Hierarchy, Properties, Rulers, Guides, Background, Cross Cursor, Show Handles,
-      Snap to Grid, Magic Snap (005 ✓ Menü View + „View Options“ im Canvas, Snap wirkt seit 007; persistent 015)
+- [x] Drei ein-/ausblendbare Seitenleisten ⌘1/⌘2/⌘3 (005), Breite 160–480 px per Splitter (Maus und Tastatur),
+      Defaults 260/260/300, Doppelklick = Standardbreite; Fenstergröße/-position über `tauri-plugin-window-state` (015)
+- [x] View Options: Command Sidebar, Hierarchy, Properties, Rulers, Guides, Background, Cross Cursor, Show Handles,
+      Snap to Grid, Magic Snap (005 Menü View + „View Options“ im Canvas, Snap wirkt seit 007; persistent seit 015,
+      dazu Grid-Abstand/-Ursprung, Selection Mode, Start-Zoom, Appearance-Vorschau, Maske, Export- und Freehand-Vorgaben)
 - [x] Menüs File/Edit/View/Add/Arrange/Help aus einem Modell: natives macOS-Menü, HTML-Menüleiste Windows/Linux (005; macOS auf dem Mac prüfen)
 - [x] Befehlspalette ⇧⌘P, Übersicht „Keyboard Shortcuts“, eigene Kürzel in `keymap.json` *(neu)* (005)
 - [x] Quit ⌘Q fragt alle Fenster mit ungespeicherten Änderungen nacheinander (005; auf dem Mac prüfen)
-- [ ] `settings.json` mit Schema-Version und Migration; „Reset to Default“ mit Bestätigung (015)
-- [ ] Settings-Dialog inkl. Debug „Log Undo Grouping“ (015)
-- [ ] Deutsch/Englisch zur Laufzeit *(neu)* (015)
+- [x] `settings.json` mit Schema-Version und Migration (je Feld nachsichtig, kaputt → `.bad`); „Reset to Default“ mit
+      Bestätigung; Änderungen wirken in allen offenen Fenstern (015)
+- [x] Settings-Dialog (⌘,) mit General, Canvas, Snapping, Export, Advanced inkl. Debug „Log Undo Grouping“ (015)
+- [x] Deutsch/Englisch zur Laufzeit, natives Menü folgt *(neu)* (015; macOS-Menü auf dem Mac prüfen)
+- [x] Hell/Dunkel/System (`data-theme`, Fensterrahmen), Kontraste beider Schemata geprüft *(neu)* (015)
 
 ## 3. Canvas
 - [x] Zoom 25/33/50/66/75/100/125/150/200 %, Anzeige, Pinch, ⌘+/⌘−/⌘0, Center Canvas (004, dazu „Fit“; Kürzel als Aktionen 005)
@@ -36,7 +40,7 @@
 - [x] Hintergrund nach Icon-Fill, Light/Dark umschaltbar (004 Vorschau; Bearbeiten 010)
 - [x] Plattform-Vorschau Squircle / Kreis als Maske (004)
 - [x] Assets lebendig im DOM, Reihenfolge wie Icon Composer (erste Gruppe oben), Layer-/Gruppen-Opacity, hidden, eindeutige IDs je Layer *(neu)* (004)
-- [ ] Gruppen-Schatten und Transluzenz als Vorschau-Annäherung *(neu)* (010)
+- [x] Gruppen-Schatten und Transluzenz als Vorschau-Annäherung *(neu)* (010: „Effects Preview“, Schatten je Layer)
 - [x] BoundsGuard (Punkte, Pfade, Translationen klemmen) (007)
 
 ## 4. Auswahl & Manipulation
@@ -91,7 +95,8 @@
 - [x] Pfad-Optimierer (RDP mit Eckenschutz, epsilon einstellbar) (011: Aktion „Optimize Path…“ mit Vorschau, kürzeste Form)
 
 ## 10. SVG-Unterstützung
-- [ ] Elemente aus legacy §10 + `use`, `defs`, Verläufe rendern und bearbeiten (004, 009)
+- [ ] Elemente aus legacy §10 + `use`, `defs`, Verläufe rendern und bearbeiten (004 rendern, 009 Attribute von
+      `use`/`stop`/`image` bearbeitbar; ein eigener Verlaufseditor fehlt noch → 017)
 - [x] Inline-`<style>`/Klassen beim Import in Attribute auflösen, Einheiten (003)
 - [x] Unbekannte Attribute/Elemente bleiben erhalten (002 unveränderte Assets byte-genau; 003 bearbeitete SVGs über DOM-Serialisierung)
 - [x] Fremdes SVG wird bereinigt (Skripte, Event-Handler, externe Referenzen) *(neu)* (003)
