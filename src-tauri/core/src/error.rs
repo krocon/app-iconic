@@ -37,6 +37,19 @@ pub enum FsErrorCode {
     InvalidText,
     /// Text to path: the font has no glyph for some characters, e.g. emoji (prompt 013 E11).
     MissingGlyphs,
+    /// AI control (prompt 018 E9): the document changed since the revision the AI expected.
+    RevisionConflict,
+    /// AI control: no open document (window) with this id.
+    UnknownDocument,
+    /// AI control: a tool call with missing, wrong or too large arguments.
+    InvalidRequest,
+    /// AI control: the window did not answer in time.
+    Timeout,
+    /// AI control: the user did not allow it (saving to a new path, export, design 018 E13).
+    Denied,
+    /// AI control: the action is not allowed for the AI, not enabled now, or its arguments do
+    /// not fit.
+    Unavailable,
 }
 
 /// The one error type every command returns.
@@ -115,6 +128,12 @@ mod tests {
             (FsErrorCode::AlreadyExists, "already_exists"),
             (FsErrorCode::InvalidText, "invalid_text"),
             (FsErrorCode::MissingGlyphs, "missing_glyphs"),
+            (FsErrorCode::RevisionConflict, "revision_conflict"),
+            (FsErrorCode::UnknownDocument, "unknown_document"),
+            (FsErrorCode::InvalidRequest, "invalid_request"),
+            (FsErrorCode::Timeout, "timeout"),
+            (FsErrorCode::Denied, "denied"),
+            (FsErrorCode::Unavailable, "unavailable"),
         ] {
             assert_eq!(serde_json::to_value(code).unwrap(), text);
         }

@@ -308,7 +308,8 @@ pub fn build_document_window(app: &AppHandle, label: &str) -> Result<WebviewWind
         .map_err(window_error)
 }
 
-fn focus(app: &AppHandle, label: &str) -> bool {
+/// Brings window `label` to the front; `false` if there is none.
+pub(crate) fn focus(app: &AppHandle, label: &str) -> bool {
     match app.get_webview_window(label) {
         Some(w) => {
             let _ = w.unminimize();

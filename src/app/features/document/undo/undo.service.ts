@@ -1,5 +1,5 @@
 import { computed, signal } from '@angular/core';
-import { CompositeCommand, DocCommand } from '../commands/command';
+import { AiCommand, CompositeCommand, DocCommand } from '../commands/command';
 import { IconDocument } from '../icon-document';
 import { logUndo } from './undo-log';
 import { undoTitle, UndoLabel } from './undo-texts';
@@ -21,6 +21,9 @@ interface RawState {
   canRedo: boolean;
   undoName: UndoLabel | null;
   redoName: UndoLabel | null;
+  /** The step is the AI's ("Undo AI: Add Circle", design 018 E10). */
+  undoAi: boolean;
+  redoAi: boolean;
   dirty: boolean;
 }
 
@@ -47,11 +50,11 @@ export class UndoService {
   private readonly _state = signal<RawState>(this.compute());
   /** Labels in the UI language: a language switch renames "Undo …" at once. */
   readonly state = computed<UndoState>(() => {
-    const { undoName, redoName, ...rest } = this._state();
+    const { undoName, redoName, undoAi, redoAi, ...rest } = this._state();
     return {
       ...rest,
-      undoLabel: undoTitle('undo', undoName),
-      redoLabel: undoTitle('redo', redoName),
+      undoLabel: undoTitle('undo', undoName, undoAi),
+      redoLabel: undoTitle('redo', redoName, redoAi),
     };
   });
 
@@ -138,6 +141,37 @@ export class UndoService {
     if (g.commands.length) this.changed();
   }
 
+  /** Where the stack is now – {@link groupSince} folds what comes after it (design 018 E10). */
+  mark(): number {
+    this.commit();
+    return this.seq;
+  }
+
+  /**
+   * Folds every step done since `mark` into one step of the AI (design 018 E10): one command →
+   * wrapped, several → a composite named after the first. Nothing is run again. A save point
+   * inside the folded steps cannot be reached any more (dirty stays right); one on the last step
+   * moves to the new one. `true` if there was something to fold.
+   */
+  groupSince(mark: number): boolean {
+    this.commit();
+    const from = this.done.findIndex((e) => e.id > mark);
+    if (from < 0) return false;
+    const entries = this.done.splice(from);
+    const commands = entries.map((e) => e.command);
+    const inner =
+      commands.length === 1 ? commands[0] : new CompositeCommand(commands[0].label, commands);
+    const ids = entries.map((e) => e.id);
+    const last = ids[ids.length - 1];
+    const id = ++this.seq;
+    if (this.savePoint === last) this.savePoint = id;
+    else if (ids.includes(this.savePoint)) this.savePoint = -1;
+    this.done.push({ id, command: new AiCommand(inner) });
+    logUndo('AI call grouped', inner.label, { steps: entries.length });
+    this.publish();
+    return true;
+  }
+
   /** The step `undo` would take back (after a gesture: the committed one). */
   get top(): DocCommand | null {
     return this.done.at(-1)?.command ?? null;
@@ -192,6 +226,8 @@ export class UndoService {
       canRedo: !!next,
       undoName: top?.command.label ?? null,
       redoName: next?.command.label ?? null,
+      undoAi: top?.command instanceof AiCommand,
+      redoAi: next?.command instanceof AiCommand,
       dirty: (top?.id ?? 0) !== (this.savePoint ?? 0),
     };
   }

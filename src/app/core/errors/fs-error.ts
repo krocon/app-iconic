@@ -31,6 +31,18 @@ export type FsErrorCode =
   | 'invalid_text'
   /** Text to path: the font has no glyph for some characters, e.g. emoji (prompt 013). */
   | 'missing_glyphs'
+  /** AI control (prompt 018): the document changed since the revision the AI expected. */
+  | 'revision_conflict'
+  /** AI control: no open document (window) with this id. */
+  | 'unknown_document'
+  /** AI control: missing, wrong or too large arguments of a tool. */
+  | 'invalid_request'
+  /** AI control: the window did not answer in time. */
+  | 'timeout'
+  /** AI control: the user did not allow it (save to a new path, export). */
+  | 'denied'
+  /** AI control: the action is not allowed for the AI, not enabled, or its arguments do not fit. */
+  | 'unavailable'
   /** Frontend only: no Tauri backend (e.g. `pnpm start` in a browser). */
   | 'backend_unavailable'
   /** Frontend only: something that is no `FsError` was thrown. */
@@ -59,6 +71,12 @@ const KNOWN: readonly FsErrorCode[] = [
   'already_exists',
   'invalid_text',
   'missing_glyphs',
+  'revision_conflict',
+  'unknown_document',
+  'invalid_request',
+  'timeout',
+  'denied',
+  'unavailable',
   'backend_unavailable',
   'unknown',
 ];
@@ -95,6 +113,12 @@ const EN = {
   already_exists: 'A file with this name already exists.',
   invalid_text: 'Enter one line of text (size and spacing within their ranges).',
   missing_glyphs: 'The font has no shapes for some characters (e.g. emoji). Choose another font.',
+  revision_conflict: 'The document changed in the meantime.',
+  unknown_document: 'This document is not open.',
+  invalid_request: 'The request was not valid.',
+  timeout: 'The window did not answer in time.',
+  denied: 'Not allowed.',
+  unavailable: 'This function is not available now.',
   backend_unavailable: 'The desktop backend is not available (running in a browser?).',
   unknown: 'Something went wrong.',
 } as const satisfies Record<FsErrorCode, string>;
@@ -119,6 +143,12 @@ const TEXTS = translatable('errors', EN, {
     invalid_text: 'Gib eine Zeile Text ein (Größe und Abstand in ihren Bereichen).',
     missing_glyphs:
       'Die Schrift hat für einige Zeichen keine Formen (z. B. Emoji). Wähle eine andere Schrift.',
+    revision_conflict: 'Das Dokument hat sich inzwischen geändert.',
+    unknown_document: 'Dieses Dokument ist nicht geöffnet.',
+    invalid_request: 'Die Anfrage war ungültig.',
+    timeout: 'Das Fenster hat nicht rechtzeitig geantwortet.',
+    denied: 'Nicht erlaubt.',
+    unavailable: 'Diese Funktion ist gerade nicht verfügbar.',
     backend_unavailable: 'Das Desktop-Backend ist nicht verfügbar (läuft es im Browser?).',
     unknown: 'Etwas ist schiefgegangen.',
   },

@@ -50,5 +50,29 @@ export class CompositeCommand implements DocCommand {
   }
 }
 
+/**
+ * A step the AI made over MCP (design 018 E10): the same command, shown as "AI: …" in Undo/Redo.
+ * Serialises as the command itself (the AI's steps are ordinary commands).
+ */
+export class AiCommand implements DocCommand {
+  readonly label: UndoLabel;
+
+  constructor(readonly command: DocCommand) {
+    this.label = command.label;
+  }
+
+  do(doc: IconDocument): void {
+    this.command.do(doc);
+  }
+
+  undo(doc: IconDocument): void {
+    this.command.undo(doc);
+  }
+
+  toJSON(): CommandJson {
+    return this.command.toJSON();
+  }
+}
+
 /** Thrown when a command's target does not exist (nothing was changed). */
 export class CommandError extends Error {}

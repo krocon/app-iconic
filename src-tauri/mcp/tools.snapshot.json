@@ -1,0 +1,488 @@
+[
+  {
+    "description": "Lists the open documents (one per window): id, name, path, unsaved changes, revision, which one is active.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "name": "list_documents"
+  },
+  {
+    "description": "Creates a new icon (one group, one empty layer) – reuses an untouched new window, else opens a new window.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "name": "new_document"
+  },
+  {
+    "description": "Opens a .icon file (absolute path, bundle folder or ZIP) – or shows its window if it is open.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "type": "object"
+    },
+    "name": "open_document"
+  },
+  {
+    "description": "Saves a document to its file, or to `path` (absolute, may ask the user first) in `format` (bundle folder or zip).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "enum": [
+            "bundle",
+            "zip"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "name": "save_document"
+  },
+  {
+    "description": "Brings the window of a document to the front; tools without id then work on it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "type": "object"
+    },
+    "name": "activate_document"
+  },
+  {
+    "description": "The document: name, path, revision, unsaved, undo step, selection, the asset list and icon.json (groups, layers, fill …).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "icon_json": {
+          "description": "include icon.json (default true)",
+          "type": "boolean"
+        },
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "name": "get_document"
+  },
+  {
+    "description": "The SVG source of an asset (as saved, without internal ids), at most max_chars (default 20000, at most 200000).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "type": "string"
+        },
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        },
+        "max_chars": {
+          "maximum": 200000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "asset"
+      ],
+      "type": "object"
+    },
+    "name": "get_asset_svg"
+  },
+  {
+    "description": "The hierarchy: root, groups, layers and their SVG nodes (kind, label, tag, node ref, fill/stroke swatch, hidden), depth-first, at most max_nodes (default 500, at most 5000).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        },
+        "max_nodes": {
+          "maximum": 5000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "name": "get_tree"
+  },
+  {
+    "description": "One SVG node: tag, attributes, text, children, and its bounding box in icon units (0…1024) as the browser measures it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        },
+        "node": {
+          "additionalProperties": false,
+          "description": "A node of an SVG asset: {asset: asset file name, id: internal node id} (from get_tree)",
+          "properties": {
+            "asset": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "asset",
+            "id"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "node"
+      ],
+      "type": "object"
+    },
+    "name": "get_node"
+  },
+  {
+    "description": "The selected nodes and icon items (groups/layers).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "name": "get_selection"
+  },
+  {
+    "description": "Runs one document command as JSON, e.g. {\"type\":\"setAttributes\",\"changes\":[{\"ref\":{\"asset\":\"a.svg\",\"id\":\"n3\"},\"name\":\"fill\",\"value\":\"#f00\"}]} or {\"type\":\"setIconJsonValue\",\"path\":[\"fill\"],\"value\":{\"solid\":\"srgb:1.00000,0.50000,0.00000,1.00000\"}}. One undo step.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "type": "object"
+        },
+        "expected_revision": {
+          "description": "Fail with revision_conflict if the document changed since this revision (get_document, or the last write's answer)",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        }
+      },
+      "required": [
+        "command"
+      ],
+      "type": "object"
+    },
+    "name": "run_command"
+  },
+  {
+    "description": "Lists the actions run_action may run (id, label, group, enabled, argument schema) – the same as menus, palette and keyboard.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "name": "list_actions"
+  },
+  {
+    "description": "Runs an action of the app with arguments, e.g. add.circle {cx, cy, r, fill}, icon.setFill {fill}, properties.set {name, value}, edit.delete. One undo step; the answer has the new revision and selection.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "args": {
+          "type": "object"
+        },
+        "expected_revision": {
+          "description": "Fail with revision_conflict if the document changed since this revision (get_document, or the last write's answer)",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "type": "object"
+    },
+    "name": "run_action"
+  },
+  {
+    "description": "Inserts SVG markup (one element, several, or a whole <svg>) like the SVG Snippet command – cleaned, centred unless it has a transform, into `parent` (a container node ref) or the current target. One undo step.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_revision": {
+          "description": "Fail with revision_conflict if the document changed since this revision (get_document, or the last write's answer)",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        },
+        "index": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "markup": {
+          "type": "string"
+        },
+        "parent": {
+          "additionalProperties": false,
+          "description": "A node of an SVG asset: {asset: asset file name, id: internal node id} (from get_tree)",
+          "properties": {
+            "asset": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "asset",
+            "id"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "markup"
+      ],
+      "type": "object"
+    },
+    "name": "insert_svg"
+  },
+  {
+    "description": "Selects SVG nodes (empty list: nothing).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        },
+        "nodes": {
+          "items": {
+            "additionalProperties": false,
+            "description": "A node of an SVG asset: {asset: asset file name, id: internal node id} (from get_tree)",
+            "properties": {
+              "asset": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "asset",
+              "id"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "nodes"
+      ],
+      "type": "object"
+    },
+    "name": "select"
+  },
+  {
+    "description": "Exports PNGs (resvg) into a folder: <name>-<appearance>-<size>.png. May ask the user first.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "appearances": {
+          "description": "Default: light and dark",
+          "items": {
+            "enum": [
+              "light",
+              "dark"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dir": {
+          "description": "Absolute path of an existing folder",
+          "type": "string"
+        },
+        "effects": {
+          "description": "shadow/translucency approximation",
+          "type": "boolean"
+        },
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        },
+        "mask": {
+          "enum": [
+            "none",
+            "squircle",
+            "circle"
+          ],
+          "type": "string"
+        },
+        "overwrite": {
+          "type": "boolean"
+        },
+        "sizes": {
+          "description": "Default: [1024]",
+          "items": {
+            "enum": [
+              1024,
+              512,
+              256,
+              128,
+              64,
+              32,
+              16
+            ],
+            "type": "integer"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "dir"
+      ],
+      "type": "object"
+    },
+    "name": "export_png"
+  },
+  {
+    "description": "Exports one flat SVG per appearance into a folder: <name>-<appearance>.svg. May ask the user first.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "appearances": {
+          "description": "Default: light and dark",
+          "items": {
+            "enum": [
+              "light",
+              "dark"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dir": {
+          "description": "Absolute path of an existing folder",
+          "type": "string"
+        },
+        "effects": {
+          "type": "boolean"
+        },
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        },
+        "mask": {
+          "enum": [
+            "none",
+            "squircle",
+            "circle"
+          ],
+          "type": "string"
+        },
+        "overwrite": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "dir"
+      ],
+      "type": "object"
+    },
+    "name": "export_svg"
+  },
+  {
+    "description": "Renders the icon as a PNG image (the export path) so you can see the result: size 16…1024 (default 512), appearance light/dark, mask (default squircle).",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "appearance": {
+          "enum": [
+            "light",
+            "dark"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        },
+        "mask": {
+          "enum": [
+            "none",
+            "squircle",
+            "circle"
+          ],
+          "type": "string"
+        },
+        "size": {
+          "maximum": 1024,
+          "minimum": 16,
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "name": "render_preview"
+  }
+]

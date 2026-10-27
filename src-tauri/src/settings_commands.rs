@@ -94,12 +94,21 @@ fn broadcast(app: &AppHandle, window: &WebviewWindow, s: &Settings) {
     );
 }
 
+/// Loads the settings at app start and opens the AI bridge if it is on (design 018 E3) – before
+/// any window asks, so an AI can connect while the first window starts.
+pub fn load_at_start(app: &AppHandle) {
+    let Ok(dir) = config_dir(app) else { return };
+    let (value, _) = app.state::<SettingsState>().current(&dir);
+    crate::mcp_commands::apply(app, &value);
+}
+
 /// The settings for a starting window; problems with the file come as a warning.
 #[tauri::command]
 pub async fn load_settings(app: AppHandle) -> Result<LoadedSettings, FsError> {
     let dir = config_dir(&app)?;
     blocking(move || {
         let (value, warning) = app.state::<SettingsState>().current(&dir);
+        crate::mcp_commands::apply(&app, &value);
         Ok(LoadedSettings { value, warning })
     })
     .await
@@ -120,6 +129,7 @@ pub async fn save_settings(
             .change(&dir, |cur| settings::apply_patch(cur, &patch))
     })
     .await?;
+    crate::mcp_commands::apply(&app, &s);
     broadcast(&app, &window, &s);
     Ok(s)
 }
@@ -135,6 +145,7 @@ pub async fn reset_settings(app: AppHandle, window: WebviewWindow) -> Result<Set
             .change(&dir, |_| Settings::default())
     })
     .await?;
+    crate::mcp_commands::apply(&app, &s);
     broadcast(&app, &window, &s);
     Ok(s)
 }

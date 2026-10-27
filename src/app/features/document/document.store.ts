@@ -92,6 +92,23 @@ export class DocumentStore {
     this.execute(commandFromJson(json));
   }
 
+  /** Where the undo stack is now (design 018 E10). */
+  undoMark(): number {
+    return this.undoService.mark();
+  }
+
+  /** Every step since `mark` becomes one step of the AI ("Undo AI: …"). */
+  groupSince(mark: number): boolean {
+    const grouped = this.undoService.groupSince(mark);
+    if (grouped) this.pruneSelection();
+    return grouped;
+  }
+
+  /** The undo title now ("Undo AI: Add Circle") – what the AI is told after a write. */
+  get undoTitle(): string | null {
+    return this.canUndo() ? this.undoLabel() : null;
+  }
+
   /** The last undoable step as JSON (design 005 E15; the AI can see what happened). */
   lastCommandJson(): CommandJson | null {
     return this.undoService.top?.toJSON() ?? null;

@@ -194,18 +194,24 @@ const VERBS = translatable(
   {
     undoNamed: (name: string) => `Undo ${name}`,
     redoNamed: (name: string) => `Redo ${name}`,
+    /** A step of the AI (design 018 E10). */
+    ai: (name: string) => `AI: ${name}`,
   },
   {
     de: {
       undoNamed: (name: string) => `Widerrufen: ${name}`,
       redoNamed: (name: string) => `Wiederholen: ${name}`,
+      ai: (name: string) => `KI: ${name}`,
     },
   },
 );
 
-/** "Undo Change Fill" for the label key (or "Undo" without one), in the UI language. */
-export function undoTitle(kind: 'undo' | 'redo', label: UndoLabel | null): string {
+/**
+ * "Undo Change Fill" for the label key (or "Undo" without one), in the UI language; a step of the
+ * AI is "Undo AI: Change Fill".
+ */
+export function undoTitle(kind: 'undo' | 'redo', label: UndoLabel | null, ai = false): string {
   if (!label) return UNDO_TEXTS[kind];
-  const name = UNDO_TEXTS[label];
+  const name = ai ? VERBS.ai(UNDO_TEXTS[label]) : UNDO_TEXTS[label];
   return kind === 'undo' ? VERBS.undoNamed(name) : VERBS.redoNamed(name);
 }

@@ -70,6 +70,29 @@ pub fn encode(pixmap: &Pixmap) -> Result<Vec<u8>, FsError> {
         .map_err(|e| FsError::new(FsErrorCode::Io, e.to_string(), None))
 }
 
+/// A preview for the AI (design 018 E8): `svg` rendered at `size` px as base64 PNG, plus whether
+/// it has transparent pixels.
+pub fn preview_base64(
+    svg: &str,
+    size: u32,
+    fonts: Arc<Database>,
+) -> Result<(String, bool), FsError> {
+    use base64::Engine;
+    if !(16..=1024).contains(&size) {
+        return Err(FsError::new(
+            FsErrorCode::InvalidRequest,
+            "size must be 16…1024",
+            None,
+        ));
+    }
+    let pixmap = render_png(svg, size, fonts)?;
+    let png = encode(&pixmap)?;
+    Ok((
+        base64::engine::general_purpose::STANDARD.encode(png),
+        has_transparency(&pixmap),
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -93,6 +116,22 @@ mod tests {
         format!(
             r#"<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024" viewBox="0 0 1024 1024">{body}</svg>"#
         )
+    }
+
+    #[test]
+    fn a_preview_is_a_base64_png_of_the_size() {
+        use base64::Engine;
+        let svg = icon(r##"<rect width="1024" height="1024" fill="#123456"/>"##);
+        let (b64, transparent) = preview_base64(&svg, 64, empty_fonts()).unwrap();
+        let png = base64::engine::general_purpose::STANDARD
+            .decode(b64)
+            .unwrap();
+        assert_eq!(&png[..8], b"\x89PNG\r\n\x1a\n");
+        assert!(!transparent);
+        let e = preview_base64(&svg, 4096, empty_fonts()).unwrap_err();
+        assert_eq!(e.code, FsErrorCode::InvalidRequest);
+        let (_, transparent) = preview_base64(&icon(""), 16, empty_fonts()).unwrap();
+        assert!(transparent);
     }
 
     #[test]

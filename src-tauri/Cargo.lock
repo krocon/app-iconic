@@ -33,6 +33,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ai-mcp"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
 name = "alloc-no-stdlib"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -67,6 +76,7 @@ name = "app-iconic"
 version = "0.1.0"
 dependencies = [
  "ai-core",
+ "ai-mcp",
  "objc2",
  "serde",
  "serde_json",

@@ -100,6 +100,16 @@ pub struct DebugSettings {
     pub log_undo_grouping: bool,
 }
 
+/// AI control over MCP (design 018 E16).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct McpSettings {
+    /// The bridge for the `app-iconic-mcp` sidecar is open (default off).
+    pub enabled: bool,
+    /// Saving to a new path and exports ask the user first (design 018 E13).
+    pub confirm_files: bool,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
@@ -113,6 +123,7 @@ pub struct Settings {
     pub export: ExportSettings,
     pub freehand: FreehandSettings,
     pub debug: DebugSettings,
+    pub mcp: McpSettings,
 }
 
 impl Default for Settings {
@@ -161,6 +172,10 @@ impl Default for Settings {
             },
             debug: DebugSettings {
                 log_undo_grouping: false,
+            },
+            mcp: McpSettings {
+                enabled: false,
+                confirm_files: true,
             },
         }
     }

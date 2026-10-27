@@ -48,6 +48,8 @@ export interface Settings {
   export: ExportSettings;
   freehand: { epsilon: number; strokeWidth: number; closed: boolean };
   debug: { logUndoGrouping: boolean };
+  /** AI control over MCP (design 018 E16): bridge open, ask before saving to a new path/export. */
+  mcp: { enabled: boolean; confirmFiles: boolean };
 }
 
 /** A part of the settings (what a window sends, design 015 E4); lists are sent whole. */
@@ -95,6 +97,7 @@ export const DEFAULT_SETTINGS: Settings = {
   },
   freehand: { epsilon: 2.5, strokeWidth: 8, closed: false },
   debug: { logUndoGrouping: false },
+  mcp: { enabled: false, confirmFiles: true },
 };
 
 /** `load_settings` (Rust `LoadedSettings`). */

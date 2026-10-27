@@ -11,6 +11,8 @@
 //! - [`export_commands`] export SVG/PNG (resvg), folder dialog, progress and cancel per window (012)
 //! - [`font_commands`] font list and text to path (013)
 //! - [`settings_commands`] `settings.json` for every window: load, patches, reset, theme (015)
+//! - [`mcp`]           AI control: the tool router over the windows (design 018)
+//! - [`mcp_commands`]  the bridge for the `app-iconic-mcp` sidecar, calls to the windows (018)
 //!
 //! The engine (icon documents, file I/O, export, fonts) lives in the Tauri-free crate
 //! `ai-core` (`src-tauri/core`); `error` is re-exported from there.
@@ -20,6 +22,8 @@ pub mod app_menu;
 pub mod commands;
 pub mod export_commands;
 pub mod font_commands;
+pub mod mcp;
+pub mod mcp_commands;
 pub mod model;
 pub mod sessions;
 pub mod settings_commands;
@@ -39,9 +43,13 @@ pub fn run() {
         .manage(app_menu::MenuSpecs::default())
         .manage(export_commands::ExportJobs::default())
         .manage(settings_commands::SettingsState::default())
-        .setup(|_| {
+        .manage(mcp_commands::McpState::default())
+        .setup(|app| {
             // system fonts for text to path and the PNG export, scanned in the background
             font_commands::warm_up();
+            // settings first: the AI bridge is open from the start if it is on (design 018 E3)
+            let handle = app.handle().clone();
+            std::thread::spawn(move || settings_commands::load_at_start(&handle));
             Ok(())
         })
         // native menu (macOS): a click is an action of the focused window; Quit asks every
@@ -59,9 +67,15 @@ pub fn run() {
                     api.prevent_close();
                     let _ = window.emit_to(window.label(), windows::CLOSE_REQUESTED, ());
                 }
-                tauri::WindowEvent::Focused(true) => app_menu::on_focus(app, window.label()),
+                tauri::WindowEvent::Focused(true) => {
+                    app_menu::on_focus(app, window.label());
+                    app.state::<mcp_commands::McpState>()
+                        .set_active(window.label());
+                }
                 tauri::WindowEvent::Destroyed => {
                     docs.forget(window.label());
+                    app.state::<mcp_commands::McpState>()
+                        .window_gone(window.label());
                     app_menu::on_destroyed(app, window.label());
                     if docs.quit(|q| q.closed(window.label())) {
                         commands::advance_quit(app);
@@ -106,6 +120,10 @@ pub fn run() {
             settings_commands::save_settings,
             settings_commands::reset_settings,
             settings_commands::set_window_theme,
+            mcp_commands::mcp_info,
+            mcp_commands::mcp_ready,
+            mcp_commands::mcp_reply,
+            mcp_commands::mcp_disconnect,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

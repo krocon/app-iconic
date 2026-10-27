@@ -42,6 +42,7 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
     },
     freehand: { epsilon: 2.5, strokeWidth: 8, closed: false },
     debug: { logUndoGrouping: false },
+    mcp: { enabled: false, confirmFiles: true },
   },
   cases: [
     {
@@ -184,6 +185,14 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
       name: 'debug flag',
       input: { debug: { logUndoGrouping: true } },
       expect: [['debug.logUndoGrouping', true]],
+    },
+    {
+      name: 'AI control (MCP) is off by default and asks before file access; wrong kinds fall back',
+      input: { mcp: { enabled: true, confirmFiles: 'no' } },
+      expect: [
+        ['mcp.enabled', true],
+        ['mcp.confirmFiles', true],
+      ],
     },
     {
       name: 'unknown fields are ignored',

@@ -113,6 +113,7 @@ export function sanitizeSettings(s: Settings): Settings {
       closed: s.freehand.closed,
     },
     debug: { logUndoGrouping: s.debug.logUndoGrouping },
+    mcp: { enabled: s.mcp.enabled, confirmFiles: s.mcp.confirmFiles },
   };
 }
 
