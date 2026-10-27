@@ -66,6 +66,11 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 007 E12 | Pfeiltasten 1 / ⇧ 10 Dokumenteinheiten; eine Folge innerhalb 500 ms ist ein Undo-Schritt (`executeCoalescing`, faltet in den obersten Schritt, nie in den Save-Punkt) | kein offenes Gesten-Fenster, das fremde Befehle verschlucken könnte |
 | 007 E13/E14 | Snapping rein (`snapping.ts`): Grid 10 (Ursprung `worldZero`/`svgCenter`), Magic Snap auf markante Punkte aller sichtbaren Nodes, 20 Bildschirm-px, Magic vor Grid; BoundsGuard klemmt Punkte/Verschiebungen auf die Leinwand (außer was schon draußen liegt) | Algorithmen der Vorlage (`SnappingService`, `BoundsGuard`) mit ihren Testfällen |
 | 007 E15 | Esc (`canvas.escape`) und Entf (`canvas.deletePoint`) im Kontext `canvas` sind nur aktiv, wenn es etwas zu tun gibt, sonst fällt die Taste zu Deselect/Delete durch | bewusste Ausnahme im Keymap-Test „Kontext verdeckt kein globales Kürzel“ |
+| 008 E1/E2 | „Add“ ohne neue Dokument-Commands: je Aktion ein `composite` aus `insertNode` bzw. `addAsset` + `addGroup` (Label „Add Circle“ …); Einfügeort rein (`insert-target.ts`): gewählter Container → hinein, Node → dahinter, Layer/Gruppe → Ende des Assets, Gruppen-Kontext, sonst erster Layer der ersten Gruppe, ohne Layer zuerst eine Icon-Gruppe (ein Undo-Schritt), ohne Dokument zuerst „New Document“ | ein Undo-Schritt, als JSON darstellbar; Regeln der Vorlage (`resolveTargetAssetAndContainer`) |
+| 008 E3 | Zentrum = Mitte des Viewports im Dokumentraum (auf die Leinwand geklemmt) → `nodeToDocument(host, parent)⁻¹`; explizite KI-Geometrie gilt im Benutzerraum des Elternelements | exakt in transformierten Gruppen ohne eigene Transform-Kette |
+| 008 E6 | Add-Aktionen mit serialisierbaren Argumenten (`core/actions/add-action-args.ts`: Geometrie je Form, `fill`/`stroke`/`strokeWidth`/`attributes`, `parent`, `index`; `add.image { href }`, `add.svgSnippet { markup }`) | KI-Regel: `add.circle { cx, cy, r, fill }` wie ein Menüklick |
+| 008 E8 | Bilder: Rust prüft Art an den Magic Bytes (PNG/JPEG/WebP/SVG, ≤ 20 MiB) und liest die Größe aus dem Kopf; `<image href="data:…">`, nur verkleinert auf ≤ 512; `insertNode` bis 32 MiB Markup | fremde Dateien sind feindlich; die Endung entscheidet nichts |
+| 008 E9 | SVG Snippet: bereinigt vor jedem DOM-Kontakt, Wurzel entpackt, `defs` mit, IDs eindeutig, Zentrieren über `getBBox` einer `<g>` in einem unsichtbaren Mess-SVG, Verschiebung vorn an `transform` | der Browser misst; wie 007 E11 |
 
 ## Schichten
 
@@ -100,10 +105,14 @@ Angular (WebView)                                   Rust
 | `load_keymap_overrides()` | 005 | `keymap.json` im Config-Ordner → `KeymapOverrides { bindings, warning }` |
 | `quit_app()`, `cancel_quit()` | 005 | Quit-Folge über alle Fenster (`close-requested` nacheinander) bzw. Abbruch durch das gefragte Fenster |
 | `window_start_action()` | 005 | Aktion, die ein ohne Fenster gewählter Menüeintrag (macOS) im neuen Fenster ausführt |
+| `pick_image_file()` | 008 | nativer Dialog für ein Bild (PNG, JPEG, WebP, SVG), `null` bei Abbruch |
+| `read_image_file(path)` | 008 | Bild ≤ 20 MiB → `ImageFileDto { name, mime, dataUrl, width?, height? }` (Art aus Magic Bytes, Größe aus dem Kopf); Fehler `too_large`, `invalid_image` |
 
 DTO-Ergänzung 003: `IconDocumentDto.name`, `SaveResult.name` (Dateiname fürs UI). Fehlercode 005: `invalid_menu`.
 006 bringt keinen Rust-Command: Hierarchie, Ausrichten und Zwischenablage laufen ganz im Frontend. 007 ebenso
-(Auswahl, Handles, Snapping, BoundsGuard nur im Frontend; neuer Dokument-Command `setAttributes`).
+(Auswahl, Handles, Snapping, BoundsGuard nur im Frontend; neuer Dokument-Command `setAttributes`). 008: keine
+neuen Dokument-Commands (Add = `composite` aus `insertNode`/`addAsset`/`addGroup`), Fehlercode `invalid_image`,
+keine neue Abhängigkeit (Bildköpfe von Hand, `base64` war schon da).
 
 Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `export_svg`,
 `export_png` (012), `list_fonts`, `text_to_path` (013), `load_settings`/`save_settings` (015).

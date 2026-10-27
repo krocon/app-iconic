@@ -50,10 +50,10 @@
 - [x] Handles korrekt bei verschachtelten, transformierten Gruppen und Zoom 50/100/150 % (007, Playwright ± 0,5 px)
 
 ## 5. Elemente hinzufügen
-- [ ] Group (Icon-Gruppe + Layer + Asset) und Container `<g>` (008)
-- [ ] Circle, Ellipse, Rectangle, Line, Polyline, Polygon, Path, Text mit Defaults der Vorlage (008)
-- [ ] Image ⌘I als Data-URL (008)
-- [ ] SVG Snippet (008)
+- [x] Group (Icon-Gruppe + Layer + Asset) und Container `<g>` (008; Command Sidebar mit Suche, Menü „Add“, Aktionen mit Argumenten)
+- [x] Circle, Ellipse, Rectangle, Line, Polyline, Polygon, Path, Text mit Defaults der Vorlage (008; zentriert im sichtbaren Ausschnitt, auch in transformierten Gruppen)
+- [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)
+- [x] SVG Snippet (008; bereinigt, `defs`, IDs eindeutig, auf die Bounds zentriert)
 - [ ] Freehand mit RDP + Glättung, offen/geschlossen, Live-Vorschau, Esc (013)
 - [ ] Text to Path mit Systemschriften (Rust, fontdb) (013)
 - [ ] Symbol-Picker mit freiem Icon-Set, Suche, Gewicht/Größe, Plugin-Schnittstelle (013)

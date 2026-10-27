@@ -4,6 +4,10 @@ import { KeyboardDispatcher } from './core/actions/keyboard-dispatcher';
 import { WindowApi } from './core/window/window-api';
 import { AboutDialog } from './features/about/about-dialog';
 import { CanvasView } from './features/canvas/canvas-view';
+import { registerAddActions } from './features/commands/add-actions';
+import { AddService } from './features/commands/add.service';
+import { CommandSidebar } from './features/commands/command-sidebar';
+import { SvgSnippetDialog } from './features/commands/svg-snippet-dialog';
 import { registerFileActions } from './features/files/file-actions';
 import { FILES_TEXTS } from './features/files/files-texts';
 import { FilesService } from './features/files/files.service';
@@ -35,10 +39,12 @@ import { DialogService } from './shared/dialog/dialog.service';
     AskDialog,
     CanvasView,
     CommandPalette,
+    CommandSidebar,
     HierarchyTree,
     MenuBar,
     ShortcutsDialog,
     SidePanel,
+    SvgSnippetDialog,
   ],
   template: `
     <header class="toolbar">
@@ -81,7 +87,9 @@ import { DialogService } from './shared/dialog/dialog.service';
     </header>
     <div class="workspace">
       @if (panels().commands) {
-        <app-side-panel class="commands" [heading]="t.commands">{{ t.comingSoon }}</app-side-panel>
+        <app-side-panel class="commands" [heading]="t.commands" [flush]="true">
+          <app-command-sidebar />
+        </app-side-panel>
       }
       @if (panels().hierarchy) {
         <app-side-panel class="hierarchy" [heading]="t.hierarchy" [flush]="!!store()">
@@ -120,6 +128,9 @@ import { DialogService } from './shared/dialog/dialog.service';
       @case ('shortcuts') {
         <app-shortcuts-dialog />
       }
+      @case ('svgSnippet') {
+        <app-svg-snippet-dialog />
+      }
     }
   `,
   styleUrl: './app.css',
@@ -150,6 +161,7 @@ export class App implements OnInit {
       this.destroyRef,
     );
     registerEditActions(this.actions, inject(EditService), this.dialogs, this.destroyRef);
+    registerAddActions(this.actions, inject(AddService), this.destroyRef);
     // where the keyboard is (design 005 E4): a dialog owns it; else hierarchy or canvas first
     this.dispatcher.setContextProvider((target) => {
       if (this.dialogs.open() !== null) return ['dialog'];

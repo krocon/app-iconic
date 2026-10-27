@@ -44,11 +44,12 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/backend/call.ts    einzige Stelle mit invoke() (+ isTauri-Prüfung, Fehler → FsError)
   app/core/errors/            FsError, toFsError, describeFsError (Codes = Rust ai-core error.rs)
   app/core/about/             AppInfo, AboutApi
-  app/core/icon-file/         IconFileApi (open/save/new/close .icon, read SVG, Dialoge), DTOs, findAsset (002)
+  app/core/icon-file/         IconFileApi (open/save/new/close .icon, read SVG/Bild, Dialoge), DTOs, findAsset (002, 008)
   app/core/window/            WindowApi (Titel, Fenster, Schließen-Frage, 003)
   app/core/recent/            RecentFilesApi („Open Recent“, 003)
   app/core/actions/           Aktionskatalog, Keymaps (base/mac/other.json), ActionService (run(id, args?)),
-                              KeyboardDispatcher (einziger keydown-Listener), shortcut, action-args (005)
+                              KeyboardDispatcher (einziger keydown-Listener), shortcut, action-args (005),
+                              add-action-args (Schema der Add-Argumente, 008)
   app/core/menu/              MenuApi (natives Menü, menu-action), KeymapApi (keymap.json), MenuSpec (005)
   app/core/clipboard/         ClipboardApi (Text der System-Zwischenablage über navigator.clipboard, 006)
   app/backend-providers.ts    Bindung der Fassaden; Dev-Build: backend-providers.dev.ts (Fakes im Browser, 003 E14)
@@ -66,6 +67,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               node-label, tree-icons; EditService + edit-actions (Cut/Copy/Paste/Duplicate/
                               Delete/Sichtbarkeit/Arrange/Align), edit-/arrange-operations, paste, align, visibility,
                               follow-up (Folge-Auswahl)
+  app/features/commands/      „Add“ (008): CommandSidebar (Liste + Suche), AddService, add-actions, insert-target
+                              (Einfügeort, rein), insert-center (Zentrum über inverse CTM), element-defaults
+                              (Legacy-Defaults, rein), add-args, icon-group, svg-snippet (+ Dialog), image-size
   app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3), Texte der Fensterhülle
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
@@ -99,7 +103,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   core/                       Crate `ai-core` (Workspace-Mitglied): Engine ohne Tauri
     src/error.rs              FsError { code, message, path }
     src/fs_atomic.rs, config_file.rs  atomar schreiben / Konfig laden (aus files-and-folders)
-    src/icon/                 .icon: model (Sicht), json_format, names, bundle, zip_io, save, svg_file (002)
+    src/icon/                 .icon: model (Sicht), json_format, names, bundle, zip_io, save, svg_file (002),
+                              image_file (Bild als Data-URL, Magic Bytes, Größe aus dem Kopf, 008)
     src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
     src/menu_spec.rs          MenuSpec prüfen, Accelerators, Menü ohne Fenster (005)
     src/keymap_file.rs        keymap.json laden (005)

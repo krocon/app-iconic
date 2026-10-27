@@ -1,4 +1,5 @@
 import { ArgsSpec } from './action-args';
+import { IMAGE_ARGS, shapeArgsSpec, SNIPPET_ARGS } from './add-action-args';
 
 /**
  * Every function of the app as an action (design 005 E1; taken over from editlicious
@@ -179,22 +180,22 @@ export const ACTIONS: readonly ActionDef[] = [
   // canvas editing (design 007 E12, E15): Esc and Delete fall through when there is nothing to do
   EDIT('canvas.escape', 'Cancel / Leave Group', { context: 'canvas', palette: false }),
   EDIT('canvas.deletePoint', 'Delete Point', { context: 'canvas' }),
-  // add (legacy §8; prompts 008, 013)
+  // add (legacy §8; prompts 008, 013) – with serialisable arguments (design 008 E6)
   ADD('add.iconGroup', 'Group (SVG)'),
-  ADD('add.container', 'Container <g>'),
-  ADD('add.circle', 'Circle'),
-  ADD('add.ellipse', 'Ellipse'),
-  ADD('add.rect', 'Rectangle'),
-  ADD('add.path', 'Path'),
+  ADD('add.container', 'Container <g>', { args: shapeArgsSpec('container') }),
+  ADD('add.circle', 'Circle', { args: shapeArgsSpec('circle') }),
+  ADD('add.ellipse', 'Ellipse', { args: shapeArgsSpec('ellipse') }),
+  ADD('add.rect', 'Rectangle', { args: shapeArgsSpec('rect') }),
+  ADD('add.path', 'Path', { args: shapeArgsSpec('path') }),
   ADD('add.freehand', 'Freehand'),
-  ADD('add.line', 'Line'),
-  ADD('add.polyline', 'Polyline'),
-  ADD('add.polygon', 'Polygon'),
-  ADD('add.text', 'Text'),
+  ADD('add.line', 'Line', { args: shapeArgsSpec('line') }),
+  ADD('add.polyline', 'Polyline', { args: shapeArgsSpec('polyline') }),
+  ADD('add.polygon', 'Polygon', { args: shapeArgsSpec('polygon') }),
+  ADD('add.text', 'Text', { args: shapeArgsSpec('text') }),
   ADD('add.textToPath', 'Text to Path…'),
   ADD('add.symbol', 'Symbol…'),
-  ADD('add.svgSnippet', 'SVG Snippet…'),
-  ADD('add.image', 'Image…'),
+  ADD('add.svgSnippet', 'SVG Snippet…', { args: SNIPPET_ARGS }),
+  ADD('add.image', 'Image…', { args: IMAGE_ARGS }),
   // arrange (legacy §7.2, §7.3; prompt 006)
   ARRANGE('arrange.bringToFront', 'Bring to Front', TEXT),
   ARRANGE('arrange.sendToBack', 'Send to Back', TEXT),

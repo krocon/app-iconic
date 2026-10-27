@@ -5,6 +5,7 @@ import {
   IconFormat,
   SaveIconRequest,
   SaveResult,
+  ImageFileDto,
   SvgFile,
 } from './icon-file.models';
 
@@ -22,6 +23,10 @@ export abstract class IconFileApi {
   abstract pickOpenIcon(folder: boolean): Promise<string | null>;
   abstract pickSaveIcon(suggestedName: string, format: IconFormat): Promise<string | null>;
   abstract pickSvgFile(): Promise<string | null>;
+  /** PNG, JPEG, WebP or SVG (design 008 E8). */
+  abstract pickImageFile(): Promise<string | null>;
+  /** An image ≤ 20 MiB as data URL with its natural size. */
+  abstract readImageFile(path: string): Promise<ImageFileDto>;
 }
 
 @Injectable()
@@ -65,5 +70,13 @@ export class TauriIconFileApi extends IconFileApi {
 
   pickSvgFile(): Promise<string | null> {
     return this.backend<string | null>('pick_svg_file');
+  }
+
+  pickImageFile(): Promise<string | null> {
+    return this.backend<string | null>('pick_image_file');
+  }
+
+  readImageFile(path: string): Promise<ImageFileDto> {
+    return this.backend<ImageFileDto>('read_image_file', { path });
   }
 }

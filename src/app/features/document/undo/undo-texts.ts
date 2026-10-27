@@ -46,6 +46,18 @@ export const UNDO_TEXTS = {
   sendToBack: 'Send to Back',
   paste: 'Paste',
   cut: 'Cut',
+  // add (design 008 E1)
+  addContainer: 'Add Container',
+  addCircle: 'Add Circle',
+  addEllipse: 'Add Ellipse',
+  addRect: 'Add Rectangle',
+  addPath: 'Add Path',
+  addLine: 'Add Line',
+  addPolyline: 'Add Polyline',
+  addPolygon: 'Add Polygon',
+  addText: 'Add Text',
+  addImage: 'Add Image',
+  addSvgSnippet: 'Add SVG Snippet',
 } as const;
 
 /** Key of an action name (`label` of a command). */

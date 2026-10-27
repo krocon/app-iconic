@@ -1,0 +1,86 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+  flex: 1;
+}
+
+.query {
+  width: 100%;
+  flex: none;
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  color: var(--color-text);
+
+  .section {
+    padding: var(--space-2) var(--space-2) var(--space-1);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  [role='option'] {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: var(--tree-row-height);
+    padding: 0 var(--space-2);
+    border-radius: var(--radius);
+    cursor: default;
+
+    &:hover {
+      background: var(--color-hover);
+    }
+
+    &.active {
+      background: var(--color-selection);
+    }
+
+    &.disabled {
+      color: var(--color-text-muted);
+    }
+  }
+
+  .icon {
+    width: 16px;
+    height: 16px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  kbd {
+    color: var(--color-text-muted);
+    font: inherit;
+    font-size: var(--font-size-small);
+  }
+
+  .empty {
+    padding: var(--space-2);
+    color: var(--color-text-muted);
+  }
+}
+
+/* the list is part of the focused combobox: show where the keyboard is */
+:host:has(.query:focus-visible) [role='option'].active {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
+}

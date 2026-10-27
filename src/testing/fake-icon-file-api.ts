@@ -9,6 +9,7 @@ import {
   IconWarning,
   SaveIconRequest,
   SaveResult,
+  ImageFileDto,
   SvgFile,
 } from '../app/core/icon-file/icon-file.models';
 import { FsError } from '../app/core/errors/fs-error';
@@ -83,6 +84,8 @@ export class FakeIconFileApi extends IconFileApi {
   readonly files = new Map<string, FakeIconFile>();
   /** SVG files for `readSvgFile`. */
   readonly svgFiles = new Map<string, SvgFile>();
+  /** Images for `readImageFile` (design 008 E8). */
+  readonly imageFiles = new Map<string, ImageFileDto>();
   /** Answers of the next dialogs, in order; empty = cancelled. */
   readonly picks: (string | null)[] = [];
   /** Every save request, in order. */
@@ -93,7 +96,8 @@ export class FakeIconFileApi extends IconFileApi {
    * Answer of a dialog when `picks` is empty (default: cancelled). The browser mode sets it so
    * that `pnpm start` can be used by hand (design 003 E14).
    */
-  fallbackPick: ((kind: 'open' | 'save' | 'svg', suggestedName?: string) => string | null) | null =
+  fallbackPick:
+    ((kind: 'open' | 'save' | 'svg' | 'image', suggestedName?: string) => string | null) | null =
     null;
 
   private readonly sessions = new Map<string, FakeIconFile>();
@@ -205,7 +209,7 @@ export class FakeIconFileApi extends IconFileApi {
     return { ...f };
   }
 
-  private pick(kind: 'open' | 'save' | 'svg', suggestedName?: string): string | null {
+  private pick(kind: 'open' | 'save' | 'svg' | 'image', suggestedName?: string): string | null {
     this.fail();
     if (this.picks.length) return this.picks.shift() ?? null;
     return this.fallbackPick?.(kind, suggestedName) ?? null;
@@ -221,5 +225,16 @@ export class FakeIconFileApi extends IconFileApi {
 
   async pickSvgFile(): Promise<string | null> {
     return this.pick('svg');
+  }
+
+  async pickImageFile(): Promise<string | null> {
+    return this.pick('image');
+  }
+
+  async readImageFile(path: string): Promise<ImageFileDto> {
+    this.fail();
+    const f = this.imageFiles.get(path);
+    if (!f) throw error('not_found', 'no such file', path);
+    return { ...f };
   }
 }

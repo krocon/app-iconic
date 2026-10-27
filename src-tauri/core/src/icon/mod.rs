@@ -8,11 +8,13 @@
 //! - [`zip_io`]       zipped `.icon`: read with limits, write atomically
 //! - [`save`]         put a document to save together from the frontend's data and the session
 //! - [`svg_file`]     `read_svg_file` for "Import SVG…"
+//! - [`image_file`]   `read_image_file` for "Add › Image…" (prompt 008)
 //!
 //! An [`IconFile`] is the in-memory form: the original `icon.json` bytes and the parsed `Value`
 //! (the truth, 002 E1), asset bytes, and every other file of the bundle/ZIP ("extra files").
 
 pub mod bundle;
+pub mod image_file;
 pub mod json_format;
 pub mod model;
 pub mod names;

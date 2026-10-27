@@ -67,6 +67,8 @@ pub fn run() {
             commands::pick_open_icon,
             commands::pick_save_icon,
             commands::pick_svg_file,
+            commands::read_image_file,
+            commands::pick_image_file,
             commands::recent_files,
             commands::add_recent_file,
             commands::clear_recent_files,

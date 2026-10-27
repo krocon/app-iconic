@@ -8,6 +8,7 @@ use crate::error::{FsError, FsErrorCode};
 use crate::model::{AppInfo, IconDocumentDto, RecentFileDto, SaveAssetDto, SaveResult};
 use crate::sessions::IconSessions;
 use crate::windows::{CLOSE_REQUESTED, DocWindows, QuitStep, window_title};
+use ai_core::icon::image_file::ImageFile;
 use ai_core::icon::save::{AssetInput, assemble};
 use ai_core::icon::svg_file::SvgFile;
 use ai_core::icon::{self, IconFormat, Limits};
@@ -167,6 +168,29 @@ pub async fn pick_svg_file(app: AppHandle) -> Result<Option<String>, FsError> {
             .dialog()
             .file()
             .add_filter("SVG", &["svg"])
+            .blocking_pick_file()
+            .and_then(to_string))
+    })
+    .await
+}
+
+// ---- prompt 008: images ----
+
+/// One image (PNG, JPEG, WebP, SVG; ≤ 20 MiB) as data URL with its natural size (design 008 E8).
+#[tauri::command]
+pub async fn read_image_file(path: String) -> Result<ImageFile, FsError> {
+    let p = file_path(&path)?;
+    blocking(move || icon::image_file::read_image_file(&p)).await
+}
+
+/// Native "open" dialog for one image; `None` = cancelled.
+#[tauri::command]
+pub async fn pick_image_file(app: AppHandle) -> Result<Option<String>, FsError> {
+    blocking(move || {
+        Ok(app
+            .dialog()
+            .file()
+            .add_filter("Image", &["png", "jpg", "jpeg", "webp", "svg"])
             .blocking_pick_file()
             .and_then(to_string))
     })
@@ -525,6 +549,6 @@ mod command_rules {
                 count += 1;
             }
         }
-        assert!(count >= 23, "found {count} commands");
+        assert!(count >= 25, "found {count} commands");
     }
 }

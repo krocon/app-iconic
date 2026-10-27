@@ -19,6 +19,7 @@ describe('fs-error', () => {
       'missing_asset',
       'invalid_svg',
       'invalid_menu',
+      'invalid_image',
     ] as const) {
       const e = toFsError({ code, message: 'rust text' });
       expect(e.code).toBe(code);

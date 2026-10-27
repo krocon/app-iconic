@@ -11,7 +11,6 @@ export const SHELL_TEXTS = {
   canvas: 'Canvas',
   noDocument: 'No document open',
   nothingSelected: 'Nothing selected',
-  comingSoon: 'Coming with the next prompts.',
   undo: 'Undo',
   redo: 'Redo',
 } as const;

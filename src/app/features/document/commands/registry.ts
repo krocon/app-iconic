@@ -27,6 +27,8 @@ import { GroupNodes, ReorderNode, Ungroup } from './tree-commands';
 
 /** Longest markup accepted (same limit as an SVG file, `read_svg_file`). */
 export const MAX_MARKUP = 16 << 20;
+/** Longest markup of one inserted node: an image of 20 MiB as data URL (design 008 E8). */
+export const MAX_NODE_MARKUP = 32 << 20;
 /** Longest JSON value for `setIconJsonValue` / groups / layers (serialised). */
 export const MAX_JSON_VALUE = 1 << 20;
 export const MAX_COMPOSITE_DEPTH = 8;
@@ -183,7 +185,7 @@ const PARSERS: Record<CommandType, Parser> = {
     keys(o, ['parent', 'markup', 'index', 'label']);
     return new InsertNode(
       ref(o['parent'], 'parent'),
-      str(o['markup'], 'markup', MAX_MARKUP),
+      str(o['markup'], 'markup', MAX_NODE_MARKUP),
       optInt(o['index'], 'index'),
       label(o['label']),
     );

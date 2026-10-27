@@ -29,6 +29,8 @@ pub enum FsErrorCode {
     InvalidSvg,
     /// A menu spec from the frontend over the limits or with bad ids/texts (prompt 005 E6).
     InvalidMenu,
+    /// A file that is no PNG, JPEG, WebP or SVG image ("Add › Image…", prompt 008 E8).
+    InvalidImage,
 }
 
 /// The one error type every command returns.
@@ -103,6 +105,7 @@ mod tests {
             (FsErrorCode::MissingAsset, "missing_asset"),
             (FsErrorCode::InvalidSvg, "invalid_svg"),
             (FsErrorCode::InvalidMenu, "invalid_menu"),
+            (FsErrorCode::InvalidImage, "invalid_image"),
         ] {
             assert_eq!(serde_json::to_value(code).unwrap(), text);
         }

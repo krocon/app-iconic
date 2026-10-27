@@ -143,9 +143,11 @@ describe('App', () => {
     const { fixture, el } = await app();
     key('P', { ctrlKey: true, shiftKey: true });
     await fixture.whenStable();
-    const input = el.querySelector<HTMLInputElement>('[role="combobox"]')!;
+    // the command sidebar has a combobox, too (design 008 E10): the palette's is in the dialog
+    const input = el.querySelector<HTMLInputElement>('[role="dialog"] [role="combobox"]')!;
     expect(input).not.toBeNull();
-    const options = () => [...el.querySelectorAll('[role="option"]')].map((o) => o.textContent);
+    const options = () =>
+      [...el.querySelectorAll('[role="dialog"] [role="option"]')].map((o) => o.textContent);
     expect(options().some((o) => o?.includes('Zoom In'))).toBe(true);
     input.value = 'cross cur';
     input.dispatchEvent(new Event('input'));
@@ -154,7 +156,7 @@ describe('App', () => {
     input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     await new Promise((r) => setTimeout(r));
     await fixture.whenStable();
-    expect(el.querySelector('[role="combobox"]')).toBeNull();
+    expect(el.querySelector('[role="dialog"]')).toBeNull();
     expect(el.querySelector('.viewport')!.classList).toContain('cross');
   });
 

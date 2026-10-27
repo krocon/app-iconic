@@ -105,3 +105,15 @@ export interface SvgFile {
   name: string;
   text: string;
 }
+
+/** "Add › Image…" (design 008 E8) – Rust `ai-core::icon::image_file::ImageFile`. */
+export interface ImageFileDto {
+  name: string;
+  /** `image/png`, `image/jpeg`, `image/webp` or `image/svg+xml`. */
+  mime: string;
+  /** `data:<mime>;base64,…` */
+  dataUrl: string;
+  /** Natural size from the header; `null` for SVG (read in the frontend). */
+  width: number | null;
+  height: number | null;
+}

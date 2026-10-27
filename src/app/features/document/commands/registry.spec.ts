@@ -2,7 +2,13 @@ import { CASES, commandDocument } from '../../../../testing/command-cases';
 import { smallDocument } from '../../../../testing/documents';
 import { DocumentStore } from '../document.store';
 import { CommandError, SetAttribute, SetIconJsonValue } from './index';
-import { COMMAND_TYPES, commandFromJson, MAX_COMPOSITE_DEPTH } from './registry';
+import {
+  COMMAND_TYPES,
+  commandFromJson,
+  MAX_COMPOSITE_DEPTH,
+  MAX_MARKUP,
+  MAX_NODE_MARKUP,
+} from './registry';
 
 /** Plain JSON, as it would come over the MCP bridge (design 005 E15). */
 const wire = (v: unknown): unknown => JSON.parse(JSON.stringify(v));
@@ -99,7 +105,9 @@ describe('command registry (serialisable commands, design 005 E15)', () => {
       { type: 'setIconJsonValue', path: ['fill'], value: 'x'.repeat(1 << 21) },
       { type: 'addGroup', group: [] },
       { type: 'addLayer', group: 0, layer: 'x' },
-      { type: 'insertNode', parent: ref, markup: 'x'.repeat((16 << 20) + 1) },
+      // one node may carry an embedded image up to 32 MiB of markup (design 008 E8), an asset 16 MiB
+      { type: 'insertNode', parent: ref, markup: 'x'.repeat(MAX_NODE_MARKUP + 1) },
+      { type: 'addAsset', name: 'big.svg', markup: 'x'.repeat(MAX_MARKUP + 1) },
       { type: 'composite', label: 'importSvg', commands: [] },
       { type: 'composite', commands: [{ type: 'removeGroup', index: 0 }] },
       deep,

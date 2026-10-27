@@ -21,6 +21,8 @@ describe('TauriIconFileApi', () => {
     await api.pickOpenIcon(true);
     await api.pickSaveIcon('x.icon', 'bundle');
     await api.pickSvgFile();
+    await api.pickImageFile();
+    await api.readImageFile('/d.png');
     expect(api.calls).toEqual([
       ['open_icon', { path: '/a.icon' }],
       ['new_icon', undefined],
@@ -30,6 +32,8 @@ describe('TauriIconFileApi', () => {
       ['pick_open_icon', { folder: true }],
       ['pick_save_icon', { suggestedName: 'x.icon', format: 'bundle' }],
       ['pick_svg_file', undefined],
+      ['pick_image_file', undefined],
+      ['read_image_file', { path: '/d.png' }],
     ]);
   });
 
