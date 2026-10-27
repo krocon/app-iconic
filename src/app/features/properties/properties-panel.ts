@@ -8,16 +8,18 @@ import { PROPERTIES_TEXTS } from './properties-texts';
 import { PropertyRow } from './property-row';
 import { SectionId } from './property-spec';
 import { TransformEditor } from './transform-editor';
+import { IconInspector } from '../inspector/icon-inspector';
+import { itemTitle } from '../inspector/inspector-title';
 
 /**
  * The properties panel (design 009 E9): header with the kind of the selection, Undo / Redo and
  * "Reset All…"; the common properties of the selection by section (from the property specs, not
- * hand-written); the transform list; the empty state. Root, group and layer properties follow with
- * the icon inspector (prompt 010).
+ * hand-written); the transform list; the empty state. One selected root, group or layer shows the
+ * icon inspector (design 010).
  */
 @Component({
   selector: 'app-properties-panel',
-  imports: [PropertyRow, TransformEditor],
+  imports: [IconInspector, PropertyRow, TransformEditor],
   template: `
     <div class="head">
       <span class="kind" data-testid="properties-kind">{{ title() }}</span>
@@ -98,6 +100,8 @@ import { TransformEditor } from './transform-editor';
             }
           </section>
         }
+      } @else if (item(); as it) {
+        <app-icon-inspector [store]="store()!" [target]="it" />
       } @else if (hasItems()) {
         <p class="empty" data-testid="properties-items">{{ t.iconItems }}</p>
       } @else {
@@ -132,7 +136,15 @@ export class PropertiesPanel {
     return panelModel(s.document(), s.selection());
   });
   protected readonly hasItems = computed(() => (this.store()?.items().length ?? 0) > 0);
+  /** The one selected root / group / layer: the icon inspector (design 010). */
+  protected readonly item = computed(() => {
+    const items = this.store()?.items() ?? [];
+    return items.length === 1 ? items[0] : null;
+  });
   protected readonly title = computed(() => {
+    const it = this.item();
+    const s = this.store();
+    if (it && s) return itemTitle(s.document().iconJson, it);
     const m = this.model();
     if (!m) return '';
     return m.count === 1 ? m.kind : this.t.items(m.count);

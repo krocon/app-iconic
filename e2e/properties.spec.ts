@@ -46,6 +46,12 @@ test('empty state, then the properties of the selected rect', async ({ page }) =
     'Select an element in the hierarchy or on the canvas.',
   );
   await page.evaluate(() => window.__appIconic!.run('edit.select', { items: [{ kind: 'root' }] }));
+  await expect(panel(page).locator('app-icon-inspector')).toBeVisible();
+  await page.evaluate(() =>
+    window.__appIconic!.run('edit.select', {
+      items: [{ kind: 'root' }, { kind: 'group', group: 0 }],
+    }),
+  );
   await expect(panel(page).getByTestId('properties-items')).toBeVisible();
   await select(page, A, [await idOf(page, A, '#r1')]);
   await expect(panel(page).getByTestId('properties-kind')).toHaveText('rect');
@@ -204,7 +210,8 @@ test('multiple selection: mixed, one change for all as one step; reset drops the
   expect(await attr(page, A, r1, 'fill')).toBe('#123456');
   expect(await attr(page, A, r2, 'fill')).toBe('#123456');
   // the style property went in the same step (else the change would not show)
-  expect(await attr(page, A, r2, 'style')).toBe('opacity: 0.8;');
+  // … and only that declaration: the rest of the attribute stays as written (design 010 E15)
+  expect(await attr(page, A, r2, 'style')).toBe('opacity: 0.8');
   const s = await undoState(page);
   expect(s.label).toBe('Undo Change Fill');
   expect((s.last as { changes: unknown[] }).changes).toHaveLength(3);

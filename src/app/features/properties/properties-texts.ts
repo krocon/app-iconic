@@ -4,7 +4,7 @@ import { SectionId } from './property-spec';
 export const PROPERTIES_TEXTS = {
   nothingSelected: 'Nothing selected',
   nothingSelectedHint: 'Select an element in the hierarchy or on the canvas.',
-  iconItems: 'Icon, group and layer properties come with the icon inspector.',
+  iconItems: 'Select a single icon, group or layer to edit its properties.',
   items: (n: number) => `${n} items selected`,
   mixed: 'mixed',
   reset: (label: string) => `Reset ${label}`,

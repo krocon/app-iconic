@@ -36,6 +36,12 @@ export interface ActionDef {
   args?: ArgsSpec;
 }
 
+/** Appearance of an icon property (design 010 E2). */
+const APPEARANCE_ARG = { type: 'string', enum: ['default', 'dark', 'tinted'] } as const;
+const INDEX = { type: 'integer', minimum: 0 } as const;
+/** Group / layer of an icon property; none = the icon itself. */
+const TARGET_ARGS = { group: INDEX, layer: INDEX } as const;
+
 /** Recently used files reachable from the menu ("Open Recent ›"). */
 export const MAX_RECENT_ACTIONS = 10;
 
@@ -165,6 +171,92 @@ export const ACTIONS: readonly ActionDef[] = [
     // `confirm: false` resets without asking (AI, tests)
     args: { type: 'object', properties: { confirm: { type: 'boolean' } } },
   }),
+  // icon inspector (design 010 E14): what the inspector changes, the AI changes the same way
+  EDIT('icon.setFill', 'Set Background Fill', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['fill'],
+      properties: { fill: { type: 'json' }, appearance: APPEARANCE_ARG },
+    },
+  }),
+  EDIT('icon.set', 'Set Icon Property', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['field', 'value'],
+      properties: {
+        ...TARGET_ARGS,
+        field: { type: 'string', maxLength: 64 },
+        value: { type: 'json' },
+        appearance: APPEARANCE_ARG,
+      },
+    },
+  }),
+  EDIT('icon.removeVariant', 'Remove Appearance Variant', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['field', 'appearance'],
+      properties: {
+        ...TARGET_ARGS,
+        field: { type: 'string', maxLength: 64 },
+        appearance: { type: 'string', enum: ['dark', 'tinted'] },
+      },
+    },
+  }),
+  EDIT('icon.renameGroup', 'Rename Group', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['group', 'name'],
+      properties: { group: INDEX, name: { type: 'string', maxLength: 255 } },
+    },
+  }),
+  EDIT('icon.renameLayer', 'Rename Layer', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['group', 'layer', 'name'],
+      properties: { group: INDEX, layer: INDEX, name: { type: 'string', maxLength: 255 } },
+    },
+  }),
+  EDIT('icon.renameAsset', 'Rename Asset', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['from', 'to'],
+      properties: {
+        from: { type: 'string', maxLength: 255 },
+        to: { type: 'string', maxLength: 255 },
+      },
+    },
+  }),
+  EDIT('icon.setPlatforms', 'Set Supported Platforms', {
+    palette: false,
+    args: {
+      type: 'object',
+      properties: {
+        squares: { type: 'string', enum: ['shared', 'iOS', 'macOS', 'iOS+macOS', 'off'] },
+        watchOS: { type: 'boolean' },
+      },
+    },
+  }),
+  EDIT('icon.setColorSpace', 'Set Color Space of Untagged SVG Colors', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['space'],
+      properties: {
+        space: { type: 'string', enum: ['display-p3', 'srgb', 'extended-gray', 'none'] },
+      },
+    },
+  }),
+  EDIT('icon.editAppearance', 'Edit Appearance', {
+    palette: false,
+    args: { type: 'object', required: ['appearance'], properties: { appearance: APPEARANCE_ARG } },
+  }),
+  EDIT('icon.copyJson', 'Copy icon.json'),
   // view (legacy §4, §5, §9)
   VIEW('view.commandSidebar', 'Command Sidebar'),
   VIEW('view.hierarchy', 'Hierarchy'),

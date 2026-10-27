@@ -67,13 +67,18 @@ describe('PropertiesPanel (design 009 E9)', () => {
     return { fixture, el, field, type, key };
   }
 
-  it('empty state and the hint for icon items', async () => {
+  it('empty state, the icon inspector for one item, a hint for several', async () => {
     const { el, fixture } = await render();
     expect(el.querySelector('[data-testid="properties-empty"]')!.textContent).toContain(
       'Nothing selected',
     );
     store.selectItems([{ kind: 'group', group: 0 }]);
     await fixture.whenStable();
+    expect(el.querySelector('app-icon-inspector')).not.toBeNull();
+    expect(el.querySelector('[data-testid="properties-kind"]')!.textContent).toContain('Group 1');
+    store.selectItems([{ kind: 'root' }, { kind: 'group', group: 0 }]);
+    await fixture.whenStable();
+    expect(el.querySelector('app-icon-inspector')).toBeNull();
     expect(el.querySelector('[data-testid="properties-items"]')).not.toBeNull();
   });
 

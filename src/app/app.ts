@@ -20,6 +20,8 @@ import { CommandPalette } from './features/menus/command-palette';
 import { MenuBar } from './features/menus/menu-bar';
 import { MenuService } from './features/menus/menu.service';
 import { registerPropertiesActions } from './features/properties/properties-actions';
+import { registerIconActions } from './features/inspector/icon-actions';
+import { IconInspectorService } from './features/inspector/icon-inspector.service';
 import { PropertiesPanel } from './features/properties/properties-panel';
 import { PropertiesService } from './features/properties/properties.service';
 import { ShortcutsDialog } from './features/menus/shortcuts-dialog';
@@ -167,6 +169,7 @@ export class App implements OnInit {
     registerEditActions(this.actions, inject(EditService), this.dialogs, this.destroyRef);
     registerAddActions(this.actions, inject(AddService), this.destroyRef);
     registerPropertiesActions(this.actions, inject(PropertiesService), this.destroyRef);
+    registerIconActions(this.actions, inject(IconInspectorService), this.destroyRef);
     // where the keyboard is (design 005 E4): a dialog owns it; else hierarchy or canvas first
     this.dispatcher.setContextProvider((target) => {
       if (this.dialogs.open() !== null) return ['dialog'];

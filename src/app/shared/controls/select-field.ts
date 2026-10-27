@@ -23,11 +23,15 @@ import { DraftField } from './draft-field';
         @if (mixed()) {
           <option value="__mixed" disabled [selected]="true">{{ t.mixed }}</option>
         }
-        <option value="__unset" [selected]="!mixed() && value() === null">
-          {{ placeholder() ? '— ' + placeholder() : '—' }}
-        </option>
+        @if (clearable() || value() === null) {
+          <option value="__unset" [selected]="!mixed() && value() === null">
+            {{ placeholder() ? '— ' + placeholder() : '—' }}
+          </option>
+        }
         @for (o of choices(); track o) {
-          <option [value]="o" [selected]="!mixed() && value() === o">{{ o }}</option>
+          <option [value]="o" [selected]="!mixed() && value() === o">
+            {{ optionLabels()[o] ?? o }}
+          </option>
         }
       </select>
     </span>
@@ -37,6 +41,10 @@ import { DraftField } from './draft-field';
 })
 export class SelectField extends DraftField {
   readonly options = input<readonly string[]>([]);
+  /** Offer "—" (not set); off: a value is required (design 010). */
+  readonly clearable = input(true);
+  /** Display names of options (the value stays the option). */
+  readonly optionLabels = input<Readonly<Record<string, string>>>({});
   readonly mixed = input(false);
   protected readonly t = CONTROLS_TEXTS;
 

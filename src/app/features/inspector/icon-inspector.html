@@ -1,0 +1,122 @@
+<div class="appearance" role="group" [attr.aria-label]="t.appearance">
+  @for (a of appearances; track a) {
+    <button
+      type="button"
+      class="seg"
+      [attr.data-testid]="'appearance-' + a"
+      [class.on]="appearance() === a"
+      [attr.aria-pressed]="appearance() === a"
+      (click)="setAppearance(a)"
+    >
+      {{ t.appearances[a] }}
+    </button>
+  }
+</div>
+@if (appearance() === 'tinted') {
+  <p class="note top" role="note">{{ t.notPreviewed }}</p>
+}
+
+@let tg = target();
+@let p = fieldPrefix();
+@if (tg.kind === 'group') {
+  <app-inspector-section sectionId="groupIdentity" [heading]="t.sections.groupIdentity">
+    <app-text-field
+      [fieldId]="p + '-name'"
+      [label]="t.name"
+      [value]="name()"
+      (edited)="draftName($event)"
+      (committed)="commitName()"
+      (reverted)="draftName(null)"
+    />
+    <span></span>
+  </app-inspector-section>
+}
+@for (s of sections(); track s.id) {
+  <app-inspector-section [sectionId]="s.id" [heading]="t.sections[s.id]" [note]="notes[s.id]">
+    @if (s.id === 'identity') {
+      <app-text-field
+        [fieldId]="p + '-name'"
+        [label]="t.name"
+        [value]="name()"
+        (edited)="draftName($event)"
+        (committed)="commitName()"
+        (reverted)="draftName(null)"
+      />
+      <span></span>
+    }
+    @for (r of s.rows; track r.def.id) {
+      @if (r.def.kind === 'fill') {
+        <app-fill-editor
+          [target]="tg"
+          [def]="r.def"
+          [state]="r.state"
+          [fieldId]="p + '-' + r.def.id"
+        />
+      } @else {
+        <app-inspector-row
+          [target]="tg"
+          [def]="r.def"
+          [state]="r.state"
+          [assets]="assets()"
+          [fieldId]="p + '-' + r.def.id"
+        />
+      }
+      @if (r.def.id === 'image-name') {
+        <app-text-field
+          [fieldId]="p + '-file'"
+          [label]="t.file"
+          [value]="assetName()"
+          [placeholder]="t.missingAsset"
+          (edited)="draftFile($event)"
+          (committed)="commitFile()"
+          (reverted)="draftFile(null)"
+        />
+        <span></span>
+      }
+    }
+  </app-inspector-section>
+}
+@if (tg.kind === 'root') {
+  @let pf = platforms();
+  <app-inspector-section sectionId="platforms" [heading]="t.sections.platforms">
+    <app-select-field
+      fieldId="icon-squares"
+      [label]="t.squares"
+      [value]="pf.squares"
+      [options]="pf.choices"
+      [optionLabels]="t.squaresChoices"
+      [clearable]="false"
+      (edited)="squares($event)"
+    />
+    <span></span>
+    <app-toggle-field
+      fieldId="icon-watchos"
+      [label]="t.watchOS"
+      [value]="pf.watch"
+      (edited)="icon.setPlatforms({ watchOS: $event === 'true' })"
+    />
+    <span></span>
+    <app-select-field
+      fieldId="icon-color-space"
+      [label]="t.colorSpace"
+      [value]="colorSpace()"
+      [placeholder]="t.notSet"
+      [options]="colorSpaces"
+      (edited)="icon.setColorSpace($event)"
+    />
+    <span></span>
+  </app-inspector-section>
+}
+<app-inspector-section sectionId="other" [heading]="t.sections.other">
+  <dl class="other wide" data-testid="other-properties">
+    @for (o of other(); track o.key) {
+      <dt>{{ o.key }}</dt>
+      <dd>{{ o.text }}</dd>
+    } @empty {
+      <dd class="none">{{ t.noOther }}</dd>
+    }
+  </dl>
+</app-inspector-section>
+<app-inspector-section sectionId="json" [heading]="t.sections.json">
+  <app-json-preview class="wide" [store]="store()" />
+</app-inspector-section>

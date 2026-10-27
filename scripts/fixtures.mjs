@@ -21,11 +21,6 @@ export const MODULES = [
     constName: 'CAMSCANNER_ICON',
   },
   {
-    bundle: 'testdata/fixtures/all-fields.icon',
-    out: 'src/testing/fixtures/all-fields-icon.ts',
-    constName: 'ALL_FIELDS_ICON',
-  },
-  {
     svgDir: 'testdata/fixtures/svg',
     out: 'src/testing/fixtures/svg-fixtures.ts',
     constName: 'SVG_FIXTURES',
@@ -34,6 +29,12 @@ export const MODULES = [
     json: 'testdata/unique-names.json',
     out: 'src/testing/fixtures/unique-names.ts',
     constName: 'UNIQUE_NAMES',
+  },
+  // prompt 010: every documented icon.json field
+  {
+    bundle: 'testdata/fixtures/all-fields.icon',
+    out: 'src/testing/fixtures/all-fields-icon.ts',
+    constName: 'ALL_FIELDS_ICON',
   },
 ];
 

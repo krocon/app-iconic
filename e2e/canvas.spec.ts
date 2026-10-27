@@ -162,6 +162,8 @@ test('first group on top, and equal ids in two assets resolve per layer', async 
   await page.goto('/');
   await waitForCanvas(page);
   await page.evaluate(() => window.__appIconic!.canvas.set('mask', 'none'));
+  // plain colours: without the effects approximation (shadow, translucency – design 010 E13)
+  await page.evaluate(() => window.__appIconic!.canvas.set('effects', false));
   // both assets define <linearGradient id="g">; red covers the left 600, blue all of it
   await importSvg(page, 'blue.svg', gradientSvg('#0000ff', 0, 1024));
   await importSvg(page, 'red.svg', gradientSvg('#ff0000', 0, 600));
