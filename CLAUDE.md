@@ -13,6 +13,7 @@
 
 ## 1. Stand
 
+- Offene Fragen an Marc: `docs/open-questions.md`.
 - Auftrag: `prompts/000-init.md` (ursprünglicher Prompt, überarbeitet); Regeln: `prompts/000-arbeitsweise.md`;
   Prompt-Liste und Status: `prompts/README.md`. Feature-Checkliste (Parität = Definition of Done): `docs/FEATURES.md`.
 - Erledigte Prompts samt Design-Dokument liegen in `prompts/done/`; Kürzel wie „002 E4“ in Code und Doku verweisen
