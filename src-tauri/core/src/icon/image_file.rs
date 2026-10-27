@@ -169,8 +169,8 @@ pub fn read_image_file(path: &Path) -> Result<ImageFile, FsError> {
 }
 
 pub(crate) fn read_image_file_limited(path: &Path, limit: u64) -> Result<ImageFile, FsError> {
-    let f = fs::File::open(path).map_err(|e| FsError::from_io(&e, path))?;
-    let meta = f.metadata().map_err(|e| FsError::from_io(&e, path))?;
+    // a folder first: Windows refuses to open one (PermissionDenied) before we could ask
+    let meta = fs::metadata(path).map_err(|e| FsError::from_io(&e, path))?;
     if meta.is_dir() {
         return Err(FsError::new(
             FsErrorCode::IsADirectory,
@@ -178,6 +178,7 @@ pub(crate) fn read_image_file_limited(path: &Path, limit: u64) -> Result<ImageFi
             Some(path),
         ));
     }
+    let f = fs::File::open(path).map_err(|e| FsError::from_io(&e, path))?;
     let bytes = read_limited(f, limit)
         .map_err(|e| FsError::from_io(&e, path))?
         .ok_or_else(|| FsError::new(FsErrorCode::TooLarge, "image too large", Some(path)))?;

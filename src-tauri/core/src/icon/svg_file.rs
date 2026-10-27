@@ -22,8 +22,8 @@ pub fn read_svg_file(path: &Path) -> Result<SvgFile, FsError> {
 }
 
 pub(crate) fn read_svg_file_limited(path: &Path, limit: u64) -> Result<SvgFile, FsError> {
-    let f = fs::File::open(path).map_err(|e| FsError::from_io(&e, path))?;
-    let meta = f.metadata().map_err(|e| FsError::from_io(&e, path))?;
+    // a folder first: Windows refuses to open one (PermissionDenied) before we could ask
+    let meta = fs::metadata(path).map_err(|e| FsError::from_io(&e, path))?;
     if meta.is_dir() {
         return Err(FsError::new(
             FsErrorCode::IsADirectory,
@@ -31,6 +31,7 @@ pub(crate) fn read_svg_file_limited(path: &Path, limit: u64) -> Result<SvgFile, 
             Some(path),
         ));
     }
+    let f = fs::File::open(path).map_err(|e| FsError::from_io(&e, path))?;
     let bytes = read_limited(f, limit)
         .map_err(|e| FsError::from_io(&e, path))?
         .ok_or_else(|| FsError::new(FsErrorCode::TooLarge, "SVG too large", Some(path)))?;
@@ -84,6 +85,10 @@ mod tests {
                 .unwrap_err()
                 .code,
             FsErrorCode::NotFound
+        );
+        assert_eq!(
+            read_svg_file(dir.path()).unwrap_err().code,
+            FsErrorCode::IsADirectory
         );
     }
 }
