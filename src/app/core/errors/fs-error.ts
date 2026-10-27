@@ -23,6 +23,8 @@ export type FsErrorCode =
   | 'invalid_menu'
   /** No PNG, JPEG, WebP or SVG image (prompt 008). */
   | 'invalid_image'
+  /** An export target exists and overwriting was not confirmed (prompt 012). */
+  | 'already_exists'
   /** Frontend only: no Tauri backend (e.g. `pnpm start` in a browser). */
   | 'backend_unavailable'
   /** Frontend only: something that is no `FsError` was thrown. */
@@ -48,6 +50,7 @@ const KNOWN: readonly FsErrorCode[] = [
   'invalid_svg',
   'invalid_menu',
   'invalid_image',
+  'already_exists',
   'backend_unavailable',
   'unknown',
 ];
@@ -96,6 +99,8 @@ export function describeFsError(error: FsError): string {
       return 'The menu could not be built.';
     case 'invalid_image':
       return 'The file is not a PNG, JPEG, WebP or SVG image.';
+    case 'already_exists':
+      return 'A file with this name already exists.';
     case 'backend_unavailable':
       return 'The desktop backend is not available (running in a browser?).';
     case 'unknown':

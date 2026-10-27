@@ -20,6 +20,7 @@ describe('fs-error', () => {
       'invalid_svg',
       'invalid_menu',
       'invalid_image',
+      'already_exists',
     ] as const) {
       const e = toFsError({ code, message: 'rust text' });
       expect(e.code).toBe(code);

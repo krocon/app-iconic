@@ -8,12 +8,13 @@
 //! - [`icon`]          `.icon` files: icon.json with lossless round trip, bundle + ZIP I/O (prompt 002)
 //! - [`menu_spec`]     the frontend's menu model for the native macOS menu, checked (prompt 005)
 //! - [`keymap_file`]   the user's shortcut overrides `keymap.json` (prompt 005)
+//! - [`export`]        export: SVG files, PNG with resvg in a size set, system fonts (prompt 012)
 //!
-//! Coming with the prompts (`prompts/README.md`): `export` (resvg PNG, prompt 012), `fonts`
-//! (fontdb + ttf-parser, prompt 013).
+//! Coming with the prompts (`prompts/README.md`): `fonts` (text to path, prompt 013).
 
 pub mod config_file;
 pub mod error;
+pub mod export;
 pub mod fs_atomic;
 pub mod icon;
 pub mod keymap_file;

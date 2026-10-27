@@ -8,6 +8,7 @@
 //! - [`windows`]       document windows: labels, start paths, close takeover, titles (003),
 //!   start actions and the quit sequence (005)
 //! - [`app_menu`]      native macOS menu bar from the menu model of the focused window (005)
+//! - [`export_commands`] export SVG/PNG (resvg), folder dialog, progress and cancel per window (012)
 //!
 //! The engine (icon documents, file I/O, export, fonts) lives in the Tauri-free crate
 //! `ai-core` (`src-tauri/core`); `error` is re-exported from there.
@@ -15,6 +16,7 @@
 pub mod about;
 pub mod app_menu;
 pub mod commands;
+pub mod export_commands;
 pub mod model;
 pub mod sessions;
 pub mod windows;
@@ -31,6 +33,7 @@ pub fn run() {
         .manage(windows::DocWindows::default())
         .manage(commands::RecentLock::default())
         .manage(app_menu::MenuSpecs::default())
+        .manage(export_commands::ExportJobs::default())
         // native menu (macOS): a click is an action of the focused window; Quit asks every
         // window (design 005 E6, E13)
         .on_menu_event(|app, event| app_menu::route(app, event.id().0.clone()))
@@ -83,6 +86,10 @@ pub fn run() {
             commands::load_keymap_overrides,
             commands::quit_app,
             commands::cancel_quit,
+            export_commands::pick_export_dir,
+            export_commands::export_svg,
+            export_commands::export_png,
+            export_commands::cancel_export,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

@@ -17,6 +17,8 @@ zip = { version = "8.6.0", default-features = false, features = ["deflate-flate2
 unicode-normalization = "0.1.25"
 # 002 E9: PNG assets as data URLs
 base64 = "0.23"
+# PNG export (prompt 012): SVG → pixels; usvg, tiny-skia and fontdb are used through its re-exports
+resvg = { version = "=0.48.1", default-features = false, features = ["text", "system-fonts", "memmap-fonts", "raster-images"] }
 
 [dev-dependencies]
 tempfile = "3"

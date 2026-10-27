@@ -31,6 +31,8 @@ pub enum FsErrorCode {
     InvalidMenu,
     /// A file that is no PNG, JPEG, WebP or SVG image ("Add › Image…", prompt 008 E8).
     InvalidImage,
+    /// An export target exists and overwriting was not confirmed (prompt 012 E11).
+    AlreadyExists,
 }
 
 /// The one error type every command returns.
@@ -106,6 +108,7 @@ mod tests {
             (FsErrorCode::InvalidSvg, "invalid_svg"),
             (FsErrorCode::InvalidMenu, "invalid_menu"),
             (FsErrorCode::InvalidImage, "invalid_image"),
+            (FsErrorCode::AlreadyExists, "already_exists"),
         ] {
             assert_eq!(serde_json::to_value(code).unwrap(), text);
         }

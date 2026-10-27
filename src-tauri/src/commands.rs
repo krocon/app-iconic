@@ -20,7 +20,7 @@ use tauri::{AppHandle, Manager, State, WebviewWindow};
 use tauri_plugin_dialog::DialogExt;
 
 /// Runs blocking work off the async runtime.
-async fn blocking<T, F>(f: F) -> Result<T, FsError>
+pub(crate) async fn blocking<T, F>(f: F) -> Result<T, FsError>
 where
     T: Send + 'static,
     F: FnOnce() -> Result<T, FsError> + Send + 'static,
@@ -38,7 +38,7 @@ pub async fn get_app_info(app: AppHandle) -> Result<AppInfo, FsError> {
 }
 
 /// A path from the frontend (opaque there, CLAUDE.md §4) – must be absolute.
-fn file_path(path: &str) -> Result<PathBuf, FsError> {
+pub(crate) fn file_path(path: &str) -> Result<PathBuf, FsError> {
     let p = PathBuf::from(path);
     if path.is_empty() || !p.is_absolute() {
         return Err(FsError::new(
@@ -118,7 +118,7 @@ pub async fn read_svg_file(path: String) -> Result<SvgFile, FsError> {
     blocking(move || icon::svg_file::read_svg_file(&p)).await
 }
 
-fn to_string(p: tauri_plugin_dialog::FilePath) -> Option<String> {
+pub(crate) fn to_string(p: tauri_plugin_dialog::FilePath) -> Option<String> {
     p.into_path().ok().map(|p| p.to_string_lossy().into_owned())
 }
 
