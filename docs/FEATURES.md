@@ -54,9 +54,9 @@
 - [x] Circle, Ellipse, Rectangle, Line, Polyline, Polygon, Path, Text mit Defaults der Vorlage (008; zentriert im sichtbaren Ausschnitt, auch in transformierten Gruppen)
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)
 - [x] SVG Snippet (008; bereinigt, `defs`, IDs eindeutig, auf die Bounds zentriert)
-- [ ] Freehand mit RDP + Glättung, offen/geschlossen, Live-Vorschau, Esc (013)
-- [ ] Text to Path mit Systemschriften (Rust, fontdb) (013)
-- [ ] Symbol-Picker mit freiem Icon-Set, Suche, Gewicht/Größe, Plugin-Schnittstelle (013)
+- [x] Freehand mit RDP + Glättung, offen/geschlossen, Live-Vorschau, Esc (013; Werkzeug-Modus, Optionen Glättung/Strichbreite, `C`, Auto-Schließen, `add.freehand { points }` für die KI)
+- [x] Text to Path mit Systemschriften (Rust, fontdb) (013; harfrust-Shaping + skrifa-Umrisse, Dialog mit Vorschau, fehlende Glyphen → Fehler)
+- [x] Symbol-Picker mit freiem Icon-Set, Suche, Gewicht/Größe, Plugin-Schnittstelle (013; Lucide ISC, Daten lazy, Lizenz in THIRD-PARTY-NOTICES.txt und About)
 
 ## 6. Hierarchie
 - [x] Baum Root → Gruppen → Layer → Nodes, Typ-Icon, Name, Swatches, Sichtbarkeit (006; „Definitions“-Knoten, ab 500 Zeilen virtualisiert)

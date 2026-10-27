@@ -3,8 +3,12 @@ import { AboutApi } from '../../core/about/about-api';
 import { AppInfo } from '../../core/about/about.models';
 import { Modal } from '../../shared/dialog/modal';
 import { DialogService } from '../../shared/dialog/dialog.service';
+import { SYMBOL_PROVIDERS } from '../symbols/symbol-providers';
 
-/** About: app icon, version and platform from the backend, link to the repository. */
+/**
+ * About: app icon, version and platform from the backend, the licences of the symbol sets
+ * (design 013 E22, CLAUDE.md §7).
+ */
 @Component({
   selector: 'app-about-dialog',
   imports: [Modal],
@@ -19,6 +23,17 @@ import { DialogService } from '../../shared/dialog/dialog.service';
           <p class="meta">Version: desktop backend not available</p>
         }
         <p class="meta">© 2026 Marc Kronberg · MIT License</p>
+        @for (p of symbols; track p.id) {
+          <p class="meta" data-testid="about-symbols">
+            Symbols: {{ p.name }} (<a
+              [href]="p.license.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              >{{ p.license.name }}</a
+            >)
+          </p>
+        }
+        <p class="meta">Third-party notices: THIRD-PARTY-NOTICES.txt</p>
       </div>
       <div class="actions">
         <button type="button" class="btn primary" data-autofocus (click)="dialogs.close()">
@@ -47,6 +62,10 @@ import { DialogService } from '../../shared/dialog/dialog.service';
       margin: 0;
       font-size: var(--font-size-small);
       color: var(--color-text-muted);
+
+      a {
+        color: inherit;
+      }
     }
     .actions {
       display: flex;
@@ -58,6 +77,7 @@ import { DialogService } from '../../shared/dialog/dialog.service';
 export class AboutDialog {
   protected readonly dialogs = inject(DialogService);
   protected readonly info = signal<AppInfo | null>(null);
+  protected readonly symbols = SYMBOL_PROVIDERS;
 
   constructor() {
     inject(AboutApi)

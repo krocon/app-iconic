@@ -1,6 +1,6 @@
 # Design 013: Werkzeuge – Freihand, Text → Pfad, Symbole
 
-Status: in Arbeit · Datum: 27.10.2026
+Status: umgesetzt · Datum: 27.10.2026
 
 ## Ausgangslage
 
@@ -56,8 +56,10 @@ Systemschriften als `fontdb::Database` einmal je Prozess (`export::fonts::system
   Eine Zeile: harfrust shapt die Zeile (Richtung/Skript geraten), skrifa zeichnet jeden Glyphen ungehinted in
   Font-Einheiten, skaliert auf `size / unitsPerEm`, y nach unten, Ursprung = Grundlinie links. Kurven bleiben
   Quadratic/Cubic (`Q`/`C`), 2 Nachkommastellen, nur absolute Befehle.
-- **E10 IDs der Schriften**: PostScript-Name (bei Doppelten `#2`, `#3` in Datenbank-Reihenfolge) – lesbar, stabil über
-  Sitzungen (für die KI und spätere Einstellungen). Familie = erster (englischer) Familienname von fontdb, Stilname
+- **E10 IDs der Schriften**: PostScript-Name (ohne PostScript-Namen `<Familie>-<Stil>`); dieselbe Schrift zweimal
+  installiert (gleiche Id, Familie und Stil) erscheint einmal, eine andere Schrift mit derselben Id bekommt `#2`,
+  `#3` … in Datenbank-Reihenfolge – lesbar, stabil über Sitzungen (für die KI und spätere Einstellungen). Familien,
+  deren Name mit `.` beginnt (versteckte macOS-Systemschriften), fehlen in der Liste. Familie = erster (englischer) Familienname von fontdb, Stilname
   aus `name` ID 17 bzw. 2 (skrifa), sonst aus Gewicht/Stil abgeleitet. Familien und Stile sortiert (Stile nach
   Gewicht, aufrecht vor kursiv).
 - **E11 Fehler**: leerer Text bzw. nur Leerzeichen oder Zeilenumbrüche → `invalid_text`; > 256 Zeichen →
@@ -99,9 +101,11 @@ Systemschriften als `fontdb::Database` einmal je Prozess (`export::fonts::system
   stroke-width="<Gewicht>" stroke-linecap="round" stroke-linejoin="round" transform="translate(…) scale(s)">`,
   `s = Größe / 24`, zentriert auf das Zentrum aus 008 E3. Die Gruppe bleibt als ein Objekt wähl-/verschiebbar;
   Elemente mit eigenem `fill` (z. B. Punkte) behalten es. Undo „Add Symbol“.
-- **E20 Picker** (`SymbolPickerDialog`): Set (Auswahl, heute eines), Suche, Raster (Listbox nach APG,
-  Pfeiltasten/Home/End/Enter, `aria-activedescendant`), Gewicht (Zahl mit Schritt 0.25), Größe (Default 512),
-  Lizenzzeile, „Add“. Letzte Wahl für die Sitzung im Dienst.
+- **E20 Picker** (`SymbolPickerDialog`): Set (Auswahl, erst ab zwei Sets sichtbar), Suche, Raster mit 8 Spalten
+  (Listbox nach APG vom Suchfeld aus: ↑/↓ Zeile, ←/→ Kachel – solange das Suchfeld leer ist, sonst bewegen sie den
+  Text-Cursor –, Home/End, Bild↑/↓, Enter fügt ein, Doppelklick ebenso; `aria-activedescendant`), Gewicht (Zahl mit
+  Schritt 0.25), Größe (Default 512), Lizenzzeile mit Link, „Add“. Vorschau über Angular-Bindungen an `<path d>`
+  (kein `innerHTML`). Letzte Wahl (Set, Suche, Größe, Gewicht) für die Sitzung im Dienst.
 - **E21 KI** (`add.symbol { set?, id, size?, weight?, stroke?, x?, y?, parent?, index? }`): `set` Default `lucide`;
   unbekannte Id → Hinweis, nichts eingefügt.
 
@@ -185,9 +189,35 @@ Neue Undo-Labels: `addFreehand`, `addTextPath`, `addSymbol`. Neue Aktion `freeha
 ## Fortschritt
 
 - [x] Design
-- [ ] Rust `ai-core::fonts` + Commands + Fehlercodes
-- [ ] Frontend Freehand
-- [ ] Frontend Text → Pfad
-- [ ] Frontend Symbole + Lizenzen
-- [ ] Playwright, echte App unter Xvfb
-- [ ] Doku, `pnpm check` + `pnpm e2e` grün
+- [x] Rust `ai-core::fonts` (`system` verschoben aus `export/`, `FontCatalog`, `outline`) + `font_commands.rs`
+      (`list_fonts`, `text_to_path`, Vorladen beim Start) + Fehlercodes `invalid_text`, `missing_glyphs`; 18 neue
+      Tests mit Caladea (OFL) inkl. Kerning, Umlaute, Emoji, Grenzen, Extrema der Kurven; `commands_are_async`
+- [x] Frontend Freehand: `shared/geometry/freehand.ts` (Fälle aus `FreeHandPathTests.swift`), `FreehandStore`,
+      `FreehandService`, Overlay, Werkzeugleiste, Canvas-Anbindung (Zeigerereignisse inkl. `getCoalescedEvents`,
+      Esc, Cursor, Statushinweis), Aktion `freehand.toggleClosed` (`C`)
+- [x] Frontend Text → Pfad: `FontApi` + `FakeFontApi`, `text-path.ts`, `TextPathService`, `TextPathDialog`,
+      `path-translate.ts`
+- [x] Frontend Symbole: Plugin-Schnittstelle, Lucide-Provider (lazy), Suche, Raster-Tastatur, `shape-path.ts`,
+      `SymbolService` (`placeSymbol`), `SymbolPickerDialog`; Test über **alle** 1 877 Lucide-Icons (jedes Element
+      wird ein Pfad)
+- [x] Lizenzen: `THIRD-PARTY-NOTICES.txt`, About-Dialog, `testdata/fonts/OFL.txt`
+- [x] Playwright `e2e/tools.spec.ts` (6): Freihand-Strich per Maus (Vorschau, ein Pfad, ⌘Z), Esc (Strich, dann
+      Werkzeug), `C` schließt, Symbol suchen + Enter (zentriert), Text to Path (Fake-Schrift, zentriert, Emoji-Fehler),
+      About; `add.spec.ts` angepasst (Werkzeuge jetzt aktiv)
+- [x] Echte App unter Xvfb (WebKitGTK): Freehand über die Sidebar, Strich mit Live-Vorschau und Optionen in der
+      Werkzeugleiste → ein Pfad (Stroke 8, round) mit Punkt-Handles; Text to Path mit den Systemschriften (Liste aus
+      fontdb, Default „Inter“, Vorschau aus Rust) → gefüllter Pfad zentriert; Symbol „rocket“ (Lucide lazy geladen)
+      → `<g>` mit `translate(256.1 254.6) scale(21.333)` = Mitte des sichtbaren Ausschnitts
+- [x] Doku, `pnpm check` + `pnpm e2e` grün
+
+## Abweichungen und Grenzen
+
+- **harfrust + skrifa statt ttf-parser** (E9) – fontdb 0.24 bringt ttf-parser nicht mehr mit; dieselben Crates nutzt
+  resvg schon. Kein eigener Kerning-Code.
+- **Aktions-Id `add.textToPath`** (seit 005 im Katalog) statt `add.textPath` aus dem Auftrag; Argumente wie vorgeschlagen.
+- **Symbole bleiben Strich-Icons** in einer skalierten `<g>` (E19); die Strichbreite skaliert mit der Größe.
+  Umwandlung in Füllpfade (Stroker) ist Folge-Idee.
+- **Text: eine Zeile**, kein Umbruch, keine Bidi-Umordnung über mehrere Richtungsläufe (harfrust rät Richtung und
+  Skript der ganzen Zeile).
+- **Schriftenliste** ohne Vorschau je Familie (nur der gewählte Stil wird in der Vorschau gezeigt).
+- **`canvas-view.ts`** hat sein Template jetzt in `canvas-view.html` (Dateigrenze ~400 Zeilen).

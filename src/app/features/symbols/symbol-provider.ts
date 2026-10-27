@@ -2,7 +2,7 @@ import { ElementSpec } from '../commands/element-defaults';
 
 /**
  * The plug-in interface of the symbol picker (design 013 E16): one provider per symbol set –
- * further sets only need another provider in `SYMBOL_PROVIDERS` (`symbol.service.ts`). No SF
+ * further sets only need another provider in `SYMBOL_PROVIDERS` (`symbol-providers.ts`). No SF
  * Symbols (their licence forbids app icons, legacy §8).
  */
 

@@ -31,4 +31,5 @@ Architecture and decisions: [docs/architecture.md](docs/architecture.md). Rules 
 
 ## License
 
-MIT © 2026 Marc Kronberg
+MIT © 2026 Marc Kronberg. Third-party works (the Lucide icons of the symbol picker, ISC/MIT):
+[THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).

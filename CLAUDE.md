@@ -49,10 +49,12 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/recent/            RecentFilesApi („Open Recent“, 003)
   app/core/actions/           Aktionskatalog, Keymaps (base/mac/other.json), ActionService (run(id, args?)),
                               KeyboardDispatcher (einziger keydown-Listener), shortcut, action-args (005),
-                              add-action-args (Schema der Add-Argumente, 008), export-action-args (012)
+                              add-action-args (Schema der Add-Argumente, 008), export-action-args (012),
+                              tool-action-args (Freehand/Text to Path/Symbol, 013)
   app/core/menu/              MenuApi (natives Menü, menu-action), KeymapApi (keymap.json), MenuSpec (005)
   app/core/clipboard/         ClipboardApi (Text der System-Zwischenablage über navigator.clipboard, 006)
   app/core/export/            ExportApi (Ordner-Dialog, export_svg, export_png mit Channel, cancel), DTOs (012)
+  app/core/fonts/             FontApi (list_fonts, text_to_path), DTOs + Grenzen (013)
   app/backend-providers.ts    Bindung der Fassaden; Dev-Build: backend-providers.dev.ts (Fakes im Browser, 003 E14)
   app/features/document/      IconDocument, DocumentStore (runCommand), UndoService (undo/), Commands (commands/:
                               serialisierbar, command-json.ts + registry.ts commandFromJson, 005; tree-commands:
@@ -88,6 +90,13 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/export/        Export (012): export-svg (Export-SVG aus stackOf/fillPreview, ID-Präfixe), export-options
                               (rein: Wahl, Argumente der KI, Dateiname), ExportService (Wahl der Sitzung, Fortschritt,
                               Abbruch, Hinweise), ExportDialog, export-actions (file.exportSvg/Png), Texte
+  app/features/tools/         Werkzeuge (013): FreehandStore (Werkzeug-Modus, Abtastung, Esc), FreehandService
+                              (Einfügen, `points` der KI), freehand-overlay (Vorschau in Viewport-Pixeln),
+                              freehand-options (Werkzeugleiste), text-path (rein: Schrift auflösen, zentrieren),
+                              TextPathService + TextPathDialog, tools-actions, Texte
+  app/features/symbols/       Symbole (013): symbol-provider (Plugin-Schnittstelle), symbol-providers (Registry),
+                              lucide-provider (Daten lazy aus lucide-static), symbol-search, symbol-grid (rein),
+                              SymbolService (placeSymbol, Einfügen), SymbolPickerDialog
   app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3), Texte der Fensterhülle
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
@@ -103,13 +112,15 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               dom-geometry (clientToDocument, nodeToDocument über Screen-CTMs, 004); 007 (rein):
                               matrix, snapping, bounds-guard, box-math, box-selection, transform-text,
                               path-data (Tokenizer für `d`), path-edit; 011 (rein): path-write (runden, Form
-                              behalten / kürzeste Form), path-optimize (RDP mit Eckenschutz)
+                              behalten / kürzeste Form), path-optimize (RDP mit Eckenschutz); 013 (rein): freehand
+                              (RDP + Catmull-Rom), shape-path (Grundformen → `d`), path-translate
   app/shared/controls/        Generische Editoren (009): DraftField (Basis: live/commit/cancel), NumberField (Stepped
                               Slider), ColorField + color-value (rein), SelectField, TextField, ToggleField, step-value
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)
   app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,
                               command-cases.ts, tree-documents.ts, fake-clipboard-api.ts, fake-export-api.ts,
+                              fake-font-api.ts (Kästchen-Schrift, gleiche Fehlercodes),
                               browser-hook.ts = `window.__appIconic` für Playwright)
   testing/fixtures/           generiert aus testdata/ (camscanner.icon, all-fields.icon, svg/, unique-names.json;
                               `pnpm fixtures`)
@@ -123,6 +134,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
                               (003), QuitQueue (005)
   src/app_menu.rs             natives macOS-Menü: Spec je Fenster, fokussiertes zeigt seins, Klicks routen (005)
   src/export_commands.rs      Export-Commands (pick_export_dir, export_svg, export_png, cancel_export), ExportJobs (012)
+  src/font_commands.rs        list_fonts, text_to_path, Vorladen der Schriften beim Start (013)
   src/about.rs, model.rs      AppInfo, DTOs (serde camelCase)
   core/                       Crate `ai-core` (Workspace-Mitglied): Engine ohne Tauri
     src/error.rs              FsError { code, message, path }
@@ -132,16 +144,20 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
     src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
     src/menu_spec.rs          MenuSpec prüfen, Accelerators, Menü ohne Fenster (005)
     src/keymap_file.rs        keymap.json laden (005)
-    src/export/               Export (012): png (resvg, sichere usvg-Optionen), fonts (Systemschriften), files (Namen,
-                              Überschreiben, atomar, Fortschritt, Abbruch)
+    src/export/               Export (012): png (resvg, sichere usvg-Optionen), files (Namen, Überschreiben, atomar,
+                              Fortschritt, Abbruch); `export::fonts` = Re-Export von `fonts::system`
+    src/fonts/                Schriften (012, 013): system (fontdb einmal je Prozess, generische Familien), FontCatalog
+                              (Familien/Stile/Ids), outline (Text → Pfad: harfrust-Shaping, skrifa-Umrisse, BBox)
   icons/source/app-icon.svg   Quelle des App-Icons
 testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverändert); all-fields.icon (010: alle
                               belegten Felder + unbekannte)
+testdata/fonts/               Caladea-Regular.ttf + OFL.txt (Testschrift für Rust-Tests, nicht im Bundle, 013)
 testdata/unique-names.json    Tabelle der eindeutigen Asset-/Layer-Namen (Rust `names.rs` und TS `unique-names.ts`)
 scripts/                      fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test, keymaps.test.mjs
 docs/                         architecture.md (Entscheidungen, Commands, Abhängigkeiten), legacy-analysis.md, legacy/,
                               FEATURES.md (Checkliste)
 prompts/                      Feature-Prompts (Index README.md), done/
+THIRD-PARTY-NOTICES.txt       Lizenzen fremder Werke (Lucide/Feather, Testschrift)
 ```
 
 ## 4. Architekturregeln (verbindlich)
@@ -206,7 +222,8 @@ prompts/                      Feature-Prompts (Index README.md), done/
   werden – mit Herkunftsvermerk im Modulkopf und den zugehörigen Tests.
 - Die Vorlage AppIconic (Swift) ist Marcs eigener Code: Algorithmen (Path-Fitting, Pfad-Optimierer, Snapping) dürfen
   nach TypeScript/Rust übertragen werden, mit Herkunftsvermerk.
-- Symbole: **keine SF Symbols** (Lizenz verbietet App-Icons); freies Icon-Set mit Lizenz im About-Dialog (Prompt 013).
+- Symbole: **keine SF Symbols** (Lizenz verbietet App-Icons); Lucide (ISC, Teil MIT von Feather) mit Lizenz in
+  `THIRD-PARTY-NOTICES.txt` und im About-Dialog (Prompt 013). Weitere Sets nur mit geprüfter Lizenz.
 
 ## 8. Arbeitsumgebung für Claude (Remote-Sitzung)
 

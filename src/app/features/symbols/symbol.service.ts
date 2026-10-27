@@ -6,16 +6,13 @@ import { AddService } from '../commands/add.service';
 import { BLACK, buildElement, ElementSpec } from '../commands/element-defaults';
 import { FilesService } from '../files/files.service';
 import { TOOLS_TEXTS } from '../tools/tools-texts';
-import { LucideProvider } from './lucide-provider';
+import { SYMBOL_PROVIDERS } from './symbol-providers';
 import { SymbolProvider, SymbolSvg } from './symbol-provider';
 
 const T = TOOLS_TEXTS.symbol;
 
 /** Default size of an inserted symbol (half the canvas). */
 export const SYMBOL_SIZE = 512;
-
-/** The symbol sets of the app (design 013 E16); the first is the default. */
-export const SYMBOL_PROVIDERS: readonly SymbolProvider[] = [new LucideProvider()];
 
 type Args = Record<string, unknown> | undefined;
 

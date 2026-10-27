@@ -10,7 +10,7 @@ Der **Browser ist die Grafik-Engine**: Das Dokument ist SVG-DOM in der WebView. 
 Geometrie (`getBBox`, `getCTM`, `getScreenCTM`, `DOMMatrix`) und Hit-Testing übernimmt der Browser – kein eigener
 SVG-/XML-/CSS-Parser, kein eigener Renderer (die größten Fehlerquellen der Vorlage). **Rust** übernimmt, was der
 Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlustfreies `icon.json`, PNG-Export
-(resvg), Systemschriften und Glyphen-Umrisse (fontdb + ttf-parser), Menü, Fenster, Einstellungen.
+(resvg), Systemschriften und Glyphen-Umrisse (fontdb + harfrust + skrifa), Menü, Fenster, Einstellungen.
 
 ## Entscheidungen
 
@@ -97,6 +97,13 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 012 E10/E11 | Ziel ist ein **Ordner** für beide Formate (`export_svg` statt `write_text_file` über Save-Dialog), Namen `<name>-<appearance>[-<size>].<ext>` bildet Rust; vor dem ersten Schreiben werden alle Ziele geprüft, `already_exists` ohne `overwrite`, jede Datei atomar | zwei Dateien je Export; Pfade bleiben opak; nie halb überschriebene Exporte |
 | 012 E12/E13 | Fortschritt je Datei über `tauri::ipc::Channel`, Abbruch-Flag je Fenster (`cancel_export`), Stopp vor Auftragsbeginn im Frontend; Rust meldet je PNG `transparent`, der Dialog warnt ohne Maske | Apple-Hinweis der Vorlage (App-Icons ohne Transparenz) |
 | 012 E14/E15 | `file.exportSvg`/`file.exportPng` ohne Argumente → Dialog, mit `{ appearances?, sizes?, mask?, effects?, targetDir?, overwrite? }` → direkt (KI), Ergebnis als Hinweis; letzte Wahl im Root-Dienst (dauerhaft mit 015) | KI-Regel; ein Weg für Menü, Palette und KI |
+| 013 E1/E2 | Freihand-Pipeline rein (`shared/geometry/freehand.ts`, aus `PathFitter.swift`): RDP `epsilon` 2.5 → zentripetales Catmull-Rom (`alpha` 0.5) → `M … C … [Z]` mit 1 Nachkommastelle, ≤ 4 096 Punkte; Abtastung 3 Bildschirm-px **und** 1/120 s, Punkte im Dokumentraum | Parameter und Testfälle der Vorlage; die Vorlage sammelte mit „oder“ jeden Pixel |
+| 013 E3–E6 | Werkzeug-Modus `FreehandStore` (Root): `add.freehand` an/aus, Ziehen zeichnet (Auswahl ruht), Vorschau im eigenen Overlay in Viewport-Pixeln, Esc = Strich → Werkzeug, `C` offen/geschlossen, Auto-Schließen (≤ 12 px am Start); Punkte vor dem Glätten mit der inversen Matrix des Elternelements in dessen Raum; Ergebnis ein `<path>` (Stroke schwarz 8, round) als ein Undo-Schritt | wie 007 E5 (Overlay nie im Dokument) und 008 E3 (exakt in transformierten Gruppen) |
+| 013 E8/E9 | Text → Pfad in Rust (`ai-core::fonts`): fontdb aus 012 wiederverwendet (einmal je Prozess, beim Start im Hintergrund), Shaping mit **harfrust** (HarfBuzz-Port: GSUB, GPOS/`kern`, komplexe Schriften), Umrisse mit **skrifa** – statt ttf-parser + eigenem Kerning | dieselben Crates nutzt resvg 0.48 intern (schon im Baum, gleiche Versionen); fontdb 0.24 bringt ttf-parser nicht mehr mit |
+| 013 E10–E12 | Schrift-Id = PostScript-Name (Kollision `#2`, Doppelinstallation einmal), Stilname aus `name` 17/2; fehlende Glyphen → `missing_glyphs` (keine Ersatzschrift), leer/Zeilenumbruch → `invalid_text`; exakte BBox (Extrema von Q/C) in Rust | stabil über Sitzungen (KI, Einstellungen); der Pfad ist immer die gewählte Schrift |
+| 013 E13/E14 | Dialog „Text to Path“ mit Vorschau des echten Rust-Ergebnisses (entprellt, veraltete Antworten verworfen); Einfügen als `<path fill>` zentriert über den Pfad-Tokenizer (`translatePath`); `add.textToPath { text, font, style?, size?, … }` | KI-Regel; „Der Browser ist die Grafik-Engine“ bleibt (Rust liefert nur Umrisse) |
+| 013 E15–E19 | Symbole: **Lucide** (ISC, Feather-Teil MIT) aus `lucide-static` (Daten lazy als eigene Chunks), Plugin-Schnittstelle `SymbolProvider { id, name, license, variants, load, search, toSvg }`; Einfügen als **eine** `<g>` mit Strich-Farbe/-Breite (= Gewicht) und `translate · scale`, jedes Element als `<path>` (`shape-path.ts`) | kleinstes einheitliches freies Set; SF Symbols verboten (legacy §8); Strich bleibt Strich (Umwandeln in Konturen = Folge-Idee) |
+| 013 E22 | `THIRD-PARTY-NOTICES.txt` (Lucide/Feather; Testschrift Caladea OFL nur unter `testdata/fonts/`), About nennt das Symbol-Set mit Lizenz | Lizenzpflicht (Hinweis + Lizenztext) |
 | 009 E10/E11 | Generische Editoren in `shared/controls/` (Zahl mit Stepped Slider, Farbe, Auswahl, Text, Schalter; Ausgaben `edited`/`committed`/`reverted`), Aktionen `properties.set/reset/resetAll` | wiederverwendbar für den Icon-Inspector (010); die KI setzt, was das Panel setzt |
 
 ## Schichten
@@ -138,6 +145,8 @@ Angular (WebView)                                   Rust
 | `cancel_export()` | 012 | laufenden PNG-Export des aufrufenden Fensters nach der aktuellen Datei beenden |
 | `pick_image_file()` | 008 | nativer Dialog für ein Bild (PNG, JPEG, WebP, SVG), `null` bei Abbruch |
 | `read_image_file(path)` | 008 | Bild ≤ 20 MiB → `ImageFileDto { name, mime, dataUrl, width?, height? }` (Art aus Magic Bytes, Größe aus dem Kopf); Fehler `too_large`, `invalid_image` |
+| `list_fonts()` | 013 | Systemschriften → `FontFamilyDto[] { family, styles: [{ name, weight, italic, id }] }` (einmal je Prozess) |
+| `text_to_path(text, fontId, size, letterSpacing)` | 013 | eine Zeile → `TextPathDto { d, bbox \| null, advance }` (Grundlinie links = 0, y nach unten); Fehler `invalid_text`, `too_large`, `not_found`, `missing_glyphs` |
 
 DTO-Ergänzung 003: `IconDocumentDto.name`, `SaveResult.name` (Dateiname fürs UI). Fehlercode 005: `invalid_menu`.
 006 bringt keinen Rust-Command: Hierarchie, Ausrichten und Zwischenablage laufen ganz im Frontend. 007 ebenso
@@ -154,8 +163,12 @@ keine neue Abhängigkeit. 011: kein Rust-Command; Dokument-Command `replaceNode 
 012: Commands oben (eigenes Modul `export_commands.rs`), Fehlercode `already_exists`, Aktionen `file.exportSvg`/
 `file.exportPng` mit Argumenten, Abhängigkeit `resvg`; kein neuer Dokument-Command (Export ändert nichts).
 
-Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `list_fonts`,
-`text_to_path` (013), `load_settings`/`save_settings` (015).
+013: Commands oben (eigenes Modul `font_commands.rs`), Fehlercodes `invalid_text`, `missing_glyphs`; Aktionen
+`add.freehand { points?, closed?, epsilon?, … }`, `freehand.toggleClosed`, `add.textToPath { text, font?, style?, size?, … }`,
+`add.symbol { set?, id, size?, weight?, … }`; Undo-Labels `addFreehand`, `addTextPath`, `addSymbol`; kein neuer
+Dokument-Command (Einfügen = `composite` aus `insertNode` wie 008).
+
+Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `load_settings`/`save_settings` (015).
 
 ## Abhängigkeiten
 
@@ -176,4 +189,6 @@ Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts f
 | `base64` | Rust (`ai-core`) | PNG-Assets als Data-URL ans Frontend (002 E9) |
 | `objc2` 0.6 (nur macOS) | Rust | `-[NSWindow setDocumentEdited:]` für den Änderungspunkt im Schließknopf (003 E11); Tauri hat dafür keine API, die Crate ist über tao ohnehin im Baum |
 | `resvg` 0.48.1 (exakt; Features `text`, `system-fonts`, `memmap-fonts`, `raster-images`) | Rust (`ai-core`) | PNG-Export (012 E8): ausgereifter reiner Rust-Renderer für SVG 1.1 inkl. Filter, Masken, Text; `usvg` (Parser), `tiny-skia` (Raster) und `fontdb` (Systemschriften) über seine Re-Exporte – keine Versionskonflikte. Kein Browser-Rendern: offscreen-WebView ist je OS verschieden und nicht testbar. 0.49.0 war erst drei Tage alt |
+| `harfrust` 0.12.0, `skrifa` 0.44.0 (exakt; `skrifa` ohne Default-Features, nur `std`) | Rust (`ai-core`) | Text → Pfad (013 E9): OpenType-Shaping (HarfBuzz-Port) und Glyphen-Umrisse – dieselben Crates, Versionen und Features, die resvg 0.48 intern nutzt (nichts zusätzlich zu bauen). Statt ttf-parser + eigenem Kerning: Ligaturen, GPOS, komplexe Schriften inklusive |
+| `lucide-static` 1.55.0 (exakt; 10.10.2026) | Frontend (lazy, nur Daten) | Symbol-Set „Lucide“ (013 E15, ISC/MIT): `icon-nodes.json` + `tags.json` als eigene Lazy-Chunks (≈ 0,41 + 0,19 MB, Startbundle unverändert). Daten statt Komponenten-Paket: kein Framework, die Elemente werden zu Pfaden im Dokument |
 | `tempfile` | Rust (Dev) | Dateisystem-Tests |
