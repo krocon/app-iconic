@@ -40,11 +40,14 @@ async function red(page: Page) {
   return r > 200 && g < 60 && b < 60;
 }
 
-/** Replaces the whole editor text (insertText: no key events, no auto-close of tags). */
+/**
+ * Replaces the whole editor text (insertText: no key events, no auto-close of tags). CodeMirror's
+ * Mod is Cmd on macOS (Ctrl+A there = line start), hence ControlOrMeta.
+ */
 async function setEditorText(page: Page, text: string) {
   const content = dialog(page).locator('.cm-content');
   await content.click();
-  await page.keyboard.press('Control+A');
+  await page.keyboard.press('ControlOrMeta+A');
   await page.keyboard.insertText(text);
 }
 
@@ -83,7 +86,7 @@ test('edit a node in the source: colour on the canvas, undo; invalid markup bloc
   );
   await expect(dialog(page).getByTestId('svg-source-status')).toHaveText('Valid SVG');
   await expect(apply).toBeEnabled();
-  await page.keyboard.press('Control+Enter');
+  await page.keyboard.press('ControlOrMeta+Enter');
   await expect(dialog(page)).toBeHidden();
   await expect.poll(() => green(page)).toBe(true);
   // the new element is selected
@@ -104,8 +107,8 @@ test('Esc with changes asks first; the search panel takes Esc for itself', async
   await menu(page, 'Edit', 'Edit SVG…');
   await expect(dialog(page).locator('.cm-editor')).toBeVisible();
   await dialog(page).locator('.cm-content').click();
-  // Ctrl+F opens CodeMirror's search; Esc closes only the search
-  await page.keyboard.press('Control+F');
+  // Mod-F (Cmd on macOS) opens CodeMirror's search; Esc closes only the search
+  await page.keyboard.press('ControlOrMeta+F');
   await expect(dialog(page).locator('.cm-search')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(dialog(page).locator('.cm-search')).toBeHidden();
