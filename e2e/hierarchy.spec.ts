@@ -97,7 +97,9 @@ test('align with transformed nested groups (nested_g.svg): bounds meet within ±
     // sizes do not change, only the position
     after.forEach((r, i) => expect(Math.abs(r.width - before[i].width)).toBeLessThanOrEqual(0.5));
     // one undo step "Change Transform" puts everything back
-    await expect(page.getByRole('button', { name: 'Undo Change Transform' })).toBeEnabled();
+    await expect(
+      page.locator('header.toolbar').getByRole('button', { name: 'Undo Change Transform' }),
+    ).toBeEnabled();
     await page.evaluate(() => window.__appIconic!.run('edit.undo'));
     const back = await bounds(page, NESTED, picked);
     back.forEach((r, i) => expect(Math.abs(r.x - before[i].x)).toBeLessThanOrEqual(0.01));
@@ -123,7 +125,9 @@ test('drag & drop with the mouse: groups, a node into a container, never into it
   await expect.poll(() => groupNames(page)).toEqual(['logo-scanner-2 2', 'logo-scanner 3']);
   // the canvas follows at once
   await expect.poll(assetsInCanvas).toEqual(['logo-scanner 3.svg', 'logo-scanner-2 2.svg']);
-  await expect(page.getByRole('button', { name: 'Undo Reorder Node' })).toBeEnabled();
+  await expect(
+    page.locator('header.toolbar').getByRole('button', { name: 'Undo Reorder Node' }),
+  ).toBeEnabled();
   await page.evaluate(() => window.__appIconic!.run('edit.undo'));
   await expect.poll(() => groupNames(page)).toEqual(['logo-scanner 3', 'logo-scanner-2 2']);
 

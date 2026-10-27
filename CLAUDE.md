@@ -57,7 +57,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               serialisierbar, command-json.ts + registry.ts commandFromJson, 005; tree-commands:
                               ReorderNode/GroupNodes/Ungroup, 006; set-attributes: Ergebnis einer Geste, 007),
                               model/ (icon-json, unique-names, selection, reorder-rules), svg/ (node-ids,
-                              sanitize-svg, resolve-styles, svg-references) (003, 006)
+                              sanitize-svg, resolve-styles, svg-references, style-props) (003, 006, 009)
   app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster/Quit), Recent,
                               file-actions (Aktionen der Datei-Funktionen), Texte (003, 005)
   app/features/menus/         Menümodell (rein), MenuService (nativ/HTML), MenuBar (Windows/Linux), Befehlspalette,
@@ -70,6 +70,10 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/commands/      „Add“ (008): CommandSidebar (Liste + Suche), AddService, add-actions, insert-target
                               (Einfügeort, rein), insert-center (Zentrum über inverse CTM), element-defaults
                               (Legacy-Defaults, rein), add-args, icon-group, svg-snippet (+ Dialog), image-size
+  app/features/properties/    Properties-Panel (009): property-spec (rein: Specs je Node-Typ), property-values (lesen:
+                              style/Attribut/berechnet/Default), property-edit (setAttributes/setText, PropertySession
+                              = Geste je Feld, Reset), panel-model, mixed, constrain, transform-list (rein) +
+                              transform-editor/-step-row, PropertiesService + properties-actions (properties.*)
   app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3), Texte der Fensterhülle
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
@@ -84,6 +88,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               dom-geometry (clientToDocument, nodeToDocument über Screen-CTMs, 004); 007 (rein):
                               matrix, snapping, bounds-guard, box-math, box-selection, transform-text,
                               path-data (Tokenizer für `d`), path-edit
+  app/shared/controls/        Generische Editoren (009): DraftField (Basis: live/commit/cancel), NumberField (Stepped
+                              Slider), ColorField + color-value (rein), SelectField, TextField, ToggleField, step-value
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)
   app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,

@@ -71,6 +71,11 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 008 E6 | Add-Aktionen mit serialisierbaren Argumenten (`core/actions/add-action-args.ts`: Geometrie je Form, `fill`/`stroke`/`strokeWidth`/`attributes`, `parent`, `index`; `add.image { href }`, `add.svgSnippet { markup }`) | KI-Regel: `add.circle { cx, cy, r, fill }` wie ein Menüklick |
 | 008 E8 | Bilder: Rust prüft Art an den Magic Bytes (PNG/JPEG/WebP/SVG, ≤ 20 MiB) und liest die Größe aus dem Kopf; `<image href="data:…">`, nur verkleinert auf ≤ 512; `insertNode` bis 32 MiB Markup | fremde Dateien sind feindlich; die Endung entscheidet nichts |
 | 008 E9 | SVG Snippet: bereinigt vor jedem DOM-Kontakt, Wurzel entpackt, `defs` mit, IDs eindeutig, Zentrieren über `getBBox` einer `<g>` in einem unsichtbaren Mess-SVG, Verschiebung vorn an `transform` | der Browser misst; wie 007 E11 |
+| 009 E1/E2 | Properties-Panel aus **Property-Specs** (`property-spec.ts`, Typ/Einheit/Bereich/Default je Node-Typ, Abschnitte Geometry → Advanced) statt einer handgeschriebenen Komponente; Werte: `style` vor Attribut (wirkt im Browser), sonst berechnet (`getComputedStyle`) bzw. Default | Vorlage: 1 500 Zeilen `PropertiesPanel.swift`; der Browser löst Vererbung auf |
+| 009 E3/E4 | Schreiben = Attribut, eine gleichnamige `style`-Eigenschaft fällt im selben `setAttributes` weg (`value: null` = entfernen); Text-Inhalt über den neuen Command `setText`; getippte Werte sind eine Geste je Feld (Ziele beim Start fest, `merge` → ein Command), Enter/Blur = commit, Esc = cancel | eine Änderung, die sichtbar wirkt; ein Undo-Schritt je getipptem Wert; serialisierbar (KI-Regel) |
+| 009 E7 | Transform-Liste rein (`transform-list.ts`): strenge Grammatik, unveränderte Schritte behalten ihren Text, Matrix = Produkt der Schritte (in Playwright gegen `transform.baseVal.consolidate()` geprüft); „Use pivot“ = BBox-Mitte im Raum des `rotate` | Rohtext bleibt lesbar; der Browser bleibt Richter über die Bedeutung |
+| 009 E8 | Reset entfernt Attribut + `style`-Eigenschaft (statt Defaults zu schreiben); Geometrie, ohne die die Form verschwindet, und `id` sind nicht zurücksetzbar | Defaults wie `fill="none"` hätten das Bild verändert; `url(#id)`-Verweise bleiben heil |
+| 009 E10/E11 | Generische Editoren in `shared/controls/` (Zahl mit Stepped Slider, Farbe, Auswahl, Text, Schalter; Ausgaben `edited`/`committed`/`reverted`), Aktionen `properties.set/reset/resetAll` | wiederverwendbar für den Icon-Inspector (010); die KI setzt, was das Panel setzt |
 
 ## Schichten
 
@@ -112,7 +117,8 @@ DTO-Ergänzung 003: `IconDocumentDto.name`, `SaveResult.name` (Dateiname fürs U
 006 bringt keinen Rust-Command: Hierarchie, Ausrichten und Zwischenablage laufen ganz im Frontend. 007 ebenso
 (Auswahl, Handles, Snapping, BoundsGuard nur im Frontend; neuer Dokument-Command `setAttributes`). 008: keine
 neuen Dokument-Commands (Add = `composite` aus `insertNode`/`addAsset`/`addGroup`), Fehlercode `invalid_image`,
-keine neue Abhängigkeit (Bildköpfe von Hand, `base64` war schon da).
+keine neue Abhängigkeit (Bildköpfe von Hand, `base64` war schon da). 009: kein Rust-Command; Dokument-Commands `setAttributes` mit `value: null` (Attribut
+entfernen) und neu `setText { changes: [{ ref, text }] }`; keine neue Abhängigkeit.
 
 Geplante Commands (Signaturen werden im Design-Dokument des jeweiligen Prompts festgelegt): `export_svg`,
 `export_png` (012), `list_fonts`, `text_to_path` (013), `load_settings`/`save_settings` (015).

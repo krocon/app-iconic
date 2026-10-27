@@ -68,12 +68,12 @@
 - [x] Copy/Paste als SVG-XML, auch zwischen Dokumenten (006)
 
 ## 7. Properties
-- [ ] Leerzustand „Nothing selected – Select an element in the hierarchy…“ (009)
-- [ ] Editoren aus Property-Specs (Typ, Einheit, Min/Max, Schritt) für alle Attribute aus legacy §7.4 (009)
-- [ ] Farbeingabe Swatch + Hex (#RRGGBB/#AARRGGBB), none/inherit/mixed (009)
-- [ ] Stepped Slider, Constrain proportions (009)
-- [ ] Transform-Liste (Schritte, Pivot, Reihenfolge per Drag, Rohanzeige) (009)
-- [ ] Reset je Property, Reset All Properties, Undo/Redo-Knöpfe (009)
+- [x] Leerzustand „Nothing selected – Select an element in the hierarchy…“ (009; Root/Gruppe/Layer: Hinweis auf 010)
+- [x] Editoren aus Property-Specs (Typ, Einheit, Min/Max, Schritt) für alle Attribute aus legacy §7.4 (009; Abschnitte Geometry/Appearance/Stroke/Text/Transform/Advanced, Mehrfachauswahl „mixed“, getippte Werte = ein Undo-Schritt)
+- [x] Farbeingabe Swatch + Hex (#RRGGBB/#RRGGBBAA – CSS-Reihenfolge, Frage an Marc), none/inherit/currentColor/mixed, nativer Farbwähler, Verlaufs-Swatch (009)
+- [x] Stepped Slider (↑/↓, ⇧ × 10, Ziehen am Label), Constrain proportions (width/height, rx/ry, scale) (009)
+- [x] Transform-Liste (Schritte, Pivot, Reihenfolge per Drag/Alt+↑↓, Rohanzeige mit Validierung) (009)
+- [x] Reset je Property, Reset All Properties (mit Bestätigung), Undo/Redo-Knöpfe (009)
 - [ ] Clip Path: Picker, Create, Edit-Modus, Vererbung, `clipPathUnits` (014)
 
 ## 8. Icon-Eigenschaften

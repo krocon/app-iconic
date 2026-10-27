@@ -84,13 +84,13 @@ generischen Editor aus **Property-Specs** (die Vorlage hatte 1 500 Zeilen `Prope
   properties come with the icon inspector.“ (Prompt 010). Abschnitte als Knöpfe mit `aria-expanded` (Advanced zu,
   der Rest offen). Jede Zeile: `<label for>` + Editor + Reset; alles per Tab erreichbar.
 - **E10 Editoren** (`shared/controls/`, generisch, ohne Dokument-Wissen; Ausgaben `edit(value)` live, `commit()`,
-  `cancel()`): **NumberField** (Stepped Slider: `<input type="range">` nur bei min+max, Zahlenfeld; ↑/↓ ± step,
+  `cancel()` – als Outputs `edited`/`committed`/`reverted`, weil `cancel` ein DOM-Ereignis ist): **NumberField** (Stepped Slider: `<input type="range">` nur bei min+max, Zahlenfeld; ↑/↓ ± step,
   ⇧ × 10, auf den Bereich geklemmt; Ziehen am Label: ein Schritt je 2 px, ⇧ × 10, als Geste; Einheiten bei `length`
   bleiben erhalten: `50%` → `51%`), **ColorField** (Swatch, Hex-Feld `#RGB`/`#RRGGBB`/`#RRGGBBAA`, Menü `none` /
   `inherit` / `currentColor`, nativer Farbwähler `<input type="color">`, `url(#…)` als Verlaufs-Swatch mit Namen,
   benannte/`rgb()`-Farben bleiben als Text), **SelectField** (Optionen; ein unbekannter vorhandener Wert bleibt als
   zusätzliche Option), **TextField** (Input bzw. Textarea für `d`/`points`; in der Textarea bestätigt ⌘/Ctrl+Enter,
-  Enter macht eine Zeile), **ToggleField** (Checkbox). Farbformate rein in `color-value.ts`.
+  Enter macht eine Zeile), **ToggleField** (Checkbox). Farbformate rein in `shared/controls/color-value.ts`.
 - **E11 Aktionen** (KI-Regel): `properties.set { name, value, constrain? }` (setzt eine Property der Spec an allen
   gewählten Nodes, ein Schritt; `name: "text"` = Inhalt), `properties.reset { name }`, `properties.resetAll
   { confirm? }` (Palette: „Reset All Properties…“). Die Transform-Liste braucht keine eigene Aktion: sie ist
@@ -102,7 +102,7 @@ generischen Editor aus **Property-Specs** (die Vorlage hatte 1 500 Zeilen `Prope
 ## Verträge
 
 ```ts
-// features/properties/property-spec.ts (rein)
+// features/properties/property-defs.ts (Katalog) + property-spec.ts (je Node-Typ, rein)
 type PropertyType = 'number'|'length'|'color'|'enum'|'text'|'textarea'|'toggle';
 type SectionId = 'geometry'|'appearance'|'stroke'|'text'|'transform'|'advanced';
 interface PropertyDef { name; label; type; section; unit?; min?; max?; step?; default?; options?; on?; off?; reset: boolean }
@@ -111,7 +111,7 @@ bySection(defs): { section; defs }[]; isCssProperty(name): boolean
 // features/properties/mixed.ts (rein)
 type Combined = { kind: 'none' } | { kind: 'same'; value: string } | { kind: 'mixed' };
 combine(values: (string | null)[]): Combined
-// features/properties/color-value.ts (rein)
+// shared/controls/color-value.ts (rein)
 parseHex(s): Rgba | null; toHex(c: Rgba): string /* #RRGGBB | #RRGGBBAA */; colorKind(v): 'hex'|'keyword'|'url'|'other'
 normalizeHex(input): string | null; nativeValue(v): string /* #rrggbb for <input type=color> */
 // features/properties/constrain.ts (rein)
@@ -172,9 +172,37 @@ Kein Rust-Command, keine neue Abhängigkeit.
 ## Fortschritt
 
 - [x] Design
-- [x] Rust: nichts nötig (kein Command, keine Crate)
-- [ ] Reine Module + Tests (spec, transform-list, color-value, mixed, constrain)
-- [ ] Commands `setAttributes` mit `null`, `setText`; property-values/-edit, Session
-- [ ] Controls, Panel, Transform-Editor, Aktionen
-- [ ] Playwright, echte App unter Xvfb
-- [ ] Doku, `pnpm check` + `pnpm e2e` grün
+- [x] Rust: nichts nötig (kein Command, keine Crate). Nebenbei: CI-Fehler aus 008 behoben – unter Windows liefert
+      `File::open` auf einen Ordner `PermissionDenied`, darum prüfen `read_image_file`/`read_svg_file` jetzt zuerst
+      `fs::metadata` (Test für SVG ergänzt)
+- [x] Reine Module + Tests: `property-defs`/`property-spec`, `transform-list`, `color-value`, `mixed`, `constrain`,
+      `step-value`
+- [x] Commands `setAttributes` mit `null` (Undo stellt die Attribut-Reihenfolge her), `setText` (registriert,
+      Roundtrip-Fälle); `property-values`, `property-edit` (`PropertySession`), `panel-model`, `style-props` (aus
+      006 `visibility.ts` herausgelöst)
+- [x] Controls (`shared/controls/`), Panel, Transform-Editor, `PropertiesService`, Aktionen `properties.*`;
+      Tastatur-Kontext: im Panel nur `global` (Pfeile auf Slidern nudgen nicht den Canvas)
+- [x] Playwright `e2e/properties.spec.ts` (7): Leerzustand/Hinweis, Breite live + ein Undo-Schritt (Panel-Knöpfe),
+      Esc + Constrain, rotate mit Pivot → Pivot-Handle ± 0,5 px an der Screen-CTM-Position, Transform-Liste =
+      `transform.baseVal.consolidate()`, Mehrfachauswahl mixed + `style`-Bereinigung + Reset + Reset All,
+      `properties.set`
+- [x] Echte App unter Xvfb (WebKitGTK): Leerzustand, Rechteck über die Command Sidebar, Breite 400 und Fill `#3a7`
+      getippt → Canvas und Baum folgen
+- [x] Doku, `pnpm check` + `pnpm e2e` grün
+
+## Abweichungen und Grenzen
+
+- **Slider nicht per Tab erreichbar** (`aria-hidden`, `tabindex=-1`): die Tastatur bedient das Zahlenfeld daneben
+  (↑/↓, ⇧ × 10) – sonst gäbe es zwei Tab-Stopps mit derselben Bedeutung.
+- **Rohanzeige der Transform-Liste** übernimmt erst bei Enter/Blur (ungültiger Text wird nie geschrieben); die
+  Zahlenfelder der Schritte wirken live.
+- **Mehrfachauswahl mit verschiedenen `transform`s:** die Schritte werden nicht gezeigt („different transforms“),
+  die Rohanzeige ist leer; ein dort getippter Text gilt für alle. „Add“ ist dann aus (es würde alle überschreiben).
+- **Text mit `tspan`s:** der Inhalt ist schreibgeschützt (Hinweis auf „Edit SVG…“, 011) – `setText` würde die
+  Struktur flachklopfen.
+- **⌘Z im Textfeld** ist das Undo des Felds (Browser, `nativeInText` aus 005); das Dokument-Undo liegt auf den
+  Knöpfen im Panel-Kopf und wirkt außerhalb der Felder.
+- **Bestehende E2E-Tests** suchten den Undo-Knopf seitenweit; mit dem zweiten Knopf im Panel sind sie jetzt auf die
+  Werkzeugleiste (`header.toolbar`) eingeschränkt (Prüfung unverändert).
+- Clip Path fehlt bewusst (014); Root/Gruppen/Layer-Eigenschaften zeigt das Panel als Hinweis (010).
+- Leerzustand zweizeilig: „Nothing selected“ + „Select an element in the hierarchy or on the canvas.“

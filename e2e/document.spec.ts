@@ -56,11 +56,15 @@ test('an attribute change marks the title, undo/redo by button and shortcut', as
   await expect(page.getByTestId('doc-title')).toContainText('Edited');
   await expect(layerSvg(page, A3)).toHaveAttribute('opacity', '0.5');
 
-  const undo = page.getByRole('button', { name: 'Undo Change Attribute' });
+  const undo = page
+    .locator('header.toolbar')
+    .getByRole('button', { name: 'Undo Change Attribute' });
   await undo.click();
   await expect(page).toHaveTitle('camscanner.icon');
   await expect(layerSvg(page, A3)).not.toHaveAttribute('opacity', /.*/);
-  await expect(page.getByRole('button', { name: 'Redo Change Attribute' })).toBeEnabled();
+  await expect(
+    page.locator('header.toolbar').getByRole('button', { name: 'Redo Change Attribute' }),
+  ).toBeEnabled();
 
   await page.locator('body').press('Control+Shift+Z');
   await expect(layerSvg(page, A3)).toHaveAttribute('opacity', '0.5');
@@ -122,7 +126,7 @@ test('Import SVG resolves styles; one undo removes group, layer and asset', asyn
   expect(text).toContain('height="32"');
   await expect(page).toHaveTitle('• camscanner.icon');
 
-  await page.getByRole('button', { name: 'Undo Import SVG' }).click();
+  await page.locator('header.toolbar').getByRole('button', { name: 'Undo Import SVG' }).click();
   await expect(groups).toHaveCount(2);
   await expect.poll(() => assetNames(page)).toEqual([A3, A2]);
   await expect(page.locator('app-canvas-view .layer')).toHaveCount(2);
