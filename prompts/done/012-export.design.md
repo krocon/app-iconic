@@ -42,7 +42,9 @@ color)`): Canvas → CSS-Farbe, Export → `SvgColor { hex, opacity }`.
 - **E8 PNG in Rust** (`ai-core/export/`): `resvg` 0.48.1 (exakt gepinnt; 0.49.0 ist erst drei Tage alt) mit
   `usvg`, `tiny-skia` und `fontdb` über dessen Re-Exporte (keine Versionskonflikte, eine Zeile in `Cargo.toml`).
   Features `text`, `system-fonts`, `memmap-fonts`, `raster-images`; ohne `svgz`. Systemschriften einmal je Prozess
-  geladen (`LazyLock<Arc<Database>>`).
+  geladen (`LazyLock<Arc<Database>>`); die generischen Familien (`sans-serif`, `serif`, `monospace` …) zeigen auf
+  installierte Schriften (fontdb setzt fest Arial/Times – unter Linux oft nicht vorhanden, Text fehlte in der CI),
+  Text ohne `font-family` nutzt die Serif-Schrift wie ein Browser.
 - **E9 Keine externen Referenzen beim Rendern.** `usvg::Options`: `resources_dir = None`, Bild-Resolver nur für
   Data-URLs (Dateipfade/URLs → `None`), verschachtelte SVG-Data-URLs nutzen dieselben Optionen. Grenzen: SVG-Text
   ≤ 64 MiB je Variante (`too_large`), höchstens 2 Varianten, Größen nur aus dem Set.

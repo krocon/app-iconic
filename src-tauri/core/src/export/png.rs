@@ -5,13 +5,16 @@
 use super::MAX_SVG_BYTES;
 use crate::error::{FsError, FsErrorCode};
 use resvg::tiny_skia::{Pixmap, Transform};
-use resvg::usvg::fontdb::Database;
+use resvg::usvg::fontdb::{Database, Family};
 use resvg::usvg::{ImageHrefResolver, Options, Tree};
 use std::sync::Arc;
 
 /// Parser options for untrusted SVG text: data URLs only, the given fonts.
 pub fn safe_options(fonts: Arc<Database>) -> Options<'static> {
+    // text without `font-family` uses the serif font, like a browser (not a fixed "Times New Roman")
+    let font_family = fonts.family_name(&Family::Serif).to_string();
     Options {
+        font_family,
         resources_dir: None,
         image_href_resolver: ImageHrefResolver {
             resolve_data: ImageHrefResolver::default_data_resolver(),
@@ -157,16 +160,22 @@ mod tests {
     #[test]
     fn text_with_a_system_font() {
         let fonts = system_fonts();
-        let svg = icon(
-            r##"<text x="512" y="700" font-family="sans-serif" font-size="600" text-anchor="middle" fill="#000">X</text>"##,
-        );
-        let p = render_png(&svg, 128, fonts.clone()).unwrap();
-        let inked = p.pixels().iter().filter(|c| c.alpha() > 0).count();
-        if fonts.is_empty() {
-            eprintln!("no system fonts on this machine – text is skipped");
-            assert_eq!(inked, 0);
-        } else {
-            assert!(inked > 200, "only {inked} pixels drawn");
+        for family in [
+            r#" font-family="sans-serif""#,
+            r#" font-family="serif""#,
+            "",
+        ] {
+            let svg = icon(&format!(
+                r##"<text x="512" y="700"{family} font-size="600" text-anchor="middle" fill="#000">X</text>"##
+            ));
+            let p = render_png(&svg, 128, fonts.clone()).unwrap();
+            let inked = p.pixels().iter().filter(|c| c.alpha() > 0).count();
+            if fonts.is_empty() {
+                eprintln!("no system fonts on this machine – text is skipped");
+                assert_eq!(inked, 0);
+            } else {
+                assert!(inked > 200, "{family}: only {inked} pixels drawn");
+            }
         }
     }
 
