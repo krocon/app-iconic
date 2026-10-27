@@ -1,5 +1,6 @@
 //! `icon.json` written like Icon Composer (`JSONEncoder` with `.prettyPrinted`, design 002 E2):
-//! two spaces, `"key" : value`, whole floats without `.0`, no newline at the end.
+//! two spaces, `"key" : value`, whole floats without `.0`, no newline at the end, an empty list as
+//! `[` + empty line + `]` (Icon Composer's `New.icon`, design 010 E11). Empty objects stay `{}`.
 //! Keys are written in the order of the `Value` (feature `preserve_order`, 002 E4).
 
 use serde::Serialize;
@@ -50,6 +51,13 @@ impl Formatter for IconComposerFormatter {
         self.open(w, b"[")
     }
     fn end_array<W: ?Sized + Write>(&mut self, w: &mut W) -> io::Result<()> {
+        if !self.has_value {
+            // `JSONEncoder` writes `[]` as "[\n\n<indent>]"
+            w.write_all(b"\n")?;
+            self.indent -= 1;
+            self.newline_indent(w)?;
+            self.indent += 1;
+        }
         self.close(w, b"]")
     }
     fn begin_array_value<W: ?Sized + Write>(&mut self, w: &mut W, first: bool) -> io::Result<()> {
@@ -134,8 +142,33 @@ mod tests {
         let v = json!({ "z": 1.0, "a": [0.5, 2], "m": {}, "e": [], "s": "ä/😀" });
         assert_eq!(
             String::from_utf8(format_icon_json(&v)).unwrap(),
-            "{\n  \"z\" : 1,\n  \"a\" : [\n    0.5,\n    2\n  ],\n  \"m\" : {},\n  \"e\" : [],\n  \"s\" : \"ä/😀\"\n}"
+            "{\n  \"z\" : 1,\n  \"a\" : [\n    0.5,\n    2\n  ],\n  \"m\" : {},\n  \"e\" : [\n\n  ],\n  \"s\" : \"ä/😀\"\n}"
         );
+    }
+
+    /// Icon Composer's `New.icon` (unofficial schema repo, design 010): empty `groups`.
+    #[test]
+    fn writes_empty_lists_like_icon_composer() {
+        let new_icon = "{\n  \"fill\" : \"none\",\n  \"groups\" : [\n\n  ],\n  \"supported-platforms\" : {\n    \"circles\" : [\n      \"watchOS\"\n    ],\n    \"squares\" : \"shared\"\n  }\n}";
+        let value: Value = serde_json::from_str(new_icon).unwrap();
+        assert_eq!(
+            String::from_utf8(format_icon_json(&value)).unwrap(),
+            new_icon
+        );
+        let nested = json!({ "a": { "b": [] } });
+        assert_eq!(
+            String::from_utf8(format_icon_json(&nested)).unwrap(),
+            "{\n  \"a\" : {\n    \"b\" : [\n\n    ]\n  }\n}"
+        );
+    }
+
+    /// The hand-written fixture of prompt 010 is in Icon Composer's format.
+    #[test]
+    fn formats_the_all_fields_fixture_byte_for_byte() {
+        let original =
+            std::fs::read(crate::icon::testdata::all_fields().join("icon.json")).unwrap();
+        let value: Value = serde_json::from_slice(&original).unwrap();
+        assert_eq!(format_icon_json(&value), original);
     }
 
     #[test]

@@ -3,7 +3,8 @@ import { IconGroup, IconJson, IconLayer } from '../../../core/icon-file/icon-fil
 /**
  * Reading and changing `icon.json` without touching what we do not know (design 003 E1). The
  * value is never changed in place: every helper returns a new object that shares the untouched
- * parts and keeps the key order (a replaced key stays where it was).
+ * parts and keeps the key order (a replaced key stays where it was; a new key goes to its
+ * alphabetical place when the object is sorted – as Icon Composer writes it – else to the end).
  */
 
 /** Keys of objects and indices of arrays from the root, e.g. `['groups', 0, 'shadow', 'opacity']`. */
@@ -41,17 +42,21 @@ function withKey(c: Container, key: string | number, value: unknown): Container 
     copy[key] = value;
     return copy;
   }
-  const copy: Record<string, unknown> = {};
-  let seen = false;
-  for (const [k, v] of Object.entries(c)) {
-    if (k === String(key)) {
-      seen = true;
-      if (value !== undefined) copy[k] = value;
-    } else {
-      copy[k] = v;
-    }
+  const name = String(key);
+  const entries = Object.entries(c);
+  if (!Object.hasOwn(c, name) && value !== undefined) {
+    // a new key (design 010 E4): in a sorted object (every Icon Composer file) at its place
+    const names = entries.map(([k]) => k);
+    const sorted = names.every((k, i) => i === 0 || names[i - 1] < k);
+    const at = sorted ? names.findIndex((k) => k > name) : -1;
+    entries.splice(at < 0 ? entries.length : at, 0, [name, value]);
+    return Object.fromEntries(entries);
   }
-  if (!seen && value !== undefined) copy[String(key)] = value;
+  const copy: Record<string, unknown> = {};
+  for (const [k, v] of entries) {
+    if (k !== name) copy[k] = v;
+    else if (value !== undefined) copy[k] = value;
+  }
   return copy;
 }
 

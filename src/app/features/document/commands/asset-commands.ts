@@ -94,3 +94,32 @@ export class RemoveAsset implements DocCommand {
     return { type: 'removeAsset', name: this.name };
   }
 }
+
+/**
+ * Renames an asset file (design 010 E9): same place, same content. Only the asset – the
+ * `image-name` references are changed by `SetIconJsonValue`s in the same composite.
+ */
+export class RenameAsset implements DocCommand {
+  readonly label = 'renameAsset';
+
+  constructor(
+    readonly from: string,
+    readonly to: string,
+  ) {
+    if (!from || !to) throw new CommandError('empty asset name');
+  }
+
+  do(doc: IconDocument): void {
+    if (!doc.renameAsset(this.from, this.to)) {
+      throw new CommandError(`cannot rename asset ${this.from} to ${this.to}`);
+    }
+  }
+
+  undo(doc: IconDocument): void {
+    doc.renameAsset(this.to, this.from);
+  }
+
+  toJSON(): CommandJson {
+    return { type: 'renameAsset', from: this.from, to: this.to };
+  }
+}

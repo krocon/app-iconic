@@ -1,7 +1,7 @@
 import { IconGroup, IconLayer } from '../../../core/icon-file/icon-file.models';
 import { NodeRef } from '../icon-document';
 import { UNDO_TEXTS, UndoLabel } from '../undo/undo-texts';
-import { AddAsset, RemoveAsset, ReplaceAssetMarkup } from './asset-commands';
+import { AddAsset, RemoveAsset, RenameAsset, ReplaceAssetMarkup } from './asset-commands';
 import { CommandError, CompositeCommand, DocCommand } from './command';
 import { CommandType } from './command-json';
 import { DROP_POSITIONS, DropPosition, TreeTarget } from '../model/selection';
@@ -277,6 +277,10 @@ const PARSERS: Record<CommandType, Parser> = {
   removeAsset: (o) => {
     keys(o, ['name']);
     return new RemoveAsset(name(o['name'], 'name'));
+  },
+  renameAsset: (o) => {
+    keys(o, ['from', 'to']);
+    return new RenameAsset(name(o['from'], 'from'), name(o['to'], 'to'));
   },
   composite: (o, depth, count) => {
     keys(o, ['label', 'commands']);

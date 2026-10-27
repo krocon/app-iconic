@@ -275,7 +275,7 @@ describe('visibility (design 006 E4)', () => {
     el.setAttribute('style', 'display: none; opacity: 0.5');
     const store = new DocumentStore(doc);
     store.execute(visibilityCommand(doc, nodes('n9'))!);
-    expect(el.getAttribute('style')).toBe('opacity: 0.5;');
+    expect(el.getAttribute('style')).toBe('opacity: 0.5');
     expect(store.undoLabel()).toBe('Undo Toggle Visibility');
   });
 

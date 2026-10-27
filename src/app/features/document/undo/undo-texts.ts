@@ -59,6 +59,26 @@ export const UNDO_TEXTS = {
   addText: 'Add Text',
   addImage: 'Add Image',
   addSvgSnippet: 'Add SVG Snippet',
+  // icon inspector (design 010 E5)
+  changeBackground: 'Change Background',
+  changeShadow: 'Change Shadow',
+  changeTranslucency: 'Change Translucency',
+  changeGroupOpacity: 'Change Group Opacity',
+  changeLayerOpacity: 'Change Layer Opacity',
+  changeBlendMode: 'Change Blend Mode',
+  changeLighting: 'Change Lighting',
+  changeSpecular: 'Change Specular',
+  changeBlur: 'Change Blur',
+  changeGlass: 'Change Glass',
+  changePosition: 'Change Position',
+  changeLayerFill: 'Change Layer Fill',
+  renameGroup: 'Rename Group',
+  renameLayer: 'Rename Layer',
+  renameAsset: 'Rename Asset',
+  changeLayerAsset: 'Change Layer Asset',
+  changePlatforms: 'Change Platforms',
+  changeColorSpace: 'Change Color Space',
+  removeVariant: 'Remove Appearance Variant',
 } as const;
 
 /** Key of an action name (`label` of a command). */

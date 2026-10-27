@@ -176,9 +176,10 @@ export class FakeIconFileApi extends IconFileApi {
       }
       seen.add(key);
       if (a.unchanged) {
-        const old = base?.assets.find((b) => b.name === a.name);
-        if (!old) throw error('missing_asset', `unknown asset ${a.name}`, r.path);
-        return { ...old };
+        const from = a.source ?? a.name;
+        const old = base?.assets.find((b) => b.name === from);
+        if (!old) throw error('missing_asset', `unknown asset ${from}`, r.path);
+        return { ...old, name: a.name };
       }
       if (a.text === undefined) throw error('invalid_icon', `no content for ${a.name}`, r.path);
       return {

@@ -14,6 +14,7 @@ import {
   MoveNode,
   RemoveAsset,
   RemoveAttribute,
+  RenameAsset,
   RemoveGroup,
   RemoveLayer,
   RemoveNode,
@@ -122,6 +123,7 @@ export const CASES: [string, (doc: IconDocument) => DocCommand][] = [
   ['Ungroup', () => new Ungroup(a('n2'))],
   ['AddAsset', () => new AddAsset('c.svg', SVG)],
   ['RemoveAsset', () => new RemoveAsset('a.svg')],
+  ['RenameAsset', () => new RenameAsset('a.svg', 'renamed.svg')],
   [
     'CompositeCommand',
     () =>

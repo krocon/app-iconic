@@ -82,6 +82,8 @@ export interface SaveAsset {
   name: string;
   text?: string;
   unchanged: boolean;
+  /** With `unchanged`: the asset's name in the session before it was renamed (design 010 E9). */
+  source?: string;
 }
 
 export interface SaveIconRequest {

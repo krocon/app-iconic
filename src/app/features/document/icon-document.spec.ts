@@ -47,6 +47,29 @@ describe('IconDocument', () => {
     expect([doc.path, doc.name, doc.format]).toEqual(['/b.icon', 'b.icon', 'zip']);
   });
 
+  it('a renamed asset is sent as unchanged with its session name, also after a save (010 E9)', () => {
+    const doc = smallDocument();
+    expect(doc.renameAsset('p.png', 'photo.png')).toBe(true);
+    expect([...doc.assets.keys()]).toEqual(['a.svg', 'photo.png']);
+    expect(doc.saveRequest('/a.icon', 'bundle').assets[1]).toEqual({
+      name: 'photo.png',
+      unchanged: true,
+      source: 'p.png',
+    });
+    expect(doc.renameAsset('a.svg', 'PHOTO.png')).toBe(false); // taken (case-insensitive)
+    doc.markSaved({ path: '/a.icon', name: 'a.icon', format: 'bundle' });
+    expect(doc.saveRequest('/a.icon', 'bundle').assets[1]).toEqual({
+      name: 'photo.png',
+      unchanged: true,
+    });
+    // undo after the save = renaming back: the session knows it as photo.png now
+    doc.renameAsset('photo.png', 'p.png');
+    expect(doc.saveRequest('/a.icon', 'bundle').assets[1].source).toBe('photo.png');
+    // renaming back to the session name needs no source
+    doc.renameAsset('p.png', 'photo.png');
+    expect(doc.saveRequest('/a.icon', 'bundle').assets[1].source).toBeUndefined();
+  });
+
   it('a change undone by hand counts as unchanged', () => {
     const doc = smallDocument();
     const rect = doc.node({ asset: 'a.svg', id: 'n3' })!;

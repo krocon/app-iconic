@@ -12,6 +12,11 @@ pub fn camscanner() -> PathBuf {
     fixtures().join("camscanner.icon")
 }
 
+/// Every documented `icon.json` field + unknown ones (prompt 010).
+pub fn all_fields() -> PathBuf {
+    fixtures().join("all-fields.icon")
+}
+
 pub fn camscanner_json() -> Vec<u8> {
     fs::read(camscanner().join("icon.json")).unwrap()
 }

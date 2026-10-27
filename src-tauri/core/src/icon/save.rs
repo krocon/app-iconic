@@ -16,6 +16,8 @@ pub struct AssetInput {
     pub text: Option<String>,
     /// Take the bytes from the session; `text` is ignored.
     pub unchanged: bool,
+    /// With `unchanged`: the name of the asset in the session when it was renamed (design 010 E9).
+    pub source: Option<String>,
 }
 
 /// The file to write. `base` is the session of the document (`None` for a new one).
@@ -44,12 +46,13 @@ pub fn assemble(
             ));
         }
         let bytes = if input.unchanged {
-            base.and_then(|b| b.asset(&input.name))
+            let from = input.source.as_deref().unwrap_or(&input.name);
+            base.and_then(|b| b.asset(from))
                 .map(|a| a.bytes.clone())
                 .ok_or_else(|| {
                     FsError::new(
                         FsErrorCode::MissingAsset,
-                        format!("unknown asset {:?}", input.name),
+                        format!("unknown asset {from:?}"),
                         Some(path),
                     )
                 })?
@@ -104,6 +107,7 @@ mod tests {
                 name: a.name.clone(),
                 text: None,
                 unchanged: true,
+                source: None,
             })
             .collect()
     }
@@ -172,6 +176,91 @@ mod tests {
         );
     }
 
+    /// Design 010 E9: a renamed, otherwise unchanged asset comes from the session under its old name.
+    #[test]
+    fn a_renamed_asset_takes_its_bytes_from_the_old_name() {
+        let dir = tempdir().unwrap();
+        let target = dir.path().join("cam.icon");
+        copy_tree(&camscanner(), &target);
+        let base = read_icon(&target, &Limits::default()).unwrap();
+        let mut inputs = unchanged(&base);
+        inputs[0].source = Some(inputs[0].name.clone());
+        inputs[0].name = "renamed.svg".into();
+        let mut json = base.json.clone();
+        json["groups"][0]["layers"][0]["image-name"] = json!("renamed.svg");
+        let f = assemble(Some(&base), base.format, json, inputs, &target).unwrap();
+        write_icon(&target, &f).unwrap();
+        let (before, after) = (tree(&camscanner()), tree(&target));
+        assert_eq!(
+            after["Assets/renamed.svg"],
+            before["Assets/logo-scanner 3.svg"]
+        );
+        assert!(!after.contains_key("Assets/logo-scanner 3.svg"));
+        assert_eq!(
+            after["Assets/logo-scanner-2 2.svg"],
+            before["Assets/logo-scanner-2 2.svg"]
+        );
+        // a source the session does not know is an error, nothing is guessed
+        let mut bad = unchanged(&base);
+        bad[0].source = Some("nope.svg".into());
+        let e = assemble(Some(&base), base.format, base.json.clone(), bad, &target).unwrap_err();
+        assert_eq!(e.code, FsErrorCode::MissingAsset);
+    }
+
+    /// Prompt 010, Rust: every documented field + unknown ones survive an edit elsewhere.
+    #[test]
+    fn the_all_fields_fixture_survives_an_edit_elsewhere() {
+        let fixture = crate::icon::testdata::all_fields();
+        let dir = tempdir().unwrap();
+        let target = dir.path().join("all.icon");
+        copy_tree(&fixture, &target);
+        let base = read_icon(&target, &Limits::default()).unwrap();
+        assert!(base.warnings.is_empty(), "{:?}", base.warnings);
+        // unchanged = byte for byte
+        let f = assemble(
+            Some(&base),
+            base.format,
+            base.json.clone(),
+            unchanged(&base),
+            &target,
+        )
+        .unwrap();
+        write_icon(&target, &f).unwrap();
+        assert_eq!(tree(&target), tree(&fixture));
+        // one field changed (as the inspector does): only that line differs
+        let mut json = base.json.clone();
+        json["groups"][0]["shadow"]["opacity"] = json!(0.25);
+        let f = assemble(
+            Some(&base),
+            base.format,
+            json.clone(),
+            unchanged(&base),
+            &target,
+        )
+        .unwrap();
+        write_icon(&target, &f).unwrap();
+        let reread = read_icon(&target, &Limits::default()).unwrap();
+        assert_eq!(reread.json, json);
+        let old = String::from_utf8(tree(&fixture)["icon.json"].clone()).unwrap();
+        let new = String::from_utf8(tree(&target)["icon.json"].clone()).unwrap();
+        let diff: Vec<_> = old
+            .lines()
+            .zip(new.lines())
+            .filter(|(a, b)| a != b)
+            .collect();
+        assert_eq!(old.lines().count(), new.lines().count());
+        assert_eq!(diff.len(), 1, "{diff:?}");
+        assert!(diff[0].1.trim() == "\"opacity\" : 0.25,");
+        for key in [
+            "x-future-root",
+            "x-future-group",
+            "x-future-layer",
+            "x-future-shadow",
+        ] {
+            assert!(new.contains(key), "{key} kept");
+        }
+    }
+
     #[test]
     fn errors() {
         let base = read_icon(&camscanner(), &Limits::default()).unwrap();
@@ -180,6 +269,7 @@ mod tests {
             name: name.into(),
             text: None,
             unchanged,
+            source: None,
         };
         let e = assemble(
             Some(&base),
@@ -224,6 +314,7 @@ mod tests {
             name: "layer.svg".into(),
             text: Some(crate::icon::EMPTY_SVG.into()),
             unchanged: false,
+            source: None,
         }];
         let f = assemble(None, IconFormat::Zip, n.json.clone(), inputs, &target).unwrap();
         assert_eq!(f.json_bytes, n.json_bytes);

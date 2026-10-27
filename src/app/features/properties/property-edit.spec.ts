@@ -80,14 +80,14 @@ describe('writing properties (design 009 E3)', () => {
     store.execute(setPropertyCommand(store.document(), [p('n2')], 'fill', '#00FF00')!);
     const rect = store.document().node(p('n2'))!;
     expect(rect.getAttribute('fill')).toBe('#00FF00');
-    expect(rect.getAttribute('style')).toBe('opacity: 0.5;');
+    expect(rect.getAttribute('style')).toBe('opacity: 0.5');
     expect(rect.getAttribute('data-x')).toBe('k');
     expect(store.undoLabel()).toBe('Undo Change Fill');
     expect(store.lastCommandJson()).toEqual({
       type: 'setAttributes',
       changes: [
         { ref: p('n2'), name: 'fill', value: '#00FF00' },
-        { ref: p('n2'), name: 'style', value: 'opacity: 0.5;' },
+        { ref: p('n2'), name: 'style', value: 'opacity: 0.5' },
       ],
       label: 'changeFill',
     });
@@ -156,7 +156,7 @@ describe('typed values are one gesture (design 009 E4)', () => {
       type: 'setAttributes',
       changes: [
         { ref: p('n2'), name: 'opacity', value: '0.25' },
-        { ref: p('n2'), name: 'style', value: 'fill: blue;' },
+        { ref: p('n2'), name: 'style', value: 'fill: blue' },
       ],
       label: 'changeOpacity',
     });
@@ -190,7 +190,7 @@ describe('reset (design 009 E8)', () => {
     store.execute(resetCommand(store.document(), [p('n2')], ['fill'])!);
     const rect = store.document().node(p('n2'))!;
     expect(rect.hasAttribute('fill')).toBe(false);
-    expect(rect.getAttribute('style')).toBe('opacity: 0.5;');
+    expect(rect.getAttribute('style')).toBe('opacity: 0.5');
     expect(store.undoLabel()).toBe('Undo Reset Property');
     store.undo();
     expect(store.document().snapshot()).toBe(before);

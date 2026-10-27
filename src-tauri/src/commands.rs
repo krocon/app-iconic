@@ -87,6 +87,7 @@ pub async fn save_icon(
             name: a.name,
             text: a.text,
             unchanged: a.unchanged,
+            source: a.source,
         })
         .collect();
     let file = blocking(move || {

@@ -78,6 +78,9 @@ pub struct SaveAssetDto {
     pub text: Option<String>,
     #[serde(default)]
     pub unchanged: bool,
+    /// With `unchanged`: the asset's name in the session before it was renamed (design 010 E9).
+    #[serde(default)]
+    pub source: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
@@ -137,7 +140,12 @@ mod tests {
     #[test]
     fn save_asset_defaults() {
         let a: SaveAssetDto = serde_json::from_value(json!({ "name": "a.svg" })).unwrap();
-        assert_eq!((a.text, a.unchanged), (None, false));
+        assert_eq!((a.text, a.unchanged, a.source), (None, false, None));
+        let a: SaveAssetDto = serde_json::from_value(
+            json!({ "name": "b.svg", "unchanged": true, "source": "a.svg" }),
+        )
+        .unwrap();
+        assert_eq!((a.unchanged, a.source.as_deref()), (true, Some("a.svg")));
         let r = serde_json::to_value(SaveResult {
             path: "/a.icon".into(),
             name: "a.icon".into(),

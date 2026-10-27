@@ -26,6 +26,21 @@ describe('icon-json', () => {
     });
   });
 
+  it('puts a new key at its alphabetical place in a sorted object (design 010 E4)', () => {
+    const sorted = { fill: 'automatic', groups: [], 'supported-platforms': {} } as IconJson;
+    expect(Object.keys(setIn(sorted, ['fill-specializations'], []))).toEqual([
+      'fill',
+      'fill-specializations',
+      'groups',
+      'supported-platforms',
+    ]);
+    expect(Object.keys(setIn(sorted, ['a'], 1))[0]).toBe('a');
+    expect(Object.keys(setIn(sorted, ['z'], 1)).at(-1)).toBe('z');
+    // an unsorted object keeps its order, new keys at the end
+    const unsorted = { groups: [], fill: 'automatic' } as IconJson;
+    expect(Object.keys(setIn(unsorted, ['color'], 'x'))).toEqual(['groups', 'fill', 'color']);
+  });
+
   it('removes keys and array elements', () => {
     expect(Object.keys(removeIn(icon, ['fill']))).toEqual(['groups', 'x-top']);
     expect(removeIn(icon, ['groups', 0]).groups).toEqual([]);

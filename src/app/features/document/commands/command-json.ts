@@ -52,6 +52,8 @@ export type CommandJson =
   | { type: 'ungroup'; ref: NodeRef }
   | { type: 'addAsset'; name: string; markup: string }
   | { type: 'removeAsset'; name: string }
+  /** Asset file renamed in place (design 010 E9); references change separately. */
+  | { type: 'renameAsset'; from: string; to: string }
   | { type: 'composite'; label: UndoLabel; commands: CommandJson[] };
 
 export type CommandType = CommandJson['type'];

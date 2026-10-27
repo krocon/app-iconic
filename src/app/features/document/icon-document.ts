@@ -9,6 +9,7 @@ import {
   SaveIconRequest,
   SaveResult,
 } from '../../core/icon-file/icon-file.models';
+import { nameKey } from './model/unique-names';
 import { assignIds, goLive, ID_ATTR, parseSvg, serializeAsset, SvgText } from './svg/node-ids';
 import { SanitizeKind, sanitizeSvg } from './svg/sanitize-svg';
 
@@ -31,6 +32,8 @@ export interface AssetState {
   /** Serialisation at the last open/save (`''` for non-SVG); missing = the backend has never
    * seen this asset. */
   saved?: string;
+  /** Its name in the backend session when it was renamed since (design 010 E9). */
+  source?: string;
 }
 
 /** What the user should know about an opened or imported file. */
@@ -147,6 +150,24 @@ export class IconDocument {
     return { state, index };
   }
 
+  /**
+   * Renames an asset in place (design 010 E9): same position, same content; remembers the name the
+   * backend session knows it by (undo = renaming back, so a save in between stays right).
+   * `false` if `from` is missing or `to` is taken by another asset.
+   */
+  renameAsset(from: string, to: string): boolean {
+    const old = this.assets.get(from);
+    const key = nameKey(to);
+    const taken = [...this.assets.values()].some((a) => a !== old && nameKey(a.name) === key);
+    if (!old || !to || taken) return false;
+    const source = old.saved === undefined ? undefined : (old.source ?? old.name);
+    const next: AssetState = { ...old, name: to, source: source === to ? undefined : source };
+    this.assets = new Map(
+      [...this.assets.values()].map((a) => (a === old ? [to, next] : [a.name, a])),
+    );
+    return true;
+  }
+
   /** Unchanged since the last open/save, and the backend still has it (design 003 E3). */
   private isUnchanged(a: AssetState): boolean {
     if (!this.session || a.saved === undefined) return false;
@@ -160,7 +181,7 @@ export class IconDocument {
   saveRequest(path: string, format: IconFormat): SaveIconRequest {
     const assets: SaveAsset[] = [...this.assets.values()].map((a) =>
       this.isUnchanged(a)
-        ? { name: a.name, unchanged: true }
+        ? { name: a.name, unchanged: true, ...(a.source ? { source: a.source } : {}) }
         : { name: a.name, unchanged: false, text: a.svg ? serializeAsset(a.svg) : a.text },
     );
     const from = this.session && this.path !== null && this.path !== path ? this.path : null;
@@ -175,6 +196,7 @@ export class IconDocument {
     this.session = true;
     for (const a of this.assets.values()) {
       a.saved = a.svg ? serializeAsset(a.svg) : (a.text ?? '');
+      delete a.source;
     }
   }
 
