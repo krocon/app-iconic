@@ -65,8 +65,11 @@ jobs:
           else
             echo "publish=false" >> "$GITHUB_OUTPUT"
           fi
+      # the release scripts only: they need plain node (fixtures/keymaps need node_modules – CI runs them)
       - name: Script tests (version, notes, notices, licences, packages, sidecar)
-        run: node --test scripts/*.test.mjs
+        run: >-
+          node --test scripts/version.test.mjs scripts/release-notes.test.mjs scripts/notices.test.mjs
+          scripts/licenses.test.mjs scripts/collect-packages.test.mjs scripts/mcp-sidecar.test.mjs
       - name: Release notes
         id: notes
         run: |
