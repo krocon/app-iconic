@@ -242,16 +242,18 @@ Aktion `mcp.disconnect`; kein neuer Dokument-Command (`AiCommand` hüllt vorhand
 
 Prompt 031, `e2e/hardening.spec.ts` (Zahlen stehen im Testprotokoll): `scripts/big-svg.mjs` erzeugt 20 000 Formen
 (Pfade mit 24 Kurven, Kreise, Rechtecke) in 400 transformierten Gruppen, 6,8 MB; Variante `--plain` ohne `opacity`
-an jedem dritten Element. Gemessen am 27.10.2026 in Headless-Chromium 1.63 im Container (2 vCPU Xeon 2,8 GHz,
-**Software-Rasterung ohne GPU**), Fenster 1440 × 900:
+an jedem dritten Element. Gemessen am 27.10.2026, Fenster 1440 × 900, in Playwright-Chromium 1.63 – **Container**:
+2 vCPU Xeon 2,8 GHz, Software-Rasterung ohne GPU; **Mac**: Marcs MacBook Pro (Playwright-Chromium, nicht WKWebView):
 
-| Schritt                                       | mit `opacity` | ohne   |
-| --------------------------------------------- | ------------- | ------ |
-| Import (Datei → Baum sichtbar)                | 4,2 s         | 3,6 s  |
-| Zoom/Pan je Bild                              | 510 ms        | 414 ms |
-| Klick-Auswahl                                 | 2,1 s         | 1,2 s  |
-| Ziehen mit Magic Snap + Grid je Schritt       | 707 ms        | 188 ms |
-| gerenderte Zeilen im Ebenenbaum (von 20 400+) | 405           | 405    |
+| Schritt                                       | Container mit `opacity` | Container ohne | Mac mit `opacity` | Mac ohne |
+| --------------------------------------------- | ----------------------- | -------------- | ----------------- | -------- |
+| Import (Datei → Baum sichtbar)                | 4,2 s                   | 3,6 s          | 1,45 s            | 1,15 s   |
+| Zoom/Pan je Bild                              | 510 ms                  | 414 ms         | 292 ms            | 67 ms    |
+| Klick-Auswahl                                 | 2,1 s                   | 1,2 s          | 723 ms            | 197 ms   |
+| Ziehen mit Magic Snap + Grid je Schritt       | 707 ms                  | 188 ms         | 341 ms            | 84 ms    |
+| gerenderte Zeilen im Ebenenbaum (von 20 400+) | 405                     | 405            | 405               | 405      |
+
+Ein Schritt beim Ziehen enthält die Rundreise Playwright → Browser und das Warten auf das nächste Bild (≥ 16 ms).
 
 - **Was die Zeit kostet** (Chromium-Trace): Rastern und „Layerize“ der ganzen Zeichenfläche bei jeder Änderung; jedes
   Element mit eigener `opacity` ist eine eigene Ebene, deshalb ist die Variante mit `opacity` beim Ziehen ~4× langsamer.
@@ -260,6 +262,7 @@ an jedem dritten Element. Gemessen am 27.10.2026 in Headless-Chromium 1.63 im Co
   Striche), bevor `isPointInFill`/`isPointInStroke` laufen, der Ebenenbaum wird während einer Geste nicht neu gebaut
   (`DocumentStore.gesture`), virtualisierter Baum ab 500 Zeilen (006 E1).
 - **Verworfen:** Zoom per CSS-Skalierung eines fertigen Bildes – Chromium rastert trotzdem neu.
-- **Ziel ≥ 50 fps beim Ziehen** ist ohne GPU nicht erreichbar; die Messung auf einem Mac (WKWebView, GPU) steht aus
-  (Prompt 033). Die Schwellen im Test sind Regressionswächter (Import < 30 s, Bild < 2 s, Schritt < 3 s, Baum < 500
+- **Ziel ≥ 50 fps beim Ziehen** ist auch auf dem Mac nicht erreicht: ohne `opacity` ~12 Bilder/s, mit `opacity`
+  ~3 Bilder/s. Die Ursache (die ganze Fläche wird je Schritt neu gerastert, Elemente mit `opacity` je als isolierte
+  Gruppe) und die Messung in der echten App (WKWebView) sind Teil von Prompt 033. Die Schwellen im Test sind Regressionswächter (Import < 30 s, Bild < 2 s, Schritt < 3 s, Baum < 500
   Zeilen), keine Zielwerte.

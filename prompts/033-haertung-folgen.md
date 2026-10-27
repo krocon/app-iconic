@@ -20,9 +20,12 @@ Die Befunde des Reviews aus 031, die dort bewusst nicht mehr behoben wurden.
   `src-tauri/core/src/settings.rs`, `src-tauri/src/commands.rs` (Fenster- und Menü-Commands in eigene Dateien),
   `src/app/core/actions/action-catalog.ts` (je Bereich), `canvas-view.ts`, `edit.service.ts` – teilen, ohne Verhalten
   zu ändern.
-- **Leistung auf echter Hardware:** die Messung aus `e2e/hardening.spec.ts` auf Marcs Mac (WKWebView, GPU) wiederholen
-  und in `docs/architecture.md` „Performance“ eintragen; liegt Ziehen mit Snap unter 50 fps, die Ursache messen
-  (eigene Ebenen durch `opacity`, Neuaufbau der Auswahl-Overlays) und beheben.
+- **Leistung (Ziel ≥ 50 fps beim Ziehen mit Snap):** Ausgangslage auf Marcs Mac (27.10.2026, Playwright-Chromium,
+  `docs/architecture.md` „Performance“): großes SVG ohne `opacity` 84 ms je Zieh-Schritt, 67 ms je Zoom/Pan-Bild;
+  mit `opacity` 341 ms bzw. 292 ms. Ursache messen (Chromium-Trace und WKWebView in der echten App): Neu-Rastern der
+  ganzen Fläche je Schritt, isolierte Gruppen durch `opacity`, Neuaufbau der Auswahl-Overlays, Snap-Kandidaten. Ideen:
+  während einer Geste die bewegten Elemente in einer eigenen Overlay-Ebene zeigen und den Rest als festes Bild
+  (Undo/Ergebnis unverändert ein `setAttributes`), Magic-Punkte einmal je Geste sammeln. Danach neu messen.
 
 ## Akzeptanz
 
