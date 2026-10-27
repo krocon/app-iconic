@@ -110,6 +110,101 @@ pub struct McpSettings {
     pub confirm_files: bool,
 }
 
+/// The remembered paint of one kind of shape (design 019 E12): attribute values as written, `""`
+/// = not set.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DrawStyle {
+    pub fill: String,
+    pub fill_opacity: String,
+    pub stroke: String,
+    pub stroke_width: String,
+    pub stroke_opacity: String,
+    pub stroke_linecap: String,
+    pub stroke_linejoin: String,
+    pub stroke_dasharray: String,
+    pub opacity: String,
+}
+
+impl DrawStyle {
+    /// A thin black line without fill (design 019 E13).
+    fn thin_line() -> Self {
+        Self {
+            fill: "none".into(),
+            fill_opacity: String::new(),
+            stroke: "#000000".into(),
+            stroke_width: "2".into(),
+            stroke_opacity: String::new(),
+            stroke_linecap: String::new(),
+            stroke_linejoin: String::new(),
+            stroke_dasharray: String::new(),
+            opacity: String::new(),
+        }
+    }
+
+    fn fields_mut(&mut self) -> [&mut String; 9] {
+        [
+            &mut self.fill,
+            &mut self.fill_opacity,
+            &mut self.stroke,
+            &mut self.stroke_width,
+            &mut self.stroke_opacity,
+            &mut self.stroke_linecap,
+            &mut self.stroke_linejoin,
+            &mut self.stroke_dasharray,
+            &mut self.opacity,
+        ]
+    }
+}
+
+/// One remembered style per kind of shape (design 019 E12).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DrawingStyles {
+    pub rect: DrawStyle,
+    pub circle: DrawStyle,
+    pub ellipse: DrawStyle,
+    pub line: DrawStyle,
+    pub polyline: DrawStyle,
+    pub polygon: DrawStyle,
+    pub path: DrawStyle,
+    pub arc: DrawStyle,
+}
+
+impl DrawingStyles {
+    fn all_mut(&mut self) -> [&mut DrawStyle; 8] {
+        [
+            &mut self.rect,
+            &mut self.circle,
+            &mut self.ellipse,
+            &mut self.line,
+            &mut self.polyline,
+            &mut self.polygon,
+            &mut self.path,
+            &mut self.arc,
+        ]
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DrawingSettings {
+    pub styles: DrawingStyles,
+}
+
+/// Longest remembered style value.
+const MAX_STYLE_VALUE: usize = 128;
+
+/// A style value that may be written as an attribute (design 019 E13): short, no markup or CSS
+/// syntax, no control characters and no `url(` (a reference into another asset).
+pub fn style_value_ok(v: &str) -> bool {
+    v.chars().count() <= MAX_STYLE_VALUE
+        && !v
+            .chars()
+            .any(|c| c.is_control() || "<>\"'`;{}\\".contains(c))
+        && !v.to_ascii_lowercase().contains("url(")
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Settings {
@@ -124,6 +219,7 @@ pub struct Settings {
     pub freehand: FreehandSettings,
     pub debug: DebugSettings,
     pub mcp: McpSettings,
+    pub drawing: DrawingSettings,
 }
 
 impl Default for Settings {
@@ -176,6 +272,18 @@ impl Default for Settings {
             mcp: McpSettings {
                 enabled: false,
                 confirm_files: true,
+            },
+            drawing: DrawingSettings {
+                styles: DrawingStyles {
+                    rect: DrawStyle::thin_line(),
+                    circle: DrawStyle::thin_line(),
+                    ellipse: DrawStyle::thin_line(),
+                    line: DrawStyle::thin_line(),
+                    polyline: DrawStyle::thin_line(),
+                    polygon: DrawStyle::thin_line(),
+                    path: DrawStyle::thin_line(),
+                    arc: DrawStyle::thin_line(),
+                },
             },
         }
     }
@@ -327,6 +435,15 @@ pub fn sanitize(mut s: Settings) -> Settings {
     let f = &mut s.freehand;
     f.epsilon = clamp_f(f.epsilon, 0.0, 20.0, d.freehand.epsilon);
     f.stroke_width = f.stroke_width.clamp(1, 64);
+    let fallback = DrawStyle::thin_line();
+    for style in s.drawing.styles.all_mut() {
+        let mut d = fallback.clone();
+        for (v, dv) in style.fields_mut().into_iter().zip(d.fields_mut()) {
+            if !style_value_ok(v) {
+                *v = std::mem::take(dv);
+            }
+        }
+    }
     s
 }
 

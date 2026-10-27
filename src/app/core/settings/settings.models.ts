@@ -39,6 +39,45 @@ export interface ExportSettings {
   targetDir: string | null;
 }
 
+/** The remembered paint of one kind of shape (design 019 E12): attribute values, `''` = not set. */
+export interface DrawStyle {
+  fill: string;
+  fillOpacity: string;
+  stroke: string;
+  strokeWidth: string;
+  strokeOpacity: string;
+  strokeLinecap: string;
+  strokeLinejoin: string;
+  strokeDasharray: string;
+  opacity: string;
+}
+
+/** The kinds of shape with a remembered style (design 019 E12). */
+export const STYLE_KINDS = [
+  'rect',
+  'circle',
+  'ellipse',
+  'line',
+  'polyline',
+  'polygon',
+  'path',
+  'arc',
+] as const;
+export type StyleKind = (typeof STYLE_KINDS)[number];
+
+/** A thin black line without fill (design 019 E13). */
+export const THIN_LINE: DrawStyle = {
+  fill: 'none',
+  fillOpacity: '',
+  stroke: '#000000',
+  strokeWidth: '2',
+  strokeOpacity: '',
+  strokeLinecap: '',
+  strokeLinejoin: '',
+  strokeDasharray: '',
+  opacity: '',
+};
+
 export interface Settings {
   schemaVersion: number;
   theme: ThemeChoice;
@@ -50,6 +89,8 @@ export interface Settings {
   debug: { logUndoGrouping: boolean };
   /** AI control over MCP (design 018 E16): bridge open, ask before saving to a new path/export. */
   mcp: { enabled: boolean; confirmFiles: boolean };
+  /** Paint of new shapes, remembered per kind (design 019 E12). */
+  drawing: { styles: Record<StyleKind, DrawStyle> };
 }
 
 /** A part of the settings (what a window sends, design 015 E4); lists are sent whole. */
@@ -98,6 +139,12 @@ export const DEFAULT_SETTINGS: Settings = {
   freehand: { epsilon: 2.5, strokeWidth: 8, closed: false },
   debug: { logUndoGrouping: false },
   mcp: { enabled: false, confirmFiles: true },
+  drawing: {
+    styles: Object.fromEntries(STYLE_KINDS.map((k) => [k, { ...THIN_LINE }])) as Record<
+      StyleKind,
+      DrawStyle
+    >,
+  },
 };
 
 /** `load_settings` (Rust `LoadedSettings`). */

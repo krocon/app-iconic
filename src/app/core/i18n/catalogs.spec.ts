@@ -20,6 +20,7 @@ import '../../features/inspector/inspector-texts';
 import '../../features/menus/menus-texts';
 import '../../features/properties/properties-texts';
 import '../../features/settings/settings-texts';
+import '../../features/sketch/sketch-texts';
 import '../../features/shell/shell-texts';
 import '../../features/svg-source/svg-source-texts';
 import '../../features/tools/tools-texts';
@@ -54,6 +55,7 @@ const NAMES = [
   'properties',
   'settings',
   'shell',
+  'sketch',
   'svgSource',
   'tools',
   'undo',

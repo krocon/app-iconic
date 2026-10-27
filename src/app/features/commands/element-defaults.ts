@@ -40,44 +40,50 @@ export interface ElementSpec {
 const pts = (ps: readonly [number, number][]) =>
   ps.map(([x, y]) => `${fmt(x)},${fmt(y)}`).join(' ');
 
-/** Tag, attributes and text of a shape with the legacy defaults around `c`. */
-export function defaultShape(kind: ShapeKind, c: Point): ElementSpec {
+/** A thin black line without fill – the paint of new shapes (design 019 E13). */
+export const THIN_LINE_ATTRS: Readonly<Record<string, string>> = {
+  fill: 'none',
+  stroke: BLACK,
+  'stroke-width': '2',
+};
+
+/**
+ * Tag, attributes and text of a shape with the legacy geometry around `c` (design 008 E5) and the
+ * paint `paint` – the remembered style of its kind (design 019 E13), a thin line by default.
+ */
+export function defaultShape(
+  kind: ShapeKind,
+  c: Point,
+  paint: Readonly<Record<string, string>> = THIN_LINE_ATTRS,
+): ElementSpec {
   const { x, y } = c;
   switch (kind) {
     case 'container':
       return { tag: 'g', attrs: {} };
     case 'circle':
-      return { tag: 'circle', attrs: { cx: fmt(x), cy: fmt(y), r: '128', fill: BLACK } };
+      return { tag: 'circle', attrs: { cx: fmt(x), cy: fmt(y), r: '128', ...paint } };
     case 'ellipse':
       return {
         tag: 'ellipse',
-        attrs: { cx: fmt(x), cy: fmt(y), rx: '160', ry: '120', fill: BLACK },
+        attrs: { cx: fmt(x), cy: fmt(y), rx: '160', ry: '120', ...paint },
       };
     case 'rect':
       return {
         tag: 'rect',
-        attrs: { x: fmt(x - 128), y: fmt(y - 128), width: '256', height: '256', fill: BLACK },
+        attrs: { x: fmt(x - 128), y: fmt(y - 128), width: '256', height: '256', ...paint },
       };
     case 'path':
       return {
         tag: 'path',
         attrs: {
           d: `M ${fmt(x)},${fmt(y - 140)} L ${fmt(x - 140)},${fmt(y + 140)} L ${fmt(x + 140)},${fmt(y + 140)} Z`,
-          fill: BLACK,
+          ...paint,
         },
       };
     case 'line':
       return {
         tag: 'line',
-        attrs: {
-          x1: fmt(x - 160),
-          y1: fmt(y),
-          x2: fmt(x + 160),
-          y2: fmt(y),
-          stroke: BLACK,
-          'stroke-width': '12',
-          'stroke-linecap': 'round',
-        },
+        attrs: { x1: fmt(x - 160), y1: fmt(y), x2: fmt(x + 160), y2: fmt(y), ...paint },
       };
     case 'polyline':
       return {
@@ -88,12 +94,7 @@ export function defaultShape(kind: ShapeKind, c: Point): ElementSpec {
             [x, y - 140],
             [x + 160, y + 120],
           ]),
-          // an open line would be filled black by default
-          fill: 'none',
-          stroke: BLACK,
-          'stroke-width': '10',
-          'stroke-linecap': 'round',
-          'stroke-linejoin': 'round',
+          ...paint,
         },
       };
     case 'polygon':
@@ -105,7 +106,7 @@ export function defaultShape(kind: ShapeKind, c: Point): ElementSpec {
             [x - 160, y + 120],
             [x + 160, y + 120],
           ]),
-          fill: BLACK,
+          ...paint,
         },
       };
     case 'text':

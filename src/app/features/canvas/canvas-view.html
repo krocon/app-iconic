@@ -26,7 +26,7 @@
     [class.cross]="opt().crossCursor"
     [class.can-pan]="space()"
     [class.panning]="panning()"
-    [class.freehand]="freehand.active()"
+    [class.freehand]="freehand.active() || sketch.active()"
     (wheel)="onWheel($event)"
     (pointerdown)="onPointerDown($event)"
     (pointermove)="onPointerMove($event)"
@@ -76,6 +76,9 @@
         [strokeWidth]="freehand.strokeWidth()"
       />
     }
+    @if (sketch.active()) {
+      <app-sketch-overlay [toView]="toView()" />
+    }
     @if (clipId(); as id) {
       <div class="clip-banner" role="status" data-testid="clip-banner">
         <span>{{ ct.editing(id) }}</span>
@@ -111,6 +114,9 @@
   </span>
   @if (freehand.active()) {
     <span class="hint tool" data-testid="tool-hint">{{ tt.freehand.hint }}</span>
+  }
+  @if (sketch.hint(); as h) {
+    <span class="hint tool" data-testid="sketch-hint">{{ h }}</span>
   }
   @if (!fill().known) {
     <span class="hint">{{ t.unknownFill }}</span>

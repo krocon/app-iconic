@@ -18,6 +18,24 @@ type Section = keyof typeof COMMANDS_TEXTS.sections;
 export const SIDEBAR_COMMANDS: readonly { section: Section; ids: readonly string[] }[] = [
   { section: 'structure', ids: ['add.iconGroup', 'add.container'] },
   {
+    section: 'sketch',
+    ids: [
+      'sketch.line',
+      'sketch.midpointLine',
+      'sketch.rect2p',
+      'sketch.rect3p',
+      'sketch.rectCenter',
+      'sketch.circleCenter',
+      'sketch.circle2p',
+      'sketch.circle3p',
+      'sketch.circle2t',
+      'sketch.circle3t',
+      'sketch.arc3p',
+      'sketch.arcCenter',
+      'sketch.arcTangent',
+    ],
+  },
+  {
     section: 'shapes',
     ids: [
       'add.circle',

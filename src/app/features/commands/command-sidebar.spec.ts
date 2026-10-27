@@ -46,7 +46,7 @@ describe('CommandSidebar (design 008 E10)', () => {
 
   it('lists every add action with shortcut; later ones disabled', async () => {
     const { options, el } = await render();
-    expect(options()).toHaveLength(15);
+    expect(options()).toHaveLength(28);
     const image = options().find((o) => o.dataset['action'] === 'add.image')!;
     expect(image.textContent).toContain('Ctrl+I');
     const free = options().find((o) => o.dataset['action'] === 'add.freehand')!;
@@ -68,9 +68,9 @@ describe('CommandSidebar (design 008 E10)', () => {
     await type('zzz');
     expect(options()).toHaveLength(0);
     await key('Escape');
-    expect(options()).toHaveLength(15);
+    expect(options()).toHaveLength(28);
     await key('End');
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-14');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-27');
   });
 
   it('runs a click', async () => {

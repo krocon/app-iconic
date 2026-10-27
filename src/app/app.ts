@@ -16,6 +16,9 @@ import { FreehandService } from './features/tools/freehand.service';
 import { TextPathDialog } from './features/tools/text-path-dialog';
 import { TextPathService } from './features/tools/text-path.service';
 import { registerToolActions } from './features/tools/tools-actions';
+import { registerSketchActions } from './features/sketch/sketch-actions';
+import { SketchService } from './features/sketch/sketch.service';
+import { SketchStore } from './features/sketch/sketch.store';
 import { registerFileActions } from './features/files/file-actions';
 import { FILES_TEXTS } from './features/files/files-texts';
 import { FilesService } from './features/files/files.service';
@@ -251,6 +254,7 @@ export class App implements OnInit {
     );
     registerEditActions(this.actions, inject(EditService), this.dialogs, this.destroyRef);
     registerAddActions(this.actions, inject(AddService), this.destroyRef);
+    const sketchStore = inject(SketchStore);
     registerToolActions(
       this.actions,
       inject(AddService),
@@ -258,7 +262,9 @@ export class App implements OnInit {
       inject(TextPathService),
       inject(SymbolService),
       this.destroyRef,
+      () => sketchStore.toggle(null),
     );
+    registerSketchActions(this.actions, inject(AddService), inject(SketchService), this.destroyRef);
     registerPropertiesActions(this.actions, inject(PropertiesService), this.destroyRef);
     registerIconActions(this.actions, inject(IconInspectorService), this.destroyRef);
     registerSvgSourceActions(this.actions, inject(SvgSourceService), this.destroyRef);

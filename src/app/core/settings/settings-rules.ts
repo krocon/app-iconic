@@ -1,11 +1,15 @@
 import { PNG_SIZES } from '../export/export.models';
 import {
   DEFAULT_SETTINGS,
+  DrawStyle,
   PANEL_MAX,
   PANEL_MIN,
   SCHEMA_VERSION,
   Settings,
   SettingsPatch,
+  STYLE_KINDS,
+  StyleKind,
+  THIN_LINE,
 } from './settings.models';
 
 /**
@@ -67,6 +71,29 @@ const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(mi
 const MASKS = ['none', 'squircle', 'circle'] as const;
 const CHOICES = ['system', 'light', 'dark'] as const;
 
+const MAX_STYLE_VALUE = 128;
+
+/**
+ * A style value that may be written as an attribute (design 019 E13; Rust `style_value_ok`):
+ * short, no markup or CSS syntax, no control characters, no `url(` (a reference into another asset).
+ */
+export function styleValueOk(v: string): boolean {
+  return (
+    [...v].length <= MAX_STYLE_VALUE &&
+    // eslint-disable-next-line no-control-regex
+    !/[\u0000-\u001f\u007f-\u009f<>"'`;{}\\]/.test(v) &&
+    !v.toLowerCase().includes('url(')
+  );
+}
+
+function sanitizeStyle(st: DrawStyle): DrawStyle {
+  const out = { ...st };
+  for (const k of Object.keys(THIN_LINE) as (keyof DrawStyle)[]) {
+    if (!styleValueOk(out[k])) out[k] = THIN_LINE[k];
+  }
+  return out;
+}
+
 /** Clamps and checks every field (Rust `sanitize`). */
 export function sanitizeSettings(s: Settings): Settings {
   const d = DEFAULT_SETTINGS;
@@ -114,6 +141,11 @@ export function sanitizeSettings(s: Settings): Settings {
     },
     debug: { logUndoGrouping: s.debug.logUndoGrouping },
     mcp: { enabled: s.mcp.enabled, confirmFiles: s.mcp.confirmFiles },
+    drawing: {
+      styles: Object.fromEntries(
+        STYLE_KINDS.map((k) => [k, sanitizeStyle(s.drawing.styles[k])]),
+      ) as Record<StyleKind, DrawStyle>,
+    },
   };
 }
 

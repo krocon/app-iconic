@@ -19,6 +19,8 @@ export function registerToolActions(
   textPath: TextPathService,
   symbols: SymbolService,
   destroyRef?: DestroyRef,
+  /** Switches the sketch tool off when freehand comes on (one tool at a time, design 019 E3). */
+  stopSketch?: () => void,
 ): void {
   const enabled = () => add.canAdd();
   actions.registerAll(
@@ -27,6 +29,7 @@ export function registerToolActions(
         run: (a) => {
           const args = a as Args;
           if (args?.['points'] !== undefined) return freehand.insertFromArgs(args);
+          if (!freehand.tool.active()) stopSketch?.();
           freehand.tool.toggle();
           return undefined;
         },

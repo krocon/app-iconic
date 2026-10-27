@@ -11,6 +11,7 @@ import { NodeRef } from '../document/icon-document';
 import { isDefinitionTag } from '../document/model/reorder-rules';
 import { collectIds } from '../document/svg/svg-references';
 import { SVG_NS } from '../document/svg/node-ids';
+import { StyleMemory } from '../sketch/style-memory';
 import { UndoLabel } from '../document/undo/undo-texts';
 import { FilesService } from '../files/files.service';
 import { EditService } from '../hierarchy/edit.service';
@@ -26,12 +27,25 @@ import {
 } from './element-defaults';
 import { iconGroupPlan } from './icon-group';
 import { isImageDataUrl, svgDataUrlSize } from './image-size';
-import { toLocal, visibleCenter } from './insert-center';
+import { localMatrix, toLocal, visibleCenter } from './insert-center';
+import { Matrix } from '../../shared/geometry/matrix';
 import { InsertTarget, insertTarget } from './insert-target';
 import { measureInDom, SnippetError, snippetElements, snippetMarkups } from './svg-snippet';
 import { ClipEditStore } from '../clip/clip-edit.store';
 import { clipSpaceToDocument } from '../../shared/geometry/clip-geometry';
 import { parseFragment } from '../document/svg/node-ids';
+
+/** Shapes whose paint is remembered when they are added (design 019 E13; not freehand, text …). */
+const REMEMBERED: ReadonlySet<UndoLabel> = new Set<UndoLabel>([
+  'addCircle',
+  'addEllipse',
+  'addRect',
+  'addPath',
+  'addLine',
+  'addPolyline',
+  'addPolygon',
+  'addArc',
+]);
 
 /** Undo label of each shape (design 008 E1). */
 const LABELS: Record<ShapeKind, UndoLabel> = {
@@ -54,6 +68,8 @@ interface Place {
   center: Point;
   /** A document point in the user space of the target's parent (design 008 E3). */
   local: (p: Point) => Point;
+  /** The same as a matrix, `null` = none (design 019 E11). */
+  matrix: Matrix | null;
   /** Put in front of every new element's `transform` (a bounding-box clip, design 014 E7). */
   transform?: string;
 }
@@ -67,8 +83,15 @@ function withTransform(markup: string, transform: string): string {
   return new XMLSerializer().serializeToString(el);
 }
 
-/** Builds the markup of what is added around `center` (`local` maps document points). */
-export type BuildMarkup = (center: Point, local: (p: Point) => Point) => string[] | null;
+/**
+ * Builds the markup of what is added around `center` (`local` maps document points, `toLocal` is
+ * that map as a matrix or `null` for none).
+ */
+export type BuildMarkup = (
+  center: Point,
+  local: (p: Point) => Point,
+  toLocal: Matrix | null,
+) => string[] | null;
 
 /** The namespace declarations the asset root already makes (content of a new asset). */
 function withoutNs(markup: string): string {
@@ -92,6 +115,7 @@ export class AddService {
   private readonly api = inject(IconFileApi);
   private readonly dialogs = inject(DialogService);
   private readonly clipEdit = inject(ClipEditStore);
+  private readonly memory = inject(StyleMemory);
 
   /** Adding works when no file action is running. */
   canAdd(): boolean {
@@ -131,6 +155,7 @@ export class AddService {
       target,
       center: toLocal(host, parentEl, docCenter),
       local: (p) => toLocal(host, parentEl, p),
+      matrix: localMatrix(host, parentEl),
     };
   }
 
@@ -144,17 +169,18 @@ export class AddService {
     const host = this.canvas.host;
     const m = host ? clipSpaceToDocument(host, clip) : null;
     if (!m || Math.abs(m.a * m.d - m.b * m.c) < 1e-12)
-      return { target, center: docCenter, local: (p) => p };
+      return { target, center: docCenter, local: (p) => p, matrix: null };
     const inv = m.inverse();
     const local = (p: Point) => {
       const q = new DOMPoint(p.x, p.y).matrixTransform(inv);
       return { x: q.x, y: q.y };
     };
     if (clip.getAttribute('clipPathUnits')?.trim() !== 'objectBoundingBox') {
-      return { target, center: local(docCenter), local };
+      const mat = { a: inv.a, b: inv.b, c: inv.c, d: inv.d, e: inv.e, f: inv.f };
+      return { target, center: local(docCenter), local, matrix: mat };
     }
     const t = `matrix(${[inv.a, inv.b, inv.c, inv.d, inv.e, inv.f].map((v) => Number(v.toPrecision(10))).join(' ')})`;
-    return { target, center: docCenter, local: (p) => p, transform: t };
+    return { target, center: docCenter, local: (p) => p, matrix: null, transform: t };
   }
 
   /** Runs the insertion of `markups` at `place` as one step; selects the new nodes. */
@@ -170,6 +196,7 @@ export class AddService {
         store.execute(new CompositeCommand(label, inserts));
         const refs = inserts.flatMap((i) => (i.ref ? [i.ref] : []));
         this.selectPainted(store, refs);
+        if (REMEMBERED.has(label)) this.memory.recordRefs(store.document(), refs);
       } else {
         const content = markups.map((m) => withoutNs(m) + '\n').join('');
         const plan = iconGroupPlan(doc, this.edit.selection(), label, content);
@@ -180,6 +207,7 @@ export class AddService {
           return r ? [r] : [];
         });
         this.selectPainted(store, refs);
+        if (REMEMBERED.has(label)) this.memory.recordRefs(store.document(), refs);
       }
       return true;
     } catch (e) {
@@ -207,7 +235,7 @@ export class AddService {
     const store = await this.ensureStore();
     if (!store) return false;
     const place = this.place(store, args);
-    const markups = place ? build(place.center, place.local) : null;
+    const markups = place ? build(place.center, place.local, place.matrix) : null;
     if (!place || !markups?.length) {
       this.files.notice.set(T.addFailed);
       return false;
@@ -217,8 +245,9 @@ export class AddService {
 
   /** Container, circle … text (design 008 E5/E6). */
   addShape(kind: ShapeKind, args?: Args): Promise<boolean> {
+    const paint = kind === 'container' || kind === 'text' ? undefined : this.memory.attrs(kind);
     return this.insertBuilt(LABELS[kind], args, (c) => {
-      const spec = applyShapeArgs(kind, defaultShape(kind, c), args);
+      const spec = applyShapeArgs(kind, defaultShape(kind, c, paint), args);
       return spec ? [buildElement(spec)] : null;
     });
   }

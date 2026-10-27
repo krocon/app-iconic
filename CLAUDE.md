@@ -53,7 +53,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               (base/mac/other.json), ActionService (run(id, args?)),
                               KeyboardDispatcher (einziger keydown-Listener), shortcut, action-args (005),
                               add-action-args (Schema der Add-Argumente, 008), export-action-args (012),
-                              tool-action-args (Freehand/Text to Path/Symbol, 013), clip-action-args (014)
+                              tool-action-args (Freehand/Text to Path/Symbol, 013), clip-action-args (014),
+                              sketch-action-args (019)
   app/core/menu/              MenuApi (natives Menü, menu-action), KeymapApi (keymap.json), MenuSpec (005)
   app/core/clipboard/         ClipboardApi (Text der System-Zwischenablage über navigator.clipboard, 006)
   app/core/export/            ExportApi (Ordner-Dialog, export_svg, export_png mit Channel, cancel), DTOs (012)
@@ -126,6 +127,11 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               canvas-edit-actions (Esc, Punkt löschen, Pfeiltasten, moveBy); handles/ (rein:
                               node-geometry, node-handles, handle-edit, handle-types)
                               grid-hint-overlay (Rasterpunkte um den Zeiger bei Snap to Grid)
+  app/features/sketch/        Zeichenwerkzeuge wie Fusion (019): SketchStore (Werkzeug, Schritte, feste Maße, Bezüge),
+                              SketchService (Einfügen, `points`/`values` der KI), sketch-interaction (Zeiger + Snap),
+                              sketch-targets (Kanten/Kreise/Linienenden aus dem DOM), sketch-elements (Form → SVG im
+                              Raum des Elternelements), SketchOverlay (Vorschau + Maßfelder), sketch-preview (rein),
+                              sketch-actions (`sketch.*`), StyleMemory + draw-style (Stil je Formtyp), Texte
   app/features/clip/          Clip Paths (014): ClipEditStore (Bearbeitungsmodus), ClipEditLayer (Formen in der
                               Host-<svg>), ClipService + clip-actions (clip.*), clip-panel-model (rein),
                               ClipPathSection (Properties), clip-references (Copy/Duplicate/Delete), Texte
@@ -136,7 +142,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               behalten / kürzeste Form), path-optimize (RDP mit Eckenschutz); 013 (rein): freehand
                               (RDP + Catmull-Rom), shape-path (Grundformen → `d`), path-translate; 014:
                               clip-geometry (Clip-Raum → Dokument über den Owner, Treffer durch Clips)
-                              grid-hint (rein: Rasterpunkte um den Zeiger)
+                              grid-hint (rein: Rasterpunkte um den Zeiger); sketch/ (019, rein): sketch-shapes,
+                              sketch-tools (Schritte, Maße), apollonius (Tangentenkreise), svg-arc (Bogen-Mittelpunkt)
   app/shared/controls/        Generische Editoren (009): DraftField (Basis: live/commit/cancel), NumberField (Stepped
                               Slider), ColorField + color-value (rein), SelectField, TextField, ToggleField, step-value
   app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)

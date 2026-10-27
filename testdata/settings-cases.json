@@ -35,33 +35,187 @@
     },
     "freehand": { "epsilon": 2.5, "strokeWidth": 8, "closed": false },
     "debug": { "logUndoGrouping": false },
-    "mcp": { "enabled": false, "confirmFiles": true }
+    "mcp": { "enabled": false, "confirmFiles": true },
+    "drawing": {
+      "styles": {
+        "rect": {
+          "fill": "none",
+          "fillOpacity": "",
+          "stroke": "#000000",
+          "strokeWidth": "2",
+          "strokeOpacity": "",
+          "strokeLinecap": "",
+          "strokeLinejoin": "",
+          "strokeDasharray": "",
+          "opacity": ""
+        },
+        "circle": {
+          "fill": "none",
+          "fillOpacity": "",
+          "stroke": "#000000",
+          "strokeWidth": "2",
+          "strokeOpacity": "",
+          "strokeLinecap": "",
+          "strokeLinejoin": "",
+          "strokeDasharray": "",
+          "opacity": ""
+        },
+        "ellipse": {
+          "fill": "none",
+          "fillOpacity": "",
+          "stroke": "#000000",
+          "strokeWidth": "2",
+          "strokeOpacity": "",
+          "strokeLinecap": "",
+          "strokeLinejoin": "",
+          "strokeDasharray": "",
+          "opacity": ""
+        },
+        "line": {
+          "fill": "none",
+          "fillOpacity": "",
+          "stroke": "#000000",
+          "strokeWidth": "2",
+          "strokeOpacity": "",
+          "strokeLinecap": "",
+          "strokeLinejoin": "",
+          "strokeDasharray": "",
+          "opacity": ""
+        },
+        "polyline": {
+          "fill": "none",
+          "fillOpacity": "",
+          "stroke": "#000000",
+          "strokeWidth": "2",
+          "strokeOpacity": "",
+          "strokeLinecap": "",
+          "strokeLinejoin": "",
+          "strokeDasharray": "",
+          "opacity": ""
+        },
+        "polygon": {
+          "fill": "none",
+          "fillOpacity": "",
+          "stroke": "#000000",
+          "strokeWidth": "2",
+          "strokeOpacity": "",
+          "strokeLinecap": "",
+          "strokeLinejoin": "",
+          "strokeDasharray": "",
+          "opacity": ""
+        },
+        "path": {
+          "fill": "none",
+          "fillOpacity": "",
+          "stroke": "#000000",
+          "strokeWidth": "2",
+          "strokeOpacity": "",
+          "strokeLinecap": "",
+          "strokeLinejoin": "",
+          "strokeDasharray": "",
+          "opacity": ""
+        },
+        "arc": {
+          "fill": "none",
+          "fillOpacity": "",
+          "stroke": "#000000",
+          "strokeWidth": "2",
+          "strokeOpacity": "",
+          "strokeLinecap": "",
+          "strokeLinejoin": "",
+          "strokeDasharray": "",
+          "opacity": ""
+        }
+      }
+    }
   },
   "cases": [
     {
       "name": "empty object = defaults",
       "input": {},
-      "expect": [["schemaVersion", 1], ["panels.commands.width", 260]]
+      "expect": [
+        ["schemaVersion", 1],
+        ["panels.commands.width", 260]
+      ]
     },
     {
       "name": "panel widths are clamped to 160…480",
-      "input": { "panels": { "commands": { "width": 20 }, "hierarchy": { "width": 9000 }, "properties": { "width": 333, "visible": false } } },
-      "expect": [["panels.commands.width", 160], ["panels.hierarchy.width", 480], ["panels.properties.width", 333], ["panels.properties.visible", false], ["panels.commands.visible", true]]
+      "input": {
+        "panels": {
+          "commands": { "width": 20 },
+          "hierarchy": { "width": 9000 },
+          "properties": { "width": 333, "visible": false }
+        }
+      },
+      "expect": [
+        ["panels.commands.width", 160],
+        ["panels.hierarchy.width", 480],
+        ["panels.properties.width", 333],
+        ["panels.properties.visible", false],
+        ["panels.commands.visible", true]
+      ]
     },
     {
       "name": "a wrong kind falls back field by field",
-      "input": { "canvas": { "rulers": "yes", "guides": false, "gridSize": 12.5, "zoom": "big" }, "theme": 3 },
-      "expect": [["canvas.rulers", true], ["canvas.guides", false], ["canvas.gridSize", 10], ["canvas.zoom", 0], ["theme", "system"]]
+      "input": {
+        "canvas": { "rulers": "yes", "guides": false, "gridSize": 12.5, "zoom": "big" },
+        "theme": 3
+      },
+      "expect": [
+        ["canvas.rulers", true],
+        ["canvas.guides", false],
+        ["canvas.gridSize", 10],
+        ["canvas.zoom", 0],
+        ["theme", "system"]
+      ]
     },
     {
       "name": "unknown enum values fall back",
-      "input": { "theme": "sepia", "language": "fr", "canvas": { "gridOrigin": "middle", "selectionMode": "lasso", "appearance": "tinted", "mask": "star" }, "export": { "format": "pdf", "mask": "x" } },
-      "expect": [["theme", "system"], ["language", "system"], ["canvas.gridOrigin", "worldZero"], ["canvas.selectionMode", "point"], ["canvas.appearance", "system"], ["canvas.mask", "squircle"], ["export.format", "png"], ["export.mask", "none"]]
+      "input": {
+        "theme": "sepia",
+        "language": "fr",
+        "canvas": {
+          "gridOrigin": "middle",
+          "selectionMode": "lasso",
+          "appearance": "tinted",
+          "mask": "star"
+        },
+        "export": { "format": "pdf", "mask": "x" }
+      },
+      "expect": [
+        ["theme", "system"],
+        ["language", "system"],
+        ["canvas.gridOrigin", "worldZero"],
+        ["canvas.selectionMode", "point"],
+        ["canvas.appearance", "system"],
+        ["canvas.mask", "squircle"],
+        ["export.format", "png"],
+        ["export.mask", "none"]
+      ]
     },
     {
       "name": "valid enum values are kept",
-      "input": { "theme": "dark", "language": "de", "canvas": { "gridOrigin": "svgCenter", "selectionMode": "boxed", "appearance": "light", "mask": "circle" }, "export": { "format": "svg", "mask": "squircle" } },
-      "expect": [["theme", "dark"], ["language", "de"], ["canvas.gridOrigin", "svgCenter"], ["canvas.selectionMode", "boxed"], ["canvas.appearance", "light"], ["canvas.mask", "circle"], ["export.format", "svg"], ["export.mask", "squircle"]]
+      "input": {
+        "theme": "dark",
+        "language": "de",
+        "canvas": {
+          "gridOrigin": "svgCenter",
+          "selectionMode": "boxed",
+          "appearance": "light",
+          "mask": "circle"
+        },
+        "export": { "format": "svg", "mask": "squircle" }
+      },
+      "expect": [
+        ["theme", "dark"],
+        ["language", "de"],
+        ["canvas.gridOrigin", "svgCenter"],
+        ["canvas.selectionMode", "boxed"],
+        ["canvas.appearance", "light"],
+        ["canvas.mask", "circle"],
+        ["export.format", "svg"],
+        ["export.mask", "squircle"]
+      ]
     },
     {
       "name": "zoom: 0 = fit, else 0.25…2",
@@ -80,13 +234,21 @@
     },
     {
       "name": "export lists: allowed values in their order, no duplicates",
-      "input": { "export": { "appearances": ["dark", "tinted", "dark"], "sizes": [16, 1024, 1000, 16, "x"] } },
-      "expect": [["export.appearances", ["dark"]], ["export.sizes", [1024, 16]]]
+      "input": {
+        "export": { "appearances": ["dark", "tinted", "dark"], "sizes": [16, 1024, 1000, 16, "x"] }
+      },
+      "expect": [
+        ["export.appearances", ["dark"]],
+        ["export.sizes", [1024, 16]]
+      ]
     },
     {
       "name": "empty export lists fall back",
       "input": { "export": { "appearances": [], "sizes": [3] } },
-      "expect": [["export.appearances", ["light", "dark"]], ["export.sizes", [1024]]]
+      "expect": [
+        ["export.appearances", ["light", "dark"]],
+        ["export.sizes", [1024]]
+      ]
     },
     {
       "name": "export target folder: a text or null",
@@ -101,7 +263,11 @@
     {
       "name": "freehand options are clamped",
       "input": { "freehand": { "epsilon": 99, "strokeWidth": 0, "closed": true } },
-      "expect": [["freehand.epsilon", 20], ["freehand.strokeWidth", 1], ["freehand.closed", true]]
+      "expect": [
+        ["freehand.epsilon", 20],
+        ["freehand.strokeWidth", 1],
+        ["freehand.closed", true]
+      ]
     },
     {
       "name": "debug flag",
@@ -111,7 +277,63 @@
     {
       "name": "AI control (MCP) is off by default and asks before file access; wrong kinds fall back",
       "input": { "mcp": { "enabled": true, "confirmFiles": "no" } },
-      "expect": [["mcp.enabled", true], ["mcp.confirmFiles", true]]
+      "expect": [
+        ["mcp.enabled", true],
+        ["mcp.confirmFiles", true]
+      ]
+    },
+    {
+      "name": "drawing styles: the remembered paint per kind of shape (design 019 E13)",
+      "input": {
+        "drawing": {
+          "styles": {
+            "rect": {
+              "fill": "#ff0000",
+              "strokeWidth": "4",
+              "strokeDasharray": "4 2",
+              "opacity": "0.5"
+            },
+            "arc": { "stroke": "rgb(0, 128, 255)", "fill": "" }
+          }
+        }
+      },
+      "expect": [
+        ["drawing.styles.rect.fill", "#ff0000"],
+        ["drawing.styles.rect.strokeWidth", "4"],
+        ["drawing.styles.rect.strokeDasharray", "4 2"],
+        ["drawing.styles.rect.opacity", "0.5"],
+        ["drawing.styles.rect.stroke", "#000000"],
+        ["drawing.styles.arc.stroke", "rgb(0, 128, 255)"],
+        ["drawing.styles.arc.fill", ""],
+        ["drawing.styles.circle.fill", "none"]
+      ]
+    },
+    {
+      "name": "drawing styles: markup, CSS syntax, references, long values and wrong kinds fall back per field",
+      "input": {
+        "drawing": {
+          "styles": {
+            "circle": {
+              "fill": "url(#g)",
+              "stroke": "red;x:y",
+              "strokeWidth": 3,
+              "opacity": "<b>",
+              "strokeLinecap": "round"
+            },
+            "line": {
+              "stroke": "#0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
+            }
+          }
+        }
+      },
+      "expect": [
+        ["drawing.styles.circle.fill", "none"],
+        ["drawing.styles.circle.stroke", "#000000"],
+        ["drawing.styles.circle.strokeWidth", "2"],
+        ["drawing.styles.circle.opacity", ""],
+        ["drawing.styles.circle.strokeLinecap", "round"],
+        ["drawing.styles.line.stroke", "#000000"]
+      ]
     },
     {
       "name": "unknown fields are ignored",
@@ -121,12 +343,18 @@
     {
       "name": "a newer schema version is read leniently and written as the current one",
       "input": { "schemaVersion": 7, "canvas": { "guides": false } },
-      "expect": [["schemaVersion", 1], ["canvas.guides", false]]
+      "expect": [
+        ["schemaVersion", 1],
+        ["canvas.guides", false]
+      ]
     },
     {
       "name": "a section of the wrong kind is the default section",
       "input": { "panels": [1, 2], "canvas": true },
-      "expect": [["panels.hierarchy.width", 260], ["canvas.rulers", true]]
+      "expect": [
+        ["panels.hierarchy.width", 260],
+        ["canvas.rulers", true]
+      ]
     }
   ]
 }

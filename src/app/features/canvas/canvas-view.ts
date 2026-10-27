@@ -42,6 +42,10 @@ import { TOOLS_TEXTS } from '../tools/tools-texts';
 import { ClipEditStore } from '../clip/clip-edit.store';
 import { ClipEditLayer } from '../clip/clip-edit-layer';
 import { CLIP_TEXTS } from '../clip/clip-texts';
+import { SketchInteraction } from '../sketch/sketch-interaction';
+import { SketchOverlay } from '../sketch/sketch-overlay';
+import { SketchService } from '../sketch/sketch.service';
+import { SketchStore } from '../sketch/sketch.store';
 
 /** Ctrl+wheel / pinch: zoom factor per wheel pixel (design 004 E9). */
 const WHEEL_ZOOM = 0.01;
@@ -60,6 +64,7 @@ const WHEEL_ZOOM = 0.01;
     FreehandOverlay,
     GridHintOverlay,
     SelectionOverlay,
+    SketchOverlay,
   ],
   templateUrl: './canvas-view.html',
   styleUrl: './canvas-view.css',
@@ -110,6 +115,9 @@ export class CanvasView {
   /** The freehand tool (design 013 E3): while on, dragging draws instead of selecting. */
   protected readonly freehand = inject(FreehandStore);
   private readonly freehandService = inject(FreehandService);
+  /** The sketch tools (design 019 E3): while one is on, clicks place its steps. */
+  protected readonly sketch = inject(SketchStore);
+  private readonly sketchPointer: SketchInteraction;
   protected readonly tt = TOOLS_TEXTS;
   /** The clip path edit mode (design 014 E7). */
   protected readonly clipEdit = inject(ClipEditStore);
@@ -202,7 +210,11 @@ export class CanvasView {
       this.edit,
       () => this.canvas.host,
       destroy,
-      this.freehand,
+      // the tool first (freehand or sketch): its stroke / shape, then the tool
+      {
+        escape: () => this.sketch.escape() || this.freehand.escape(),
+        active: () => this.sketch.active() || this.freehand.active(),
+      },
       {
         scope: () => this.clipEdit.scope(this.store()?.document()),
         exit: () => this.clipEdit.exit(),
@@ -217,9 +229,19 @@ export class CanvasView {
       actions.os === 'mac',
       () => this.clipEdit.target(),
     );
+    this.sketchPointer = new SketchInteraction(
+      this.sketch,
+      inject(SketchService),
+      this.canvas,
+      this.edit,
+      () => this.store(),
+      () => this.hostEl().nativeElement,
+      () => this.layersEl().nativeElement,
+    );
     destroy.onDestroy(() => {
       this.edit.gesture.cancel();
       this.freehand.cancel();
+      this.sketch.reset();
     });
     actions.register(
       'canvas.panHold',
@@ -279,6 +301,14 @@ export class CanvasView {
 
   protected onPointerDown(e: PointerEvent): void {
     const vp = this.viewportEl().nativeElement;
+    if (e.button === 0 && !this.space() && this.sketch.active()) {
+      // place a step of the sketch tool (design 019 E3); the fields take the focus after it
+      vp.focus({ preventScroll: true });
+      e.preventDefault();
+      vp.setPointerCapture?.(e.pointerId);
+      this.sketchPointer.press(e);
+      return;
+    }
     if (e.button === 0 && !this.space() && this.freehand.active()) {
       // draw (design 013 E3)
       vp.focus({ preventScroll: true });
@@ -308,6 +338,7 @@ export class CanvasView {
       const stroke = this.freehand.finish(this.toDoc(e), this.canvas.zoom());
       if (stroke) void this.freehandService.insertStroke(stroke);
     }
+    this.sketchPointer.release(e);
     this.interaction.up(e);
     this.endPan(e);
   }
@@ -319,7 +350,7 @@ export class CanvasView {
   }
 
   protected onDblClick(e: MouseEvent): void {
-    if (this.freehand.active()) return;
+    if (this.freehand.active() || this.sketch.active()) return;
     this.interaction.dblclick({ ...pointerOf(e), pointerId: 0 });
   }
 
@@ -340,7 +371,8 @@ export class CanvasView {
         this.freehand.sample(this.toDoc(c), c.timeStamp, this.canvas.zoom());
       }
     }
-    this.interaction.move(e);
+    if (this.sketch.active()) this.sketchPointer.move(e);
+    else this.interaction.move(e);
     if (this.pan && this.pan.id === e.pointerId) {
       this.canvas.panBy(e.clientX - this.pan.x, e.clientY - this.pan.y);
       this.pan = { id: e.pointerId, x: e.clientX, y: e.clientY };
@@ -359,6 +391,7 @@ export class CanvasView {
     if (this.pan) return;
     this.lastClient = null;
     this.track(null);
+    this.sketchPointer.leave();
   }
 
   /** The viewport has the keyboard focus (Space pans then too). */

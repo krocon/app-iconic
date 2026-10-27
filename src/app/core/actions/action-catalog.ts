@@ -9,6 +9,7 @@ import {
   CLIP_UNITS_ARGS,
 } from './clip-action-args';
 import { FREEHAND_ARGS, SYMBOL_ARGS, TEXT_PATH_ARGS } from './tool-action-args';
+import { SKETCH_ARGS } from './sketch-action-args';
 
 /**
  * Every function of the app as an action (design 005 E1; taken over from editlicious
@@ -354,12 +355,12 @@ export const ACTIONS: readonly ActionDef[] = [
   // add (legacy §8; prompts 008, 013) – with serialisable arguments (design 008 E6)
   ADD('add.iconGroup', 'Group (SVG)'),
   ADD('add.container', 'Container <g>', { args: shapeArgsSpec('container') }),
-  ADD('add.circle', 'Circle', { args: shapeArgsSpec('circle') }),
+  ADD('add.circle', 'Circle at Center', { args: shapeArgsSpec('circle') }),
   ADD('add.ellipse', 'Ellipse', { args: shapeArgsSpec('ellipse') }),
-  ADD('add.rect', 'Rectangle', { args: shapeArgsSpec('rect') }),
+  ADD('add.rect', 'Rectangle at Center', { args: shapeArgsSpec('rect') }),
   ADD('add.path', 'Path', { args: shapeArgsSpec('path') }),
   ADD('add.freehand', 'Freehand', { args: FREEHAND_ARGS }),
-  ADD('add.line', 'Line', { args: shapeArgsSpec('line') }),
+  ADD('add.line', 'Line at Center', { args: shapeArgsSpec('line') }),
   ADD('add.polyline', 'Polyline', { args: shapeArgsSpec('polyline') }),
   ADD('add.polygon', 'Polygon', { args: shapeArgsSpec('polygon') }),
   ADD('add.text', 'Text', { args: shapeArgsSpec('text') }),
@@ -367,6 +368,20 @@ export const ACTIONS: readonly ActionDef[] = [
   ADD('add.symbol', 'Symbol…', { args: SYMBOL_ARGS }),
   ADD('add.svgSnippet', 'SVG Snippet…', { args: SNIPPET_ARGS }),
   ADD('add.image', 'Image…', { args: IMAGE_ARGS }),
+  // sketch tools like Fusion (prompt 019): without arguments the mouse tool on/off
+  ADD('sketch.line', 'Line', { args: SKETCH_ARGS }),
+  ADD('sketch.midpointLine', 'Midpoint Line', { args: SKETCH_ARGS }),
+  ADD('sketch.rect2p', '2-Point Rectangle', { args: SKETCH_ARGS }),
+  ADD('sketch.rect3p', '3-Point Rectangle', { args: SKETCH_ARGS }),
+  ADD('sketch.rectCenter', 'Center Rectangle', { args: SKETCH_ARGS }),
+  ADD('sketch.circleCenter', 'Center Diameter Circle', { args: SKETCH_ARGS }),
+  ADD('sketch.circle2p', '2-Point Circle', { args: SKETCH_ARGS }),
+  ADD('sketch.circle3p', '3-Point Circle', { args: SKETCH_ARGS }),
+  ADD('sketch.circle2t', '2-Tangent Circle', { args: SKETCH_ARGS }),
+  ADD('sketch.circle3t', '3-Tangent Circle', { args: SKETCH_ARGS }),
+  ADD('sketch.arc3p', '3-Point Arc', { args: SKETCH_ARGS }),
+  ADD('sketch.arcCenter', 'Center Point Arc', { args: SKETCH_ARGS }),
+  ADD('sketch.arcTangent', 'Tangent Arc', { args: SKETCH_ARGS }),
   // arrange (legacy §7.2, §7.3; prompt 006)
   ARRANGE('arrange.bringToFront', 'Bring to Front', TEXT),
   ARRANGE('arrange.sendToBack', 'Send to Back', TEXT),

@@ -57,7 +57,13 @@
 
 ## 5. Elemente hinzufügen
 - [x] Group (Icon-Gruppe + Layer + Asset) und Container `<g>` (008; Command Sidebar mit Suche, Menü „Add“, Aktionen mit Argumenten)
-- [x] Circle, Ellipse, Rectangle, Line, Polyline, Polygon, Path, Text mit Defaults der Vorlage (008; zentriert im sichtbaren Ausschnitt, auch in transformierten Gruppen)
+- [x] Circle, Ellipse, Rectangle, Line, Polyline, Polygon, Path, Text mit Defaults der Vorlage (008; zentriert im sichtbaren Ausschnitt, auch in transformierten Gruppen; „… at Center“ seit 019)
+- [x] Zeichenwerkzeuge wie Fusion *(neu)* (019): Line, Midpoint Line; Rectangle ▸ 2-Point / 3-Point / Center; Circle ▸
+      Center Diameter / 2-Point / 3-Point / 2-Tangent / 3-Tangent; Arc ▸ 3-Point / Center Point / Tangent – Klicks mit
+      Grid-/Magic-Snap, Maßfelder (Länge, Winkel, Breite, Höhe, Durchmesser, Radius, Start-/Bogenwinkel; Tab, Enter,
+      Esc), Tangenten an Kanten und Kreisen, Kürzel `l`/`r`/`c`, `sketch.* { points, values }` für die KI
+- [x] Stil-Gedächtnis je Formtyp *(neu)* (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
+      gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)
 - [x] SVG Snippet (008; bereinigt, `defs`, IDs eindeutig, auf die Bounds zentriert)
 - [x] Freehand mit RDP + Glättung, offen/geschlossen, Live-Vorschau, Esc (013; Werkzeug-Modus, Optionen Glättung/Strichbreite, `C`, Auto-Schließen, `add.freehand { points }` für die KI)

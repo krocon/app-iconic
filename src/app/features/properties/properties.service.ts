@@ -2,6 +2,8 @@ import { inject, Injectable, signal } from '@angular/core';
 import { AskService } from '../../shared/ask/ask.service';
 import { DocumentStore } from '../document/document.store';
 import { FilesService } from '../files/files.service';
+import { STYLE_ATTRS } from '../sketch/draw-style';
+import { StyleMemory } from '../sketch/style-memory';
 import { PROPERTIES_TEXTS as T } from './properties-texts';
 import { PropertySession, resetCommand, setPropertyCommand } from './property-edit';
 import { commonSpec } from './property-spec';
@@ -17,6 +19,8 @@ import { validValue } from './property-values';
 export class PropertiesService {
   private readonly files = inject(FilesService);
   private readonly askService = inject(AskService);
+  /** Paint changes are remembered per kind of shape (design 019 E13). */
+  private readonly memory = inject(StyleMemory);
   private session: { store: DocumentStore; s: PropertySession } | null = null;
 
   /** Constrain proportions of width/height and rx/ry (design 009 E6), per window. */
@@ -53,8 +57,18 @@ export class PropertiesService {
   }
 
   commit(): void {
-    this.session?.s.commit();
+    const session = this.session;
+    const changed = session?.s.active ?? false;
+    session?.s.commit();
     this.session = null;
+    if (session && changed) this.remember(session.store, session.s.name);
+  }
+
+  /** After a change of `name` ('all' = Reset All): remember the paint of the selection. */
+  private remember(store: DocumentStore, name: string): void {
+    if (name === 'all' || STYLE_ATTRS.has(name) || name === 'style') {
+      this.memory.recordRefs(store.document(), store.selection());
+    }
   }
 
   cancel(): void {
@@ -83,6 +97,7 @@ export class PropertiesService {
       );
       if (!cmd) return false;
       store.execute(cmd);
+      this.remember(store, name);
       return true;
     } catch {
       return false;
@@ -96,6 +111,7 @@ export class PropertiesService {
     const cmd = store ? resetCommand(store.document(), store.selection(), [name]) : null;
     if (!store || !cmd) return false;
     store.execute(cmd);
+    this.remember(store, name);
     return true;
   }
 
@@ -119,6 +135,7 @@ export class PropertiesService {
     const cmd = resetCommand(store.document(), store.selection(), 'all', 'resetAllProperties');
     if (!cmd) return false;
     store.execute(cmd);
+    this.remember(store, 'all');
     return true;
   }
 

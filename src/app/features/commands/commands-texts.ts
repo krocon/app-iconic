@@ -12,6 +12,7 @@ const EN = {
   later: 'Coming in a later version',
   sections: {
     structure: 'Structure',
+    sketch: 'Sketch',
     shapes: 'Shapes',
     tools: 'Tools',
     import: 'Import',
@@ -39,6 +40,7 @@ export const COMMANDS_TEXTS = translatable('commands', EN, {
     later: 'Kommt in einer späteren Version',
     sections: {
       structure: 'Struktur',
+      sketch: 'Skizze',
       shapes: 'Formen',
       tools: 'Werkzeuge',
       import: 'Import',

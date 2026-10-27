@@ -27,7 +27,8 @@ describe('keymap (design 005 E2)', () => {
    * something to do (a drag to cancel, a chosen point) – otherwise the key falls through to the
    * global action (dispatcher, design 005 E4).
    */
-  const FALLS_THROUGH = new Set(['canvas.escape', 'canvas.deletePoint']);
+  // enabled only while their mode is on – else the key reaches the global action (`c` = circle)
+  const FALLS_THROUGH = new Set(['canvas.escape', 'canvas.deletePoint', 'freehand.toggleClosed']);
 
   it('a context shortcut does not hide a global one', () => {
     for (const os of ['mac', 'other'] as const) {

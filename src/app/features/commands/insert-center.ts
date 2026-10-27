@@ -1,5 +1,6 @@
 import { CANVAS_SIZE } from '../../shared/geometry/icon-guides';
 import { nodeToDocument } from '../../shared/geometry/dom-geometry';
+import { fromDom, invert, Matrix } from '../../shared/geometry/matrix';
 import { Point, ViewTransform, viewToDocument } from '../../shared/geometry/view-transform';
 
 /**
@@ -36,4 +37,17 @@ export function toLocal(host: SVGSVGElement | null, parent: Element | null, p: P
   if (Math.abs(det) < 1e-12) return p;
   const q = new DOMPoint(p.x, p.y).matrixTransform(m.inverse());
   return Number.isFinite(q.x) && Number.isFinite(q.y) ? { x: q.x, y: q.y } : p;
+}
+
+/**
+ * The matrix document → user space of `parent` (design 019 E11); `null` when the parent is not
+ * rendered or there is no canvas (then document units are used as they are, like `toLocal`).
+ */
+export function localMatrix(host: SVGSVGElement | null, parent: Element | null): Matrix | null {
+  if (!host || !parent || typeof (parent as SVGGraphicsElement).getScreenCTM !== 'function') {
+    return null;
+  }
+  const m = nodeToDocument(host, parent as SVGGraphicsElement);
+  if (!m || ![m.a, m.b, m.c, m.d, m.e, m.f].every(Number.isFinite)) return null;
+  return invert(fromDom(m));
 }

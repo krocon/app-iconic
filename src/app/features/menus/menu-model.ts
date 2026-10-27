@@ -113,9 +113,22 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     sep,
     a('app.palette'),
   ];
+  // sketch tools like Fusion's "Create" menu (prompt 019)
   const add: MenuNode[] = [
     a('add.iconGroup'),
     a('add.container'),
+    sep,
+    a('sketch.line'),
+    a('sketch.midpointLine'),
+    sub(t.rectangle, [a('sketch.rect2p'), a('sketch.rect3p'), a('sketch.rectCenter')]),
+    sub(t.circle, [
+      a('sketch.circleCenter'),
+      a('sketch.circle2p'),
+      a('sketch.circle3p'),
+      a('sketch.circle2t'),
+      a('sketch.circle3t'),
+    ]),
+    sub(t.arc, [a('sketch.arc3p'), a('sketch.arcCenter'), a('sketch.arcTangent')]),
     sep,
     a('add.circle'),
     a('add.ellipse'),
