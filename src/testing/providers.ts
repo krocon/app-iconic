@@ -6,6 +6,8 @@ import { KeymapApi, MenuApi } from '../app/core/menu/menu-api';
 import { WindowApi } from '../app/core/window/window-api';
 import { ExportApi } from '../app/core/export/export-api';
 import { FakeExportApi } from './fake-export-api';
+import { FontApi } from '../app/core/fonts/font-api';
+import { FakeFontApi } from './fake-font-api';
 import { FakeKeymapApi, FakeMenuApi } from './fake-menu-api';
 import { FakeAboutApi } from './fake-about-api';
 import { FakeIconFileApi } from './fake-icon-file-api';
@@ -21,6 +23,7 @@ export function fakeBackend(): {
   menu: FakeMenuApi;
   keymap: FakeKeymapApi;
   exporter: FakeExportApi;
+  fonts: FakeFontApi;
 } {
   const files = new FakeIconFileApi();
   const window = new FakeWindowApi();
@@ -28,6 +31,7 @@ export function fakeBackend(): {
   const menu = new FakeMenuApi();
   const keymap = new FakeKeymapApi();
   const exporter = new FakeExportApi();
+  const fonts = new FakeFontApi();
   return {
     files,
     window,
@@ -35,6 +39,7 @@ export function fakeBackend(): {
     menu,
     keymap,
     exporter,
+    fonts,
     providers: [
       { provide: AboutApi, useClass: FakeAboutApi },
       { provide: IconFileApi, useValue: files },
@@ -43,6 +48,7 @@ export function fakeBackend(): {
       { provide: MenuApi, useValue: menu },
       { provide: KeymapApi, useValue: keymap },
       { provide: ExportApi, useValue: exporter },
+      { provide: FontApi, useValue: fonts },
     ],
   };
 }

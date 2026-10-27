@@ -33,6 +33,10 @@ pub enum FsErrorCode {
     InvalidImage,
     /// An export target exists and overwriting was not confirmed (prompt 012 E11).
     AlreadyExists,
+    /// Text to path: empty text, a line break, size or letter spacing out of range (prompt 013 E11).
+    InvalidText,
+    /// Text to path: the font has no glyph for some characters, e.g. emoji (prompt 013 E11).
+    MissingGlyphs,
 }
 
 /// The one error type every command returns.
@@ -109,6 +113,8 @@ mod tests {
             (FsErrorCode::InvalidMenu, "invalid_menu"),
             (FsErrorCode::InvalidImage, "invalid_image"),
             (FsErrorCode::AlreadyExists, "already_exists"),
+            (FsErrorCode::InvalidText, "invalid_text"),
+            (FsErrorCode::MissingGlyphs, "missing_glyphs"),
         ] {
             assert_eq!(serde_json::to_value(code).unwrap(), text);
         }

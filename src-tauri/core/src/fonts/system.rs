@@ -1,5 +1,6 @@
-//! System fonts for `<text>` in the PNG export (prompt 012): loaded once per process – scanning
-//! the font folders takes a while and the result does not change while the app runs.
+//! System fonts for `<text>` in the PNG export (prompt 012) and for text to path (prompt 013):
+//! loaded once per process – scanning the font folders takes a while and the result does not
+//! change while the app runs. The app warms it up on a background thread at start (design 013 E8).
 //!
 //! fontdb maps the generic families to fixed names (`sans-serif` → Arial, `serif` → Times New
 //! Roman …). Linux often has neither, and text in those families would vanish, so each generic

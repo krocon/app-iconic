@@ -25,6 +25,10 @@ export type FsErrorCode =
   | 'invalid_image'
   /** An export target exists and overwriting was not confirmed (prompt 012). */
   | 'already_exists'
+  /** Text to path: empty text, a line break, size or spacing out of range (prompt 013). */
+  | 'invalid_text'
+  /** Text to path: the font has no glyph for some characters, e.g. emoji (prompt 013). */
+  | 'missing_glyphs'
   /** Frontend only: no Tauri backend (e.g. `pnpm start` in a browser). */
   | 'backend_unavailable'
   /** Frontend only: something that is no `FsError` was thrown. */
@@ -51,6 +55,8 @@ const KNOWN: readonly FsErrorCode[] = [
   'invalid_menu',
   'invalid_image',
   'already_exists',
+  'invalid_text',
+  'missing_glyphs',
   'backend_unavailable',
   'unknown',
 ];
@@ -101,6 +107,10 @@ export function describeFsError(error: FsError): string {
       return 'The file is not a PNG, JPEG, WebP or SVG image.';
     case 'already_exists':
       return 'A file with this name already exists.';
+    case 'invalid_text':
+      return 'Enter one line of text (size and spacing within their ranges).';
+    case 'missing_glyphs':
+      return 'The font has no shapes for some characters (e.g. emoji). Choose another font.';
     case 'backend_unavailable':
       return 'The desktop backend is not available (running in a browser?).';
     case 'unknown':

@@ -19,6 +19,10 @@ unicode-normalization = "0.1.25"
 base64 = "0.23"
 # PNG export (prompt 012): SVG → pixels; usvg, tiny-skia and fontdb are used through its re-exports
 resvg = { version = "=0.48.1", default-features = false, features = ["text", "system-fonts", "memmap-fonts", "raster-images"] }
+# Text to path (prompt 013 E9): OpenType shaping and glyph outlines – the crates resvg uses
+# internally (same versions and features, already in the tree)
+harfrust = "=0.12.0"
+skrifa = { version = "=0.44.0", default-features = false, features = ["std"] }
 
 [dev-dependencies]
 tempfile = "3"

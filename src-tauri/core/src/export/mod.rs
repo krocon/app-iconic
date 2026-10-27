@@ -2,12 +2,13 @@
 //! (`features/export/export-svg.ts`); this module writes them as `.svg` files or renders them
 //! with resvg as PNGs in a size set. No Tauri – the commands in `export_commands.rs` are thin.
 //!
-//! - [`fonts`]  system fonts for `<text>`, loaded once per process (fontdb)
+//! - [`fonts`]  system fonts for `<text>`, loaded once per process (re-export of
+//!   [`crate::fonts::system`], shared with text to path, prompt 013)
 //! - [`png`]    one SVG → one pixmap, without loading anything from outside (design 012 E9)
 //! - [`files`]  file names, overwrite check, atomic writes, progress and cancelling (E10–E13)
 
 pub mod files;
-pub mod fonts;
+pub use crate::fonts::system as fonts;
 pub mod png;
 
 use serde::{Deserialize, Serialize};

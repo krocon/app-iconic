@@ -5,6 +5,7 @@ import { RecentFilesApi, TauriRecentFilesApi } from './core/recent/recent-files-
 import { KeymapApi, MenuApi, TauriKeymapApi, TauriMenuApi } from './core/menu/menu-api';
 import { TauriWindowApi, WindowApi } from './core/window/window-api';
 import { ExportApi, TauriExportApi } from './core/export/export-api';
+import { FontApi, TauriFontApi } from './core/fonts/font-api';
 
 /**
  * The backend facades of the app (production build). The development build (`ng serve`, also
@@ -18,4 +19,5 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = [
   { provide: MenuApi, useClass: TauriMenuApi },
   { provide: KeymapApi, useClass: TauriKeymapApi },
   { provide: ExportApi, useClass: TauriExportApi },
+  { provide: FontApi, useClass: TauriFontApi },
 ];
