@@ -51,6 +51,9 @@ importers:
       '@tauri-apps/api':
         specifier: ^2.12.4
         version: 2.12.4
+      lucide-static:
+        specifier: 1.55.0
+        version: 1.55.0
       rxjs:
         specifier: ~7.8.0
         version: 7.8.2
@@ -2094,6 +2097,9 @@ packages:
   lru-cache@11.5.3:
     resolution: {integrity: sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg==}
     engines: {node: 20 || >=22}
+
+  lucide-static@1.55.0:
+    resolution: {integrity: sha512-h18lunTFsIJWnY0FMRPjXeO9KcAtNi7fDqtqgWHOFbssfgUWsctn/pA7bpiyrd4g1DuBOJ24CsRnPfkYblwm/A==}
 
   magic-string@1.4.1:
     resolution: {integrity: sha512-8lyCu36ErXR0J9uaGKlKQoiLZKmtI63YGLE8G2o9jyRPdr4X47LusSOwgOJOzcVtp81fTAAjxR7BwKz682Jhow==}
@@ -4541,6 +4547,8 @@ snapshots:
       wrap-ansi: 10.0.2
 
   lru-cache@11.5.3: {}
+
+  lucide-static@1.55.0: {}
 
   magic-string@1.4.1:
     dependencies:

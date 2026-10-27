@@ -8,6 +8,12 @@ import { registerAddActions } from './features/commands/add-actions';
 import { AddService } from './features/commands/add.service';
 import { CommandSidebar } from './features/commands/command-sidebar';
 import { SvgSnippetDialog } from './features/commands/svg-snippet-dialog';
+import { SymbolPickerDialog } from './features/symbols/symbol-picker-dialog';
+import { SymbolService } from './features/symbols/symbol.service';
+import { FreehandService } from './features/tools/freehand.service';
+import { TextPathDialog } from './features/tools/text-path-dialog';
+import { TextPathService } from './features/tools/text-path.service';
+import { registerToolActions } from './features/tools/tools-actions';
 import { registerFileActions } from './features/files/file-actions';
 import { FILES_TEXTS } from './features/files/files-texts';
 import { FilesService } from './features/files/files.service';
@@ -60,6 +66,8 @@ import { SvgSourceService } from './features/svg-source/svg-source.service';
     ShortcutsDialog,
     SidePanel,
     SvgSnippetDialog,
+    SymbolPickerDialog,
+    TextPathDialog,
     SvgSourceDialog,
   ],
   template: `
@@ -156,6 +164,12 @@ import { SvgSourceService } from './features/svg-source/svg-source.service';
       @case ('export') {
         <app-export-dialog />
       }
+      @case ('textPath') {
+        <app-text-path-dialog />
+      }
+      @case ('symbolPicker') {
+        <app-symbol-picker-dialog />
+      }
     }
   `,
   styleUrl: './app.css',
@@ -187,6 +201,14 @@ export class App implements OnInit {
     );
     registerEditActions(this.actions, inject(EditService), this.dialogs, this.destroyRef);
     registerAddActions(this.actions, inject(AddService), this.destroyRef);
+    registerToolActions(
+      this.actions,
+      inject(AddService),
+      inject(FreehandService),
+      inject(TextPathService),
+      inject(SymbolService),
+      this.destroyRef,
+    );
     registerPropertiesActions(this.actions, inject(PropertiesService), this.destroyRef);
     registerIconActions(this.actions, inject(IconInspectorService), this.destroyRef);
     registerSvgSourceActions(this.actions, inject(SvgSourceService), this.destroyRef);

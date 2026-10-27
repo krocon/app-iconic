@@ -189,7 +189,7 @@ test('Image (Ctrl+I) through the file dialog: fitted to 512, centred', async ({ 
   close(n.center!, { x: 512, y: 512 });
 });
 
-test('sidebar: filter + Enter, later tools disabled, Add menu enabled', async ({ page }) => {
+test('sidebar: filter + Enter, every Add entry enabled (tools since 013)', async ({ page }) => {
   await setup(page);
   const filter = page.getByTestId('command-filter');
   await filter.fill('ellip');
@@ -197,8 +197,8 @@ test('sidebar: filter + Enter, later tools disabled, Add menu enabled', async ({
   await filter.press('Enter');
   await expect.poll(async () => (await selectedNode(page))?.tag).toBe('ellipse');
   await filter.fill('');
-  await expect(sidebarItem(page, 'add.freehand')).toHaveAttribute('aria-disabled', 'true');
-  await expect(sidebarItem(page, 'add.symbol')).toHaveAttribute('aria-disabled', 'true');
+  await expect(sidebarItem(page, 'add.freehand')).not.toHaveAttribute('aria-disabled', 'true');
+  await expect(sidebarItem(page, 'add.symbol')).not.toHaveAttribute('aria-disabled', 'true');
   const info = await page.evaluate(() =>
     window
       .__appIconic!.actions()
@@ -210,9 +210,9 @@ test('sidebar: filter + Enter, later tools disabled, Add menu enabled', async ({
     'add.iconGroup': true,
     'add.image': true,
     'add.svgSnippet': true,
-    'add.freehand': false,
-    'add.textToPath': false,
-    'add.symbol': false,
+    'add.freehand': true,
+    'add.textToPath': true,
+    'add.symbol': true,
   });
   // the AI path: an action with arguments
   const ok = await page.evaluate(() =>

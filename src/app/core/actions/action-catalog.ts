@@ -1,6 +1,7 @@
 import { ArgsSpec } from './action-args';
 import { IMAGE_ARGS, shapeArgsSpec, SNIPPET_ARGS } from './add-action-args';
 import { EXPORT_ARGS } from './export-action-args';
+import { FREEHAND_ARGS, SYMBOL_ARGS, TEXT_PATH_ARGS } from './tool-action-args';
 
 /**
  * Every function of the app as an action (design 005 E1; taken over from editlicious
@@ -313,6 +314,8 @@ export const ACTIONS: readonly ActionDef[] = [
   // canvas editing (design 007 E12, E15): Esc and Delete fall through when there is nothing to do
   EDIT('canvas.escape', 'Cancel / Leave Group', { context: 'canvas', palette: false }),
   EDIT('canvas.deletePoint', 'Delete Point', { context: 'canvas' }),
+  // freehand tool (design 013 E4): only while the tool is on
+  ADD('freehand.toggleClosed', 'Freehand: Open / Closed', { context: 'canvas' }),
   // add (legacy §8; prompts 008, 013) – with serialisable arguments (design 008 E6)
   ADD('add.iconGroup', 'Group (SVG)'),
   ADD('add.container', 'Container <g>', { args: shapeArgsSpec('container') }),
@@ -320,13 +323,13 @@ export const ACTIONS: readonly ActionDef[] = [
   ADD('add.ellipse', 'Ellipse', { args: shapeArgsSpec('ellipse') }),
   ADD('add.rect', 'Rectangle', { args: shapeArgsSpec('rect') }),
   ADD('add.path', 'Path', { args: shapeArgsSpec('path') }),
-  ADD('add.freehand', 'Freehand'),
+  ADD('add.freehand', 'Freehand', { args: FREEHAND_ARGS }),
   ADD('add.line', 'Line', { args: shapeArgsSpec('line') }),
   ADD('add.polyline', 'Polyline', { args: shapeArgsSpec('polyline') }),
   ADD('add.polygon', 'Polygon', { args: shapeArgsSpec('polygon') }),
   ADD('add.text', 'Text', { args: shapeArgsSpec('text') }),
-  ADD('add.textToPath', 'Text to Path…'),
-  ADD('add.symbol', 'Symbol…'),
+  ADD('add.textToPath', 'Text to Path…', { args: TEXT_PATH_ARGS }),
+  ADD('add.symbol', 'Symbol…', { args: SYMBOL_ARGS }),
   ADD('add.svgSnippet', 'SVG Snippet…', { args: SNIPPET_ARGS }),
   ADD('add.image', 'Image…', { args: IMAGE_ARGS }),
   // arrange (legacy §7.2, §7.3; prompt 006)

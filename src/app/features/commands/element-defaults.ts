@@ -33,6 +33,8 @@ export interface ElementSpec {
   tag: string;
   attrs: Record<string, string>;
   text?: string;
+  /** Child elements (a symbol's group, design 013 E19). */
+  children?: ElementSpec[];
 }
 
 const pts = (ps: readonly [number, number][]) =>
@@ -151,11 +153,15 @@ export function imageSpec(href: string, c: Point, w: number, h: number): Element
 /** Markup of one SVG element (inert XML document – nothing runs, values are escaped). */
 export function buildElement(spec: ElementSpec): string {
   const doc = document.implementation.createDocument(SVG_NS, 'svg', null);
-  const el = doc.createElementNS(SVG_NS, spec.tag);
-  for (const [k, v] of Object.entries(spec.attrs)) {
-    if (k.startsWith('xlink:')) el.setAttributeNS('http://www.w3.org/1999/xlink', k, v);
-    else el.setAttribute(k, v);
-  }
-  if (spec.text !== undefined) el.textContent = spec.text;
-  return new XMLSerializer().serializeToString(el);
+  const make = (s: ElementSpec): Element => {
+    const el = doc.createElementNS(SVG_NS, s.tag);
+    for (const [k, v] of Object.entries(s.attrs)) {
+      if (k.startsWith('xlink:')) el.setAttributeNS('http://www.w3.org/1999/xlink', k, v);
+      else el.setAttribute(k, v);
+    }
+    if (s.text !== undefined) el.textContent = s.text;
+    for (const c of s.children ?? []) el.appendChild(make(c));
+    return el;
+  };
+  return new XMLSerializer().serializeToString(make(spec));
 }

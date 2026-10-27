@@ -59,6 +59,10 @@ export const UNDO_TEXTS = {
   addText: 'Add Text',
   addImage: 'Add Image',
   addSvgSnippet: 'Add SVG Snippet',
+  // tools (design 013)
+  addFreehand: 'Add Freehand',
+  addTextPath: 'Add Text Path',
+  addSymbol: 'Add Symbol',
   // icon inspector (design 010 E5)
   changeBackground: 'Change Background',
   changeShadow: 'Change Shadow',

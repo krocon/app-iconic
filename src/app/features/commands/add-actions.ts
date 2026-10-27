@@ -5,8 +5,8 @@ import { SHAPE_KINDS, ShapeKind } from './element-defaults';
 
 /**
  * The "Add" actions (design 008): every entry of the Add menu, the command sidebar and the palette
- * – and of the AI – runs through these handlers. Freehand, Text to Path and Symbol stay without
- * handler (disabled) until prompt 013.
+ * – and of the AI – runs through these handlers. Freehand, Text to Path and Symbol: see
+ * `features/tools/tools-actions.ts` (prompt 013).
  */
 
 /** Action id → shape. */

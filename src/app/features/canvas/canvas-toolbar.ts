@@ -4,14 +4,17 @@ import { ZOOM_STEPS, zoomPercent } from '../../shared/geometry/zoom-steps';
 import { CANVAS_TEXTS } from './canvas-texts';
 import { CanvasViewStore } from './canvas-view.store';
 import { ViewOptionsMenu } from './view-options-menu';
+import { FreehandOptions } from '../tools/freehand-options';
+import { FreehandStore } from '../tools/freehand.store';
 
 /**
  * Toolbar of the canvas (design 004 E9/E14, 005 E10): zoom out / level / in, 100 %, Fit, Center –
- * all as actions – and the "View Options" menu with the view toggles, appearance and mask.
+ * all as actions – the options of the freehand tool while it is on (design 013 E6) and the "View
+ * Options" menu with the view toggles, appearance and mask.
  */
 @Component({
   selector: 'app-canvas-toolbar',
-  imports: [ViewOptionsMenu],
+  imports: [FreehandOptions, ViewOptionsMenu],
   template: `
     <div class="bar" role="toolbar" [attr.aria-label]="t.toolbar">
       <div class="cluster">
@@ -69,6 +72,9 @@ import { ViewOptionsMenu } from './view-options-menu';
           {{ t.centerShort }}
         </button>
       </div>
+      @if (freehand.active()) {
+        <app-freehand-options />
+      }
       <span class="spacer"></span>
       <app-view-options-menu />
     </div>
@@ -112,6 +118,7 @@ import { ViewOptionsMenu } from './view-options-menu';
 export class CanvasToolbar {
   protected readonly view = inject(CanvasViewStore);
   protected readonly actions = inject(ActionService);
+  protected readonly freehand = inject(FreehandStore);
   protected readonly t = CANVAS_TEXTS;
   protected readonly steps = ZOOM_STEPS;
   protected readonly opt = this.view.options;

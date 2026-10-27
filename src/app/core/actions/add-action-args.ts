@@ -21,7 +21,7 @@ const TEXT: ArgSpec = { type: 'string', maxLength: 4096 };
 const LIST: ArgSpec = { type: 'string', maxLength: 1 << 20 };
 
 /** Where to insert (`parent` = NodeRef) – every add action has it. */
-const PLACE: Record<string, ArgSpec> = {
+export const PLACE: Record<string, ArgSpec> = {
   parent: { type: 'json' },
   index: { type: 'integer', minimum: 0, maximum: 1_000_000 },
 };

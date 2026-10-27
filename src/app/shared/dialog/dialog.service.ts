@@ -9,7 +9,9 @@ export type DialogKind =
   | 'svgSnippet'
   | 'svgSource'
   | 'optimizePath'
-  | 'export';
+  | 'export'
+  | 'textPath'
+  | 'symbolPicker';
 
 /**
  * Which modal dialog is open. Remembers the focused element on `show` and gives the focus back

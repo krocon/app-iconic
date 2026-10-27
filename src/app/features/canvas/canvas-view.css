@@ -44,7 +44,8 @@
   touch-action: none;
   outline-offset: -2px;
 
-  &.cross {
+  &.cross,
+  &.freehand {
     cursor: crosshair;
   }
 

@@ -49,7 +49,12 @@ type Args = Record<string, unknown> | undefined;
 interface Place {
   target: InsertTarget;
   center: Point;
+  /** A document point in the user space of the target's parent (design 008 E3). */
+  local: (p: Point) => Point;
 }
+
+/** Builds the markup of what is added around `center` (`local` maps document points). */
+export type BuildMarkup = (center: Point, local: (p: Point) => Point) => string[] | null;
 
 /** The namespace declarations the asset root already makes (content of a new asset). */
 function withoutNs(markup: string): string {
@@ -104,7 +109,12 @@ export class AddService {
     }
     const docCenter = visibleCenter(this.canvas.view(), this.canvas.viewport());
     const parentEl = target.kind === 'node' ? doc.node(target.parent) : null;
-    return { target, center: toLocal(this.canvas.host, parentEl, docCenter) };
+    const host = this.canvas.host;
+    return {
+      target,
+      center: toLocal(host, parentEl, docCenter),
+      local: (p) => toLocal(host, parentEl, p),
+    };
   }
 
   /** Runs the insertion of `markups` at `place` as one step; selects the new nodes. */
@@ -146,11 +156,15 @@ export class AddService {
     store.select(painted.length ? painted : refs);
   }
 
-  private async run(label: UndoLabel, args: Args, build: (c: Point) => string[] | null) {
+  /**
+   * Inserts what `build` makes at the place from the arguments or the rules, as one undo step
+   * labelled `label`, and selects it – the way of every "Add" function, also of the tools (013).
+   */
+  async insertBuilt(label: UndoLabel, args: Args, build: BuildMarkup): Promise<boolean> {
     const store = await this.ensureStore();
     if (!store) return false;
     const place = this.place(store, args);
-    const markups = place ? build(place.center) : null;
+    const markups = place ? build(place.center, place.local) : null;
     if (!place || !markups?.length) {
       this.files.notice.set(T.addFailed);
       return false;
@@ -160,7 +174,7 @@ export class AddService {
 
   /** Container, circle … text (design 008 E5/E6). */
   addShape(kind: ShapeKind, args?: Args): Promise<boolean> {
-    return this.run(LABELS[kind], args, (c) => {
+    return this.insertBuilt(LABELS[kind], args, (c) => {
       const spec = applyShapeArgs(kind, defaultShape(kind, c), args);
       return spec ? [buildElement(spec)] : null;
     });
@@ -215,7 +229,7 @@ export class AddService {
     const w = num('width') ?? fitted.width;
     const h = num('height') ?? fitted.height;
     const url = href;
-    return this.run('addImage', args, (c) => {
+    return this.insertBuilt('addImage', args, (c) => {
       const spec: ElementSpec = imageSpec(url, c, w, h);
       const x = num('x');
       const y = num('y');

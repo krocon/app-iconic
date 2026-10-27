@@ -45,7 +45,8 @@ export class FakeFontApi extends FontApi {
     this.calls.push({ text, fontId, size, letterSpacing });
     const L = TEXT_PATH_LIMITS;
     if ([...text].length > L.maxChars) return fail('too_large', 'too long');
-    if (!text.trim() || /[\u0000-\u001f]/.test(text)) return fail('invalid_text', 'empty');
+    if (!text.trim() || [...text].some((c) => c.charCodeAt(0) < 0x20))
+      return fail('invalid_text', 'empty');
     if (!(size >= L.minSize && size <= L.maxSize)) return fail('invalid_text', 'size');
     if (!this.families.some((f) => f.styles.some((s) => s.id === fontId))) {
       return fail('not_found', fontId);

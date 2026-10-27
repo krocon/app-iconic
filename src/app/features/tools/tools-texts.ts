@@ -1,0 +1,52 @@
+/**
+ * Texts of the tools (prompt 013): freehand, text to path, symbols. English is the source; German
+ * follows in prompt 015. Action titles come from the action catalogue (design 005).
+ */
+export const TOOLS_TEXTS = {
+  freehand: {
+    toolbar: 'Freehand options',
+    title: 'Freehand',
+    hint: 'Freehand: drag to draw · C open/closed · Esc ends',
+    smoothing: 'Smoothing',
+    strokeWidth: 'Stroke width',
+    closed: 'Closed',
+    done: 'Done',
+    failed: 'The freehand path could not be added.',
+  },
+  textPath: {
+    title: 'Text to Path',
+    text: 'Text',
+    textPlaceholder: 'Text',
+    family: 'Font',
+    familySearch: 'Search fonts',
+    style: 'Style',
+    size: 'Size',
+    letterSpacing: 'Letter spacing',
+    preview: 'Preview',
+    previewEmpty: 'Enter text to see the outlines.',
+    loading: 'Loading fonts…',
+    noFonts: 'No fonts found.',
+    add: 'Add',
+    cancel: 'Cancel',
+    failed: 'The text could not be turned into a path.',
+    unknownFont: 'The font is not installed.',
+    count: (n: number, max: number) => `${n}/${max}`,
+  },
+  symbol: {
+    title: 'Symbol',
+    set: 'Symbol set',
+    search: 'Search symbols',
+    searchPlaceholder: 'Search…',
+    grid: 'Symbols',
+    weight: 'Weight',
+    size: 'Size',
+    add: 'Add',
+    cancel: 'Cancel',
+    loading: 'Loading symbols…',
+    loadFailed: 'The symbols could not be loaded.',
+    none: 'No symbol matches.',
+    more: (shown: number, total: number) => `${shown} of ${total} shown – refine the search.`,
+    license: (set: string, license: string) => `${set} · ${license}`,
+    unknown: 'There is no such symbol.',
+  },
+} as const;

@@ -13,8 +13,8 @@ import { readGeometry } from './handles/node-geometry';
 import { nodeSnaps, unionBounds } from './selection-measure';
 
 /**
- * Editing actions of the canvas (design 007 E12, E15): Escape (cancel the drag, drop the chosen
- * point, leave the group context – else the key falls through to Deselect), Delete Point (else
+ * Editing actions of the canvas (design 007 E12, E15): Escape (the freehand stroke/tool of
+ * design 013 E3, cancel the drag, drop the chosen point, leave the group context – else the key falls through to Deselect), Delete Point (else
  * Delete), the arrow keys (1 / ⇧ 10 document units, one undo step per series) and `moveBy` for the
  * AI. Registered by `CanvasView` with its `DestroyRef`.
  */
@@ -42,6 +42,7 @@ export function registerCanvasEditActions(
   edit: CanvasEditStore,
   host: () => SVGSVGElement | null,
   destroyRef: DestroyRef,
+  tool?: { escape(): boolean; active(): boolean },
 ): void {
   const hasNodes = () => (store()?.selection().length ?? 0) > 0;
   const nudge = (dx: number, dy: number) => {
@@ -58,13 +59,15 @@ export function registerCanvasEditActions(
   const handlers: Record<string, ActionHandler> = {
     'canvas.escape': {
       run: () => {
+        // the freehand tool first (design 013 E3): its stroke, then the tool
+        if (tool?.escape()) return;
         if (edit.escape()) return;
         const ctx = edit.context();
         if (!ctx) return;
         edit.context.set(null);
         store()?.select([ctx]);
       },
-      enabled: () => edit.canEscape(),
+      enabled: () => !!tool?.active() || edit.canEscape(),
     },
     'canvas.deletePoint': {
       run: () => {

@@ -33,6 +33,10 @@ import { registerCanvasEditActions } from './canvas-edit-actions';
 import { CanvasInteraction } from './canvas-pointer';
 import { EMPTY_MODEL, measureSelection } from './selection-measure';
 import { SelectionOverlay } from './selection-overlay';
+import { FreehandOverlay } from '../tools/freehand-overlay';
+import { FreehandStore } from '../tools/freehand.store';
+import { FreehandService } from '../tools/freehand.service';
+import { TOOLS_TEXTS } from '../tools/tools-texts';
 
 /** Ctrl+wheel / pinch: zoom factor per wheel pixel (design 004 E9). */
 const WHEEL_ZOOM = 0.01;
@@ -44,101 +48,8 @@ const WHEEL_ZOOM = 0.01;
  */
 @Component({
   selector: 'app-canvas-view',
-  imports: [CanvasBackground, CanvasRuler, CanvasToolbar, SelectionOverlay],
-  template: `
-    <app-canvas-toolbar />
-    <div class="frame" [class.rulers]="opt().rulers">
-      @if (opt().rulers) {
-        <div class="corner" aria-hidden="true"></div>
-        <app-canvas-ruler
-          class="ruler-x"
-          orientation="horizontal"
-          [view]="view()"
-          [length]="viewport().width"
-          [marker]="pointerView()?.x ?? null"
-        />
-        <app-canvas-ruler
-          class="ruler-y"
-          orientation="vertical"
-          [view]="view()"
-          [length]="viewport().height"
-          [marker]="pointerView()?.y ?? null"
-        />
-      }
-      <div
-        #vp
-        class="viewport"
-        role="img"
-        tabindex="0"
-        [attr.aria-label]="t.canvas"
-        [class.cross]="opt().crossCursor"
-        [class.can-pan]="space()"
-        [class.panning]="panning()"
-        (wheel)="onWheel($event)"
-        (pointerdown)="onPointerDown($event)"
-        (pointermove)="onPointerMove($event)"
-        (pointerup)="onPointerUp($event)"
-        (pointercancel)="onPointerCancel($event)"
-        (dblclick)="onDblClick($event)"
-        (pointerleave)="onPointerLeave()"
-        (auxclick)="$event.preventDefault()"
-      >
-        <div
-          class="artboard"
-          [class.unmasked]="opt().mask === 'none'"
-          [style.width.px]="px()"
-          [style.height.px]="px()"
-          [style.transform]="translate()"
-        >
-          <div class="paper" [class.transparent]="!opt().background" [style.clip-path]="clip()">
-            @if (opt().background) {
-              <app-canvas-background [fill]="fill().preview" />
-            }
-            <div #layers class="layers"></div>
-          </div>
-          <svg
-            #host
-            class="host"
-            data-testid="canvas-host"
-            [attr.viewBox]="'0 0 ' + size + ' ' + size"
-            aria-hidden="true"
-          >
-            @if (opt().guides) {
-              <g class="guides">
-                @for (l of guides.lines; track $index) {
-                  <line [attr.x1]="l.x1" [attr.y1]="l.y1" [attr.x2]="l.x2" [attr.y2]="l.y2" />
-                }
-                @for (c of guides.circles; track $index) {
-                  <circle [attr.cx]="c.cx" [attr.cy]="c.cy" [attr.r]="c.r" />
-                }
-              </g>
-            }
-          </svg>
-        </div>
-        <app-selection-overlay
-          [model]="edit.model()"
-          [toView]="toView()"
-          [marquee]="edit.marquee()"
-          [snap]="edit.snap()"
-          [active]="edit.activePoint()"
-        />
-        @if (opt().crossCursor && pointerView(); as p) {
-          <div class="cross-h" [style.top.px]="p.y"></div>
-          <div class="cross-v" [style.left.px]="p.x"></div>
-        }
-      </div>
-    </div>
-    <div class="status">
-      <span class="coords" data-testid="canvas-coords" [attr.aria-label]="t.position">
-        X {{ coord(pointer()?.x) }} &nbsp; Y {{ coord(pointer()?.y) }}
-      </span>
-      @if (!fill().known) {
-        <span class="hint">{{ t.unknownFill }}</span>
-      }
-      <span class="spacer"></span>
-      <span class="zoom" data-testid="canvas-zoom">{{ percent() }}</span>
-    </div>
-  `,
+  imports: [CanvasBackground, CanvasRuler, CanvasToolbar, FreehandOverlay, SelectionOverlay],
+  templateUrl: './canvas-view.html',
   styleUrl: './canvas-view.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -177,6 +88,10 @@ export class CanvasView {
 
   /** Editing state: selection model, marquee, snap, context (design 007 E15). */
   protected readonly edit = inject(CanvasEditStore);
+  /** The freehand tool (design 013 E3): while on, dragging draws instead of selecting. */
+  protected readonly freehand = inject(FreehandStore);
+  private readonly freehandService = inject(FreehandService);
+  protected readonly tt = TOOLS_TEXTS;
   /** Document → viewport pixels, measured with the host's screen CTM (design 007 E5). */
   protected readonly toView = signal<Matrix>(IDENTITY);
 
@@ -246,6 +161,7 @@ export class CanvasView {
       this.edit,
       () => this.canvas.host,
       destroy,
+      this.freehand,
     );
     this.interaction = new CanvasInteraction(
       () => this.store(),
@@ -255,7 +171,10 @@ export class CanvasView {
       () => this.layersEl().nativeElement,
       actions.os === 'mac',
     );
-    destroy.onDestroy(() => this.edit.gesture.cancel());
+    destroy.onDestroy(() => {
+      this.edit.gesture.cancel();
+      this.freehand.cancel();
+    });
     actions.register(
       'canvas.panHold',
       {
@@ -292,6 +211,10 @@ export class CanvasView {
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   }
 
+  private toDoc(e: { clientX: number; clientY: number }): Point {
+    return clientToDocument(this.hostEl().nativeElement, e);
+  }
+
   private track(e: { clientX: number; clientY: number } | null): void {
     this.pointer.set(e ? clientToDocument(this.hostEl().nativeElement, e) : null);
   }
@@ -310,6 +233,14 @@ export class CanvasView {
 
   protected onPointerDown(e: PointerEvent): void {
     const vp = this.viewportEl().nativeElement;
+    if (e.button === 0 && !this.space() && this.freehand.active()) {
+      // draw (design 013 E3)
+      vp.focus({ preventScroll: true });
+      e.preventDefault();
+      vp.setPointerCapture?.(e.pointerId);
+      this.freehand.begin(this.toDoc(e), e.timeStamp);
+      return;
+    }
     if (e.button === 0 && !this.space()) {
       // select, drag a handle, move, marquee (design 007)
       vp.focus({ preventScroll: true });
@@ -327,16 +258,22 @@ export class CanvasView {
   }
 
   protected onPointerUp(e: PointerEvent): void {
+    if (this.freehand.drawing()) {
+      const stroke = this.freehand.finish(this.toDoc(e), this.canvas.zoom());
+      if (stroke) void this.freehandService.insertStroke(stroke);
+    }
     this.interaction.up(e);
     this.endPan(e);
   }
 
   protected onPointerCancel(e: PointerEvent): void {
+    this.freehand.cancel();
     this.edit.gesture.cancel();
     this.endPan(e);
   }
 
   protected onDblClick(e: MouseEvent): void {
+    if (this.freehand.active()) return;
     this.interaction.dblclick({ ...pointerOf(e), pointerId: 0 });
   }
 
@@ -350,6 +287,13 @@ export class CanvasView {
 
   protected onPointerMove(e: PointerEvent): void {
     this.lastClient = { clientX: e.clientX, clientY: e.clientY };
+    if (this.freehand.drawing()) {
+      // every coalesced sample of the frame (fast strokes stay smooth)
+      const list = e.getCoalescedEvents?.() ?? [];
+      for (const c of list.length ? list : [e]) {
+        this.freehand.sample(this.toDoc(c), c.timeStamp, this.canvas.zoom());
+      }
+    }
     this.interaction.move(e);
     if (this.pan && this.pan.id === e.pointerId) {
       this.canvas.panBy(e.clientX - this.pan.x, e.clientY - this.pan.y);

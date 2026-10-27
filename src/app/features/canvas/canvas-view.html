@@ -1,0 +1,104 @@
+<app-canvas-toolbar />
+<div class="frame" [class.rulers]="opt().rulers">
+  @if (opt().rulers) {
+    <div class="corner" aria-hidden="true"></div>
+    <app-canvas-ruler
+      class="ruler-x"
+      orientation="horizontal"
+      [view]="view()"
+      [length]="viewport().width"
+      [marker]="pointerView()?.x ?? null"
+    />
+    <app-canvas-ruler
+      class="ruler-y"
+      orientation="vertical"
+      [view]="view()"
+      [length]="viewport().height"
+      [marker]="pointerView()?.y ?? null"
+    />
+  }
+  <div
+    #vp
+    class="viewport"
+    role="img"
+    tabindex="0"
+    [attr.aria-label]="t.canvas"
+    [class.cross]="opt().crossCursor"
+    [class.can-pan]="space()"
+    [class.panning]="panning()"
+    [class.freehand]="freehand.active()"
+    (wheel)="onWheel($event)"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp($event)"
+    (pointercancel)="onPointerCancel($event)"
+    (dblclick)="onDblClick($event)"
+    (pointerleave)="onPointerLeave()"
+    (auxclick)="$event.preventDefault()"
+  >
+    <div
+      class="artboard"
+      [class.unmasked]="opt().mask === 'none'"
+      [style.width.px]="px()"
+      [style.height.px]="px()"
+      [style.transform]="translate()"
+    >
+      <div class="paper" [class.transparent]="!opt().background" [style.clip-path]="clip()">
+        @if (opt().background) {
+          <app-canvas-background [fill]="fill().preview" />
+        }
+        <div #layers class="layers"></div>
+      </div>
+      <svg
+        #host
+        class="host"
+        data-testid="canvas-host"
+        [attr.viewBox]="'0 0 ' + size + ' ' + size"
+        aria-hidden="true"
+      >
+        @if (opt().guides) {
+          <g class="guides">
+            @for (l of guides.lines; track $index) {
+              <line [attr.x1]="l.x1" [attr.y1]="l.y1" [attr.x2]="l.x2" [attr.y2]="l.y2" />
+            }
+            @for (c of guides.circles; track $index) {
+              <circle [attr.cx]="c.cx" [attr.cy]="c.cy" [attr.r]="c.r" />
+            }
+          </g>
+        }
+      </svg>
+    </div>
+    @if (freehand.drawing()) {
+      <app-freehand-overlay
+        [points]="freehand.points()"
+        [toView]="toView()"
+        [closed]="freehand.closed()"
+        [strokeWidth]="freehand.strokeWidth()"
+      />
+    }
+    <app-selection-overlay
+      [model]="edit.model()"
+      [toView]="toView()"
+      [marquee]="edit.marquee()"
+      [snap]="edit.snap()"
+      [active]="edit.activePoint()"
+    />
+    @if (opt().crossCursor && pointerView(); as p) {
+      <div class="cross-h" [style.top.px]="p.y"></div>
+      <div class="cross-v" [style.left.px]="p.x"></div>
+    }
+  </div>
+</div>
+<div class="status">
+  <span class="coords" data-testid="canvas-coords" [attr.aria-label]="t.position">
+    X {{ coord(pointer()?.x) }} &nbsp; Y {{ coord(pointer()?.y) }}
+  </span>
+  @if (freehand.active()) {
+    <span class="hint tool" data-testid="tool-hint">{{ tt.freehand.hint }}</span>
+  }
+  @if (!fill().known) {
+    <span class="hint">{{ t.unknownFill }}</span>
+  }
+  <span class="spacer"></span>
+  <span class="zoom" data-testid="canvas-zoom">{{ percent() }}</span>
+</div>
