@@ -26,24 +26,24 @@ export function registerFileActions(
     label: () => recent.files()[i]?.name ?? `${i + 1}`,
   });
   const handlers: Record<string, ActionHandler> = {
-    'file.newWindow': { run: () => void files.newWindow() },
-    'file.new': { run: () => void files.newDocument(), enabled: idle },
-    'file.open': { run: () => void files.open(), enabled: idle },
+    'file.newWindow': { run: () => files.newWindow() },
+    'file.new': { run: () => files.newDocument(), enabled: idle },
+    'file.open': { run: () => files.open(), enabled: idle },
     'file.clearRecent': {
-      run: () => void recent.clear(),
+      run: () => recent.clear(),
       enabled: () => recent.files().length > 0,
     },
-    'file.importSvg': { run: () => void files.importSvg(), enabled: () => idle() && !!store() },
+    'file.importSvg': { run: () => files.importSvg(), enabled: () => idle() && !!store() },
     'file.save': {
-      run: () => void files.save(),
+      run: () => files.save(),
       enabled: () => {
         const s = store();
         return idle() && !!s && (s.dirty() || s.document().path === null);
       },
     },
-    'file.saveAs': { run: () => void files.saveAs(), enabled: () => idle() && !!store() },
-    'file.close': { run: () => void files.close(), enabled: idle },
-    'app.quit': { run: () => void files.quit() },
+    'file.saveAs': { run: () => files.saveAs(), enabled: () => idle() && !!store() },
+    'file.close': { run: () => files.close(), enabled: idle },
+    'app.quit': { run: () => files.quit() },
     'edit.undo': {
       run: () => files.undo(),
       enabled: () => !!store()?.canUndo(),

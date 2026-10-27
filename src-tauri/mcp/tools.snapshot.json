@@ -112,6 +112,10 @@
           "maximum": 200000,
           "minimum": 1,
           "type": "integer"
+        },
+        "node_ids": {
+          "description": "keep the internal node ids (data-ai-id) that get_tree's refs use",
+          "type": "boolean"
         }
       },
       "required": [

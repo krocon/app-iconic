@@ -16,16 +16,16 @@ export function registerClipActions(
   const a = (v: unknown) => v as ClipArgs | undefined;
   actions.registerAll(
     {
-      'clip.create': { run: (v) => void clip.create(a(v)), enabled: (v) => clip.canCreate(a(v)) },
+      'clip.create': { run: (v) => clip.create(a(v)), enabled: (v) => clip.canCreate(a(v)) },
       'clip.assign': {
-        run: (v) => void clip.assign(a(v)),
+        run: (v) => clip.assign(a(v)),
         enabled: (v) => clip.canCreate(a(v)),
       },
-      'clip.edit': { run: (v) => void clip.edit(a(v)), enabled: (v) => clip.canEdit(a(v)) },
-      'clip.done': { run: () => void clip.done(), enabled: () => clip.editing.target() !== null },
-      'clip.remove': { run: (v) => void clip.remove(a(v)), enabled: (v) => clip.canEdit(a(v)) },
+      'clip.edit': { run: (v) => clip.edit(a(v)), enabled: (v) => clip.canEdit(a(v)) },
+      'clip.done': { run: () => clip.done(), enabled: () => clip.editing.target() !== null },
+      'clip.remove': { run: (v) => clip.remove(a(v)), enabled: (v) => clip.canEdit(a(v)) },
       'clip.setUnits': {
-        run: (v) => void clip.setUnits(a(v) ?? {}),
+        run: (v) => clip.setUnits(a(v) ?? {}),
         enabled: (v) => clip.canEdit(a(v)),
       },
     },

@@ -1,6 +1,6 @@
 /** What the settings dialog lists (design 015 E12). Pure. */
 
-export const SECTIONS = ['general', 'canvas', 'snapping', 'export', 'advanced'] as const;
+export const SECTIONS = ['general', 'canvas', 'snapping', 'export', 'ai', 'advanced'] as const;
 export type SectionId = (typeof SECTIONS)[number];
 
 /**

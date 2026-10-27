@@ -14,8 +14,10 @@ export function registerExportActions(
 ): void {
   const handler = (format: 'svg' | 'png') => ({
     run: (a?: unknown) => {
-      if (a && typeof a === 'object') void service.runAction(format, a as Record<string, unknown>);
-      else service.openDialog(format);
+      if (a && typeof a === 'object')
+        return service.runAction(format, a as Record<string, unknown>);
+      service.openDialog(format);
+      return undefined;
     },
     enabled: () => service.canExport(),
   });

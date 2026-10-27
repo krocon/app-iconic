@@ -62,9 +62,7 @@ export function registerIconActions(
     },
     'icon.setPlatforms': {
       run: (args) =>
-        void icon.setPlatforms(
-          args as { squares?: Exclude<SquaresChoice, 'other'>; watchOS?: boolean },
-        ),
+        icon.setPlatforms(args as { squares?: Exclude<SquaresChoice, 'other'>; watchOS?: boolean }),
       enabled: hasDoc,
     },
     'icon.setColorSpace': {
@@ -77,7 +75,7 @@ export function registerIconActions(
     'icon.editAppearance': {
       run: (args) => icon.setAppearance((args as { appearance: AppearanceKey }).appearance),
     },
-    'icon.copyJson': { run: () => void icon.copyJson(), enabled: hasDoc },
+    'icon.copyJson': { run: () => icon.copyJson(), enabled: hasDoc },
   };
   for (const [id, h] of Object.entries(handlers)) actions.register(id, h, destroyRef);
 }

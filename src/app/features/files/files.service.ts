@@ -1,7 +1,7 @@
 import { computed, effect, Injectable, inject, signal } from '@angular/core';
 import { describeFsError, toFsError } from '../../core/errors/fs-error';
 import { IconFileApi } from '../../core/icon-file/icon-file-api';
-import { IconFormat } from '../../core/icon-file/icon-file.models';
+import { IconFormat, SaveResult } from '../../core/icon-file/icon-file.models';
 import { WindowApi } from '../../core/window/window-api';
 import { AskService } from '../../shared/ask/ask.service';
 import { DocumentStore } from '../document/document.store';
@@ -9,6 +9,11 @@ import { IconDocument } from '../document/icon-document';
 import { describeNotices, FILES_TEXTS as T } from './files-texts';
 import { RecentFilesService } from './recent-files.service';
 import { importSvg } from './svg-import';
+
+/** Another file action runs (a dialog is open) – the AI is told so. */
+function busyError() {
+  return toFsError({ code: 'unavailable', message: 'another file action is running' });
+}
 
 /**
  * The file actions of one window (design 003 E8–E12): New, Open, Open Recent, Import SVG, Save,
@@ -133,6 +138,46 @@ export class FilesService {
   /** Quit the app: the backend asks every window in turn (design 005 E13). */
   quit(): Promise<void> {
     return this.win.quit().catch(() => undefined);
+  }
+
+  // ---- AI control (design 018 E13/E14): no dialogs, errors are thrown as `FsError` ----
+
+  /** Opens `path` in this window without asking or showing an error; throws the `FsError`. */
+  async openQuietly(path: string): Promise<void> {
+    if (this.busy()) throw busyError();
+    return this.exclusive(async () => {
+      const dto = await this.api.openIcon(path);
+      const doc = IconDocument.fromDto(dto);
+      await this.replace(new DocumentStore(doc));
+      this.notice.set(describeNotices(doc.notices));
+      await this.recent.add(path).catch(() => undefined);
+    });
+  }
+
+  /**
+   * Saves to `path` (default: the document's own) in `format` (default: the document's) without a
+   * dialog. Throws the `FsError` – `invalid_path` for a new document without `path`.
+   */
+  async saveQuietly(path?: string, format?: IconFormat): Promise<SaveResult> {
+    if (this.busy()) throw busyError();
+    return this.exclusive(async () => {
+      const s = this.store();
+      if (!s) throw toFsError({ code: 'unknown_document', message: 'no document' });
+      const doc = s.document();
+      const target = path ?? doc.path;
+      if (target === null) {
+        throw toFsError({
+          code: 'invalid_path',
+          message: 'the document has no file yet: give a path',
+        });
+      }
+      const old = doc.path;
+      const result = await this.api.saveIcon(doc.saveRequest(target, format ?? doc.format));
+      s.markSaved(result);
+      if (old && old !== result.path) await this.api.closeIcon(old).catch(() => undefined);
+      await this.recent.add(result.path).catch(() => undefined);
+      return result;
+    });
   }
 
   undo(): void {

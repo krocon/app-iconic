@@ -8,6 +8,8 @@ import { fakeBackend } from '../../../testing/providers';
 import { MenuService } from '../menus/menu.service';
 import { SettingsSync } from './settings-sync';
 import { SettingsStore } from './settings.store';
+import { McpApi } from '../../core/mcp/mcp-api';
+import { FakeMcpApi } from '../../../testing/fake-mcp-api';
 
 describe('settings in the window (design 015 E11–E14)', () => {
   let backend: ReturnType<typeof fakeBackend>;
@@ -40,14 +42,14 @@ describe('settings in the window (design 015 E11–E14)', () => {
       new KeyboardEvent('keydown', { key: k, ctrlKey: true, bubbles: true, cancelable: true }),
     );
 
-  it('Ctrl+, opens the dialog with five sections as tabs', async () => {
+  it('Ctrl+, opens the dialog with six sections as tabs', async () => {
     const { fixture, el } = await app();
     ctrl(',');
     await fixture.whenStable();
     const dialog = el.querySelector('[role="dialog"]')!;
     expect(dialog.querySelector('.title')!.textContent).toContain('Settings');
     const tabs = [...dialog.querySelectorAll('[role="tab"]')].map((t) => t.textContent!.trim());
-    expect(tabs).toEqual(['General', 'Canvas', 'Snapping', 'Export', 'Advanced']);
+    expect(tabs).toEqual(['General', 'Canvas', 'Snapping', 'Export', 'AI control', 'Advanced']);
     const tab = dialog.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')!;
     tab.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     await fixture.whenStable();
@@ -55,6 +57,36 @@ describe('settings in the window (design 015 E11–E14)', () => {
       'Canvas',
     );
     expect(document.activeElement?.id).toBe('settings-tab-canvas');
+  });
+
+  it('AI control: off by default, the switch opens the bridge, the line for Claude Code (design 018 E16)', async () => {
+    const { fixture, el } = await app();
+    TestBed.inject(ActionService).run('app.settings');
+    await fixture.whenStable();
+    el.querySelector<HTMLElement>('[data-testid="settings-tab-ai"]')!.click();
+    await fixture.whenStable();
+    const box = el.querySelector<HTMLInputElement>('[data-testid="settings-mcp"]')!;
+    expect(box.checked).toBe(false);
+    expect(el.querySelector('[data-testid="settings-mcp-status"]')!.textContent).toContain('Off');
+    expect(
+      el.querySelector<HTMLInputElement>('[data-testid="settings-mcp-confirm"]')!.checked,
+    ).toBe(true);
+    box.click();
+    expect(TestBed.inject(SettingsStore).settings().mcp.enabled).toBe(true);
+    // the backend reports the open bridge and a sidecar next to the app
+    const mcp = TestBed.inject(McpApi) as FakeMcpApi;
+    mcp.setStatus({ enabled: true, connections: 1, sidecar: '/Apps/app-iconic-mcp' });
+    await fixture.whenStable();
+    expect(el.querySelector('[data-testid="settings-mcp-status"]')!.textContent).toContain(
+      'AI connected',
+    );
+    expect(el.querySelector('[data-testid="settings-mcp-command"]')!.textContent).toBe(
+      'claude mcp add app-iconic -- "/Apps/app-iconic-mcp"',
+    );
+    expect(el.querySelector('[data-testid="ai-badge"]')).not.toBeNull();
+    el.querySelector<HTMLElement>('[data-testid="settings-mcp-disconnect"]')!.click();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(mcp.disconnects).toBe(1);
   });
 
   it('switching the language changes texts, action names and the native menu at once', async () => {

@@ -297,6 +297,62 @@
             </label>
           </fieldset>
         }
+        @case ('ai') {
+          @let ai = mcp.info();
+          <label class="check">
+            <input
+              type="checkbox"
+              data-testid="settings-mcp"
+              aria-describedby="settings-mcp-hint"
+              [checked]="v.mcp.enabled"
+              (change)="set('mcp.enabled', checked($event))"
+            />
+            {{ t.mcpEnabled }}
+          </label>
+          <p class="hint" id="settings-mcp-hint">{{ t.mcpHint }}</p>
+          <label class="check">
+            <input
+              type="checkbox"
+              data-testid="settings-mcp-confirm"
+              [checked]="v.mcp.confirmFiles"
+              (change)="set('mcp.confirmFiles', checked($event))"
+            />
+            {{ t.mcpConfirm }}
+          </label>
+          <p class="hint" role="status" data-testid="settings-mcp-status">
+            {{
+              !ai.enabled
+                ? t.mcpOff
+                : ai.connections > 0
+                  ? t.mcpConnected(ai.connections)
+                  : t.mcpListening
+            }}
+          </p>
+          @if (ai.connections > 0) {
+            <button
+              type="button"
+              class="btn"
+              data-testid="settings-mcp-disconnect"
+              (click)="actions.run('mcp.disconnect')"
+            >
+              {{ actions.label('mcp.disconnect') }}
+            </button>
+          }
+          @if (mcp.command(); as line) {
+            <fieldset class="group">
+              <legend>{{ t.mcpCommand }}</legend>
+              <div class="panel-row">
+                <code class="command" data-testid="settings-mcp-command">{{ line }}</code>
+                <button type="button" class="btn" (click)="copyCommand(line)">
+                  {{ copied() ? t.mcpCopied : t.mcpCopy }}
+                </button>
+              </div>
+              <p class="hint">{{ t.mcpDesktop }}</p>
+            </fieldset>
+          } @else {
+            <p class="hint">{{ t.mcpNoSidecar }}</p>
+          }
+        }
         @case ('advanced') {
           <label class="check">
             <input

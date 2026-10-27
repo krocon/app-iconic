@@ -10,8 +10,11 @@ import { formatChord } from './shortcut';
 
 /** What a feature offers for an action. */
 export interface ActionHandler {
-  /** `args` were checked against the action's `args` spec. */
-  run(args?: unknown): void;
+  /**
+   * `args` were checked against the action's `args` spec. Work that goes on (a dialog, the
+   * backend) returns its promise, so the AI waits for the end (design 018 E11).
+   */
+  run(args?: unknown): unknown;
   /**
    * May read signals (menus follow). Default: enabled. `run` passes the arguments, so a target
    * given by the AI counts (design 014 E14); menus and keys ask without.
@@ -116,11 +119,27 @@ export class ActionService {
    * must be plain JSON (they may come from the AI).
    */
   run(id: string, args?: unknown): boolean {
+    const started = this.start(id, args);
+    if (started) void started.catch((e: unknown) => console.error(id, e));
+    return started !== null;
+  }
+
+  /**
+   * Like {@link run}, but waits until the action is done (its handler's promise, design 018
+   * E11). `false` = it did not run; a failure of the action rejects.
+   */
+  async runAsync(id: string, args?: unknown): Promise<boolean> {
+    const started = this.start(id, args);
+    if (!started) return false;
+    await started;
+    return true;
+  }
+
+  private start(id: string, args?: unknown): Promise<unknown> | null {
     const def = actionDef(id);
     const h = this.handler(id);
-    if (!def || !h || !checkArgs(def.args, args) || !(h.enabled?.(args) ?? true)) return false;
-    h.run(args);
-    return true;
+    if (!def || !h || !checkArgs(def.args, args) || !(h.enabled?.(args) ?? true)) return null;
+    return Promise.resolve(h.run(args));
   }
 
   /** Hold actions: the key went up. */

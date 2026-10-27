@@ -15,6 +15,8 @@ import { FakeRecentFilesApi } from './fake-recent-files-api';
 import { FakeWindowApi } from './fake-window-api';
 import { SettingsApi } from '../app/core/settings/settings-api';
 import { FakeSettingsApi } from './fake-settings-api';
+import { McpApi } from '../app/core/mcp/mcp-api';
+import { FakeMcpApi } from './fake-mcp-api';
 
 /** Every backend facade replaced by its fake (unit tests). */
 export function fakeBackend(): {
@@ -27,6 +29,7 @@ export function fakeBackend(): {
   exporter: FakeExportApi;
   fonts: FakeFontApi;
   settings: FakeSettingsApi;
+  mcp: FakeMcpApi;
 } {
   const files = new FakeIconFileApi();
   const window = new FakeWindowApi();
@@ -36,6 +39,7 @@ export function fakeBackend(): {
   const exporter = new FakeExportApi();
   const fonts = new FakeFontApi();
   const settings = new FakeSettingsApi();
+  const mcp = new FakeMcpApi();
   return {
     files,
     window,
@@ -45,6 +49,7 @@ export function fakeBackend(): {
     exporter,
     fonts,
     settings,
+    mcp,
     providers: [
       { provide: AboutApi, useClass: FakeAboutApi },
       { provide: IconFileApi, useValue: files },
@@ -55,6 +60,7 @@ export function fakeBackend(): {
       { provide: ExportApi, useValue: exporter },
       { provide: FontApi, useValue: fonts },
       { provide: SettingsApi, useValue: settings },
+      { provide: McpApi, useValue: mcp },
     ],
   };
 }

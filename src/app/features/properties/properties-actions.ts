@@ -22,11 +22,11 @@ export function registerPropertiesActions(
       enabled: hasNodes,
     },
     'properties.reset': {
-      run: (args) => void props.reset((args as { name: string }).name),
+      run: (args) => props.reset((args as { name: string }).name),
       enabled: hasNodes,
     },
     'properties.resetAll': {
-      run: (args) => void props.resetAll((args as { confirm?: boolean } | undefined)?.confirm),
+      run: (args) => props.resetAll((args as { confirm?: boolean } | undefined)?.confirm),
       enabled: () => {
         const s = props.store;
         return !!s && s.selection().length > 0 && props.canResetAll(s);

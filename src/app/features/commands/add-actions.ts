@@ -35,20 +35,25 @@ export function registerAddActions(
       .filter(([, k]) => SHAPE_KINDS.includes(k))
       .map(([id, kind]): [string, ActionHandler] => [
         id,
-        { run: (a) => void add.addShape(kind, a as Args), enabled },
+        { run: (a) => add.addShape(kind, a as Args), enabled },
       ]),
   );
   actions.registerAll(
     {
       ...shapes,
-      'add.iconGroup': { run: () => void add.addIconGroup(), enabled },
-      'add.image': { run: (a) => void add.addImage(a as Args), enabled },
+      'add.iconGroup': { run: () => add.addIconGroup(), enabled },
+      'add.image': { run: (a) => add.addImage(a as Args), enabled },
       'add.svgSnippet': {
         run: (a) => {
           const args = a as Args;
           if (typeof args?.['markup'] === 'string') {
-            void add.addSnippet(args['markup'], args).then((e) => e && add.report(e));
-          } else add.openSnippetDialog();
+            return add.addSnippet(args['markup'], args).then((e) => {
+              if (e) add.report(e);
+              return e;
+            });
+          }
+          add.openSnippetDialog();
+          return undefined;
         },
         enabled,
       },

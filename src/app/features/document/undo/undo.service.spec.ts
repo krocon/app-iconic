@@ -30,6 +30,55 @@ describe('UndoService', () => {
     expect(undo.state().redoLabel).toBe('Redo Change Fill');
   });
 
+  it('folds the steps of an AI call into one "AI:" step (design 018 E10)', () => {
+    const { undo, fill, doc } = setup();
+    undo.execute(new SetAttribute(rect, 'fill', 'red', 'changeFill'));
+    expect(undo.groupSince(undo.mark())).toBe(false);
+    const mark = undo.mark();
+    undo.execute(new SetAttribute(rect, 'fill', 'blue', 'changeFill'));
+    undo.execute(new SetAttribute(rect, 'stroke', 'green', 'changeStroke'));
+    expect(undo.groupSince(mark)).toBe(true);
+    expect(undo.state().undoLabel).toBe('Undo AI: Change Fill');
+    expect(undo.top!.toJSON()).toMatchObject({ type: 'composite', label: 'changeFill' });
+    undo.undo();
+    expect(fill()).toBe('red');
+    expect(doc.node(rect)?.getAttribute('stroke')).not.toBe('green');
+    expect(undo.state().redoLabel).toBe('Redo AI: Change Fill');
+    undo.redo();
+    expect(fill()).toBe('blue');
+    setLanguage('de');
+    try {
+      expect(undo.state().undoLabel).toBe('Widerrufen: KI: Füllung ändern');
+    } finally {
+      setLanguage('en');
+    }
+    // one command alone keeps its JSON
+    const m2 = undo.mark();
+    undo.execute(new SetAttribute(rect, 'fill', 'gold', 'changeFill'));
+    undo.groupSince(m2);
+    expect(undo.top!.toJSON()).toMatchObject({ type: 'setAttribute', value: 'gold' });
+  });
+
+  it('keeps dirty right when an AI group spans the save point', () => {
+    const { undo } = setup();
+    const mark = undo.mark();
+    undo.execute(new SetAttribute(rect, 'fill', 'blue', 'changeFill'));
+    undo.markSaved();
+    undo.execute(new SetAttribute(rect, 'fill', 'red', 'changeFill'));
+    undo.groupSince(mark);
+    expect(undo.state().dirty).toBe(true);
+    undo.undo();
+    // the saved state lies inside the group: it cannot be reached
+    expect(undo.state().dirty).toBe(true);
+    // a save point on the last folded step moves to the group
+    const { undo: u2 } = setup();
+    const m = u2.mark();
+    u2.execute(new SetAttribute(rect, 'fill', 'blue', 'changeFill'));
+    u2.markSaved();
+    u2.groupSince(m);
+    expect(u2.state().dirty).toBe(false);
+  });
+
   it('logs the grouping only while the debug flag is on (design 015 E16)', () => {
     const { undo } = setup();
     const lines: unknown[][] = [];

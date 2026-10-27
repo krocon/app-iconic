@@ -26,8 +26,9 @@ export function registerToolActions(
       'add.freehand': {
         run: (a) => {
           const args = a as Args;
-          if (args?.['points'] !== undefined) void freehand.insertFromArgs(args);
-          else freehand.tool.toggle();
+          if (args?.['points'] !== undefined) return freehand.insertFromArgs(args);
+          freehand.tool.toggle();
+          return undefined;
         },
         enabled,
       },
@@ -38,16 +39,18 @@ export function registerToolActions(
       'add.textToPath': {
         run: (a) => {
           const args = a as Args;
-          if (typeof args?.['text'] === 'string') void textPath.addFromArgs(args);
-          else textPath.openDialog();
+          if (typeof args?.['text'] === 'string') return textPath.addFromArgs(args);
+          textPath.openDialog();
+          return undefined;
         },
         enabled,
       },
       'add.symbol': {
         run: (a) => {
           const args = a as Args;
-          if (typeof args?.['id'] === 'string') void symbols.addFromArgs(args);
-          else symbols.openPicker();
+          if (typeof args?.['id'] === 'string') return symbols.addFromArgs(args);
+          symbols.openPicker();
+          return undefined;
         },
         enabled,
       },

@@ -7,6 +7,7 @@ import { TauriWindowApi, WindowApi } from './core/window/window-api';
 import { ExportApi, TauriExportApi } from './core/export/export-api';
 import { FontApi, TauriFontApi } from './core/fonts/font-api';
 import { SettingsApi, TauriSettingsApi } from './core/settings/settings-api';
+import { McpApi, TauriMcpApi } from './core/mcp/mcp-api';
 
 /**
  * The backend facades of the app (production build). The development build (`ng serve`, also
@@ -22,4 +23,5 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = [
   { provide: ExportApi, useClass: TauriExportApi },
   { provide: FontApi, useClass: TauriFontApi },
   { provide: SettingsApi, useClass: TauriSettingsApi },
+  { provide: McpApi, useClass: TauriMcpApi },
 ];

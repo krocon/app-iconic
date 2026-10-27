@@ -52,8 +52,8 @@ export function registerSettingsActions(
       },
       'settings.reset': {
         run: (args) => {
-          if ((args as { confirm?: boolean } | undefined)?.confirm === false) void store.reset();
-          else void confirmReset(ask, store);
+          if ((args as { confirm?: boolean } | undefined)?.confirm === false) return store.reset();
+          return confirmReset(ask, store);
         },
         enabled: noDialog,
       },

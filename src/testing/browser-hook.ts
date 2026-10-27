@@ -29,6 +29,7 @@ import { SettingsApi } from '../app/core/settings/settings-api';
 import { Settings } from '../app/core/settings/settings.models';
 import { SettingsStore } from '../app/features/settings/settings.store';
 import { FakeSettingsApi } from './fake-settings-api';
+import { McpStore } from '../app/features/mcp/mcp.store';
 
 /**
  * `window.__appIconic` – the test hook of the browser mode (design 003 E14): Playwright reaches
@@ -84,6 +85,11 @@ export interface AppIconicHook {
   settingsApi: FakeSettingsApi;
   /** Sends a waiting settings change now. */
   flushSettings(): Promise<void>;
+  /**
+   * Runs an MCP tool in this window as a call over the bridge would (design 018 E19): the
+   * result, or `{ error: { code, message } }`.
+   */
+  mcp(tool: string, args?: Record<string, unknown>): Promise<unknown>;
 }
 
 declare global {
@@ -105,6 +111,7 @@ export function installTestHook(): void {
   const menus = inject(MenuService);
   const settings = inject(SettingsStore);
   const settingsApi = inject(SettingsApi) as FakeSettingsApi;
+  const mcp = inject(McpStore);
   const node = (asset: string, id: string) =>
     (store()?.document().node({ asset, id }) as SVGGraphicsElement | null) ?? null;
   window.__appIconic = {
@@ -164,5 +171,6 @@ export function installTestHook(): void {
     settings: () => settings.settings(),
     settingsApi,
     flushSettings: () => settings.flush(),
+    mcp: (tool, args) => mcp.execute(tool, args ?? {}).catch((error: unknown) => ({ error })),
   };
 }

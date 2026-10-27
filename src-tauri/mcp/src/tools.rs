@@ -130,7 +130,8 @@ pub fn list() -> Vec<Value> {
             json!({
                 "id": id(),
                 "asset": {"type": "string"},
-                "max_chars": {"type": "integer", "minimum": 1, "maximum": SVG_CHARS_MAX}
+                "max_chars": {"type": "integer", "minimum": 1, "maximum": SVG_CHARS_MAX},
+                "node_ids": {"type": "boolean", "description": "keep the internal node ids (data-ai-id) that get_tree's refs use"}
             }),
             &["asset"],
         ),

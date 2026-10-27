@@ -6,6 +6,7 @@ const FIXED: Record<string, string> = {
   'app.palette': 'Befehlspalette …',
   'app.about': 'Über AppIconic',
   'app.settings': 'Einstellungen …',
+  'mcp.disconnect': 'KI trennen',
   'settings.set': 'Einstellung ändern',
   'settings.reset': 'Einstellungen zurücksetzen …',
   'app.quit': 'AppIconic beenden',

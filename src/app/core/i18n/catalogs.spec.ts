@@ -15,6 +15,7 @@ import '../../features/document/undo/undo-texts';
 import '../../features/export/export-texts';
 import '../../features/files/files-texts';
 import '../../features/hierarchy/hierarchy-texts';
+import '../../features/mcp/mcp-texts';
 import '../../features/inspector/inspector-texts';
 import '../../features/menus/menus-texts';
 import '../../features/properties/properties-texts';

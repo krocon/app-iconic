@@ -49,6 +49,15 @@
   color: var(--color-text);
 }
 
+/* an AI assistant is connected (design 018 E16) – click disconnects */
+.ai-badge {
+  margin-left: var(--space-2);
+  font-weight: 600;
+  color: var(--color-accent-text);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
 .status {
   height: var(--statusbar-height);
   flex: none;

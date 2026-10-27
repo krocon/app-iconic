@@ -68,16 +68,16 @@ export function registerEditActions(
   );
   actions.registerAll(
     {
-      'edit.copy': { run: () => void edit.copy(), enabled: () => edit.canCopy() },
-      'edit.copyXml': { run: () => void edit.copyXml(), enabled: () => edit.canCopy() },
-      'edit.cut': { run: () => void edit.cut(), enabled: () => edit.canDelete() },
+      'edit.copy': { run: () => edit.copy(), enabled: () => edit.canCopy() },
+      'edit.copyXml': { run: () => edit.copyXml(), enabled: () => edit.canCopy() },
+      'edit.cut': { run: () => edit.cut(), enabled: () => edit.canDelete() },
       'edit.paste': {
-        run: (a) => void edit.paste((a as { text?: string } | undefined)?.text),
+        run: (a) => edit.paste((a as { text?: string } | undefined)?.text),
         enabled: () => edit.store() !== null,
       },
       'edit.duplicate': { run: () => edit.duplicate(), enabled: has },
       'edit.delete': {
-        run: (a) => void edit.delete((a as { confirm?: boolean } | undefined)?.confirm),
+        run: (a) => edit.delete((a as { confirm?: boolean } | undefined)?.confirm),
         enabled: () => edit.canDelete(),
       },
       'edit.toggleVisibility': {

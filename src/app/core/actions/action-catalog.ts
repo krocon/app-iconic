@@ -103,6 +103,8 @@ export const ACTIONS: readonly ActionDef[] = [
   APP('app.palette', 'Command Palette…', { palette: false }),
   APP('app.about', 'About AppIconic'),
   APP('app.settings', 'Settings…'),
+  // AI control (design 018 E16): closes every connection of AI assistants (MCP)
+  APP('mcp.disconnect', 'Disconnect AI'),
   // settings (design 015 E11): `key` is a path of `SETTING_KEYS` (`canvas.rulers`, `theme` …)
   APP('settings.set', 'Change a Setting', {
     palette: false,

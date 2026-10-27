@@ -50,6 +50,8 @@ import { ExportService } from './features/export/export.service';
 import { ExportDialog } from './features/export/export-dialog';
 import { SvgSourceDialog } from './features/svg-source/svg-source-dialog';
 import { SvgSourceService } from './features/svg-source/svg-source.service';
+import { McpStore } from './features/mcp/mcp.store';
+import { MCP_TEXTS } from './features/mcp/mcp-texts';
 
 /**
  * Root (design 005 E11): one header row – the HTML menu bar (Windows/Linux; macOS has the native
@@ -97,6 +99,20 @@ import { SvgSourceService } from './features/svg-source/svg-source.service';
           >
         }
       </span>
+      @if (mcp.connected()) {
+        <button
+          type="button"
+          class="btn quiet ai-badge"
+          data-testid="ai-badge"
+          [title]="m.badgeTitle(mcp.info().connections) + ' – ' + actions.label('mcp.disconnect')"
+          [attr.aria-label]="
+            m.badgeTitle(mcp.info().connections) + ' – ' + actions.label('mcp.disconnect')
+          "
+          (click)="actions.run('mcp.disconnect')"
+        >
+          {{ m.badge }}
+        </button>
+      }
       <span class="sep" aria-hidden="true"></span>
       <button
         type="button"
@@ -217,6 +233,8 @@ export class App implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly t = SHELL_TEXTS;
   protected readonly f = FILES_TEXTS;
+  protected readonly m = MCP_TEXTS;
+  protected readonly mcp = inject(McpStore);
   protected readonly store = this.files.store;
   protected readonly panels = inject(LayoutStore).panels;
   protected readonly widths = inject(LayoutStore).widths;
@@ -253,6 +271,8 @@ export class App implements OnInit {
       inject(AskService),
       this.destroyRef,
     );
+    // AI control (design 018): calls of the MCP sidecar for this window's document
+    this.mcp.start(this.destroyRef);
     // where the keyboard is (design 005 E4): a dialog owns it; else hierarchy or canvas first
     this.dispatcher.setContextProvider((target) => {
       if (this.dialogs.open() !== null) return ['dialog'];
@@ -278,6 +298,7 @@ export class App implements OnInit {
   /** Document first, then the action this window was opened for (design 005 E6). */
   private async start(): Promise<void> {
     await this.files.start();
+    await this.mcp.ready();
     const action = await this.win.startAction().catch(() => null);
     if (action) this.actions.run(action);
   }
