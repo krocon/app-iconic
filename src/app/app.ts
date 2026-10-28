@@ -38,7 +38,7 @@ import { PropertiesService } from './features/properties/properties.service';
 import { ShortcutsDialog } from './features/menus/shortcuts-dialog';
 import { LayoutStore } from './features/shell/layout.store';
 import { SHELL_TEXTS } from './features/shell/shell-texts';
-import { SidePanel } from './features/shell/side-panel';
+import { PanelStrip, SidePanel } from './features/shell/side-panel';
 import { Splitter } from './features/shell/splitter';
 import { registerSettingsActions } from './features/settings/settings-actions';
 import { SettingsDialog } from './features/settings/settings-dialog';
@@ -79,6 +79,7 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
     ShortcutsDialog,
     SettingsDialog,
     SidePanel,
+    PanelStrip,
     Splitter,
     SvgSnippetDialog,
     SymbolPickerDialog,
@@ -142,6 +143,7 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
       @if (panels().commands) {
         <app-side-panel
           class="commands"
+          toggle="view.commandSidebar"
           [heading]="t.commands"
           [flush]="true"
           [style.width.px]="widths().commands"
@@ -149,10 +151,17 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
           <app-command-sidebar />
         </app-side-panel>
         <app-splitter panel="commands" side="end" [name]="t.commands" />
+      } @else {
+        <app-panel-strip
+          class="commands-strip"
+          toggle="view.commandSidebar"
+          [heading]="t.commands"
+        />
       }
       @if (panels().hierarchy) {
         <app-side-panel
           class="hierarchy"
+          toggle="view.hierarchy"
           [heading]="t.hierarchy"
           [flush]="!!store()"
           [style.width.px]="widths().hierarchy"
@@ -164,18 +173,29 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
           }
         </app-side-panel>
         <app-splitter panel="hierarchy" side="end" [name]="t.hierarchy" />
+      } @else {
+        <app-panel-strip class="hierarchy-strip" toggle="view.hierarchy" [heading]="t.hierarchy" />
       }
       <app-canvas-view [store]="store()" />
       @if (panels().properties) {
         <app-splitter panel="properties" side="start" [name]="t.properties" />
         <app-side-panel
           class="properties"
+          toggle="view.properties"
+          side="end"
           [heading]="t.properties"
           [flush]="true"
           [style.width.px]="widths().properties"
         >
           <app-properties-panel [store]="store()" />
         </app-side-panel>
+      } @else {
+        <app-panel-strip
+          class="properties-strip"
+          toggle="view.properties"
+          side="end"
+          [heading]="t.properties"
+        />
       }
     </div>
     @if (files.notice(); as n) {

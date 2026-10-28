@@ -104,3 +104,13 @@
   flex: none;
   border-left: 1px solid var(--color-border);
 }
+
+/* folded side panels: a strip with the vertical title */
+.commands-strip,
+.hierarchy-strip {
+  border-right: 1px solid var(--color-border);
+}
+
+.properties-strip {
+  border-left: 1px solid var(--color-border);
+}

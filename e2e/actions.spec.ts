@@ -16,10 +16,19 @@ test('Ctrl+1/2/3 hide and show the side panels', async ({ page }) => {
   await expect(region('Properties')).toHaveCount(0);
   await page.locator('body').press('Control+2');
   await expect(region('Hierarchy')).toBeVisible();
-  // the canvas takes the free room
+  // the canvas takes the free room; folded panels leave a strip that unfolds them
   const canvas = await page.locator('app-canvas-view').boundingBox();
   const hierarchy = await region('Hierarchy').boundingBox();
-  expect(canvas!.width).toBeGreaterThan(page.viewportSize()!.width - hierarchy!.width - 2);
+  const strips = page.locator('app-panel-strip');
+  await expect(strips).toHaveCount(2);
+  const strip = (await strips.first().boundingBox())!.width;
+  expect(canvas!.width).toBeGreaterThan(
+    page.viewportSize()!.width - hierarchy!.width - 2 * strip - 2,
+  );
+  await page.getByRole('button', { name: 'Commands', expanded: false }).click();
+  await expect(region('Commands')).toBeVisible();
+  await region('Commands').getByRole('button', { expanded: true }).click();
+  await expect(region('Commands')).toHaveCount(0);
 });
 
 test('the command palette filters and runs an action', async ({ page }) => {

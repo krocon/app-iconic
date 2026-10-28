@@ -125,6 +125,19 @@ describe('settings in the window (design 015 E11–E14)', () => {
     box.click();
     await fixture.whenStable();
     expect(el.querySelector('app-side-panel.hierarchy')).toBeNull();
+    // folded to a strip: a click unfolds it, a click on the title folds it again
+    const strip = el.querySelector<HTMLButtonElement>('app-panel-strip.hierarchy-strip button')!;
+    expect(strip.getAttribute('aria-expanded')).toBe('false');
+    expect(strip.textContent).toContain('Hierarchy');
+    strip.click();
+    await fixture.whenStable();
+    const fold = el.querySelector<HTMLButtonElement>('app-side-panel.hierarchy .fold')!;
+    expect(fold.getAttribute('aria-expanded')).toBe('true');
+    expect(box.checked).toBe(true);
+    fold.click();
+    await fixture.whenStable();
+    expect(el.querySelector('app-side-panel.hierarchy')).toBeNull();
+    expect(el.querySelector('app-panel-strip.hierarchy-strip')).not.toBeNull();
     const width = el.querySelector<HTMLInputElement>('[data-testid="settings-width-commands"]')!;
     width.value = '9000';
     width.dispatchEvent(new Event('change'));
