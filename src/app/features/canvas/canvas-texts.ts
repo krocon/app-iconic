@@ -27,6 +27,7 @@ const EN = {
   position: 'Pointer position',
   outside: '–',
   unknownFill: 'This background is not known yet – shown as Automatic.',
+  align: 'align',
 } as const;
 
 export const CANVAS_TEXTS = translatable('canvas', EN, {
@@ -56,5 +57,6 @@ export const CANVAS_TEXTS = translatable('canvas', EN, {
     position: 'Zeigerposition',
     outside: '–',
     unknownFill: 'Dieser Hintergrund ist noch unbekannt – gezeigt als „Automatisch“.',
+    align: 'ausrichten',
   },
 });

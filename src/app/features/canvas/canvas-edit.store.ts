@@ -1,11 +1,18 @@
 import { Injectable, signal } from '@angular/core';
 import { Rect } from '../../shared/geometry/dom-geometry';
-import { SnapKind } from '../../shared/geometry/snapping';
+import { SnapGuide, SnapKind } from '../../shared/geometry/snapping';
 import { Point } from '../../shared/geometry/view-transform';
 import { NodeRef } from '../document/icon-document';
 import { GestureController } from './canvas-gesture';
 import { HandleRole } from './handles/handle-types';
 import { EMPTY_MODEL, SelectionModel } from './selection-measure';
+
+/** The snap indicator: the point, how it snapped, and the "align" guides. */
+export interface CanvasSnap {
+  point: Point;
+  kind: Exclude<SnapKind, 'none'>;
+  guides?: readonly SnapGuide[];
+}
 
 /** A point handle chosen by a click (Delete removes it, design 007 E6). */
 export interface ActivePoint {
@@ -25,8 +32,8 @@ export class CanvasEditStore {
   readonly activePoint = signal<ActivePoint | null>(null);
   /** Marquee in document units while dragging on empty space. */
   readonly marquee = signal<Rect | null>(null);
-  /** Where the last update snapped to (document units). */
-  readonly snap = signal<{ point: Point; kind: Exclude<SnapKind, 'none'> } | null>(null);
+  /** Where the last update snapped to (document units) and the guide lines of "align". */
+  readonly snap = signal<CanvasSnap | null>(null);
   /** The selection as measured after the last paint (frames, handles). */
   readonly model = signal<SelectionModel>(EMPTY_MODEL);
   readonly gesture = new GestureController();

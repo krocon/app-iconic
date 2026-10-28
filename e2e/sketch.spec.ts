@@ -310,3 +310,38 @@ test('edge polygon with the mouse: the third click picks the side; sides stay', 
   await click(page, 600, 600);
   await expect(page.locator('[data-field="sides"]')).toHaveValue('4');
 });
+
+for (const zoom of [0.5, 1.5]) {
+  test(`align: a drawn point lines up with the corners of other shapes (zoom ${zoom * 100} %)`, async ({
+    page,
+  }) => {
+    const errors = collectErrors(page);
+    await setup(page, '<rect id="r" x="300" y="500" width="150" height="150"/>');
+    await snapping(page, true);
+    await centerOn(page, zoom, { x: 400, y: 400 });
+    await tool(page, 'sketch.line');
+    await click(page, 250, 250);
+    // 3 screen px off the x of the rectangle's right edge: it lines up ("align") with a guide
+    await hover(page, 450 + 3 / zoom, 330);
+    const guides = page.getByTestId('align-guides');
+    await expect(guides).toBeVisible();
+    await expect(guides).toContainText('align');
+    await expect(guides.locator('line')).toHaveCount(1);
+    await page.mouse.down();
+    await page.mouse.up();
+    await frames(page);
+    const s = await selected(page);
+    expect(s?.tag).toBe('line');
+    expect(Number(s!.attrs['x2'])).toBeCloseTo(450, 6);
+    expect(Number(s!.attrs['y2'])).toBeCloseTo(330, 0);
+    await expect(guides).toHaveCount(0);
+    // x like one corner, y like the first point: two guides
+    await tool(page, 'sketch.line');
+    await click(page, 250, 250);
+    await hover(page, 300 - 2 / zoom, 380);
+    await expect(guides.locator('line')).toHaveCount(1);
+    await hover(page, 300 - 2 / zoom, 250 + 2 / zoom);
+    await expect(guides.locator('line')).toHaveCount(2);
+    expect(errors).toEqual([]);
+  });
+}

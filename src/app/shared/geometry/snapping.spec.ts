@@ -48,7 +48,11 @@ describe('snapping (design 007 E13)', () => {
     const c = { x: 300, y: 300 };
     const o = { zoom, grid: false, magic: true };
     expect(snapPoint({ x: 300 + 19 / zoom, y: 300 }, [c], o).kind).toBe('magic');
-    expect(snapPoint({ x: 300 + 21 / zoom, y: 300 }, [c], o).kind).toBe('none');
+    // farther: no point snap, but it lines up with the point ("align")
+    expect(snapPoint({ x: 300 + 21 / zoom, y: 300 }, [c], o).kind).toBe('align');
+    expect(snapPoint({ x: 300 + 21 / zoom, y: 307 }, [c], o).kind).toBe(
+      7 * zoom <= 6 ? 'align' : 'none',
+    );
     expect(snapPoint({ x: 300 + 20 / zoom, y: 300 }, [c], o).kind).toBe('magic');
   });
 
@@ -84,5 +88,42 @@ describe('snapping (design 007 E13)', () => {
         y: 5,
       },
     );
+  });
+
+  it.each([0.5, 1, 1.5])(
+    'align: each axis lines up with a marked point within 6 screen px (zoom %s)',
+    (zoom) => {
+      const o = { zoom, grid: false, magic: true };
+      // x like the first point, y like the second: two guide lines, from those points
+      const a = { x: 100, y: 500 };
+      const b = { x: 600, y: 200 };
+      const r = snapPoint({ x: 100 + 5 / zoom, y: 200 - 4 / zoom }, [a, b], o);
+      expect(r.kind).toBe('align');
+      expect(r.point).toEqual({ x: 100, y: 200 });
+      expect(r.guides).toEqual([
+        { from: a, to: { x: 100, y: 200 } },
+        { from: b, to: { x: 100, y: 200 } },
+      ]);
+      // one axis only: the other stays free (or on the grid when that is on)
+      const one = snapPoint({ x: 100 + 5 / zoom, y: 333 }, [a], o);
+      expect(one.point).toEqual({ x: 100, y: 333 });
+      expect(one.guides).toEqual([{ from: a, to: { x: 100, y: 333 } }]);
+      const grid = snapPoint({ x: 100 + 5 / zoom, y: 333 }, [a], { ...o, grid: true });
+      expect(grid.point).toEqual({ x: 100, y: 330 });
+      expect(snapPoint({ x: 100 + 7 / zoom, y: 333 }, [a], o).kind).toBe('none');
+      expect(snapPoint({ x: 105, y: 333 }, [a], { ...o, align: false }).kind).toBe('none');
+    },
+  );
+
+  it('align: several points on the same line – the guide starts at the nearest', () => {
+    const r = snapPoint(
+      { x: 52, y: 300 },
+      [
+        { x: 50, y: 0 },
+        { x: 50, y: 280 },
+      ],
+      { zoom: 1, grid: false, magic: true },
+    );
+    expect(r.guides[0].from).toEqual({ x: 50, y: 280 });
   });
 });

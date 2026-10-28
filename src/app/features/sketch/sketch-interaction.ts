@@ -53,7 +53,9 @@ export class SketchInteraction {
       origin: gridOriginPoint(o.gridOrigin),
       step: o.gridSize,
     });
-    if (r.kind !== 'none' && r.target) this.edit.snap.set({ point: r.target, kind: r.kind });
+    if (r.kind !== 'none' && r.target) {
+      this.edit.snap.set({ point: r.target, kind: r.kind, guides: r.guides });
+    }
     return r.point;
   }
 

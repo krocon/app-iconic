@@ -81,4 +81,23 @@
   &.grid {
     stroke: var(--ai-snap-grid);
   }
+
+  &.align {
+    stroke: var(--ai-snap-align);
+  }
+}
+
+/* "align" (Smart Guides like VectorCraft): magenta lines and a label */
+.align {
+  line {
+    stroke: var(--ai-snap-align);
+    stroke-width: 1;
+  }
+
+  text {
+    fill: var(--ai-snap-align);
+    stroke: none;
+    font-size: 11px;
+    font-family: var(--font-ui);
+  }
 }

@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { Rect } from '../../shared/geometry/dom-geometry';
 import { apply, IDENTITY, Matrix, multiply } from '../../shared/geometry/matrix';
 import { Point } from '../../shared/geometry/view-transform';
-import { ActivePoint } from './canvas-edit.store';
+import { ActivePoint, CanvasSnap } from './canvas-edit.store';
+import { CANVAS_TEXTS } from './canvas-texts';
 import { HANDLE_SIZE, HandleKind, roleId } from './handles/handle-types';
 import { EMPTY_MODEL, SelectionModel } from './selection-measure';
 import { sameRef } from './canvas-pointer';
@@ -75,6 +76,15 @@ const pts = (ps: readonly Point[]) => ps.map((p) => `${p.x},${p.y}`).join(' ');
         />
       }
       @if (snapPoint(); as s) {
+        @if (s.kind === 'align') {
+          <!-- "align" like VectorCraft's Smart Guides: lines from the points it lines up with -->
+          <g class="align" data-testid="align-guides">
+            @for (g of s.guides; track $index) {
+              <line [attr.x1]="g.x1" [attr.y1]="g.y1" [attr.x2]="g.x2" [attr.y2]="g.y2" />
+            }
+            <text [attr.x]="s.x + 8" [attr.y]="s.y - 8">{{ t.align }}</text>
+          </g>
+        }
         <g
           [class]="'snap ' + s.kind"
           data-testid="snap-indicator"
@@ -96,7 +106,8 @@ export class SelectionOverlay {
   /** Document → viewport pixels (the host's screen CTM minus the viewport origin). */
   readonly toView = input<Matrix>(IDENTITY);
   readonly marquee = input<Rect | null>(null);
-  readonly snap = input<{ point: Point; kind: string } | null>(null);
+  readonly snap = input<CanvasSnap | null>(null);
+  protected readonly t = CANVAS_TEXTS;
   readonly active = input<ActivePoint | null>(null);
 
   protected readonly frames = computed(() => {
@@ -156,6 +167,12 @@ export class SelectionOverlay {
     const s = this.snap();
     if (!s) return null;
     const p = apply(this.toView(), s.point);
-    return { x: p.x, y: p.y, kind: s.kind, doc: s.point };
+    const v = this.toView();
+    const guides = (s.guides ?? []).map((g) => {
+      const a = apply(v, g.from);
+      const b = apply(v, g.to);
+      return { x1: a.x, y1: a.y, x2: b.x, y2: b.y };
+    });
+    return { x: p.x, y: p.y, kind: s.kind, doc: s.point, guides };
   });
 }

@@ -189,7 +189,9 @@ export class CanvasInteraction {
         const s = snapMove(keys, d, candidates, this.snapOptions(mods));
         d = s.delta;
         this.edit.snap.set(
-          s.target && s.kind !== 'none' ? { point: s.target, kind: s.kind } : null,
+          s.target && s.kind !== 'none'
+            ? { point: s.target, kind: s.kind, guides: s.guides }
+            : null,
         );
         // the BoundsGuard keeps nodes on the canvas – not clip shapes (design 014 E7): a clip
         // moved partly off the canvas is how a picture gets cut
@@ -317,7 +319,9 @@ export class CanvasInteraction {
     const target = (p: Point, mods: Modifiers) => {
       candidates ??= magicPoints(this.layers(), host, doc, excluded, scope);
       const s = snapPoint(p, candidates, this.snapOptions(mods));
-      this.edit.snap.set(s.target && s.kind !== 'none' ? { point: s.target, kind: s.kind } : null);
+      this.edit.snap.set(
+        s.target && s.kind !== 'none' ? { point: s.target, kind: s.kind, guides: s.guides } : null,
+      );
       return scope ? s.point : clampPoint(bounds, s.point);
     };
     const end = () => this.edit.snap.set(null);
