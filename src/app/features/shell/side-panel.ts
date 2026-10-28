@@ -124,7 +124,8 @@ export class SidePanel {
 }
 
 /**
- * A folded side panel: a narrow strip with the vertical title; a click unfolds it again.
+ * A folded side panel: a narrow strip with the vertical title, or with `tools` (projected, the
+ * icons of the commands) under the unfold button; a click on the button unfolds it again.
  */
 @Component({
   selector: 'app-panel-strip',
@@ -140,12 +141,16 @@ export class SidePanel {
       <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true">
         <path [attr.d]="chevron()" />
       </svg>
-      <span class="text">{{ heading() }}</span>
+      @if (!tools()) {
+        <span class="text">{{ heading() }}</span>
+      }
     </button>
+    <ng-content />
   `,
   styles: `
     :host {
       display: flex;
+      flex-direction: column;
       flex: none;
       width: 28px;
       min-height: 0;
@@ -156,6 +161,7 @@ export class SidePanel {
       flex-direction: column;
       align-items: center;
       gap: var(--space-2);
+      flex: 1;
       width: 100%;
       padding: var(--space-2) 0;
       font: inherit;
@@ -177,6 +183,10 @@ export class SidePanel {
         outline-offset: -2px;
       }
     }
+    :host(.with-tools) .strip {
+      flex: none;
+      padding: var(--space-1) 0;
+    }
     .text {
       writing-mode: vertical-rl;
       white-space: nowrap;
@@ -193,11 +203,14 @@ export class SidePanel {
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '[class.with-tools]': 'tools()' },
 })
 export class PanelStrip {
   protected readonly actions = inject(ActionService);
   readonly heading = input.required<string>();
   readonly toggle = input.required<string>();
+  /** The strip holds tools (projected content) instead of the vertical title. */
+  readonly tools = input(false);
   /** The side of the window the panel sits on (the chevron points inward to unfold). */
   readonly side = input<PanelSide>('start');
   protected readonly chevron = computed(() => CHEVRON[this.side() === 'start' ? 'end' : 'start']);

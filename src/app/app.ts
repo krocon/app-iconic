@@ -156,7 +156,10 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
           class="commands-strip"
           toggle="view.commandSidebar"
           [heading]="t.commands"
-        />
+          [tools]="true"
+        >
+          <app-command-sidebar [compact]="true" />
+        </app-panel-strip>
       }
       @if (panels().hierarchy) {
         <app-side-panel

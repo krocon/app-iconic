@@ -154,6 +154,34 @@ describe('CommandSidebar (design 008 E10)', () => {
     expect(store.document().node(store.selection()[0])!.localName).toBe('rect');
   });
 
+  it('folded: icons only as a tool bar; a shape opens its submenu, keys too', async () => {
+    const fixture = TestBed.createComponent(CommandSidebar);
+    fixture.componentRef.setInput('compact', true);
+    document.body.append(fixture.nativeElement);
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('input')).toBeNull();
+    const tools = Array.from(el.querySelectorAll<HTMLButtonElement>('[role="toolbar"] button'));
+    expect(tools).toHaveLength(15);
+    expect(el.querySelectorAll('[role="separator"]')).toHaveLength(3);
+    const circle = tools.find((b) => b.dataset['group'] === 'circle')!;
+    expect(circle.getAttribute('aria-haspopup')).toBe('listbox');
+    expect(circle.title).toBe('Circle');
+    circle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await fixture.whenStable();
+    expect(circle.getAttribute('aria-expanded')).toBe('true');
+    expect(circle.getAttribute('aria-activedescendant')).toBe('command-sub-0');
+    circle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    await fixture.whenStable();
+    expect(circle.getAttribute('aria-activedescendant')).toBe('command-sub-1');
+    circle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await fixture.whenStable();
+    expect(submenu()).toHaveLength(0);
+    tools.find((b) => b.dataset['action'] === 'add.ellipse')!.click();
+    await new Promise((r) => setTimeout(r, 0));
+    expect(store.document().node(store.selection()[0])!.localName).toBe('ellipse');
+  });
+
   it('runs a click', async () => {
     const { options } = await render();
     options()

@@ -1,0 +1,137 @@
+@if (compact()) {
+  <!-- folded: the icons only, like a tool bar (VectorCraft); shapes open their submenu -->
+  <div class="rail" role="toolbar" aria-orientation="vertical" [attr.aria-label]="t.listLabel">
+    @for (s of sections(); track s.section; let first = $first) {
+      @if (!first) {
+        <div class="sep" role="separator"></div>
+      }
+      @for (r of s.rows; track r.id) {
+        <button
+          type="button"
+          class="tool"
+          [id]="'command-' + r.index"
+          [attr.data-action]="r.kind === 'action' ? r.id : null"
+          [attr.data-group]="r.kind === 'group' ? r.group : null"
+          [attr.aria-label]="r.kind === 'group' ? r.label + ', ' + t.submenu : r.label"
+          [attr.aria-haspopup]="r.kind === 'group' ? 'listbox' : null"
+          [attr.aria-expanded]="r.kind === 'group' ? r.group === open() : null"
+          [attr.aria-controls]="r.kind === 'group' && r.group === open() ? 'command-sub' : null"
+          [attr.aria-activedescendant]="
+            r.kind === 'group' && r.group === open() && sub() >= 0 ? 'command-sub-' + sub() : null
+          "
+          [attr.aria-disabled]="r.kind === 'action' && !r.enabled"
+          [class.open]="r.kind === 'group' && r.group === open()"
+          [class.disabled]="r.kind === 'action' && !r.enabled"
+          [title]="tooltip(r)"
+          (pointerenter)="hover(r)"
+          (click)="click(r)"
+          (keydown)="railKey(r, $event)"
+        >
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="r.icon" /></svg>
+          @if (r.kind === 'group') {
+            <svg class="corner" viewBox="0 0 4 4" aria-hidden="true"><path d="M4 0v4H0z" /></svg>
+          }
+        </button>
+      }
+    }
+  </div>
+} @else {
+  <input
+    class="input query"
+    type="search"
+    role="combobox"
+    aria-autocomplete="list"
+    aria-expanded="true"
+    [attr.aria-controls]="flyout() ? 'command-list command-sub' : 'command-list'"
+    spellcheck="false"
+    autocomplete="off"
+    data-testid="command-filter"
+    [attr.aria-label]="t.search"
+    [attr.aria-activedescendant]="activeId()"
+    [placeholder]="t.searchPlaceholder"
+    [value]="query()"
+    (input)="onInput($event)"
+    (keydown)="onKey($event)"
+  />
+  <ul
+    id="command-list"
+    class="list"
+    role="listbox"
+    [attr.aria-label]="t.listLabel"
+    (scroll)="close()"
+  >
+    @for (s of sections(); track s.section) {
+      <li class="section" role="presentation">{{ t.sections[s.section] }}</li>
+      @for (r of s.rows; track r.id) {
+        <!-- options of a combobox: the field keeps the focus (aria-activedescendant) -->
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+        <li
+          role="option"
+          [id]="'command-' + r.index"
+          [attr.data-action]="r.kind === 'action' ? r.id : null"
+          [attr.data-group]="r.kind === 'group' ? r.group : null"
+          [attr.aria-label]="r.kind === 'group' ? r.label + ', ' + t.submenu : null"
+          [attr.aria-selected]="r.index === active() && sub() < 0"
+          [attr.aria-disabled]="r.kind === 'action' && !r.enabled"
+          [class.active]="r.index === active() && sub() < 0"
+          [class.open]="r.kind === 'group' && r.group === open()"
+          [class.disabled]="r.kind === 'action' && !r.enabled"
+          [title]="tooltip(r)"
+          (pointerdown)="$event.preventDefault()"
+          (pointerenter)="hover(r)"
+          (click)="click(r)"
+        >
+          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path [attr.d]="r.icon" />
+          </svg>
+          <span class="label">{{ r.label }}</span>
+          @if (r.kind === 'group') {
+            <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M6 4l4 4-4 4" />
+            </svg>
+          } @else if (r.shortcut) {
+            <kbd>{{ r.shortcut }}</kbd>
+          }
+        </li>
+      }
+    } @empty {
+      <li class="empty" role="presentation">{{ t.noMatch }}</li>
+    }
+  </ul>
+}
+@if (flyout(); as f) {
+  <ul
+    id="command-sub"
+    class="flyout"
+    role="listbox"
+    data-testid="command-submenu"
+    [attr.aria-label]="f.label"
+    [style.left.px]="at().left"
+    [style.top.px]="at().top"
+    (pointerenter)="cancelHover()"
+  >
+    @for (r of f.items; track r.id; let i = $index) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+      <li
+        role="option"
+        [id]="'command-sub-' + i"
+        [attr.data-action]="r.id"
+        [attr.aria-selected]="i === sub()"
+        [attr.aria-disabled]="!r.enabled"
+        [class.active]="i === sub()"
+        [class.disabled]="!r.enabled"
+        [title]="tooltip(r)"
+        (pointerdown)="$event.preventDefault()"
+        (click)="click(r)"
+      >
+        <svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
+          <path [attr.d]="r.icon" />
+        </svg>
+        <span class="label">{{ r.label }}</span>
+        @if (r.shortcut) {
+          <kbd>{{ r.shortcut }}</kbd>
+        }
+      </li>
+    }
+  </ul>
+}

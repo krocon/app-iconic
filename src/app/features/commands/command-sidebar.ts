@@ -6,6 +6,7 @@ import {
   DestroyRef,
   ElementRef,
   inject,
+  input,
   signal,
 } from '@angular/core';
 import { ActionService } from '../../core/actions/action.service';
@@ -49,106 +50,7 @@ const HOVER_MS = 120;
  */
 @Component({
   selector: 'app-command-sidebar',
-  template: `
-    <input
-      class="input query"
-      type="search"
-      role="combobox"
-      aria-autocomplete="list"
-      aria-expanded="true"
-      [attr.aria-controls]="flyout() ? 'command-list command-sub' : 'command-list'"
-      spellcheck="false"
-      autocomplete="off"
-      data-testid="command-filter"
-      [attr.aria-label]="t.search"
-      [attr.aria-activedescendant]="activeId()"
-      [placeholder]="t.searchPlaceholder"
-      [value]="query()"
-      (input)="onInput($event)"
-      (keydown)="onKey($event)"
-    />
-    <ul
-      id="command-list"
-      class="list"
-      role="listbox"
-      [attr.aria-label]="t.listLabel"
-      (scroll)="close()"
-    >
-      @for (s of sections(); track s.section) {
-        <li class="section" role="presentation">{{ t.sections[s.section] }}</li>
-        @for (r of s.rows; track r.id) {
-          <!-- options of a combobox: the field keeps the focus (aria-activedescendant) -->
-          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
-          <li
-            role="option"
-            [id]="'command-' + r.index"
-            [attr.data-action]="r.kind === 'action' ? r.id : null"
-            [attr.data-group]="r.kind === 'group' ? r.group : null"
-            [attr.aria-label]="r.kind === 'group' ? r.label + ', ' + t.submenu : null"
-            [attr.aria-selected]="r.index === active() && sub() < 0"
-            [attr.aria-disabled]="r.kind === 'action' && !r.enabled"
-            [class.active]="r.index === active() && sub() < 0"
-            [class.open]="r.kind === 'group' && r.group === open()"
-            [class.disabled]="r.kind === 'action' && !r.enabled"
-            [title]="tooltip(r)"
-            (pointerdown)="$event.preventDefault()"
-            (pointerenter)="hover(r)"
-            (click)="click(r)"
-          >
-            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
-              <path [attr.d]="r.icon" />
-            </svg>
-            <span class="label">{{ r.label }}</span>
-            @if (r.kind === 'group') {
-              <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M6 4l4 4-4 4" />
-              </svg>
-            } @else if (r.shortcut) {
-              <kbd>{{ r.shortcut }}</kbd>
-            }
-          </li>
-        }
-      } @empty {
-        <li class="empty" role="presentation">{{ t.noMatch }}</li>
-      }
-    </ul>
-    @if (flyout(); as f) {
-      <ul
-        id="command-sub"
-        class="flyout"
-        role="listbox"
-        data-testid="command-submenu"
-        [attr.aria-label]="f.label"
-        [style.left.px]="at().left"
-        [style.top.px]="at().top"
-        (pointerenter)="cancelHover()"
-      >
-        @for (r of f.items; track r.id; let i = $index) {
-          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
-          <li
-            role="option"
-            [id]="'command-sub-' + i"
-            [attr.data-action]="r.id"
-            [attr.aria-selected]="i === sub()"
-            [attr.aria-disabled]="!r.enabled"
-            [class.active]="i === sub()"
-            [class.disabled]="!r.enabled"
-            [title]="tooltip(r)"
-            (pointerdown)="$event.preventDefault()"
-            (click)="click(r)"
-          >
-            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
-              <path [attr.d]="r.icon" />
-            </svg>
-            <span class="label">{{ r.label }}</span>
-            @if (r.shortcut) {
-              <kbd>{{ r.shortcut }}</kbd>
-            }
-          </li>
-        }
-      </ul>
-    }
-  `,
+  templateUrl: './command-sidebar.html',
   styleUrl: './command-sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -160,6 +62,8 @@ const HOVER_MS = 120;
 export class CommandSidebar {
   protected readonly actions = inject(ActionService);
   protected readonly t = COMMANDS_TEXTS;
+  /** Folded panel: the icons only (a tool bar), no filter. */
+  readonly compact = input(false);
   protected readonly query = signal('');
   protected readonly active = signal(0);
   /** The open submenu. */
@@ -298,6 +202,19 @@ export class CommandSidebar {
 
   protected onKey(e: KeyboardEvent): void {
     const handled = this.flyout() && this.sub() >= 0 ? this.subKey(e.key) : this.listKey(e.key);
+    if (!handled) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  /** Keys on a tool of the folded bar: → / Enter / Space open a shape's submenu, then as in the list. */
+  protected railKey(r: Row, e: KeyboardEvent): void {
+    let handled = false;
+    if (this.flyout() && this.sub() >= 0) handled = this.subKey(e.key);
+    else if (r.kind === 'group' && ['ArrowRight', 'Enter', ' '].includes(e.key)) {
+      this.openGroup(r, true);
+      handled = true;
+    }
     if (!handled) return;
     e.preventDefault();
     e.stopPropagation();

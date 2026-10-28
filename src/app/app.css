@@ -111,6 +111,11 @@
   border-right: 1px solid var(--color-border);
 }
 
+/* the folded commands keep their icons (a tool bar) */
+.commands-strip {
+  width: 40px;
+}
+
 .properties-strip {
   border-left: 1px solid var(--color-border);
 }

@@ -108,3 +108,68 @@
   outline: 2px solid var(--color-focus);
   outline-offset: -2px;
 }
+
+/* folded: a tool bar of icons (like VectorCraft's); a corner mark on shapes with a submenu */
+.rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-1) 0;
+  overflow-y: auto;
+  min-height: 0;
+
+  .sep {
+    width: 60%;
+    height: 1px;
+    margin: var(--space-1) 0;
+    background: var(--color-border);
+  }
+
+  .tool {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex: none;
+    padding: 0;
+    color: var(--color-text);
+    background: none;
+    border: none;
+    border-radius: var(--radius);
+    cursor: default;
+
+    &:hover,
+    &.open {
+      background: var(--color-hover);
+    }
+    &.disabled {
+      color: var(--color-text-muted);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--color-focus);
+      outline-offset: -2px;
+    }
+  }
+
+  .icon {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .corner {
+    position: absolute;
+    right: 3px;
+    bottom: 3px;
+    width: 4px;
+    height: 4px;
+    fill: currentColor;
+    opacity: 0.7;
+  }
+}
