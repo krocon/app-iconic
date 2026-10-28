@@ -30,6 +30,22 @@ describe('SketchStore (design 019 E3–E6)', () => {
     expect(store.tool()).toBeNull();
   });
 
+  it('polygon: sides first (6), typed sides stay for the next polygon; invalid ones do not', () => {
+    store.toggle('polygonInscribed');
+    store.place({ x: 0, y: 0 });
+    expect(store.fields()).toEqual(['sides', 'diameter', 'angle']);
+    store.move({ x: 10, y: 0 });
+    expect(store.values()).toMatchObject({ sides: 6, diameter: 20, angle: 0 });
+    store.setLock('sides', 5);
+    const r = store.place();
+    expect(r?.shape).toMatchObject({ kind: 'polygon', sides: 5 });
+    store.toggle('polygonCircumscribed');
+    store.place({ x: 0, y: 0 });
+    store.move({ x: 0, y: 30 });
+    expect(store.values().sides).toBe(5);
+    expect(store.locks()).toEqual({});
+  });
+
   it('typed values are fixed until cleared; the pointer gives the rest', () => {
     store.toggle('rect3p');
     store.place({ x: 0, y: 0 });

@@ -32,5 +32,10 @@ export const COMMAND_ICONS: Record<string, string> = {
   'sketch.arc3p': 'M3 12A6 6 0 0 1 13 12 M2 11h2v2H2z M12 11h2v2h-2z M7 5h2v2H7z',
   'sketch.arcCenter': 'M13 9A5 5 0 0 0 8 4 M7.5 8.5h1v1h-1z M8 9h5',
   'sketch.arcTangent': 'M2 12h5 M7 12a5 5 0 0 0 5-5 M6 11h2v2H6z',
+  'sketch.polygonCircumscribed':
+    'M8 1.5l5.6 3.25v6.5L8 14.5l-5.6-3.25v-6.5z M8 3.2a4.8 4.8 0 1 0 0.01 0 M7.5 7.5h1v1h-1z',
+  'sketch.polygonInscribed':
+    'M8 3l4.3 2.5v5L8 13l-4.3-2.5v-5z M8 2a6 6 0 1 0 0.01 0 M7.5 7.5h1v1h-1z',
+  'sketch.polygonEdge': 'M5 13l-2.5-5L8 2.5l5.5 5.5L11 13z M4 12h2v2H4z M10 12h2v2h-2z',
   'add.image': 'M2.5 3.5h11v9h-11z M5.5 6.5h0.01 M2.5 11l4-4 3 3 1.5-1.5 2.5 2.5',
 };

@@ -24,6 +24,17 @@ describe('sketch shapes as SVG elements (design 019 E11)', () => {
     expect(similarity({ a: -1, b: 0, c: 0, d: 1, e: 0, f: 0 })).toBeNull();
   });
 
+  it('writes a regular polygon as <polygon points>, in a rotated parent too', () => {
+    const square = { kind: 'polygon' as const, c: { x: 0, y: 0 }, r: 10, sides: 4, angle: 0 };
+    expect(shapeSpec(square, null, paint)).toEqual({
+      tag: 'polygon',
+      attrs: { points: '10,0 0,10 -10,0 0,-10', ...paint },
+    });
+    // a parent rotated by 90° and scaled by 2: the numbers are converted
+    const m = { a: 0, b: 2, c: -2, d: 0, e: 0, f: 0 };
+    expect(shapeSpec(square, m, {}).attrs['points']).toBe('0,20 -20,0 0,-20 20,0');
+  });
+
   it('writes plain elements in document space', () => {
     expect(shapeSpec({ kind: 'circle', c: { x: 10, y: 20 }, r: 5 }, null, paint)).toEqual({
       tag: 'circle',

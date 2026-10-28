@@ -17,7 +17,19 @@ export type SketchShape =
   | { kind: 'rect'; c: Point; w: number; h: number; angle: number }
   | { kind: 'circle'; c: Point; r: number }
   /** `start` = angle of the start point, `sweep` signed (positive = clockwise on screen), |sweep| < 2π. */
-  | { kind: 'arc'; c: Point; r: number; start: number; sweep: number };
+  | { kind: 'arc'; c: Point; r: number; start: number; sweep: number }
+  /**
+   * A regular polygon: centre, circumradius, number of sides and the angle of its first corner;
+   * `guide` = the construction circle of the preview (inscribed / circumscribed tool).
+   */
+  | {
+      kind: 'polygon';
+      c: Point;
+      r: number;
+      sides: number;
+      angle: number;
+      guide?: 'inner' | 'outer';
+    };
 
 export const EPS = 1e-9;
 export const TAU = Math.PI * 2;
@@ -60,6 +72,11 @@ export function vectorFromDeg(deg: number): Point {
 
 /** Field degrees (counter-clockwise) → document angle (radians, atan2). */
 export const docAngleFromDeg = (deg: number): number => (-deg * Math.PI) / 180;
+
+/** The corners of a regular polygon, in order around it. */
+export function polygonCorners(p: { c: Point; r: number; sides: number; angle: number }): Point[] {
+  return Array.from({ length: p.sides }, (_, i) => polar(p.c, p.r, p.angle + (i * TAU) / p.sides));
+}
 
 /** The four corners of a rectangle, in order around it. */
 export function rectCorners(r: { c: Point; w: number; h: number; angle: number }): Point[] {
@@ -168,5 +185,7 @@ export function isDegenerate(shape: SketchShape, min: number): boolean {
       return !(shape.r >= min);
     case 'arc':
       return !(shape.r >= min) || Math.abs(shape.sweep) * shape.r < min;
+    case 'polygon':
+      return !(shape.r >= min);
   }
 }

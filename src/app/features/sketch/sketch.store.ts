@@ -3,7 +3,6 @@ import { isDegenerate, SketchShape } from '../../shared/geometry/sketch/sketch-s
 import {
   FieldKey,
   Locks,
-  measure,
   Placed,
   resolveStep,
   shapeOf,
@@ -11,6 +10,8 @@ import {
   SketchToolId,
   StepDef,
 } from '../../shared/geometry/sketch/sketch-tools';
+import { measure } from '../../shared/geometry/sketch/sketch-measure';
+import { DEFAULT_SIDES } from '../../shared/geometry/sketch/polygon';
 import { Point } from '../../shared/geometry/view-transform';
 import {
   nearestAnchor,
@@ -57,6 +58,8 @@ export class SketchStore {
   private targetsRevision = 0;
   private lastPointer: Point | null = null;
   private sweep = 0;
+  /** The sides of the last polygon (the next one starts with them, like Fusion). */
+  private sides = DEFAULT_SIDES;
 
   readonly active = computed(() => this.tool() !== null);
   readonly step = computed((): StepDef | null => {
@@ -145,9 +148,15 @@ export class SketchStore {
       return;
     }
     this.hover.set(null);
-    const cur = resolveStep(t, this.placed(), p, this.locks(), this.sweep);
+    const cur = resolveStep(t, this.placed(), p, this.stepLocks(), this.sweep);
     if (cur.sweep !== undefined) this.sweep = cur.sweep;
     this.current.set(cur);
+  }
+
+  /** The typed values and, for a step with sides, the last polygon's sides unless typed. */
+  private stepLocks(): Locks {
+    const locks = this.locks();
+    return this.fields().includes('sides') ? { sides: this.sides, ...locks } : locks;
   }
 
   /** A typed value of the current step; `null` unlocks it. */
@@ -191,6 +200,7 @@ export class SketchStore {
       this.move(p, pxPerUnit);
       return null;
     }
+    if (shape?.kind === 'polygon') this.sides = shape.sides;
     // one shape per tool start: afterwards the pointer selects and moves again (Marc, 27.10.2026)
     this.reset();
     this.tool.set(null);

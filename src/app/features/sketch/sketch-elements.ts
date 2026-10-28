@@ -1,7 +1,7 @@
 import { StyleKind } from '../../core/settings/settings.models';
 import { fmt } from '../../shared/geometry/align';
 import { apply, Matrix } from '../../shared/geometry/matrix';
-import { arcEnds, SketchShape } from '../../shared/geometry/sketch/sketch-shapes';
+import { arcEnds, polygonCorners, SketchShape } from '../../shared/geometry/sketch/sketch-shapes';
 import { UndoLabel } from '../document/undo/undo-texts';
 import { ElementSpec } from '../commands/element-defaults';
 
@@ -46,6 +46,8 @@ export function kindOf(shape: SketchShape): { kind: StyleKind; label: UndoLabel 
       return { kind: 'circle', label: 'addCircle' };
     case 'arc':
       return { kind: 'arc', label: 'addArc' };
+    case 'polygon':
+      return { kind: 'polygon', label: 'addPolygon' };
   }
 }
 
@@ -93,6 +95,13 @@ function build(
           d: `M ${fmt(s.x)} ${fmt(s.y)} A ${r} ${r} 0 ${large} ${sweep} ${fmt(e.x)} ${fmt(e.y)}`,
         },
       };
+    }
+    case 'polygon': {
+      const points = polygonCorners(shape)
+        .map(map)
+        .map((p) => `${fmt(p.x)},${fmt(p.y)}`)
+        .join(' ');
+      return { tag: 'polygon', attrs: { points } };
     }
   }
 }

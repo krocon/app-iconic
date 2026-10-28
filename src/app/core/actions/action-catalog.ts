@@ -363,7 +363,7 @@ export const ACTIONS: readonly ActionDef[] = [
   ADD('add.freehand', 'Freehand', { args: FREEHAND_ARGS }),
   ADD('add.line', 'Line at Center', { args: shapeArgsSpec('line') }),
   ADD('add.polyline', 'Polyline', { args: shapeArgsSpec('polyline') }),
-  ADD('add.polygon', 'Polygon', { args: shapeArgsSpec('polygon') }),
+  ADD('add.polygon', 'Polygon at Center', { args: shapeArgsSpec('polygon') }),
   ADD('add.text', 'Text', { args: shapeArgsSpec('text') }),
   ADD('add.textToPath', 'Text to Path…', { args: TEXT_PATH_ARGS }),
   ADD('add.symbol', 'Symbol…', { args: SYMBOL_ARGS }),
@@ -383,6 +383,9 @@ export const ACTIONS: readonly ActionDef[] = [
   ADD('sketch.arc3p', '3-Point Arc', { args: SKETCH_ARGS }),
   ADD('sketch.arcCenter', 'Center Point Arc', { args: SKETCH_ARGS }),
   ADD('sketch.arcTangent', 'Tangent Arc', { args: SKETCH_ARGS }),
+  ADD('sketch.polygonCircumscribed', 'Circumscribed Polygon', { args: SKETCH_ARGS }),
+  ADD('sketch.polygonInscribed', 'Inscribed Polygon', { args: SKETCH_ARGS }),
+  ADD('sketch.polygonEdge', 'Edge Polygon', { args: SKETCH_ARGS }),
   // arrange (legacy §7.2, §7.3; prompt 006)
   ARRANGE('arrange.bringToFront', 'Bring to Front', TEXT),
   ARRANGE('arrange.sendToBack', 'Send to Back', TEXT),

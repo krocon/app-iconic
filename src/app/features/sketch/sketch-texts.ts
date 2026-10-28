@@ -14,6 +14,7 @@ const EN = {
     radius: 'Radius',
     start: 'Start angle',
     sweep: 'Sweep',
+    sides: 'Sides',
   },
   fixed: (label: string) => `${label} (fixed)`,
   fieldsLabel: 'Dimensions',
@@ -76,6 +77,19 @@ const EN = {
       'Tangent Arc: click the end of a line or arc',
       'Tangent Arc: click the end or type radius and sweep',
     ],
+    polygonCircumscribed: [
+      'Circumscribed Polygon: click the centre',
+      'Circumscribed Polygon: click the middle of an edge or type sides, diameter and angle',
+    ],
+    polygonInscribed: [
+      'Inscribed Polygon: click the centre',
+      'Inscribed Polygon: click a corner or type sides, diameter and angle',
+    ],
+    polygonEdge: [
+      'Edge Polygon: click the first corner',
+      'Edge Polygon: click the second corner or type sides, length and angle',
+      'Edge Polygon: click the side of the polygon',
+    ],
   },
   failed: 'The shape could not be drawn.',
   noTarget: 'There is no edge, circle or line end at that point.',
@@ -93,6 +107,7 @@ export const SKETCH_TEXTS = translatable('sketch', EN, {
       radius: 'Radius',
       start: 'Startwinkel',
       sweep: 'Bogenwinkel',
+      sides: 'Ecken',
     },
     fixed: (label: string) => `${label} (fest)`,
     fieldsLabel: 'Maße',
@@ -154,6 +169,19 @@ export const SKETCH_TEXTS = translatable('sketch', EN, {
       arcTangent: [
         'Tangentialer Bogen: Ende einer Linie oder eines Bogens klicken',
         'Tangentialer Bogen: Ende klicken oder Radius und Bogenwinkel tippen',
+      ],
+      polygonCircumscribed: [
+        'Umschriebenes Polygon: Mitte klicken',
+        'Umschriebenes Polygon: Kantenmitte klicken oder Ecken, Durchmesser und Winkel tippen',
+      ],
+      polygonInscribed: [
+        'Einbeschriebenes Polygon: Mitte klicken',
+        'Einbeschriebenes Polygon: Ecke klicken oder Ecken, Durchmesser und Winkel tippen',
+      ],
+      polygonEdge: [
+        'Polygon über Kante: erste Ecke klicken',
+        'Polygon über Kante: zweite Ecke klicken oder Ecken, Länge und Winkel tippen',
+        'Polygon über Kante: Seite des Polygons klicken',
       ],
     },
     failed: 'Die Form konnte nicht gezeichnet werden.',

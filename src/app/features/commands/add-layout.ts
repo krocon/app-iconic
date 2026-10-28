@@ -4,7 +4,7 @@
  * the one-click variant at the centre first, then the sketch tools. Pure.
  */
 export type AddSectionKey = 'structure' | 'shapes' | 'text' | 'import';
-export type AddGroupKey = 'line' | 'rectangle' | 'circle' | 'arc';
+export type AddGroupKey = 'line' | 'rectangle' | 'circle' | 'arc' | 'polygon';
 
 export type AddEntry =
   { kind: 'action'; id: string } | { kind: 'group'; group: AddGroupKey; ids: readonly string[] };
@@ -37,7 +37,12 @@ export const ADD_LAYOUT: readonly AddSection[] = [
         'sketch.circle3t',
       ]),
       group('arc', ['sketch.arc3p', 'sketch.arcCenter', 'sketch.arcTangent']),
-      act('add.polygon'),
+      group('polygon', [
+        'add.polygon',
+        'sketch.polygonCircumscribed',
+        'sketch.polygonInscribed',
+        'sketch.polygonEdge',
+      ]),
       act('add.ellipse'),
       act('add.path'),
       act('add.freehand'),

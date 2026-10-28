@@ -21,6 +21,7 @@ export const SKETCH_VALUE_KEYS = [
   'radius',
   'start',
   'sweep',
+  'sides',
 ] as const;
 
 export const SKETCH_ARGS: ArgsSpec = {
@@ -29,7 +30,8 @@ export const SKETCH_ARGS: ArgsSpec = {
     /** `[[x, y], …]` – one point per step of the tool. */
     points: { type: 'json' },
     /**
-     * `{ length, angle, width, height, diameter, radius, start, sweep }` – degrees counter-clockwise.
+     * `{ length, angle, width, height, diameter, radius, start, sweep, sides }` – degrees
+     * counter-clockwise; `sides` of a polygon 3 … 64 (default 6).
      * A Center Point Arc from `points` alone sweeps at most 180°; a larger one needs `sweep`.
      */
     values: { type: 'json' },

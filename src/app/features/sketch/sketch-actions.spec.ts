@@ -44,6 +44,35 @@ describe('sketch actions (design 019 E1, E14)', () => {
     expect(sketch.tool.tool()).toBeNull();
   });
 
+  it('points and values draw a polygon (default 6 sides; sides from values)', async () => {
+    actions.run('sketch.polygonInscribed', {
+      points: [
+        [200, 200],
+        [250, 200],
+      ],
+    });
+    await flush();
+    expect(node().localName).toBe('polygon');
+    expect(attrs()['points'].split(' ')).toHaveLength(6);
+    expect(attrs()['points'].split(' ')[0]).toBe('250,200');
+    expect(store.undoLabel()).toBe('Undo Add Polygon');
+    actions.run('sketch.polygonEdge', {
+      points: [
+        [0, 0],
+        [0, 0],
+        [0, 100],
+      ],
+      values: { sides: 4, length: 40, angle: 0 },
+    });
+    await flush();
+    const pts = attrs()['points'].split(' ');
+    expect(pts).toHaveLength(4);
+    expect(pts).toContain('0,40');
+    expect(pts).toContain('40,40');
+    expect(parseSketchValues({ sides: 2 })).toBeNull();
+    expect(parseSketchValues({ sides: 7.5 })).toBeNull();
+  });
+
   it('points and values draw a 3-point rectangle as one step (as JSON the same)', async () => {
     actions.run('sketch.rect3p', {
       points: [

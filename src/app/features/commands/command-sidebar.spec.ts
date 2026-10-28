@@ -57,7 +57,7 @@ describe('CommandSidebar (design 008 E10)', () => {
       'rectangle',
       'circle',
       'arc',
-      'add.polygon',
+      'polygon',
       'add.ellipse',
       'add.path',
       'add.freehand',
@@ -82,7 +82,13 @@ describe('CommandSidebar (design 008 E10)', () => {
   it('filters flat over all variants, moves with the keys and runs with Enter', async () => {
     const { options, input, key, type } = await render();
     await type('poly');
-    expect(ids(options())).toEqual(['add.polyline', 'add.polygon']);
+    expect(ids(options())).toEqual([
+      'add.polyline',
+      'add.polygon',
+      'sketch.polygonCircumscribed',
+      'sketch.polygonInscribed',
+      'sketch.polygonEdge',
+    ]);
     await key('ArrowDown');
     expect(input.getAttribute('aria-activedescendant')).toBe('command-1');
     await key('Enter');

@@ -61,11 +61,12 @@
 
 ## 5. Elemente hinzufügen
 
-- [x] Group (Icon-Gruppe + Layer + Asset) und Container `<g>` (008; Command Sidebar mit Suche, Menü „Add“, Aktionen mit Argumenten)
+- [x] Group (Icon-Gruppe + Layer + Asset) und Container `<g>` (008; Command Sidebar mit Suche, Menü „Add“, Aktionen mit Argumenten; Sidebar und Menü nach Formen mit Untermenüs wie Fusion, `add-layout.ts`)
 - [x] Circle, Ellipse, Rectangle, Line, Polyline, Polygon, Path, Text mit der Geometrie der Vorlage, Stil dünne Linie ohne Fill bzw. der gemerkte je Formtyp (008, 019 E13; zentriert im sichtbaren Ausschnitt, auch in transformierten Gruppen; „… at Center“ seit 019)
 - [x] Zeichenwerkzeuge wie Fusion _(neu)_ (019): Line, Midpoint Line; Rectangle ▸ 2-Point / 3-Point / Center; Circle ▸
-      Center Diameter / 2-Point / 3-Point / 2-Tangent / 3-Tangent; Arc ▸ 3-Point / Center Point / Tangent – Klicks mit
-      Grid-/Magic-Snap, Maßfelder (Länge, Winkel, Breite, Höhe, Durchmesser, Radius, Start-/Bogenwinkel; Tab, Enter,
+      Center Diameter / 2-Point / 3-Point / 2-Tangent / 3-Tangent; Arc ▸ 3-Point / Center Point / Tangent; Polygon ▸
+      Circumscribed / Inscribed / Edge (Ecken 3–64, Default 6, die letzte Zahl bleibt) – Klicks mit Grid-/Magic-Snap,
+      Maßfelder (Ecken, Länge, Winkel, Breite, Höhe, Durchmesser, Radius, Start-/Bogenwinkel; Tab, Enter,
       Esc), Tangenten an Kanten und Kreisen, Kürzel `l`/`r`/`c`, `sketch.* { points, values }` für die KI; nach jeder
       Form wieder Auswahl, ausgewählte Formen auch innerhalb des Rahmens ziehbar
 - [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt

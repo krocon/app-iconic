@@ -4,11 +4,13 @@ import {
   arcEnds,
   degFromVector,
   dist,
+  polygonCorners,
   rectCorners,
   SketchShape,
   vectorFromDeg,
 } from './sketch-shapes';
-import { Locks, measure, Placed, resolveStep, shapeOf, SketchToolId } from './sketch-tools';
+import { measure } from './sketch-measure';
+import { fieldValueOk, Locks, Placed, resolveStep, shapeOf, SketchToolId } from './sketch-tools';
 
 /** Plays the steps like the mouse does: resolve each point, then the shape. */
 function play(
@@ -287,5 +289,77 @@ describe('sketch tools (design 019 E5)', () => {
       shapeOf('arcCenter', [{ p: { x: 0, y: 0 } }], { p: { x: 10, y: 0 } }),
     ];
     expect(shapes.map((s) => s?.kind)).toEqual(['rect', 'circle']);
+  });
+});
+
+describe('polygon tools like Fusion', () => {
+  const corners = (s: SketchShape | null) => {
+    expect(s?.kind).toBe('polygon');
+    return s?.kind === 'polygon' ? polygonCorners(s) : [];
+  };
+  const edges = (ps: Point[]) => ps.map((p, i) => dist(p, ps[(i + 1) % ps.length]));
+
+  it('inscribed: the pointer is a corner; 6 sides unless typed', () => {
+    const ps = corners(
+      play('polygonInscribed', [
+        { x: 100, y: 100 },
+        { x: 150, y: 100 },
+      ]),
+    );
+    expect(ps).toHaveLength(6);
+    close(ps[0], { x: 150, y: 100 });
+    for (const e of edges(ps)) expect(e).toBeCloseTo(50, 9);
+  });
+
+  it('circumscribed: the pointer is the middle of an edge', () => {
+    const ps = corners(
+      play(
+        'polygonCircumscribed',
+        [
+          { x: 0, y: 0 },
+          { x: 0, y: -40 },
+        ],
+        [{}, { sides: 4 }],
+      ),
+    );
+    expect(ps).toHaveLength(4);
+    // a square around a circle of radius 40: the top edge is horizontal at y = -40
+    const top = ps.filter((p) => Math.abs(p.y + 40) < 1e-9);
+    expect(top).toHaveLength(2);
+    for (const e of edges(ps)) expect(e).toBeCloseTo(80, 9);
+  });
+
+  it('typed sides, diameter and angle win over the pointer; the fields show them', () => {
+    const placed: Placed[] = [{ p: { x: 10, y: 10 } }];
+    const locks = { sides: 5, diameter: 100, angle: 90 };
+    const cur = resolveStep('polygonInscribed', placed, { x: 300, y: 20 }, locks);
+    const ps = corners(shapeOf('polygonInscribed', placed, cur));
+    expect(ps).toHaveLength(5);
+    // the first corner straight up (90° counter-clockwise), 50 from the centre
+    close(ps[0], { x: 10, y: -40 });
+    expect(measure('polygonInscribed', placed, cur)).toMatchObject({ sides: 5 });
+    expect(measure('polygonInscribed', placed, cur).diameter).toBeCloseTo(100, 9);
+    expect(measure('polygonInscribed', placed, cur).angle).toBeCloseTo(90, 9);
+  });
+
+  it('edge: two corners and the side; sides typed in the second step', () => {
+    const a = { x: 0, y: 0 };
+    const b = { x: 60, y: 0 };
+    const below = corners(play('polygonEdge', [a, b, { x: 30, y: 50 }], [{}, { sides: 3 }]));
+    expect(below).toHaveLength(3);
+    for (const e of edges(below)) expect(e).toBeCloseTo(60, 9);
+    expect(below.some((p) => p.y > 50)).toBe(true);
+    const above = corners(play('polygonEdge', [a, b, { x: 30, y: -50 }], [{}, { sides: 3 }]));
+    expect(above.some((p) => p.y < -50)).toBe(true);
+    expect(above.some((p) => dist(p, a) < 1e-9) && above.some((p) => dist(p, b) < 1e-9)).toBe(true);
+  });
+
+  it('only whole sides from 3 to 64 are typed values', () => {
+    expect(fieldValueOk('sides', 5)).toBe(true);
+    expect(fieldValueOk('sides', 2)).toBe(false);
+    expect(fieldValueOk('sides', 5.5)).toBe(false);
+    expect(fieldValueOk('sides', 65)).toBe(false);
+    expect(fieldValueOk('angle', -30)).toBe(true);
+    expect(fieldValueOk('diameter', 0)).toBe(false);
   });
 });

@@ -244,3 +244,69 @@ test('new shapes take the style of the last shape of their kind', async ({ page 
   await click(page, 650, 600);
   expect((await selected(page))!.attrs['stroke']).toBe('#000000');
 });
+
+/** Corners of a `<polygon points>`. */
+const polygonPoints = (a: Record<string, string>) =>
+  a['points'].split(' ').map((s) => {
+    const [x, y] = s.split(',').map(Number);
+    return { x, y };
+  });
+
+for (const zoom of [0.5, 1.5]) {
+  test(`inscribed polygon: 5 sides, diameter 200 at 90° typed (zoom ${zoom * 100} %)`, async ({
+    page,
+  }) => {
+    const errors = collectErrors(page);
+    await setup(page);
+    await centerOn(page, zoom, { x: 500, y: 500 });
+    await tool(page, 'sketch.polygonInscribed');
+    await click(page, 500, 500);
+    // like Fusion: the number of sides has the focus, 6 at first
+    await expect(page.locator('[data-field="sides"]')).toBeFocused();
+    await expect(page.locator('[data-field="sides"]')).toHaveValue('6');
+    await page.keyboard.type('5');
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('200');
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('90');
+    await expect(page.getByTestId('sketch-shape')).toHaveCount(1);
+    await page.keyboard.press('Enter');
+    const s = await selected(page);
+    expect(s?.tag).toBe('polygon');
+    const ps = polygonPoints(s!.attrs);
+    expect(ps).toHaveLength(5);
+    expect(near(ps[0], 500, 400), JSON.stringify(ps)).toBe(true);
+    expect(errors).toEqual([]);
+  });
+}
+
+test('edge polygon with the mouse: the third click picks the side; sides stay', async ({
+  page,
+}) => {
+  await setup(page);
+  await tool(page, 'sketch.polygonEdge');
+  await click(page, 300, 300);
+  await page.keyboard.type('4');
+  await click(page, 400, 300);
+  await expect(page.locator('[data-field="sides"]')).toHaveCount(0);
+  await click(page, 350, 250);
+  const s = await selected(page);
+  expect(s?.tag).toBe('polygon');
+  const ps = polygonPoints(s!.attrs);
+  expect(ps).toHaveLength(4);
+  for (const [x, y] of [
+    [300, 300],
+    [400, 300],
+    [400, 200],
+    [300, 200],
+  ]) {
+    expect(
+      ps.some((p) => near(p, x, y)),
+      JSON.stringify(ps),
+    ).toBe(true);
+  }
+  // the next polygon starts with 4 sides
+  await tool(page, 'sketch.polygonCircumscribed');
+  await click(page, 600, 600);
+  await expect(page.locator('[data-field="sides"]')).toHaveValue('4');
+});

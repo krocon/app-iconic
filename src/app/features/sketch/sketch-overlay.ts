@@ -10,14 +10,13 @@ import {
   viewChildren,
 } from '@angular/core';
 import { apply, IDENTITY, Matrix } from '../../shared/geometry/matrix';
-import { FieldKey } from '../../shared/geometry/sketch/sketch-tools';
+import { ANGLE_FIELDS, FieldKey, fieldValueOk } from '../../shared/geometry/sketch/sketch-tools';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { SketchService } from './sketch.service';
 import { SketchStore } from './sketch.store';
 import { SKETCH_TEXTS } from './sketch-texts';
 import { constructionPath, crossesPath, shapePath, targetPath } from './sketch-preview';
 
-const ANGLES: ReadonlySet<FieldKey> = new Set<FieldKey>(['angle', 'start', 'sweep']);
 /** Distance of the fields from the pointer and their rough size (to keep them on the canvas). */
 const FIELD_GAP_PX = 18;
 const FIELD_WIDTH_PX = 170;
@@ -258,7 +257,7 @@ export class SketchOverlay {
   }
 
   protected angle(f: FieldKey): boolean {
-    return ANGLES.has(f);
+    return ANGLE_FIELDS.has(f);
   }
 
   protected locked(f: FieldKey): boolean {
@@ -273,8 +272,8 @@ export class SketchOverlay {
     const text = (e.target as HTMLInputElement).value;
     this.drafts.update((d) => ({ ...d, [f]: text }));
     const v = parseValue(text);
-    // not a number (or not a size > 0): the field is free again and marked
-    this.store.setLock(f, v !== null && (ANGLES.has(f) || v > 0) ? v : null);
+    // not a number (a size ≤ 0, sides not 3 … 64): the field is free again and marked
+    this.store.setLock(f, v !== null && fieldValueOk(f, v) ? v : null);
   }
 
   /** Text typed that is no usable value. */

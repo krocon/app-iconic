@@ -7,12 +7,12 @@ import {
   Tangent,
   tangentCircles,
 } from './apollonius';
+import { polygonAround, polygonOnEdge, sidesOf, validSides } from './polygon';
 import {
   add,
   arcFromCenterTangent,
   arcThrough,
   circumcircle,
-  degFromVector,
   dist,
   dot,
   docAngleFromDeg,
@@ -48,10 +48,13 @@ export type SketchToolId =
   | 'circle3t'
   | 'arc3p'
   | 'arcCenter'
-  | 'arcTangent';
+  | 'arcTangent'
+  | 'polygonCircumscribed'
+  | 'polygonInscribed'
+  | 'polygonEdge';
 
 export type FieldKey =
-  'length' | 'angle' | 'width' | 'height' | 'diameter' | 'radius' | 'start' | 'sweep';
+  'length' | 'angle' | 'width' | 'height' | 'diameter' | 'radius' | 'start' | 'sweep' | 'sides';
 export type Locks = Partial<Record<FieldKey, number>>;
 export type Pick = 'point' | 'tangent' | 'anchor';
 
@@ -94,7 +97,21 @@ export const SKETCH_TOOLS: Record<SketchToolId, { steps: StepDef[] }> = {
   arc3p: { steps: [P(), P(), P('radius')] },
   arcCenter: { steps: [P(), P('radius', 'start'), P('sweep')] },
   arcTangent: { steps: [{ pick: 'anchor', fields: [] }, P('radius', 'sweep')] },
+  // like Fusion: the number of sides first (it has the focus after the first click)
+  polygonCircumscribed: { steps: [P(), P('sides', 'diameter', 'angle')] },
+  polygonInscribed: { steps: [P(), P('sides', 'diameter', 'angle')] },
+  polygonEdge: { steps: [P(), P('sides', 'length', 'angle'), P()] },
 };
+
+/** The fields in degrees (any value); the others are sizes (> 0) or the number of sides. */
+export const ANGLE_FIELDS: ReadonlySet<FieldKey> = new Set<FieldKey>(['angle', 'start', 'sweep']);
+
+/** A typed value the field can take. */
+export function fieldValueOk(f: FieldKey, v: number): boolean {
+  if (!Number.isFinite(v)) return false;
+  if (ANGLE_FIELDS.has(f)) return true;
+  return f === 'sides' ? validSides(v) : v > 0;
+}
 
 export const SKETCH_TOOL_IDS = Object.keys(SKETCH_TOOLS) as SketchToolId[];
 
@@ -129,7 +146,7 @@ function box(a: Point, p: Point, w: number | undefined, h: number | undefined, k
 }
 
 /** Signed height of `p` across the edge `a → b` (positive = right side on screen). */
-function heightAcross(a: Point, b: Point, p: Point): number {
+export function heightAcross(a: Point, b: Point, p: Point): number {
   const e = unit(sub(b, a)) ?? RIGHT;
   return dot({ x: -e.y, y: e.x }, sub(p, a));
 }
@@ -190,6 +207,16 @@ export function resolveStep(
         p: along(a, pointer, has(locks.diameter) ? locks.diameter / 2 : undefined, undefined),
         ...own,
       };
+    case 'polygonCircumscribed':
+    case 'polygonInscribed':
+      // the pointer: middle of an edge / a corner; the diameter of the construction circle
+      return {
+        p: along(a, pointer, has(locks.diameter) ? locks.diameter / 2 : undefined, locks.angle),
+        ...own,
+      };
+    case 'polygonEdge':
+      if (step === 1) return { p: along(a, pointer, locks.length, locks.angle), ...own };
+      break;
     case 'rect2p':
       return { p: box(a, pointer, locks.width, locks.height, 1), ...own };
     case 'rectCenter':
@@ -333,48 +360,13 @@ export function shapeOf(
       const arc = tangentArcFor(steps[0], b, steps[1].locks ?? {});
       return arc ? { kind: 'arc', ...arc } : { kind: 'line', a: steps[0].anchor.p, b };
     }
-  }
-}
-
-/** The values the fields show for the current step (from its resolved point). */
-export function measure(tool: SketchToolId, placed: readonly Placed[], cur: Placed): Locks {
-  const a = placed[0]?.p;
-  if (!a) return {};
-  const p = cur.p;
-  const step = placed.length;
-  const deg = (v: Point) => degFromVector(v);
-  switch (tool) {
-    case 'line':
-      return { length: dist(a, p), angle: deg(sub(p, a)) };
-    case 'rect3p':
-      if (step === 1) return { length: dist(a, p), angle: deg(sub(p, a)) };
-      return { height: Math.abs(heightAcross(a, placed[1].p, p)) };
-    case 'midpointLine':
-      return { length: 2 * dist(a, p), angle: deg(sub(p, a)) };
-    case 'rect2p':
-      return { width: Math.abs(p.x - a.x), height: Math.abs(p.y - a.y) };
-    case 'rectCenter':
-      return { width: 2 * Math.abs(p.x - a.x), height: 2 * Math.abs(p.y - a.y) };
-    case 'circleCenter':
-      return { diameter: 2 * dist(a, p) };
-    case 'circle2p':
-      return { diameter: dist(a, p), angle: deg(sub(p, a)) };
-    case 'circle2t': {
-      const s = shapeOf(tool, placed, cur);
-      return s?.kind === 'circle' ? { diameter: 2 * s.r } : {};
+    case 'polygonCircumscribed':
+    case 'polygonInscribed': {
+      if (!a || !b) return null;
+      const mode = tool === 'polygonInscribed' ? 'inscribed' : 'circumscribed';
+      return polygonAround(a, b, sidesOf(steps[1].locks?.sides), mode);
     }
-    case 'arc3p': {
-      const s = shapeOf(tool, placed, cur);
-      return s?.kind === 'arc' ? { radius: s.r } : {};
-    }
-    case 'arcCenter':
-      if (step === 1) return { radius: dist(a, p), start: deg(sub(p, a)) };
-      return { sweep: (-(cur.sweep ?? 0) * 180) / Math.PI };
-    case 'arcTangent': {
-      const s = shapeOf(tool, placed, cur);
-      return s?.kind === 'arc' ? { radius: s.r, sweep: (Math.abs(s.sweep) * 180) / Math.PI } : {};
-    }
-    default:
-      return {};
+    case 'polygonEdge':
+      return a && b ? polygonOnEdge(a, b, sidesOf(steps[1].locks?.sides), c) : null;
   }
 }

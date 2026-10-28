@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { MAX_SKETCH_POINTS, SKETCH_VALUE_KEYS } from '../../core/actions/sketch-action-args';
+import { validSides } from '../../shared/geometry/sketch/polygon';
 import { isDegenerate, SketchShape } from '../../shared/geometry/sketch/sketch-shapes';
 import {
   Locks,
@@ -48,6 +49,7 @@ export function parseSketchValues(v: unknown): Locks | null {
   for (const [k, x] of Object.entries(v as Record<string, unknown>)) {
     if (!(SKETCH_VALUE_KEYS as readonly string[]).includes(k)) return null;
     if (typeof x !== 'number' || !Number.isFinite(x) || Math.abs(x) > 1e5) return null;
+    if (k === 'sides' && !validSides(x)) return null;
     out[k as keyof Locks] = x;
   }
   return out;

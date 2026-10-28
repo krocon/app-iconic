@@ -1,5 +1,11 @@
 import { apply, Matrix } from '../../shared/geometry/matrix';
-import { arcEnds, rectCorners, SketchShape } from '../../shared/geometry/sketch/sketch-shapes';
+import {
+  arcEnds,
+  polar,
+  polygonCorners,
+  rectCorners,
+  SketchShape,
+} from '../../shared/geometry/sketch/sketch-shapes';
 import { Point } from '../../shared/geometry/view-transform';
 import { SketchAnchor, SketchTarget } from './sketch-targets';
 
@@ -36,6 +42,10 @@ export function shapePath(shape: SketchShape | null, m: Matrix): string | null {
       const sweep = shape.sweep > 0 ? 1 : 0;
       return `M ${pt(apply(m, start))} A ${r} ${r} 0 ${large} ${sweep} ${pt(apply(m, end))}`;
     }
+    case 'polygon': {
+      const c = polygonCorners(shape).map((p) => pt(apply(m, p)));
+      return `M ${c.join(' L ')} Z`;
+    }
   }
 }
 
@@ -50,6 +60,14 @@ export function constructionPath(
     const { start, end } = arcEnds(shape);
     const c = apply(m, shape.c);
     parts.push(`M ${pt(apply(m, start))} L ${pt(c)} L ${pt(apply(m, end))}`);
+  } else if (shape?.kind === 'polygon' && shape.guide) {
+    // the construction circle and the radius to the pointer (a corner / the middle of an edge)
+    const half = Math.PI / shape.sides;
+    const inner = shape.guide === 'inner';
+    const r = inner ? shape.r * Math.cos(half) : shape.r;
+    const to = polar(shape.c, r, inner ? shape.angle - half : shape.angle);
+    const c = apply(m, shape.c);
+    parts.push(circlePath(c, r * scaleOf(m)), `M ${pt(c)} L ${pt(apply(m, to))}`);
   } else if (shape?.kind === 'circle' && placed.length === 1) {
     parts.push(`M ${pt(apply(m, placed[0]))} L ${pt(apply(m, shape.c))}`);
   }
