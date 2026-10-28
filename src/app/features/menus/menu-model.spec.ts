@@ -1,6 +1,6 @@
 import { actionDef } from '../../core/actions/action-catalog';
 import { buildKeymap } from '../../core/actions/keymap';
-import { SIDEBAR_COMMANDS } from '../commands/command-sidebar';
+import { addLayoutIds } from '../commands/add-layout';
 import { matches } from './command-palette';
 import {
   actionIds,
@@ -44,11 +44,14 @@ describe('menu model (design 005 E5)', () => {
     }
   });
 
-  it('orders the Add menu like the command sidebar (by shape, like Fusion)', () => {
+  it('builds the Add menu from the sidebar layout: shapes in submenus like Fusion', () => {
     const add = buildMenuModel('other', { recent: [] }).find((m) => m.label === 'Add')!;
-    expect(actionIds(add.items)).toEqual(SIDEBAR_COMMANDS.flatMap((s) => s.ids));
+    expect(actionIds(add.items)).toEqual(addLayoutIds());
+    const subs = add.items.filter((i) => i.kind === 'submenu').map((i) => i.label);
+    expect(subs).toEqual(['Line', 'Rectangle', 'Circle', 'Arc']);
     const circle = add.items.find((i) => i.kind === 'submenu' && i.label === 'Circle')!;
     expect(actionIds([circle]).slice(0, 2)).toEqual(['add.circle', 'sketch.circleCenter']);
+    expect(add.items.filter((i) => i.kind === 'separator')).toHaveLength(3);
   });
 
   it('puts About and Quit into the app menu on macOS', () => {

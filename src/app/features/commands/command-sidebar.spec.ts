@@ -44,42 +44,117 @@ describe('CommandSidebar (design 008 E10)', () => {
     return { fixture, el, input, options, key, type };
   }
 
-  it('lists every add action with shortcut; later ones disabled', async () => {
+  const ids = (els: HTMLElement[]) => els.map((o) => o.dataset['action'] ?? o.dataset['group']);
+  const submenu = () =>
+    Array.from(document.querySelectorAll<HTMLElement>('#command-sub [role="option"]'));
+
+  it('lists the add actions, the variants of a shape as a submenu; later ones disabled', async () => {
     const { options, el } = await render();
-    expect(options()).toHaveLength(28);
+    expect(ids(options())).toEqual([
+      'add.iconGroup',
+      'add.container',
+      'line',
+      'rectangle',
+      'circle',
+      'arc',
+      'add.polygon',
+      'add.ellipse',
+      'add.path',
+      'add.freehand',
+      'add.text',
+      'add.textToPath',
+      'add.symbol',
+      'add.svgSnippet',
+      'add.image',
+    ]);
     const image = options().find((o) => o.dataset['action'] === 'add.image')!;
     expect(image.textContent).toContain('Ctrl+I');
+    const circle = options().find((o) => o.dataset['group'] === 'circle')!;
+    expect(circle.getAttribute('aria-label')).toBe('Circle, submenu');
     const free = options().find((o) => o.dataset['action'] === 'add.freehand')!;
     expect(free.getAttribute('aria-disabled')).toBe('true');
     free.click();
     expect(store.selection()).toEqual([]);
     expect(el.textContent).toContain('Shapes');
-    expect(el.textContent).not.toContain('Coming with the next prompts');
+    expect(submenu()).toHaveLength(0);
   });
 
-  it('filters, moves with the keys and runs with Enter', async () => {
+  it('filters flat over all variants, moves with the keys and runs with Enter', async () => {
     const { options, input, key, type } = await render();
     await type('poly');
-    expect(options().map((o) => o.dataset['action'])).toEqual(['add.polyline', 'add.polygon']);
+    expect(ids(options())).toEqual(['add.polyline', 'add.polygon']);
     await key('ArrowDown');
     expect(input.getAttribute('aria-activedescendant')).toBe('command-1');
     await key('Enter');
     expect(store.document().node(store.selection()[0])!.localName).toBe('polygon');
+    await type('circle');
+    expect(ids(options())).toContain('sketch.circle3t');
     await type('zzz');
     expect(options()).toHaveLength(0);
     await key('Escape');
-    expect(options()).toHaveLength(28);
+    expect(options()).toHaveLength(15);
     await key('End');
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-27');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-14');
+  });
+
+  it('keyboard: → opens the submenu, ↑/↓ move in it, ← closes, Enter runs', async () => {
+    const { input, key } = await render();
+    for (let i = 0; i < 4; i++) await key('ArrowDown');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-4');
+    await key('ArrowRight');
+    expect(ids(submenu())).toEqual([
+      'add.circle',
+      'sketch.circleCenter',
+      'sketch.circle2p',
+      'sketch.circle3p',
+      'sketch.circle2t',
+      'sketch.circle3t',
+    ]);
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-sub-0');
+    expect(input.getAttribute('aria-controls')).toBe('command-list command-sub');
+    await key('ArrowUp');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-sub-5');
+    await key('ArrowLeft');
+    expect(submenu()).toHaveLength(0);
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-4');
+    await key('Enter');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-sub-0');
+    await key('Enter');
+    expect(submenu()).toHaveLength(0);
+    expect(store.document().node(store.selection()[0])!.localName).toBe('circle');
+  });
+
+  it('a click opens the submenu, a click in it runs; hovering opens another', async () => {
+    const { options, fixture } = await render();
+    options()
+      .find((o) => o.dataset['group'] === 'rectangle')!
+      .click();
+    await fixture.whenStable();
+    expect(ids(submenu())[0]).toBe('add.rect');
+    options()
+      .find((o) => o.dataset['group'] === 'arc')!
+      .dispatchEvent(new PointerEvent('pointerenter'));
+    await new Promise((r) => setTimeout(r, 200));
+    await fixture.whenStable();
+    expect(ids(submenu())).toEqual(['sketch.arc3p', 'sketch.arcCenter', 'sketch.arcTangent']);
+    options()
+      .find((o) => o.dataset['group'] === 'rectangle')!
+      .click();
+    await fixture.whenStable();
+    submenu()[0].click();
+    await new Promise((r) => setTimeout(r, 0));
+    await fixture.whenStable();
+    expect(submenu()).toHaveLength(0);
+    expect(store.document().node(store.selection()[0])!.localName).toBe('rect');
   });
 
   it('runs a click', async () => {
     const { options } = await render();
     options()
-      .find((o) => o.dataset['action'] === 'add.circle')!
+      .find((o) => o.dataset['action'] === 'add.ellipse')!
       .click();
     await new Promise((r) => setTimeout(r, 0));
-    expect(store.document().node(store.selection()[0])!.localName).toBe('circle');
+    expect(store.document().node(store.selection()[0])!.localName).toBe('ellipse');
   });
 });
 

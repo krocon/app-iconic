@@ -53,6 +53,12 @@ function sidebarItem(page: Page, id: string) {
   return page.locator(`app-command-sidebar [data-action="${id}"]`);
 }
 
+/** Opens the submenu of a shape in the sidebar (like Fusion's "Create" menu). */
+async function openSidebarGroup(page: Page, group: string) {
+  await page.locator(`app-command-sidebar [data-group="${group}"]`).click();
+  await expect(page.getByTestId('command-submenu')).toBeVisible();
+}
+
 test('a rectangle goes into a rotated group, centred in the visible area; undo removes it', async ({
   page,
 }) => {
@@ -66,6 +72,7 @@ test('a rectangle goes into a rotated group, centred in the visible area; undo r
     await centerOn(page, zoom, p);
     await select(page, A, [rg]);
     const before = await page.evaluate(() => window.__appIconic!.store()!.document().snapshot());
+    await openSidebarGroup(page, 'rectangle');
     await sidebarItem(page, 'add.rect').click();
     await frames(page);
     const n = (await selectedNode(page))!;
@@ -115,6 +122,7 @@ test('Group (SVG) adds group, layer and asset; the next shape lands in it', asyn
   expect(state.assets).toContain(`${name}.svg`);
   expect(state.items).toEqual([{ kind: 'layer', group: 1, layer: 0 }]);
   await expect(page.getByRole('tree')).toContainText(name);
+  await openSidebarGroup(page, 'circle');
   await sidebarItem(page, 'add.circle').click();
   await frames(page);
   const n = (await selectedNode(page))!;
@@ -187,6 +195,26 @@ test('Image (Ctrl+I) through the file dialog: fitted to 512, centred', async ({ 
   }, n.ref);
   expect(size).toEqual(['512', '256']);
   close(n.center!, { x: 512, y: 512 });
+});
+
+test('sidebar: a shape opens its submenu beside the list, inside the window', async ({ page }) => {
+  await setup(page);
+  const group = page.locator('app-command-sidebar [data-group="circle"]');
+  await group.hover();
+  const sub = page.getByTestId('command-submenu');
+  await expect(sub).toBeVisible();
+  const g = (await group.boundingBox())!;
+  const s = (await sub.boundingBox())!;
+  const view = page.viewportSize()!;
+  expect(s.x).toBeGreaterThan(g.x + g.width - 8);
+  expect(s.y + s.height).toBeLessThanOrEqual(view.height);
+  await expect(sub.locator('[role="option"]').first()).toHaveText(/Circle at Center/);
+  // moving the pointer into the submenu keeps it open; leaving the sidebar closes it
+  await sub.locator('[data-action="sketch.circle2p"]').hover();
+  await page.waitForTimeout(250);
+  await expect(sub).toBeVisible();
+  await page.mouse.move(view.width - 10, view.height / 2);
+  await expect(sub).toBeHidden();
 });
 
 test('sidebar: filter + Enter, every Add entry enabled (tools since 013)', async ({ page }) => {

@@ -2,6 +2,8 @@ import { MAX_RECENT_ACTIONS } from '../../core/actions/action-catalog';
 import { Os } from '../../core/actions/platform';
 import { formatChord } from '../../core/actions/shortcut';
 import { AppMenuSpec, MenuItemSpec, MenuSpec } from '../../core/menu/menu.models';
+import { ADD_LAYOUT } from '../commands/add-layout';
+import { COMMANDS_TEXTS } from '../commands/commands-texts';
 import { MENUS_TEXTS } from './menus-texts';
 
 /**
@@ -114,42 +116,18 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     sep,
     a('app.palette'),
   ];
-  // by shape like Fusion's "Create" menu (prompt 019); same order as the command sidebar
-  const add: MenuNode[] = [
-    a('add.iconGroup'),
-    a('add.container'),
-    sep,
-    a('add.line'),
-    a('sketch.line'),
-    a('sketch.midpointLine'),
-    a('add.polyline'),
-    sub(t.rectangle, [
-      a('add.rect'),
-      a('sketch.rect2p'),
-      a('sketch.rect3p'),
-      a('sketch.rectCenter'),
-    ]),
-    sub(t.circle, [
-      a('add.circle'),
-      a('sketch.circleCenter'),
-      a('sketch.circle2p'),
-      a('sketch.circle3p'),
-      a('sketch.circle2t'),
-      a('sketch.circle3t'),
-    ]),
-    sub(t.arc, [a('sketch.arc3p'), a('sketch.arcCenter'), a('sketch.arcTangent')]),
-    a('add.polygon'),
-    a('add.ellipse'),
-    a('add.path'),
-    a('add.freehand'),
-    sep,
-    a('add.text'),
-    a('add.textToPath'),
-    sep,
-    a('add.symbol'),
-    a('add.svgSnippet'),
-    a('add.image'),
-  ];
+  // by shape like Fusion's "Create" menu (prompt 019): the layout of the command sidebar
+  const add: MenuNode[] = ADD_LAYOUT.flatMap((section, i) => [
+    ...(i > 0 ? [sep] : []),
+    ...section.entries.map((e) =>
+      e.kind === 'action'
+        ? a(e.id)
+        : sub(
+            COMMANDS_TEXTS.groups[e.group],
+            e.ids.map((id) => a(id)),
+          ),
+    ),
+  ]);
   const arrange: MenuNode[] = [
     a('arrange.bringToFront'),
     a('arrange.sendToBack'),

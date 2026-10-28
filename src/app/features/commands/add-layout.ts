@@ -1,0 +1,58 @@
+/**
+ * The layout of the "Add" functions, shared by the command sidebar and the Add menu (design 008
+ * E10; prompt 019): by shape like Fusion's "Create" menu – the variants of one shape in a submenu,
+ * the one-click variant at the centre first, then the sketch tools. Pure.
+ */
+export type AddSectionKey = 'structure' | 'shapes' | 'text' | 'import';
+export type AddGroupKey = 'line' | 'rectangle' | 'circle' | 'arc';
+
+export type AddEntry =
+  { kind: 'action'; id: string } | { kind: 'group'; group: AddGroupKey; ids: readonly string[] };
+
+export interface AddSection {
+  section: AddSectionKey;
+  entries: readonly AddEntry[];
+}
+
+const act = (id: string): AddEntry => ({ kind: 'action', id });
+const group = (key: AddGroupKey, ids: readonly string[]): AddEntry => ({
+  kind: 'group',
+  group: key,
+  ids,
+});
+
+export const ADD_LAYOUT: readonly AddSection[] = [
+  { section: 'structure', entries: [act('add.iconGroup'), act('add.container')] },
+  {
+    section: 'shapes',
+    entries: [
+      group('line', ['add.line', 'sketch.line', 'sketch.midpointLine', 'add.polyline']),
+      group('rectangle', ['add.rect', 'sketch.rect2p', 'sketch.rect3p', 'sketch.rectCenter']),
+      group('circle', [
+        'add.circle',
+        'sketch.circleCenter',
+        'sketch.circle2p',
+        'sketch.circle3p',
+        'sketch.circle2t',
+        'sketch.circle3t',
+      ]),
+      group('arc', ['sketch.arc3p', 'sketch.arcCenter', 'sketch.arcTangent']),
+      act('add.polygon'),
+      act('add.ellipse'),
+      act('add.path'),
+      act('add.freehand'),
+    ],
+  },
+  { section: 'text', entries: [act('add.text'), act('add.textToPath')] },
+  { section: 'import', entries: [act('add.symbol'), act('add.svgSnippet'), act('add.image')] },
+];
+
+/** The action ids of one entry (a group: its variants). */
+export function entryIds(e: AddEntry): readonly string[] {
+  return e.kind === 'action' ? [e.id] : e.ids;
+}
+
+/** Every add action in layout order. */
+export function addLayoutIds(layout: readonly AddSection[] = ADD_LAYOUT): string[] {
+  return layout.flatMap((s) => s.entries.flatMap(entryIds));
+}

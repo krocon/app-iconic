@@ -11,12 +11,10 @@
   flex: none;
 }
 
-.list {
-  flex: 1;
-  min-height: 0;
+.list,
+.flyout {
   margin: 0;
   padding: 0;
-  overflow: auto;
   list-style: none;
   color: var(--color-text);
 
@@ -36,7 +34,8 @@
     border-radius: var(--radius);
     cursor: default;
 
-    &:hover {
+    &:hover,
+    &.open {
       background: var(--color-hover);
     }
 
@@ -49,7 +48,8 @@
     }
   }
 
-  .icon {
+  .icon,
+  .chevron {
     width: 16px;
     height: 16px;
     flex: none;
@@ -58,6 +58,12 @@
     stroke-width: 1.2;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+
+  .chevron {
+    width: 12px;
+    height: 12px;
+    color: var(--color-text-muted);
   }
 
   .label {
@@ -77,6 +83,24 @@
     padding: var(--space-2);
     color: var(--color-text-muted);
   }
+}
+
+.list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* the submenu beside the list, like Fusion's "Create" menu (prompt 019) */
+.flyout {
+  position: fixed;
+  z-index: 30;
+  min-width: 15rem;
+  padding: var(--space-1);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-popup);
 }
 
 /* the list is part of the focused combobox: show where the keyboard is */
