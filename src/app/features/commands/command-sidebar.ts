@@ -14,42 +14,37 @@ import { COMMANDS_TEXTS } from './commands-texts';
 
 type Section = keyof typeof COMMANDS_TEXTS.sections;
 
-/** The add actions in the order of the Add menu, by section (design 008 E10). */
+/**
+ * The add actions in the order of the Add menu, by section (design 008 E10): grouped by shape
+ * like Fusion's "Create" menu – line, rectangle, circle, arc, then the other shapes; in each group
+ * the one-click variant at the centre first, then the sketch tools (`menu-model.spec` checks the
+ * Add menu has the same order).
+ */
 export const SIDEBAR_COMMANDS: readonly { section: Section; ids: readonly string[] }[] = [
   { section: 'structure', ids: ['add.iconGroup', 'add.container'] },
   {
-    section: 'sketch',
+    section: 'line',
+    ids: ['add.line', 'sketch.line', 'sketch.midpointLine', 'add.polyline'],
+  },
+  {
+    section: 'rectangle',
+    ids: ['add.rect', 'sketch.rect2p', 'sketch.rect3p', 'sketch.rectCenter'],
+  },
+  {
+    section: 'circle',
     ids: [
-      'sketch.line',
-      'sketch.midpointLine',
-      'sketch.rect2p',
-      'sketch.rect3p',
-      'sketch.rectCenter',
+      'add.circle',
       'sketch.circleCenter',
       'sketch.circle2p',
       'sketch.circle3p',
       'sketch.circle2t',
       'sketch.circle3t',
-      'sketch.arc3p',
-      'sketch.arcCenter',
-      'sketch.arcTangent',
     ],
   },
-  {
-    section: 'shapes',
-    ids: [
-      'add.circle',
-      'add.ellipse',
-      'add.rect',
-      'add.path',
-      'add.line',
-      'add.polyline',
-      'add.polygon',
-      'add.text',
-    ],
-  },
-  { section: 'tools', ids: ['add.freehand', 'add.textToPath', 'add.symbol'] },
-  { section: 'import', ids: ['add.svgSnippet', 'add.image'] },
+  { section: 'arc', ids: ['sketch.arc3p', 'sketch.arcCenter', 'sketch.arcTangent'] },
+  { section: 'shapes', ids: ['add.polygon', 'add.ellipse', 'add.path', 'add.freehand'] },
+  { section: 'text', ids: ['add.text', 'add.textToPath'] },
+  { section: 'import', ids: ['add.symbol', 'add.svgSnippet', 'add.image'] },
 ];
 
 interface Row {

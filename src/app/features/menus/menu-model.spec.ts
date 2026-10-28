@@ -1,5 +1,6 @@
 import { actionDef } from '../../core/actions/action-catalog';
 import { buildKeymap } from '../../core/actions/keymap';
+import { SIDEBAR_COMMANDS } from '../commands/command-sidebar';
 import { matches } from './command-palette';
 import {
   actionIds,
@@ -41,6 +42,13 @@ describe('menu model (design 005 E5)', () => {
     for (const id of ['file.exportPng', 'add.image', 'arrange.align.left', 'view.magicSnap']) {
       expect(all('mac')).toContain(id);
     }
+  });
+
+  it('orders the Add menu like the command sidebar (by shape, like Fusion)', () => {
+    const add = buildMenuModel('other', { recent: [] }).find((m) => m.label === 'Add')!;
+    expect(actionIds(add.items)).toEqual(SIDEBAR_COMMANDS.flatMap((s) => s.ids));
+    const circle = add.items.find((i) => i.kind === 'submenu' && i.label === 'Circle')!;
+    expect(actionIds([circle]).slice(0, 2)).toEqual(['add.circle', 'sketch.circleCenter']);
   });
 
   it('puts About and Quit into the app menu on macOS', () => {
