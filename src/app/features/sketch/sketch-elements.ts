@@ -48,6 +48,8 @@ export function kindOf(shape: SketchShape): { kind: StyleKind; label: UndoLabel 
       return { kind: 'arc', label: 'addArc' };
     case 'polygon':
       return { kind: 'polygon', label: 'addPolygon' };
+    case 'ellipse':
+      return { kind: 'ellipse', label: 'addEllipse' };
   }
 }
 
@@ -95,6 +97,18 @@ function build(
           d: `M ${fmt(s.x)} ${fmt(s.y)} A ${r} ${r} 0 ${large} ${sweep} ${fmt(e.x)} ${fmt(e.y)}`,
         },
       };
+    }
+    case 'ellipse': {
+      const c = map(shape.c);
+      const attrs: Record<string, string> = {
+        cx: fmt(c.x),
+        cy: fmt(c.y),
+        rx: fmt(shape.rx * k),
+        ry: fmt(shape.ry * k),
+      };
+      const deg = degrees(theta);
+      if (deg !== 0) attrs['transform'] = `rotate(${fmt(deg)} ${fmt(c.x)} ${fmt(c.y)})`;
+      return { tag: 'ellipse', attrs };
     }
     case 'polygon': {
       const points = polygonCorners(shape)

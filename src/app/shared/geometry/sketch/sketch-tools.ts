@@ -7,6 +7,7 @@ import {
   Tangent,
   tangentCircles,
 } from './apollonius';
+import { DragMods, dragShape, DragToolId, isDragTool } from './drag-shapes';
 import { polygonAround, polygonOnEdge, sidesOf, validSides } from './polygon';
 import {
   add,
@@ -51,7 +52,8 @@ export type SketchToolId =
   | 'arcTangent'
   | 'polygonCircumscribed'
   | 'polygonInscribed'
-  | 'polygonEdge';
+  | 'polygonEdge'
+  | DragToolId;
 
 export type FieldKey =
   'length' | 'angle' | 'width' | 'height' | 'diameter' | 'radius' | 'start' | 'sweep' | 'sides';
@@ -78,6 +80,8 @@ export interface Placed {
   locks?: Locks;
   /** Signed sweep (radians, document) of a centre point arc's last step. */
   sweep?: number;
+  /** The keys held (the drag tools: Shift, Alt). */
+  mods?: DragMods;
 }
 
 const P = (...fields: FieldKey[]): StepDef => ({ pick: 'point', fields });
@@ -101,6 +105,11 @@ export const SKETCH_TOOLS: Record<SketchToolId, { steps: StepDef[] }> = {
   polygonCircumscribed: { steps: [P(), P('sides', 'diameter', 'angle')] },
   polygonInscribed: { steps: [P(), P('sides', 'diameter', 'angle')] },
   polygonEdge: { steps: [P(), P('sides', 'length', 'angle'), P()] },
+  // drawn with one drag like VectorCraft (prompt 041): press, release
+  dragRect: { steps: [P(), P()] },
+  dragEllipse: { steps: [P(), P()] },
+  dragPolygon: { steps: [P(), P()] },
+  dragLine: { steps: [P(), P()] },
 };
 
 /** The fields in degrees (any value); the others are sizes (> 0) or the number of sides. */
@@ -185,11 +194,13 @@ export function resolveStep(
   pointer: Point,
   locks: Locks = {},
   prevSweep = 0,
+  mods: DragMods = {},
 ): Placed {
   const step = placed.length;
   const a = placed[0]?.p;
   const own = { locks: { ...locks } };
   if (!a || step === 0) return { p: pointer, ...own };
+  if (isDragTool(tool)) return { p: pointer, ...own, mods: { ...mods } };
   switch (tool) {
     case 'line':
     case 'rect3p':
@@ -368,5 +379,10 @@ export function shapeOf(
     }
     case 'polygonEdge':
       return a && b ? polygonOnEdge(a, b, sidesOf(steps[1].locks?.sides), c) : null;
+    case 'dragRect':
+    case 'dragEllipse':
+    case 'dragPolygon':
+    case 'dragLine':
+      return a && b ? dragShape(tool, a, b, steps[1].mods, sidesOf(steps[1].locks?.sides)) : null;
   }
 }

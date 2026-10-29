@@ -4,7 +4,7 @@
  * the one-click variant at the centre first, then the sketch tools. Pure.
  */
 export type AddSectionKey = 'structure' | 'shapes' | 'text' | 'import';
-export type AddGroupKey = 'line' | 'rectangle' | 'circle' | 'arc' | 'polygon';
+export type AddGroupKey = 'line' | 'rectangle' | 'circle' | 'ellipse' | 'arc' | 'polygon';
 
 export type AddEntry =
   { kind: 'action'; id: string } | { kind: 'group'; group: AddGroupKey; ids: readonly string[] };
@@ -26,8 +26,20 @@ export const ADD_LAYOUT: readonly AddSection[] = [
   {
     section: 'shapes',
     entries: [
-      group('line', ['add.line', 'sketch.line', 'sketch.midpointLine', 'add.polyline']),
-      group('rectangle', ['add.rect', 'sketch.rect2p', 'sketch.rect3p', 'sketch.rectCenter']),
+      group('line', [
+        'add.line',
+        'sketch.dragLine',
+        'sketch.line',
+        'sketch.midpointLine',
+        'add.polyline',
+      ]),
+      group('rectangle', [
+        'add.rect',
+        'sketch.dragRect',
+        'sketch.rect2p',
+        'sketch.rect3p',
+        'sketch.rectCenter',
+      ]),
       group('circle', [
         'add.circle',
         'sketch.circleCenter',
@@ -39,11 +51,12 @@ export const ADD_LAYOUT: readonly AddSection[] = [
       group('arc', ['sketch.arc3p', 'sketch.arcCenter', 'sketch.arcTangent']),
       group('polygon', [
         'add.polygon',
+        'sketch.dragPolygon',
         'sketch.polygonCircumscribed',
         'sketch.polygonInscribed',
         'sketch.polygonEdge',
       ]),
-      act('add.ellipse'),
+      group('ellipse', ['add.ellipse', 'sketch.dragEllipse']),
       act('add.path'),
       act('add.freehand'),
     ],

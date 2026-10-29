@@ -11,6 +11,7 @@ import { AddService } from './features/commands/add.service';
 import { CommandSidebar } from './features/commands/command-sidebar';
 import { SvgSnippetDialog } from './features/commands/svg-snippet-dialog';
 import { SymbolPickerDialog } from './features/symbols/symbol-picker-dialog';
+import { ShapeSizeDialog } from './features/sketch/shape-size-dialog';
 import { SymbolService } from './features/symbols/symbol.service';
 import { FreehandService } from './features/tools/freehand.service';
 import { TextPathDialog } from './features/tools/text-path-dialog';
@@ -83,6 +84,7 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
     Splitter,
     SvgSnippetDialog,
     SymbolPickerDialog,
+    ShapeSizeDialog,
     TextPathDialog,
     SvgSourceDialog,
   ],
@@ -240,6 +242,9 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
       @case ('symbolPicker') {
         <app-symbol-picker-dialog />
       }
+      @case ('shapeSize') {
+        <app-shape-size-dialog />
+      }
       @case ('settings') {
         <app-settings-dialog />
       }
@@ -308,7 +313,8 @@ export class App implements OnInit {
       if (target?.closest('app-side-panel.hierarchy')) return ['hierarchy', 'global'];
       // the panel's sliders and buttons keep their arrow keys (no canvas nudge, design 009 E12)
       if (target?.closest('app-side-panel.properties')) return ['global'];
-      return ['canvas', 'global'];
+      // while a shape is dragged its keys (↑/↓ sides, Space moves) come first (prompt 041)
+      return ['drawing', 'canvas', 'global'];
     });
   }
 

@@ -35,4 +35,24 @@ export function registerSketchActions(
     ]),
   );
   actions.registerAll(handlers, destroyRef);
+  // keys of a drag (prompt 041): only while one runs
+  const store = sketch.tool;
+  actions.registerAll(
+    {
+      'sketch.sidesUp': {
+        run: () => store.stepSides(1),
+        enabled: () => store.dragging() && store.tool() === 'dragPolygon',
+      },
+      'sketch.sidesDown': {
+        run: () => store.stepSides(-1),
+        enabled: () => store.dragging() && store.tool() === 'dragPolygon',
+      },
+      'sketch.moveHold': {
+        run: () => store.setSpaceMove(true),
+        release: () => store.setSpaceMove(false),
+        enabled: () => store.dragging(),
+      },
+    },
+    destroyRef,
+  );
 }

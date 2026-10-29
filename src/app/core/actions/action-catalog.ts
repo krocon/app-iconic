@@ -25,7 +25,7 @@ import { SKETCH_ARGS } from './sketch-action-args';
  * Where a shortcut is active (design 005 E4): `global` everywhere, `canvas` / `hierarchy` while
  * the focus is there (before `global`), `dialog` while a dialog is open (nothing else then).
  */
-export type ActionContext = 'global' | 'canvas' | 'hierarchy' | 'dialog';
+export type ActionContext = 'global' | 'drawing' | 'canvas' | 'hierarchy' | 'dialog';
 
 /** The menu an action belongs to (palette and shortcut overview group by it). */
 export type ActionGroup = 'app' | 'file' | 'edit' | 'view' | 'add' | 'arrange' | 'help';
@@ -386,6 +386,27 @@ export const ACTIONS: readonly ActionDef[] = [
   ADD('sketch.polygonCircumscribed', 'Circumscribed Polygon', { args: SKETCH_ARGS }),
   ADD('sketch.polygonInscribed', 'Inscribed Polygon', { args: SKETCH_ARGS }),
   ADD('sketch.polygonEdge', 'Edge Polygon', { args: SKETCH_ARGS }),
+  // drawn with one drag like VectorCraft (prompt 041); a click asks for the size
+  ADD('sketch.dragRect', 'Rectangle Tool', { args: SKETCH_ARGS }),
+  ADD('sketch.dragEllipse', 'Ellipse Tool', { args: SKETCH_ARGS }),
+  ADD('sketch.dragPolygon', 'Polygon Tool', { args: SKETCH_ARGS }),
+  ADD('sketch.dragLine', 'Line Segment Tool', { args: SKETCH_ARGS }),
+  // only while dragging one of them (the "drawing" keys come before the canvas's)
+  ADD('sketch.sidesUp', 'Polygon: One Side More', {
+    context: 'drawing',
+    repeat: true,
+    palette: false,
+  }),
+  ADD('sketch.sidesDown', 'Polygon: One Side Less', {
+    context: 'drawing',
+    repeat: true,
+    palette: false,
+  }),
+  ADD('sketch.moveHold', 'Move the Shape Being Drawn (hold)', {
+    context: 'drawing',
+    hold: true,
+    palette: false,
+  }),
   // arrange (legacy §7.2, §7.3; prompt 006)
   ARRANGE('arrange.bringToFront', 'Bring to Front', TEXT),
   ARRANGE('arrange.sendToBack', 'Send to Back', TEXT),

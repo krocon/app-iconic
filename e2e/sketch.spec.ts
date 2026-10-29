@@ -395,3 +395,107 @@ for (const c of [
     expect(errors).toEqual([]);
   });
 }
+
+test.describe('drag tools like VectorCraft (prompt 041)', () => {
+  async function drag(
+    page: Page,
+    from: { x: number; y: number },
+    to: { x: number; y: number },
+    during?: () => Promise<void>,
+  ) {
+    const a = await toClient(page, from.x, from.y);
+    const b = await toClient(page, to.x, to.y);
+    await page.mouse.move(a.clientX, a.clientY);
+    await page.mouse.down();
+    await page.mouse.move(b.clientX, b.clientY, { steps: 6 });
+    await during?.();
+    await page.mouse.up();
+    await frames(page);
+  }
+
+  for (const zoom of [0.5, 1.5]) {
+    test(`rectangle: a drag; Shift + Alt a square around the start (zoom ${zoom * 100} %)`, async ({
+      page,
+    }) => {
+      const errors = collectErrors(page);
+      await setup(page);
+      await centerOn(page, zoom, { x: 400, y: 400 });
+      await page.locator('.viewport').focus();
+      await page.keyboard.press('m');
+      await expect(page.getByTestId('sketch-hint')).toContainText('Rectangle');
+      await drag(page, { x: 300, y: 300 }, { x: 400, y: 350 });
+      let s = await selected(page);
+      expect(s?.tag).toBe('rect');
+      expect(
+        [s!.attrs['x'], s!.attrs['y'], s!.attrs['width'], s!.attrs['height']].map(Number),
+      ).toEqual([300, 300, 100, 50]);
+      // one shape per tool start: the tool is off again
+      await expect(page.getByTestId('sketch-hint')).toHaveCount(0);
+      await tool(page, 'sketch.dragRect');
+      await page.keyboard.down('Shift');
+      await page.keyboard.down('Alt');
+      await drag(page, { x: 400, y: 400 }, { x: 460, y: 420 });
+      await page.keyboard.up('Alt');
+      await page.keyboard.up('Shift');
+      s = await selected(page);
+      expect(
+        [s!.attrs['x'], s!.attrs['y'], s!.attrs['width'], s!.attrs['height']].map(Number),
+      ).toEqual([340, 340, 120, 120]);
+      expect(errors).toEqual([]);
+    });
+  }
+
+  test('polygon: ↑ during the drag adds a side; Space moves the shape', async ({ page }) => {
+    await setup(page);
+    await tool(page, 'sketch.dragPolygon');
+    await page.locator('.viewport').focus();
+    await drag(page, { x: 400, y: 400 }, { x: 500, y: 400 }, async () => {
+      await page.keyboard.press('ArrowUp');
+      await page.keyboard.press('ArrowUp');
+    });
+    let s = await selected(page);
+    expect(s?.tag).toBe('polygon');
+    expect(s!.attrs['points'].split(' ')).toHaveLength(8);
+    // Space held: the polygon follows the pointer instead of growing
+    await tool(page, 'sketch.dragPolygon');
+    await page.locator('.viewport').focus();
+    const a = await toClient(page, 300, 300);
+    const b = await toClient(page, 350, 300);
+    const c = await toClient(page, 350, 400);
+    await page.mouse.move(a.clientX, a.clientY);
+    await page.mouse.down();
+    await page.mouse.move(b.clientX, b.clientY, { steps: 4 });
+    await page.keyboard.down('Space');
+    await page.mouse.move(c.clientX, c.clientY, { steps: 4 });
+    await page.keyboard.up('Space');
+    await page.mouse.up();
+    await frames(page);
+    s = await selected(page);
+    const pts = s!.attrs['points'].split(' ').map((p) => p.split(',').map(Number));
+    expect(pts).toHaveLength(8);
+    // the centre moved from (300, 300) to (300, 400), the radius stayed 50
+    const cx = pts.reduce((t, p) => t + p[0], 0) / pts.length;
+    const cy = pts.reduce((t, p) => t + p[1], 0) / pts.length;
+    expect(cx).toBeCloseTo(300, 1);
+    expect(cy).toBeCloseTo(400, 1);
+  });
+
+  test('a click without a drag asks for the size', async ({ page }) => {
+    await setup(page);
+    await tool(page, 'sketch.dragEllipse');
+    await click(page, 200, 300);
+    const dialog = page.getByRole('dialog', { name: 'Ellipse' });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator('[data-field="width"]')).toBeFocused();
+    await page.keyboard.type('80');
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('40');
+    await page.keyboard.press('Enter');
+    await expect(dialog).toBeHidden();
+    const s = await selected(page);
+    expect(s?.tag).toBe('ellipse');
+    expect([s!.attrs['cx'], s!.attrs['cy'], s!.attrs['rx'], s!.attrs['ry']].map(Number)).toEqual([
+      240, 320, 40, 20,
+    ]);
+  });
+});

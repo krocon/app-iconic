@@ -69,6 +69,9 @@
       Maßfelder (Ecken, Länge, Winkel, Breite, Höhe, Durchmesser, Radius, Start-/Bogenwinkel; Tab, Enter,
       Esc), Tangenten an Kanten und Kreisen, Kürzel `l`/`r`/`c`, `sketch.* { points, values }` für die KI; nach jeder
       Form wieder Auswahl, ausgewählte Formen auch innerhalb des Rahmens ziehbar
+- [x] Formen aufziehen wie VectorCraft _(neu)_ (041): Rectangle / Ellipse / Polygon / Line Segment Tool – Ziehen,
+      Shift (Quadrat/Kreis/45°/aufrecht), Alt (von der Mitte), Leertaste (verschieben), ↑/↓ (Ecken), Klick → Größendialog;
+      Snap-Ziele: Magic-Punkte, „align“ und Schnittpunkte („intersect“, 040)
 - [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
       gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)

@@ -37,7 +37,13 @@
     "Mod+Shift+h": "edit.toggleVisibility",
     "l": "sketch.line",
     "r": "sketch.rect2p",
-    "c": "sketch.circleCenter"
+    "c": "sketch.circleCenter",
+    "m": "sketch.dragRect"
+  },
+  "drawing": {
+    "ArrowUp": "sketch.sidesUp",
+    "ArrowDown": "sketch.sidesDown",
+    "Space": "sketch.moveHold"
   },
   "canvas": {
     "Space": "canvas.panHold",

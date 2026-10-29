@@ -58,7 +58,7 @@ describe('CommandSidebar (design 008 E10)', () => {
       'circle',
       'arc',
       'polygon',
-      'add.ellipse',
+      'ellipse',
       'add.path',
       'add.freehand',
       'add.text',
@@ -85,6 +85,7 @@ describe('CommandSidebar (design 008 E10)', () => {
     expect(ids(options())).toEqual([
       'add.polyline',
       'add.polygon',
+      'sketch.dragPolygon',
       'sketch.polygonCircumscribed',
       'sketch.polygonInscribed',
       'sketch.polygonEdge',
@@ -177,18 +178,18 @@ describe('CommandSidebar (design 008 E10)', () => {
     circle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await fixture.whenStable();
     expect(submenu()).toHaveLength(0);
-    tools.find((b) => b.dataset['action'] === 'add.ellipse')!.click();
+    tools.find((b) => b.dataset['action'] === 'add.path')!.click();
     await new Promise((r) => setTimeout(r, 0));
-    expect(store.document().node(store.selection()[0])!.localName).toBe('ellipse');
+    expect(store.document().node(store.selection()[0])!.localName).toBe('path');
   });
 
   it('runs a click', async () => {
     const { options } = await render();
     options()
-      .find((o) => o.dataset['action'] === 'add.ellipse')!
+      .find((o) => o.dataset['action'] === 'add.path')!
       .click();
     await new Promise((r) => setTimeout(r, 0));
-    expect(store.document().node(store.selection()[0])!.localName).toBe('ellipse');
+    expect(store.document().node(store.selection()[0])!.localName).toBe('path');
   });
 });
 

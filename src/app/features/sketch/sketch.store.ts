@@ -11,7 +11,8 @@ import {
   StepDef,
 } from '../../shared/geometry/sketch/sketch-tools';
 import { measure } from '../../shared/geometry/sketch/sketch-measure';
-import { DEFAULT_SIDES } from '../../shared/geometry/sketch/polygon';
+import { DEFAULT_SIDES, MAX_SIDES, MIN_SIDES } from '../../shared/geometry/sketch/polygon';
+import { DragMods, DragToolId, isDragTool } from '../../shared/geometry/sketch/drag-shapes';
 import { Point } from '../../shared/geometry/view-transform';
 import {
   nearestAnchor,
@@ -60,6 +61,12 @@ export class SketchStore {
   private sweep = 0;
   /** The sides of the last polygon (the next one starts with them, like Fusion). */
   private sides = DEFAULT_SIDES;
+  /** The keys held while dragging (the drag tools, prompt 041). */
+  readonly mods = signal<DragMods>({});
+  /** Space held while dragging: the shape moves with the pointer (VectorCraft). */
+  private spaceMove = false;
+  /** A click of a drag tool without a drag: the size dialog asks at this point. */
+  readonly sizing = signal<{ tool: DragToolId; p: Point } | null>(null);
 
   readonly active = computed(() => this.tool() !== null);
   readonly step = computed((): StepDef | null => {
@@ -106,6 +113,7 @@ export class SketchStore {
     this.picked.set([]);
     this.sweep = 0;
     this.targets = null;
+    this.spaceMove = false;
   }
 
   /** The targets of the painted shapes (collected by the canvas at the start of a pick step). */
@@ -124,6 +132,14 @@ export class SketchStore {
 
   /** The pointer moved to `p` (document units, snapped); `pxPerUnit` = zoom. */
   move(p: Point | null, pxPerUnit = 1): void {
+    // Space held in a drag: the start moves along with the pointer
+    if (p && this.spaceMove && this.lastPointer && this.dragging()) {
+      const d = { x: p.x - this.lastPointer.x, y: p.y - this.lastPointer.y };
+      this.placed.update(([first, ...rest]) => [
+        { ...first, p: { x: first.p.x + d.x, y: first.p.y + d.y } },
+        ...rest,
+      ]);
+    }
     // off the canvas the last position stays: Enter with typed values still places the step
     if (p) this.lastPointer = p;
     const t = this.tool();
@@ -148,7 +164,7 @@ export class SketchStore {
       return;
     }
     this.hover.set(null);
-    const cur = resolveStep(t, this.placed(), p, this.stepLocks(), this.sweep);
+    const cur = resolveStep(t, this.placed(), p, this.stepLocks(), this.sweep, this.mods());
     if (cur.sweep !== undefined) this.sweep = cur.sweep;
     this.current.set(cur);
   }
@@ -156,7 +172,56 @@ export class SketchStore {
   /** The typed values and, for a step with sides, the last polygon's sides unless typed. */
   private stepLocks(): Locks {
     const locks = this.locks();
-    return this.fields().includes('sides') ? { sides: this.sides, ...locks } : locks;
+    const sided = this.fields().includes('sides') || this.tool() === 'dragPolygon';
+    return sided ? { sides: this.sides, ...locks } : locks;
+  }
+
+  /** A drag tool's drag is running (its start placed). */
+  dragging(): boolean {
+    const t = this.tool();
+    return !!t && isDragTool(t) && this.placed().length === 1;
+  }
+
+  /** The keys held changed (Shift, Alt): the preview follows. */
+  setMods(m: DragMods): void {
+    const cur = this.mods();
+    if (!!cur.shift === !!m.shift && !!cur.alt === !!m.alt) return;
+    this.mods.set({ shift: !!m.shift, alt: !!m.alt });
+    if (this.lastPointer) this.move(this.lastPointer);
+  }
+
+  /** Space down / up while dragging. */
+  setSpaceMove(on: boolean): void {
+    this.spaceMove = on;
+  }
+
+  /** The sides of the next polygon (↑/↓ while dragging, the size dialog). */
+  polygonSides(): number {
+    return this.sides;
+  }
+
+  /** ↑/↓ while dragging a polygon: one side more or less (3 … 64). */
+  stepSides(d: number): void {
+    this.sides = Math.max(MIN_SIDES, Math.min(MAX_SIDES, this.sides + d));
+    if (this.lastPointer) this.move(this.lastPointer);
+  }
+
+  /** A drag tool was clicked without a drag: drop the start and ask for a size there. */
+  askSize(): boolean {
+    const t = this.tool();
+    const start = this.placed()[0];
+    if (!t || !isDragTool(t) || !start || this.placed().length !== 1) return false;
+    this.reset();
+    this.sizing.set({ tool: t, p: start.p });
+    return true;
+  }
+
+  /** The size dialog closed: `sides` used are remembered, the tool goes off. */
+  sized(sides?: number): void {
+    if (sides !== undefined) this.sides = Math.max(MIN_SIDES, Math.min(MAX_SIDES, sides));
+    this.sizing.set(null);
+    this.reset();
+    this.tool.set(null);
   }
 
   /** A typed value of the current step; `null` unlocks it. */

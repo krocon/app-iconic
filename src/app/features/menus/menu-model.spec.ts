@@ -48,7 +48,7 @@ describe('menu model (design 005 E5)', () => {
     const add = buildMenuModel('other', { recent: [] }).find((m) => m.label === 'Add')!;
     expect(actionIds(add.items)).toEqual(addLayoutIds());
     const subs = add.items.filter((i) => i.kind === 'submenu').map((i) => i.label);
-    expect(subs).toEqual(['Line', 'Rectangle', 'Circle', 'Arc', 'Polygon']);
+    expect(subs).toEqual(['Line', 'Rectangle', 'Circle', 'Arc', 'Polygon', 'Ellipse']);
     const circle = add.items.find((i) => i.kind === 'submenu' && i.label === 'Circle')!;
     expect(actionIds([circle]).slice(0, 2)).toEqual(['add.circle', 'sketch.circleCenter']);
     expect(add.items.filter((i) => i.kind === 'separator')).toHaveLength(3);

@@ -8,7 +8,13 @@ import { normalizeChord } from './shortcut';
 
 type KeymapFile = Partial<Record<ActionContext, Record<string, string>>>;
 
-export const CONTEXTS: readonly ActionContext[] = ['global', 'canvas', 'hierarchy', 'dialog'];
+export const CONTEXTS: readonly ActionContext[] = [
+  'global',
+  'drawing',
+  'canvas',
+  'hierarchy',
+  'dialog',
+];
 
 /** The shortcuts in force: context → chord → action, and action → chords (design 005 E2). */
 export interface Keymap {

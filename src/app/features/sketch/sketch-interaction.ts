@@ -1,6 +1,7 @@
 import { clientToDocument } from '../../shared/geometry/dom-geometry';
 import { gridOriginPoint, SnapCandidate, snapPoint } from '../../shared/geometry/snapping';
 import { Point } from '../../shared/geometry/view-transform';
+import { isDragTool } from '../../shared/geometry/sketch/drag-shapes';
 import { CanvasEditStore } from '../canvas/canvas-edit.store';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { magicPoints } from '../canvas/magic-points';
@@ -16,6 +17,7 @@ interface PointerLike {
   clientX: number;
   clientY: number;
   altKey: boolean;
+  shiftKey?: boolean;
 }
 
 /**
@@ -45,7 +47,9 @@ export class SketchInteraction {
     this.edit.snap.set(null);
     if (step?.pick !== 'point') return raw;
     const o = this.view.options();
-    const off = e.altKey;
+    // ⌥ = no snap; the drag tools use ⌥ for "from the centre" (VectorCraft)
+    const tool = this.sketch.tool();
+    const off = e.altKey && !(tool && isDragTool(tool));
     const r = snapPoint(raw, this.candidates(), {
       zoom: this.view.zoom(),
       grid: o.snapToGrid && !off,
@@ -89,6 +93,7 @@ export class SketchInteraction {
 
   move(e: PointerLike): void {
     if (!this.sketch.active()) return;
+    this.sketch.setMods({ shift: !!e.shiftKey, alt: e.altKey });
     this.targets();
     this.sketch.move(this.point(e), this.view.zoom());
   }
@@ -96,6 +101,7 @@ export class SketchInteraction {
   /** Left button pressed: places the step (and inserts a finished shape). */
   press(e: PointerLike): void {
     if (!this.sketch.active()) return;
+    this.sketch.setMods({ shift: !!e.shiftKey, alt: e.altKey });
     this.targets();
     const before = this.sketch.placed().length;
     this.place(e);
@@ -108,6 +114,11 @@ export class SketchInteraction {
     this.down = null;
     if (!d || !this.sketch.active()) return;
     const moved = Math.hypot(e.clientX - d.x, e.clientY - d.y) >= DRAG_PLACE_PX;
+    // a drag tool clicked without a drag: the size dialog (VectorCraft)
+    if (!moved && this.sketch.dragging() && this.service.askSize()) {
+      this.edit.snap.set(null);
+      return;
+    }
     const next = this.sketch.step();
     if (moved && this.sketch.placed().length === d.step + 1 && next?.pick === 'point') {
       this.targets();

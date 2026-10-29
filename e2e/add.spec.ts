@@ -221,7 +221,7 @@ test('sidebar: filter + Enter, every Add entry enabled (tools since 013)', async
   await setup(page);
   const filter = page.getByTestId('command-filter');
   await filter.fill('ellip');
-  await expect(page.locator('app-command-sidebar [role="option"]')).toHaveCount(1);
+  await expect(page.locator('app-command-sidebar [role="option"]')).toHaveCount(2);
   await filter.press('Enter');
   await expect.poll(async () => (await selectedNode(page))?.tag).toBe('ellipse');
   await filter.fill('');

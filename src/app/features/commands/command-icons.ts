@@ -36,6 +36,10 @@ export const COMMAND_ICONS: Record<string, string> = {
     'M8 1.5l5.6 3.25v6.5L8 14.5l-5.6-3.25v-6.5z M8 3.2a4.8 4.8 0 1 0 0.01 0 M7.5 7.5h1v1h-1z',
   'sketch.polygonInscribed':
     'M8 3l4.3 2.5v5L8 13l-4.3-2.5v-5z M8 2a6 6 0 1 0 0.01 0 M7.5 7.5h1v1h-1z',
+  'sketch.dragRect': 'M3 4h10v8H3z M12 11l3 3',
+  'sketch.dragEllipse': 'M8 4a5.5 4 0 1 0 0.01 0 M12 11l3 3',
+  'sketch.dragPolygon': 'M8 2.5l5 3.6-1.9 5.9H4.9L3 6.1z M12 11l3 3',
+  'sketch.dragLine': 'M3 13L12 4 M12 11l3 3',
   'sketch.polygonEdge': 'M5 13l-2.5-5L8 2.5l5.5 5.5L11 13z M4 12h2v2H4z M10 12h2v2h-2z',
   'add.image': 'M2.5 3.5h11v9h-11z M5.5 6.5h0.01 M2.5 11l4-4 3 3 1.5-1.5 2.5 2.5',
 };

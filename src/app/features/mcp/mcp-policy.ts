@@ -17,6 +17,7 @@ const DENIED = new Set([
   'edit.copyXml',
   'icon.copyJson',
   'canvas.panHold',
+  'sketch.moveHold',
 ]);
 
 /** `null` = allowed, else why not (for the AI's error message). */

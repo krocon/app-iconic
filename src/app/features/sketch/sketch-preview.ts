@@ -42,6 +42,14 @@ export function shapePath(shape: SketchShape | null, m: Matrix): string | null {
       const sweep = shape.sweep > 0 ? 1 : 0;
       return `M ${pt(apply(m, start))} A ${r} ${r} 0 ${large} ${sweep} ${pt(apply(m, end))}`;
     }
+    case 'ellipse': {
+      // the view matrix is a similarity without rotation (zoom and pan)
+      const c = apply(m, shape.c);
+      const rx = shape.rx * k;
+      const ry = shape.ry * k;
+      if (!(rx > 0 && ry > 0)) return null;
+      return `M ${n(c.x - rx)} ${n(c.y)} a ${n(rx)} ${n(ry)} 0 1 0 ${n(2 * rx)} 0 a ${n(rx)} ${n(ry)} 0 1 0 ${n(-2 * rx)} 0`;
+    }
     case 'polygon': {
       const c = polygonCorners(shape).map((p) => pt(apply(m, p)));
       return `M ${c.join(' L ')} Z`;

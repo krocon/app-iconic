@@ -12,7 +12,8 @@ export type DialogKind =
   | 'export'
   | 'textPath'
   | 'symbolPicker'
-  | 'settings';
+  | 'settings'
+  | 'shapeSize';
 
 /**
  * Which modal dialog is open. Remembers the focused element on `show` and gives the focus back

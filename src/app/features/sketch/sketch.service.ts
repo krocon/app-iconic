@@ -1,6 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { MAX_SKETCH_POINTS, SKETCH_VALUE_KEYS } from '../../core/actions/sketch-action-args';
 import { validSides } from '../../shared/geometry/sketch/polygon';
+import { sizedShape } from '../../shared/geometry/sketch/drag-shapes';
+import { DialogService } from '../../shared/dialog/dialog.service';
 import { isDegenerate, SketchShape } from '../../shared/geometry/sketch/sketch-shapes';
 import {
   Locks,
@@ -24,6 +26,9 @@ import { SKETCH_TEXTS as T } from './sketch-texts';
 import { StyleMemory } from './style-memory';
 
 type Args = Record<string, unknown> | undefined;
+
+/** What the size dialog asks (prompt 041). */
+export type SizeValues = Parameters<typeof sizedShape>[2];
 
 /** `[[x, y], …]` from outside (design 019 E14); `null` if malformed. */
 export function parseSketchPoints(v: unknown): Point[] | null {
@@ -71,12 +76,28 @@ export class SketchService {
   private readonly canvas = inject(CanvasViewStore);
   private readonly memory = inject(StyleMemory);
   private readonly freehand = inject(FreehandStore);
+  private readonly dialogs = inject(DialogService);
   readonly tool = inject(SketchStore);
 
   /** The tool on/off (an action without arguments); the freehand tool goes off. */
   toggle(tool: SketchToolId): void {
     this.freehand.toggle(false);
     this.tool.toggle(tool);
+  }
+
+  /** A drag tool clicked without a drag: ask for the size at the click (prompt 041). */
+  askSize(): boolean {
+    if (!this.tool.askSize()) return false;
+    this.dialogs.show('shapeSize');
+    return true;
+  }
+
+  /** The size dialog's values: the shape at the click, one undo step; the tool goes off. */
+  async insertSized(values: SizeValues): Promise<boolean> {
+    const at = this.tool.sizing();
+    const shape = at ? sizedShape(at.tool, at.p, values) : null;
+    this.tool.sized(at?.tool === 'dragPolygon' ? values.sides : undefined);
+    return shape ? this.insert(shape) : false;
   }
 
   /** Inserts `shape` (document units) as one undo step. */

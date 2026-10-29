@@ -16,6 +16,8 @@ export type SketchShape =
   /** Centre, size (≥ 0) and rotation of the unrotated rectangle about its centre. */
   | { kind: 'rect'; c: Point; w: number; h: number; angle: number }
   | { kind: 'circle'; c: Point; r: number }
+  /** An axis-aligned ellipse (the drag tools, design 041). */
+  | { kind: 'ellipse'; c: Point; rx: number; ry: number }
   /** `start` = angle of the start point, `sweep` signed (positive = clockwise on screen), |sweep| < 2π. */
   | { kind: 'arc'; c: Point; r: number; start: number; sweep: number }
   /**
@@ -187,5 +189,7 @@ export function isDegenerate(shape: SketchShape, min: number): boolean {
       return !(shape.r >= min) || Math.abs(shape.sweep) * shape.r < min;
     case 'polygon':
       return !(shape.r >= min);
+    case 'ellipse':
+      return !(shape.rx >= min && shape.ry >= min);
   }
 }

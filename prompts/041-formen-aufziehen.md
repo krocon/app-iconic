@@ -8,6 +8,12 @@
 Formen entstehen wie in VectorCraft mit einer Zieh-Geste – zusätzlich zu den Fusion-Werkzeugen mit zwei Klicks und
 Maßfeldern.
 
+## Stand
+
+- ✅ 29.10.2026: Rectangle / Ellipse / Polygon / Line Segment Tool (`sketch.drag*`, Kürzel `m` = Rechteck) mit
+  Shift, Alt, Leertaste (Kontext „drawing“: `sketch.moveHold`), ↑/↓ (`sketch.sidesUp/Down`), Klick → Größendialog
+  (`ShapeSizeDialog`), Geometrie rein in `shared/geometry/sketch/drag-shapes.ts`. Der Stern folgt mit 044.
+
 ## Umfang
 
 - Rechteck, Ellipse, Polygon, Stern, Linie: Drücken = Start, Ziehen = Größe, Loslassen = fertig (ein Undo-Schritt).
