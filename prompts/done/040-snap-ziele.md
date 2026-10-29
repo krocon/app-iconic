@@ -1,6 +1,6 @@
 # Prompt 040: Snap-Ziele wie Smart Guides
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 007, 019 · Vorbild: VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden),
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 007, 019 · Vorbild: VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden),
 > `crates/tools/src/guides/` (`targets.rs`, `snap.rs`)
 
 ## Ziel

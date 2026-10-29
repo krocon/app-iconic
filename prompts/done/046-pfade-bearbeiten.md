@@ -1,6 +1,6 @@
 # Prompt 046: Pfade bearbeiten – Punkte, Schere, Messer, Verbinden, Glätten
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 042 · Vorbild: VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden),
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 042 · Vorbild: VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden),
 > `crates/tools/src/draw2/` (`anchor.rs`, `gesture.rs`), `cut.rs`
 
 ## Stand

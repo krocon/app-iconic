@@ -1,6 +1,6 @@
 # Prompt 051: Verrunden und Fasen zwischen Elementen
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 050 · Vorbild: Fusion 360 Sketch „Fillet“/„Chamfer“; VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden), `crates/geom/src/corners.rs`
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 050 · Vorbild: Fusion 360 Sketch „Fillet“/„Chamfer“; VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden), `crates/geom/src/corners.rs`
 
 ## Stand
 

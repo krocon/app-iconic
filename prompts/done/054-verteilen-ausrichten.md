@@ -1,6 +1,6 @@
 # Prompt 054: Verteilen und Ausrichten an Leinwand / Schlüsselobjekt
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 007 · Vorbild: Illustrator „Align“-Panel
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 007 · Vorbild: Illustrator „Align“-Panel
 
 ## Stand
 

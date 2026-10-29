@@ -1,6 +1,6 @@
 # Prompt 052: Versatz und Kontur in Fläche
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 047 · Vorbild: Illustrator „Offset Path“/„Outline Stroke“, Fusion „Offset“; VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden), `crates/pathops/src/offset.rs`
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 047 · Vorbild: Illustrator „Offset Path“/„Outline Stroke“, Fusion „Offset“; VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden), `crates/pathops/src/offset.rs`
 
 ## Stand
 

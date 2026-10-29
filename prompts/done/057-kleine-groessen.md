@@ -1,6 +1,6 @@
 # Prompt 057: Vorschau in kleinen Größen und Pixelraster
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 012 · Vorbild: Icon-Editoren (Icon Slate, Figma Pixel Preview)
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 012 · Vorbild: Icon-Editoren (Icon Slate, Figma Pixel Preview)
 
 ## Stand
 

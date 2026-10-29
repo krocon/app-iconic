@@ -1,6 +1,6 @@
 # Prompt 058: Direkt als Konstruktion zeichnen
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 049 · Vorbild: Fusion 360 Sketch-Palette „Construction“
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 049 · Vorbild: Fusion 360 Sketch-Palette „Construction“
 
 ## Stand
 

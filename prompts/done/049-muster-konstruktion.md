@@ -1,6 +1,6 @@
 # Prompt 049: Konstruktionslinien, Muster, Spiegeln, Klonen
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 040 · Vorbild: Fusion 360 (Sketch: Construction,
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 040 · Vorbild: Fusion 360 (Sketch: Construction,
 > Circular Pattern, Rectangular Pattern, Mirror) – Marc, 29.10.2026
 
 ## Stand

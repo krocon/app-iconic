@@ -49,25 +49,25 @@ dann 056, 057, 058, 032 (Verlaufseditor), zuletzt 059.
 | 031 | [031-haertung-paritaet.md](done/031-haertung-paritaet.md) | Parität gegen `docs/FEATURES.md`, Review durch separaten Agenten, feindliche Dateien, Performance großer SVGs, Barrierefreiheit, Doku | 002–030 | M | ✅ 27.10.2026 |
 | 032 | [032-verlaufseditor.md](032-verlaufseditor.md) | Verlaufseditor: Panel-Abschnitt Gradient (Art, Units, Spread, Transform, Stop-Leiste), Griffe auf der Fläche, geteilte Verläufe, `gradient.*` | 009, 011 | M | offen |
 | 033 | [033-haertung-folgen.md](033-haertung-folgen.md) | Folgen aus dem Review von 031: Pfade nur aus vertrauten Quellen, Transform-Rechnung über den Browser, Dateien teilen, Leistung auf dem Mac messen | 031 | M | offen |
-| 040 | [040-snap-ziele.md](040-snap-ziele.md) | Smart Guides wie VectorCraft: Schnittpunkte („intersect“), Kontur („path“), Labels, Konstruktionswinkel, Tangente/Senkrecht, Verlängerung | 007, 019 | M–L | ✅ 29.10.2026 |
-| 041 | [041-formen-aufziehen.md](041-formen-aufziehen.md) | Formen per Klicken und Ziehen (Shift/Alt/Leertaste/↑↓), Klick → Größendialog | 019, 040 | M | ✅ 29.10.2026 (Stern mit 044) |
-| 042 | [042-pen.md](042-pen.md) | Zeichenstift: Ecken/glatte Punkte, Griffe, schließen, fortsetzen, Auto Add/Delete | 040 | L | ✅ 29.10.2026 (Auto Add/Delete mit 046) |
-| 043 | [043-curvature.md](043-curvature.md) | Curvature-Werkzeug: glatte Kurve durch Klicks, vorhandene Pfade krümmen | 042 | M | ✅ 29.10.2026 |
-| 044 | [044-weitere-formen.md](044-weitere-formen.md) | Rounded Rectangle, Stern, Spirale, Rechteck-/Polarraster, Bogen | 041 | M | ✅ 29.10.2026 |
-| 045 | [045-live-corners.md](045-live-corners.md) | Live Corners: Ecken runden/fasen per Griff | 007 | M | ✅ 29.10.2026 |
-| 046 | [046-pfade-bearbeiten.md](046-pfade-bearbeiten.md) | Punkte hinzufügen/löschen/umwandeln, Schere, Messer, Cuts, Join, Smooth | 042 | L | ✅ 29.10.2026 (Messer/Cuts mit 047) |
-| 047 | [047-shape-builder-pathfinder.md](047-shape-builder-pathfinder.md) | Pathfinder (boolesche Operationen) und Shape Builder | 046 | L | ✅ 29.10.2026 |
-| 048 | [048-bemassung-messen.md](048-bemassung-messen.md) | Messen und Bemaßung | 040 | M | ✅ 29.10.2026 |
-| 049 | [049-muster-konstruktion.md](049-muster-konstruktion.md) | Konstruktionslinien, kreisförmiges/rechteckiges Muster, Spiegeln, Klonen | 040 | M | ✅ 29.10.2026 |
-| 050 | [050-trimmen-verlaengern.md](050-trimmen-verlaengern.md) | Trimmen und Verlängern an Schnittpunkten | 040, 046 | M | ✅ 29.10.2026 |
-| 051 | [051-verrunden-fasen.md](051-verrunden-fasen.md) | Verrunden und Fasen zwischen Elementen | 050 | M | ✅ 29.10.2026 |
-| 052 | [052-versatz-kontur.md](052-versatz-kontur.md) | Versatz (Offset) und Kontur in Fläche | 047 | L | ✅ 29.10.2026 |
-| 053 | [053-transformieren.md](053-transformieren.md) | Transformieren mit Bezugspunkt und Zahlen | 007 | M | ✅ 29.10.2026 |
-| 054 | [054-verteilen-ausrichten.md](054-verteilen-ausrichten.md) | Verteilen; Ausrichten an Leinwand/Schlüsselobjekt | 007 | S | ✅ 29.10.2026 |
-| 055 | [055-sperren-isolieren.md](055-sperren-isolieren.md) | Sperren, Isolieren, Konstruktion ausblenden | 006, 007 | M | ✅ 29.10.2026 |
-| 056 | [056-hilfslinien-raster.md](056-hilfslinien-raster.md) | Hilfslinien aus dem Lineal, Icon-Raster-Vorlagen | 004 | M | ✅ 29.10.2026 |
-| 057 | [057-kleine-groessen.md](057-kleine-groessen.md) | Vorschau in kleinen Größen, Pixelraster | 012 | M | ✅ 29.10.2026 |
-| 058 | [058-als-konstruktion-zeichnen.md](058-als-konstruktion-zeichnen.md) | Direkt als Konstruktion zeichnen | 049 | S | ✅ 29.10.2026 |
+| 040 | [040-snap-ziele.md](done/040-snap-ziele.md) | Smart Guides wie VectorCraft: Schnittpunkte („intersect“), Kontur („path“), Labels, Konstruktionswinkel, Tangente/Senkrecht, Verlängerung | 007, 019 | M–L | ✅ 29.10.2026 |
+| 041 | [041-formen-aufziehen.md](done/041-formen-aufziehen.md) | Formen per Klicken und Ziehen (Shift/Alt/Leertaste/↑↓), Klick → Größendialog | 019, 040 | M | ✅ 29.10.2026 (Stern mit 044) |
+| 042 | [042-pen.md](done/042-pen.md) | Zeichenstift: Ecken/glatte Punkte, Griffe, schließen, fortsetzen, Auto Add/Delete | 040 | L | ✅ 29.10.2026 (Auto Add/Delete mit 046) |
+| 043 | [043-curvature.md](done/043-curvature.md) | Curvature-Werkzeug: glatte Kurve durch Klicks, vorhandene Pfade krümmen | 042 | M | ✅ 29.10.2026 |
+| 044 | [044-weitere-formen.md](done/044-weitere-formen.md) | Rounded Rectangle, Stern, Spirale, Rechteck-/Polarraster, Bogen | 041 | M | ✅ 29.10.2026 |
+| 045 | [045-live-corners.md](done/045-live-corners.md) | Live Corners: Ecken runden/fasen per Griff | 007 | M | ✅ 29.10.2026 |
+| 046 | [046-pfade-bearbeiten.md](done/046-pfade-bearbeiten.md) | Punkte hinzufügen/löschen/umwandeln, Schere, Messer, Cuts, Join, Smooth | 042 | L | ✅ 29.10.2026 (Messer/Cuts mit 047) |
+| 047 | [047-shape-builder-pathfinder.md](done/047-shape-builder-pathfinder.md) | Pathfinder (boolesche Operationen) und Shape Builder | 046 | L | ✅ 29.10.2026 |
+| 048 | [048-bemassung-messen.md](done/048-bemassung-messen.md) | Messen und Bemaßung | 040 | M | ✅ 29.10.2026 |
+| 049 | [049-muster-konstruktion.md](done/049-muster-konstruktion.md) | Konstruktionslinien, kreisförmiges/rechteckiges Muster, Spiegeln, Klonen | 040 | M | ✅ 29.10.2026 |
+| 050 | [050-trimmen-verlaengern.md](done/050-trimmen-verlaengern.md) | Trimmen und Verlängern an Schnittpunkten | 040, 046 | M | ✅ 29.10.2026 |
+| 051 | [051-verrunden-fasen.md](done/051-verrunden-fasen.md) | Verrunden und Fasen zwischen Elementen | 050 | M | ✅ 29.10.2026 |
+| 052 | [052-versatz-kontur.md](done/052-versatz-kontur.md) | Versatz (Offset) und Kontur in Fläche | 047 | L | ✅ 29.10.2026 |
+| 053 | [053-transformieren.md](done/053-transformieren.md) | Transformieren mit Bezugspunkt und Zahlen | 007 | M | ✅ 29.10.2026 |
+| 054 | [054-verteilen-ausrichten.md](done/054-verteilen-ausrichten.md) | Verteilen; Ausrichten an Leinwand/Schlüsselobjekt | 007 | S | ✅ 29.10.2026 |
+| 055 | [055-sperren-isolieren.md](done/055-sperren-isolieren.md) | Sperren, Isolieren, Konstruktion ausblenden | 006, 007 | M | ✅ 29.10.2026 |
+| 056 | [056-hilfslinien-raster.md](done/056-hilfslinien-raster.md) | Hilfslinien aus dem Lineal, Icon-Raster-Vorlagen | 004 | M | ✅ 29.10.2026 |
+| 057 | [057-kleine-groessen.md](done/057-kleine-groessen.md) | Vorschau in kleinen Größen, Pixelraster | 012 | M | ✅ 29.10.2026 |
+| 058 | [058-als-konstruktion-zeichnen.md](done/058-als-konstruktion-zeichnen.md) | Direkt als Konstruktion zeichnen | 049 | S | ✅ 29.10.2026 |
 | 059 | [059-abhaengigkeiten.md](059-abhaengigkeiten.md) | Abhängigkeiten und treibende Maße (parametrisch) | 048, 050, 051 | XL | offen |
 
 ## Folge-Ideen (noch ohne Prompt)

@@ -1,6 +1,6 @@
 # Prompt 045: Live Corners – Ecken runden und fasen
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 007 · Vorbild: VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden), `crates/tools/src/corners.rs`
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 007 · Vorbild: VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden), `crates/tools/src/corners.rs`
 
 ## Stand
 

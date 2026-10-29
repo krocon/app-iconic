@@ -1,6 +1,6 @@
 # Prompt 056: Hilfslinien aus dem Lineal und Icon-Raster
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 004 · Vorbild: Illustrator/Figma Guides; Apple/Material Keyline-Raster
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 004 · Vorbild: Illustrator/Figma Guides; Apple/Material Keyline-Raster
 
 ## Stand
 

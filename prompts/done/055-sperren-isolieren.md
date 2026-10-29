@@ -1,6 +1,6 @@
 # Prompt 055: Sperren und Isolieren
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 006, 007 · Vorbild: Illustrator „Lock“/„Isolation Mode“
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 006, 007 · Vorbild: Illustrator „Lock“/„Isolation Mode“
 
 ## Stand
 

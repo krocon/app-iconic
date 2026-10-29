@@ -1,6 +1,6 @@
 # Prompt 047: Shape Builder und Pathfinder (boolesche Operationen)
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 046 · Vorbild: VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden),
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 046 · Vorbild: VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden),
 > `crates/tools/src/builder.rs` (`vectorcraft_pathops::shape_builder`)
 
 ## Stand

@@ -1,6 +1,6 @@
 # Prompt 050: Trimmen und Verlängern
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 040, 046, 049 · Vorbild: Fusion 360 Sketch „Trim“/„Extend“; VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden), `crates/tools/src/cut.rs`
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 040, 046, 049 · Vorbild: Fusion 360 Sketch „Trim“/„Extend“; VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden), `crates/tools/src/cut.rs`
 
 ## Stand
 

@@ -1,6 +1,6 @@
 # Prompt 053: Transformieren mit Zahlen und Bezugspunkt
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 007 · Vorbild: Illustrator „Rotate/Scale/Reflect Tool“ + „Transform Each“; Fusion „Move/Copy“
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 007 · Vorbild: Illustrator „Rotate/Scale/Reflect Tool“ + „Transform Each“; Fusion „Move/Copy“
 
 ## Stand
 
