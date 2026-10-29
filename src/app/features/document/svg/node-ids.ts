@@ -7,6 +7,11 @@ import { sanitizeSvg } from './sanitize-svg';
 
 export const SVG_NS = 'http://www.w3.org/2000/svg';
 export const ID_ATTR = 'data-ai-id';
+/**
+ * Internal attributes commands may set: live state of an editing aid while the document is open
+ * (Live Corners' sharp points, prompt 045); never saved like every `data-ai-*`.
+ */
+export const LIVE_ATTRS: ReadonlySet<string> = new Set(['data-ai-corners']);
 const INTERNAL_PREFIX = 'data-ai-';
 
 /**

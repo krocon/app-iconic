@@ -12,6 +12,8 @@ import { CommandSidebar } from './features/commands/command-sidebar';
 import { SvgSnippetDialog } from './features/commands/svg-snippet-dialog';
 import { SymbolPickerDialog } from './features/symbols/symbol-picker-dialog';
 import { ShapeSizeDialog } from './features/sketch/shape-size-dialog';
+import { CornersDialog } from './features/corners/corners-dialog';
+import { CornersService } from './features/corners/corners.service';
 import { SymbolService } from './features/symbols/symbol.service';
 import { FreehandService } from './features/tools/freehand.service';
 import { TextPathDialog } from './features/tools/text-path-dialog';
@@ -89,6 +91,7 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
     SvgSnippetDialog,
     SymbolPickerDialog,
     ShapeSizeDialog,
+    CornersDialog,
     TextPathDialog,
     SvgSourceDialog,
   ],
@@ -246,6 +249,9 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
       @case ('symbolPicker') {
         <app-symbol-picker-dialog />
       }
+      @case ('corners') {
+        <app-corners-dialog />
+      }
       @case ('shapeSize') {
         <app-shape-size-dialog />
       }
@@ -303,6 +309,25 @@ export class App implements OnInit {
       inject(SketchService),
       this.destroyRef,
       penService.pen,
+    );
+    const corners = inject(CornersService);
+    this.actions.registerAll(
+      {
+        // Live Corners (prompt 045): with `radius` / `kind` at once, else the dialog
+        'corners.set': {
+          run: (a) => {
+            const args = a as
+              { radius?: number; kind?: 'round' | 'inverted' | 'chamfer' } | undefined;
+            if (args?.radius === undefined) {
+              this.dialogs.show('corners');
+              return true;
+            }
+            return corners.apply(args.radius, args.kind ?? 'round');
+          },
+          enabled: () => corners.canApply(),
+        },
+      },
+      this.destroyRef,
     );
     registerPenActions(
       this.actions,

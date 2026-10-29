@@ -81,6 +81,7 @@
         [strokeWidth]="freehand.strokeWidth()"
       />
     }
+    <app-corner-overlay [toView]="toView()" />
     @if (pen.on()) {
       <app-pen-overlay
         [toView]="toView()"

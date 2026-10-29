@@ -298,6 +298,16 @@ export const ACTIONS: readonly ActionDef[] = [
     args: { type: 'object', required: ['appearance'], properties: { appearance: APPEARANCE_ARG } },
   }),
   EDIT('icon.copyJson', 'Copy icon.json'),
+  // Live Corners (prompt 045): without arguments the dialog
+  EDIT('corners.set', 'Corners…', {
+    args: {
+      type: 'object',
+      properties: {
+        radius: { type: 'number', minimum: 0, maximum: 10000 },
+        kind: { type: 'string', enum: ['round', 'inverted', 'chamfer'] },
+      },
+    },
+  }),
   // view (legacy §4, §5, §9)
   VIEW('view.commandSidebar', 'Command Sidebar'),
   VIEW('view.hierarchy', 'Hierarchy'),

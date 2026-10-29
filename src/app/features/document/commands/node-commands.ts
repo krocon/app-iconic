@@ -1,6 +1,6 @@
 import { unsafeAttribute } from '../svg/sanitize-svg';
 import { IconDocument, NodeRef } from '../icon-document';
-import { ID_ATTR, parseFragment } from '../svg/node-ids';
+import { ID_ATTR, parseFragment, LIVE_ATTRS } from '../svg/node-ids';
 import { UndoLabel } from '../undo/undo-texts';
 import { CommandError, DocCommand } from './command';
 import { CommandJson, opt } from './command-json';
@@ -44,7 +44,7 @@ export function checkValue(name: string, value: string | null): void {
 
 export function checkName(name: string): void {
   // internal ids are never changed by commands; handlers never get in (design 003 E4)
-  if (!name || name.startsWith('data-ai-') || /^on/i.test(name)) {
+  if (!name || (name.startsWith('data-ai-') && !LIVE_ATTRS.has(name)) || /^on/i.test(name)) {
     throw new CommandError(`attribute ${name} cannot be set`);
   }
 }

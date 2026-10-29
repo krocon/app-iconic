@@ -90,6 +90,7 @@ const EN = {
   // SVG source (design 011 E12)
   optimizePath: 'Optimize Path',
   editPath: 'Edit Path',
+  roundCorners: 'Round Corners',
   // clip paths (design 014 E5)
   createClipPath: 'Create Clip Path',
   assignClip: 'Assign Clip Path',
@@ -177,6 +178,7 @@ export const UNDO_TEXTS = translatable('undo', EN, {
     removeVariant: 'Variante des Erscheinungsbilds entfernen',
     optimizePath: 'Pfad optimieren',
     editPath: 'Pfad bearbeiten',
+    roundCorners: 'Ecken abrunden',
     createClipPath: 'Beschneidungspfad anlegen',
     assignClip: 'Beschneidungspfad zuweisen',
     layerClip: 'Beschneidung der Ebene ändern',
