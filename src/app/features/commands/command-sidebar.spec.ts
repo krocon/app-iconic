@@ -59,7 +59,7 @@ describe('CommandSidebar (design 008 E10)', () => {
       'arc',
       'polygon',
       'ellipse',
-      'add.path',
+      'path',
       'add.freehand',
       'add.text',
       'add.textToPath',
@@ -178,18 +178,18 @@ describe('CommandSidebar (design 008 E10)', () => {
     circle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await fixture.whenStable();
     expect(submenu()).toHaveLength(0);
-    tools.find((b) => b.dataset['action'] === 'add.path')!.click();
+    tools.find((b) => b.dataset['action'] === 'add.text')!.click();
     await new Promise((r) => setTimeout(r, 0));
-    expect(store.document().node(store.selection()[0])!.localName).toBe('path');
+    expect(store.document().node(store.selection()[0])!.localName).toBe('text');
   });
 
   it('runs a click', async () => {
     const { options } = await render();
     options()
-      .find((o) => o.dataset['action'] === 'add.path')!
+      .find((o) => o.dataset['action'] === 'add.text')!
       .click();
     await new Promise((r) => setTimeout(r, 0));
-    expect(store.document().node(store.selection()[0])!.localName).toBe('path');
+    expect(store.document().node(store.selection()[0])!.localName).toBe('text');
   });
 });
 

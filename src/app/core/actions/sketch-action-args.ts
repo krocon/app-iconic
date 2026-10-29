@@ -24,6 +24,21 @@ export const SKETCH_VALUE_KEYS = [
   'sides',
 ] as const;
 
+/**
+ * The pen / curvature tools (prompts 042, 043): without arguments the tool on/off; with
+ * `anchors` (`[{ p: [x, y], in?: [x, y], out?: [x, y] }, …]`, document units) and `closed` the
+ * path at once.
+ */
+export const PEN_ARGS: ArgsSpec = {
+  type: 'object',
+  properties: {
+    anchors: { type: 'json' },
+    closed: { type: 'boolean' },
+    ...PAINT,
+    ...PLACE,
+  },
+};
+
 export const SKETCH_ARGS: ArgsSpec = {
   type: 'object',
   properties: {

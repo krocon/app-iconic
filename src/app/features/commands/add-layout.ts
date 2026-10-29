@@ -4,7 +4,7 @@
  * the one-click variant at the centre first, then the sketch tools. Pure.
  */
 export type AddSectionKey = 'structure' | 'shapes' | 'text' | 'import';
-export type AddGroupKey = 'line' | 'rectangle' | 'circle' | 'ellipse' | 'arc' | 'polygon';
+export type AddGroupKey = 'line' | 'rectangle' | 'circle' | 'ellipse' | 'arc' | 'polygon' | 'path';
 
 export type AddEntry =
   { kind: 'action'; id: string } | { kind: 'group'; group: AddGroupKey; ids: readonly string[] };
@@ -57,7 +57,7 @@ export const ADD_LAYOUT: readonly AddSection[] = [
         'sketch.polygonEdge',
       ]),
       group('ellipse', ['add.ellipse', 'sketch.dragEllipse']),
-      act('add.path'),
+      group('path', ['add.path', 'pen.tool']),
       act('add.freehand'),
     ],
   },

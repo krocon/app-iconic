@@ -19,7 +19,10 @@ import { TextPathService } from './features/tools/text-path.service';
 import { registerToolActions } from './features/tools/tools-actions';
 import { registerSketchActions } from './features/sketch/sketch-actions';
 import { SketchService } from './features/sketch/sketch.service';
-import { SketchStore } from './features/sketch/sketch.store';
+import { CanvasTools } from './features/canvas/canvas-tools';
+import { PenService } from './features/pen/pen.service';
+import { FreehandStore } from './features/tools/freehand.store';
+import { registerPenActions } from './features/pen/pen-actions';
 import { registerFileActions } from './features/files/file-actions';
 import { FILES_TEXTS } from './features/files/files-texts';
 import { FilesService } from './features/files/files.service';
@@ -282,7 +285,7 @@ export class App implements OnInit {
     );
     registerEditActions(this.actions, inject(EditService), this.dialogs, this.destroyRef);
     registerAddActions(this.actions, inject(AddService), this.destroyRef);
-    const sketchStore = inject(SketchStore);
+    const canvasTools = inject(CanvasTools);
     registerToolActions(
       this.actions,
       inject(AddService),
@@ -290,9 +293,24 @@ export class App implements OnInit {
       inject(TextPathService),
       inject(SymbolService),
       this.destroyRef,
-      () => sketchStore.toggle(null),
+      () => canvasTools.stopAll(),
     );
-    registerSketchActions(this.actions, inject(AddService), inject(SketchService), this.destroyRef);
+    const penService = inject(PenService);
+    registerSketchActions(
+      this.actions,
+      inject(AddService),
+      inject(SketchService),
+      this.destroyRef,
+      penService.pen,
+    );
+    registerPenActions(
+      this.actions,
+      inject(AddService),
+      penService,
+      canvasTools,
+      inject(FreehandStore),
+      this.destroyRef,
+    );
     registerPropertiesActions(this.actions, inject(PropertiesService), this.destroyRef);
     registerIconActions(this.actions, inject(IconInspectorService), this.destroyRef);
     registerSvgSourceActions(this.actions, inject(SvgSourceService), this.destroyRef);

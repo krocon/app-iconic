@@ -36,6 +36,7 @@ export const COMMAND_ICONS: Record<string, string> = {
     'M8 1.5l5.6 3.25v6.5L8 14.5l-5.6-3.25v-6.5z M8 3.2a4.8 4.8 0 1 0 0.01 0 M7.5 7.5h1v1h-1z',
   'sketch.polygonInscribed':
     'M8 3l4.3 2.5v5L8 13l-4.3-2.5v-5z M8 2a6 6 0 1 0 0.01 0 M7.5 7.5h1v1h-1z',
+  'pen.tool': 'M3 13l2.5-6.5L11 3l2 2-3.5 5.5L3 13z M3 13l4-4 M7.5 7.5h1v1h-1z',
   'sketch.dragRect': 'M3 4h10v8H3z M12 11l3 3',
   'sketch.dragEllipse': 'M8 4a5.5 4 0 1 0 0.01 0 M12 11l3 3',
   'sketch.dragPolygon': 'M8 2.5l5 3.6-1.9 5.9H4.9L3 6.1z M12 11l3 3',

@@ -6,6 +6,7 @@ import {
   rectCorners,
   SketchShape,
 } from '../../shared/geometry/sketch/sketch-shapes';
+import { mapAnchors, penPathData } from '../../shared/geometry/pen/pen-path';
 import { Point } from '../../shared/geometry/view-transform';
 import { SketchAnchor, SketchTarget } from './sketch-targets';
 
@@ -42,6 +43,13 @@ export function shapePath(shape: SketchShape | null, m: Matrix): string | null {
       const sweep = shape.sweep > 0 ? 1 : 0;
       return `M ${pt(apply(m, start))} A ${r} ${r} 0 ${large} ${sweep} ${pt(apply(m, end))}`;
     }
+    case 'bezier':
+      return (
+        penPathData(
+          mapAnchors(shape.anchors, (p) => apply(m, p)),
+          shape.closed,
+        ) || null
+      );
     case 'ellipse': {
       // the view matrix is a similarity without rotation (zoom and pan)
       const c = apply(m, shape.c);

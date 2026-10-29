@@ -18,6 +18,8 @@ export function registerSketchActions(
   add: AddService,
   sketch: SketchService,
   destroyRef?: DestroyRef,
+  /** The pen: Space moves its anchor too (prompt 042). */
+  pen?: { dragging(): boolean; setSpaceMove(on: boolean): void },
 ): void {
   const handlers = Object.fromEntries(
     SKETCH_TOOL_IDS.map((tool): [string, ActionHandler] => [
@@ -48,9 +50,15 @@ export function registerSketchActions(
         enabled: () => store.dragging() && store.tool() === 'dragPolygon',
       },
       'sketch.moveHold': {
-        run: () => store.setSpaceMove(true),
-        release: () => store.setSpaceMove(false),
-        enabled: () => store.dragging(),
+        run: () => {
+          store.setSpaceMove(true);
+          pen?.setSpaceMove(true);
+        },
+        release: () => {
+          store.setSpaceMove(false);
+          pen?.setSpaceMove(false);
+        },
+        enabled: () => store.dragging() || !!pen?.dragging(),
       },
     },
     destroyRef,

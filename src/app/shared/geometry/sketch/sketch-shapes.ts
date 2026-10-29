@@ -1,3 +1,4 @@
+import type { PenAnchor } from '../pen/pen-path';
 import { Point } from '../view-transform';
 
 /**
@@ -16,6 +17,8 @@ export type SketchShape =
   /** Centre, size (≥ 0) and rotation of the unrotated rectangle about its centre. */
   | { kind: 'rect'; c: Point; w: number; h: number; angle: number }
   | { kind: 'circle'; c: Point; r: number }
+  /** A path of the pen / curvature tools (prompts 042, 043). */
+  | { kind: 'bezier'; anchors: readonly PenAnchor[]; closed: boolean }
   /** An axis-aligned ellipse (the drag tools, design 041). */
   | { kind: 'ellipse'; c: Point; rx: number; ry: number }
   /** `start` = angle of the start point, `sweep` signed (positive = clockwise on screen), |sweep| < 2π. */
@@ -191,5 +194,9 @@ export function isDegenerate(shape: SketchShape, min: number): boolean {
       return !(shape.r >= min);
     case 'ellipse':
       return !(shape.rx >= min && shape.ry >= min);
+    case 'bezier': {
+      const ps = shape.anchors.map((a) => a.p);
+      return ps.length < 2 || ps.every((p) => dist(p, ps[0]) < min);
+    }
   }
 }

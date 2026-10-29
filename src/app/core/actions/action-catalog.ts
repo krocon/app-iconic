@@ -9,7 +9,7 @@ import {
   CLIP_UNITS_ARGS,
 } from './clip-action-args';
 import { FREEHAND_ARGS, SYMBOL_ARGS, TEXT_PATH_ARGS } from './tool-action-args';
-import { SKETCH_ARGS } from './sketch-action-args';
+import { SKETCH_ARGS, PEN_ARGS } from './sketch-action-args';
 
 /**
  * Every function of the app as an action (design 005 E1; taken over from editlicious
@@ -393,6 +393,9 @@ export const ACTIONS: readonly ActionDef[] = [
   ADD('sketch.dragPolygon', 'Polygon Tool', { args: SKETCH_ARGS }),
   ADD('sketch.dragLine', 'Line Segment Tool', { args: SKETCH_ARGS }),
   // only while dragging one of them (the "drawing" keys come before the canvas's)
+  // the pen (prompt 042): click / drag points; Enter ends
+  ADD('pen.tool', 'Pen', { args: PEN_ARGS }),
+  ADD('pen.finish', 'Finish Path', { context: 'drawing', palette: false }),
   ADD('sketch.sidesUp', 'Polygon: One Side More', {
     context: 'drawing',
     repeat: true,

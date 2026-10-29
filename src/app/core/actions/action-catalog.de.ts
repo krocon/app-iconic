@@ -108,6 +108,8 @@ const FIXED: Record<string, string> = {
   'sketch.polygonCircumscribed': 'Umschriebenes Polygon',
   'sketch.polygonInscribed': 'Einbeschriebenes Polygon',
   'sketch.polygonEdge': 'Polygon über Kante',
+  'pen.tool': 'Zeichenstift',
+  'pen.finish': 'Pfad beenden',
   'sketch.dragRect': 'Rechteck aufziehen',
   'sketch.dragEllipse': 'Ellipse aufziehen',
   'sketch.dragPolygon': 'Polygon aufziehen',

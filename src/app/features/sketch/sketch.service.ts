@@ -14,6 +14,7 @@ import {
 } from '../../shared/geometry/sketch/sketch-tools';
 import { Point } from '../../shared/geometry/view-transform';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
+import { CanvasTools } from '../canvas/canvas-tools';
 import { applyShapeArgs } from '../commands/add-args';
 import { AddService } from '../commands/add.service';
 import { buildElement } from '../commands/element-defaults';
@@ -77,11 +78,13 @@ export class SketchService {
   private readonly memory = inject(StyleMemory);
   private readonly freehand = inject(FreehandStore);
   private readonly dialogs = inject(DialogService);
+  private readonly tools = inject(CanvasTools);
   readonly tool = inject(SketchStore);
 
   /** The tool on/off (an action without arguments); the freehand tool goes off. */
   toggle(tool: SketchToolId): void {
     this.freehand.toggle(false);
+    this.tools.stopAll('sketch');
     this.tool.toggle(tool);
   }
 

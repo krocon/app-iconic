@@ -20,13 +20,13 @@
   <div
     #vp
     class="viewport"
-    [attr.role]="sketch.active() ? 'application' : 'img'"
+    [attr.role]="tools.current() ? 'application' : 'img'"
     tabindex="0"
     [attr.aria-label]="t.canvas"
     [class.cross]="opt().crossCursor"
     [class.can-pan]="space()"
     [class.panning]="panning()"
-    [class.freehand]="freehand.active() || sketch.active()"
+    [class.freehand]="freehand.active() || !!tools.current()"
     (wheel)="onWheel($event)"
     (pointerdown)="onPointerDown($event)"
     (pointermove)="onPointerMove($event)"
@@ -81,6 +81,14 @@
         [strokeWidth]="freehand.strokeWidth()"
       />
     }
+    @if (pen.on()) {
+      <app-pen-overlay
+        [toView]="toView()"
+        [anchors]="pen.preview().anchors"
+        [closed]="pen.preview().closed"
+        [placed]="pen.anchors().length"
+      />
+    }
     @if (sketch.active()) {
       <app-sketch-overlay [toView]="toView()" />
     }
@@ -120,7 +128,7 @@
   @if (freehand.active()) {
     <span class="hint tool" data-testid="tool-hint">{{ tt.freehand.hint }}</span>
   }
-  @if (sketch.hint(); as h) {
+  @if (tools.hint(); as h) {
     <span class="hint tool" data-testid="sketch-hint">{{ h }}</span>
   }
   @if (!fill().known) {

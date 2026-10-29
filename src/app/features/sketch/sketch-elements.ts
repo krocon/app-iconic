@@ -2,6 +2,7 @@ import { StyleKind } from '../../core/settings/settings.models';
 import { fmt } from '../../shared/geometry/align';
 import { apply, Matrix } from '../../shared/geometry/matrix';
 import { arcEnds, polygonCorners, SketchShape } from '../../shared/geometry/sketch/sketch-shapes';
+import { mapAnchors, penPathData } from '../../shared/geometry/pen/pen-path';
 import { UndoLabel } from '../document/undo/undo-texts';
 import { ElementSpec } from '../commands/element-defaults';
 
@@ -50,6 +51,8 @@ export function kindOf(shape: SketchShape): { kind: StyleKind; label: UndoLabel 
       return { kind: 'polygon', label: 'addPolygon' };
     case 'ellipse':
       return { kind: 'ellipse', label: 'addEllipse' };
+    case 'bezier':
+      return { kind: 'path', label: 'addPath' };
   }
 }
 
@@ -98,6 +101,11 @@ function build(
         },
       };
     }
+    case 'bezier':
+      return {
+        tag: 'path',
+        attrs: { d: penPathData(mapAnchors(shape.anchors, map), shape.closed) },
+      };
     case 'ellipse': {
       const c = map(shape.c);
       const attrs: Record<string, string> = {
