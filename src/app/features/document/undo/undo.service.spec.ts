@@ -1,5 +1,5 @@
 import { smallDocument } from '../../../../testing/documents';
-import { RemoveNode, SetAttribute, SetIconJsonValue } from '../commands';
+import { RemoveNode, SetAttribute, SetAttributes, SetIconJsonValue } from '../commands';
 import { setLanguage } from '../../../core/i18n/i18n';
 import { logUndoGrouping } from './undo-log';
 import { UNDO_DEPTH, UndoService } from './undo.service';
@@ -28,6 +28,35 @@ describe('UndoService', () => {
       setLanguage('en');
     }
     expect(undo.state().redoLabel).toBe('Redo Change Fill');
+  });
+
+  it('a follower keeps derived content up to date in the same step (prompt 060)', () => {
+    const { undo, fill, doc } = setup();
+    const stroke = () => doc.node(rect)?.getAttribute('stroke');
+    // derived: the stroke always mirrors the fill
+    undo.setFollower(() =>
+      stroke() === fill()
+        ? null
+        : new SetAttributes([{ ref: rect, name: 'stroke', value: fill()! }]),
+    );
+    const before = stroke();
+    undo.execute(new SetAttribute(rect, 'fill', 'red', 'changeFill'));
+    expect(stroke()).toBe('red');
+    expect(undo.state().undoLabel).toBe('Undo Change Fill');
+    undo.begin('changeFill');
+    for (const c of ['#111', '#222', '#333'])
+      undo.update(new SetAttribute(rect, 'fill', c, 'changeFill'));
+    undo.commit();
+    expect(stroke()).toBe('#333');
+    undo.undo();
+    expect([fill(), stroke()]).toEqual(['red', 'red']);
+    undo.undo();
+    expect(stroke()).toBe(before);
+    undo.redo();
+    expect(stroke()).toBe('red');
+    undo.setFollower(null);
+    undo.execute(new SetAttribute(rect, 'fill', 'blue', 'changeFill'));
+    expect(stroke()).toBe('red');
   });
 
   it('folds the steps of an AI call into one "AI:" step (design 018 E10)', () => {

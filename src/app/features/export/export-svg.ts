@@ -1,3 +1,4 @@
+import { stripLiveFills } from '../live-fill/live-fill-model';
 import { stripConstraints } from '../constraints/constraint-storage';
 import { stripConstruction } from '../construction/construction';
 import { IconDocument } from '../document/icon-document';
@@ -186,6 +187,7 @@ class Builder {
     stripInternal(copy);
     stripConstruction(copy);
     stripConstraints(copy);
+    stripLiveFills(copy);
     if (!this.opts.dimensions) {
       for (const dim of Array.from(copy.querySelectorAll('[data-dimension]'))) dim.remove();
     }

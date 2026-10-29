@@ -51,6 +51,7 @@ import { PenOverlay } from '../pen/pen-overlay';
 import { ToolOverlays } from './tool-overlays';
 import { GradientOverlay } from '../gradient/gradient-overlay';
 import { ConstraintOverlay } from '../constraints/constraint-overlay';
+import { LiveFillOverlay } from '../live-fill/live-fill-overlay';
 import { CanvasTools } from './canvas-tools';
 import { followSelection } from './follow-selection';
 import { SketchOverlay } from '../sketch/sketch-overlay';
@@ -78,6 +79,7 @@ const WHEEL_ZOOM = 0.01;
     ToolOverlays,
     GradientOverlay,
     ConstraintOverlay,
+    LiveFillOverlay,
   ],
   templateUrl: './canvas-view.html',
   styleUrl: './canvas-view.css',

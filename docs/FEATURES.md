@@ -112,6 +112,8 @@
 - [x] Abhängigkeiten und treibende Maße wie Fusion 360 (059): deckungsgleich, horizontal, vertikal, parallel,
       senkrecht, tangential, gleich, konzentrisch, Mittelpunkt, symmetrisch, fixiert; Abstand, Länge, Radius, Durchmesser,
       Winkel als treibende Maße (Wert ändern → Geometrie folgt); Punkte ziehen hält alle Beziehungen; Werkzeug K
+- [x] Flächen füllen wie „Interaktiv malen“ (060): Werkzeug F füllt jede von Linien, Bögen und Kreisen umschlossene
+      Fläche (auch aus offenen Linien); die Füllung folgt live, wenn sich die Umrisse ändern (im selben Undo-Schritt)
 - [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
       gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)

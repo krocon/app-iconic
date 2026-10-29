@@ -19,6 +19,9 @@ import { TransformTool } from '../transform/transform-tool';
 import { registerConstraintActions } from '../constraints/constraint-actions';
 import { ConstraintService } from '../constraints/constraint.service';
 import { ConstraintTool } from '../constraints/constraint-tool';
+import { registerLiveFillActions } from '../live-fill/live-fill-actions';
+import { LiveFillService } from '../live-fill/live-fill.service';
+import { LiveFillTool } from '../live-fill/live-fill-tool';
 import { registerGradientActions } from '../gradient/gradient-actions';
 import { GradientService } from '../gradient/gradient.service';
 import { registerAlignActions } from '../align/align-actions';
@@ -83,6 +86,15 @@ export function registerPathTools(
   registerOffsetActions(actions, inject(OffsetService), inject(DialogService), destroyRef);
   registerAlignActions(actions, inject(AlignService), destroyRef);
   registerGradientActions(actions, inject(GradientService), destroyRef);
+  registerLiveFillActions(
+    actions,
+    inject(LiveFillService),
+    inject(LiveFillTool),
+    tools,
+    freehand,
+    inject(FilesService),
+    destroyRef,
+  );
   registerConstraintActions(
     actions,
     inject(ConstraintService),

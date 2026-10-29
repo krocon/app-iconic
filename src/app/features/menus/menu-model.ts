@@ -82,6 +82,8 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('path.offset'),
     a('path.outlineStroke'),
     a('constraint.tool'),
+    a('fill.tool'),
+    a('fill.detach'),
     a('constraint.solve'),
     sub(t.pathfinder, [
       a('pathfinder.unite'),

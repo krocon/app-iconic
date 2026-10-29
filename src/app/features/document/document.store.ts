@@ -62,6 +62,11 @@ export class DocumentStore {
     });
   }
 
+  /** Derived content kept up to date in the same step (prompt 060, `UndoService.setFollower`). */
+  setFollower(fn: (() => DocCommand | null) | null): void {
+    this.undoService.setFollower(fn);
+  }
+
   execute(command: DocCommand): void {
     this.undoService.execute(command);
     this.pruneSelection();

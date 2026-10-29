@@ -424,6 +424,45 @@ export const ACTIONS: readonly ActionDef[] = [
   EDIT('edit.toggleConstruction', 'Construction Line'),
   // draw as construction (prompt 058)
   ADD('sketch.toggleConstructionMode', 'Draw as Construction'),
+  // live fills (prompt 060)
+  ADD('fill.tool', 'Fill Tool'),
+  ADD('fill.at', 'Fill Area at Point', {
+    palette: false,
+    args: {
+      type: 'object',
+      properties: {
+        x: { type: 'number' },
+        y: { type: 'number' },
+        color: { type: 'string', maxLength: 64 },
+      },
+      required: ['x', 'y'],
+    },
+  }),
+  ADD('fill.across', 'Fill Areas as One', {
+    palette: false,
+    args: {
+      type: 'object',
+      properties: { points: { type: 'json' }, color: { type: 'string', maxLength: 64 } },
+      required: ['points'],
+    },
+  }),
+  EDIT('fill.remove', 'Remove Fill at Point', {
+    palette: false,
+    args: {
+      type: 'object',
+      properties: { x: { type: 'number' }, y: { type: 'number' } },
+      required: ['x', 'y'],
+    },
+  }),
+  ADD('fill.color', 'Fill Colour', {
+    palette: false,
+    args: {
+      type: 'object',
+      properties: { color: { type: 'string', maxLength: 64 } },
+      required: ['color'],
+    },
+  }),
+  EDIT('fill.detach', 'Detach Fill'),
   // constraints and driving dimensions (prompt 059)
   ADD('constraint.tool', 'Constraint Tool', { args: CONSTRAINT_TOOL_ARGS }),
   ADD('constraint.add', 'Add Constraint', { palette: false, args: CONSTRAINT_ADD_ARGS }),

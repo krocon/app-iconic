@@ -52,6 +52,7 @@
     "Shift+x": "sketch.toggleConstructionMode",
     "t": "trim.tool",
     "k": "constraint.tool",
+    "f": "fill.tool",
     "e": "extend.tool",
     "Shift+r": "transform.rotate",
     "Shift+s": "transform.scale",

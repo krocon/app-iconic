@@ -46,7 +46,40 @@ export class UndoService {
   private seq = 0;
   /** Id of the top entry when saved (0 = the empty stack, -1 = no longer reachable). */
   private savePoint = 0;
-  private gesture: { label: UndoLabel; commands: DocCommand[] } | null = null;
+  private gesture: { label: UndoLabel; commands: DocCommand[]; follow?: DocCommand } | null = null;
+  private follower: (() => DocCommand | null) | null = null;
+  private following = false;
+
+  /**
+   * Derived content (prompt 060: live fills): after every change `fn` may return a command that
+   * brings what depends on the change up to date – it becomes part of the same step (undo takes
+   * both back, redo does both again). Not called for undo / redo.
+   */
+  setFollower(fn: (() => DocCommand | null) | null): void {
+    this.follower = fn;
+  }
+
+  /** The follow-up of the change just done, already done (or `null`). */
+  private follow(): DocCommand | null {
+    if (!this.follower || this.following) return null;
+    this.following = true;
+    try {
+      const f = this.follower();
+      if (!f) return null;
+      f.do(this.doc);
+      return f;
+    } catch (e) {
+      console.error('follow-up failed', e);
+      return null;
+    } finally {
+      this.following = false;
+    }
+  }
+
+  private withFollow(command: DocCommand): DocCommand {
+    const f = this.follow();
+    return f ? new CompositeCommand(command.label, [command, f]) : command;
+  }
   private readonly _state = signal<RawState>(this.compute());
   /** Labels in the UI language: a language switch renames "Undo …" at once. */
   readonly state = computed<UndoState>(() => {
@@ -71,7 +104,7 @@ export class UndoService {
       return;
     }
     command.do(this.doc);
-    this.push(command);
+    this.push(this.withFollow(command));
     this.publish();
   }
 
@@ -86,6 +119,12 @@ export class UndoService {
       return false;
     }
     command.do(this.doc);
+    const f = this.follow();
+    if (f) {
+      this.push(new CompositeCommand(command.label, [command, f]));
+      this.publish();
+      return false;
+    }
     const top = this.done.at(-1);
     if (into && top && top.command === into && top.id !== this.savePoint && into.merge?.(command)) {
       logUndo('merged into the top step', into.label);
@@ -112,9 +151,16 @@ export class UndoService {
       return;
     }
     command.do(this.doc);
-    const last = this.gesture.commands.at(-1);
+    const g = this.gesture;
+    const last = g.commands.at(-1);
     if (last?.merge?.(command)) logUndo('gesture merges', command.label);
-    else this.gesture.commands.push(command);
+    else g.commands.push(command);
+    // follow-ups of one gesture (a live fill while dragging) fold into one as well
+    const f = this.follow();
+    if (f && !g.follow?.merge?.(f)) {
+      g.follow = f;
+      g.commands.push(f);
+    }
     this.changed();
   }
 
