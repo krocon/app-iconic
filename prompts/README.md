@@ -68,7 +68,7 @@ dann 056, 057, 058, 032 (Verlaufseditor), zuletzt 059.
 | 056 | [056-hilfslinien-raster.md](done/056-hilfslinien-raster.md) | Hilfslinien aus dem Lineal, Icon-Raster-Vorlagen | 004 | M | ✅ 29.10.2026 |
 | 057 | [057-kleine-groessen.md](done/057-kleine-groessen.md) | Vorschau in kleinen Größen, Pixelraster | 012 | M | ✅ 29.10.2026 |
 | 058 | [058-als-konstruktion-zeichnen.md](done/058-als-konstruktion-zeichnen.md) | Direkt als Konstruktion zeichnen | 049 | S | ✅ 29.10.2026 |
-| 059 | [059-abhaengigkeiten.md](059-abhaengigkeiten.md) | Abhängigkeiten und treibende Maße (parametrisch) | 048, 050, 051 | XL | offen |
+| 059 | [059-abhaengigkeiten.md](done/059-abhaengigkeiten.md) | Abhängigkeiten und treibende Maße (parametrisch) | 048, 050, 051 | XL | ✅ 29.10.2026 |
 
 ## Folge-Ideen (noch ohne Prompt)
 

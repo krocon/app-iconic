@@ -16,6 +16,9 @@ import { OffsetService } from '../offset/offset.service';
 import { registerTransformActions } from '../transform/transform-actions';
 import { TransformService } from '../transform/transform.service';
 import { TransformTool } from '../transform/transform-tool';
+import { registerConstraintActions } from '../constraints/constraint-actions';
+import { ConstraintService } from '../constraints/constraint.service';
+import { ConstraintTool } from '../constraints/constraint-tool';
 import { registerGradientActions } from '../gradient/gradient-actions';
 import { GradientService } from '../gradient/gradient.service';
 import { registerAlignActions } from '../align/align-actions';
@@ -80,6 +83,14 @@ export function registerPathTools(
   registerOffsetActions(actions, inject(OffsetService), inject(DialogService), destroyRef);
   registerAlignActions(actions, inject(AlignService), destroyRef);
   registerGradientActions(actions, inject(GradientService), destroyRef);
+  registerConstraintActions(
+    actions,
+    inject(ConstraintService),
+    inject(ConstraintTool),
+    tools,
+    freehand,
+    destroyRef,
+  );
   registerPreviewActions(
     actions,
     inject(SmallPreviewService),

@@ -1,5 +1,6 @@
 import { ArgsSpec } from './action-args';
 import { IMAGE_ARGS, shapeArgsSpec, SNIPPET_ARGS } from './add-action-args';
+import { CONSTRAINT_ADD_ARGS, CONSTRAINT_TOOL_ARGS } from './constraint-action-args';
 import { EXPORT_ARGS } from './export-action-args';
 import {
   GRADIENT_ADD_STOP_ARGS,
@@ -423,6 +424,34 @@ export const ACTIONS: readonly ActionDef[] = [
   EDIT('edit.toggleConstruction', 'Construction Line'),
   // draw as construction (prompt 058)
   ADD('sketch.toggleConstructionMode', 'Draw as Construction'),
+  // constraints and driving dimensions (prompt 059)
+  ADD('constraint.tool', 'Constraint Tool', { args: CONSTRAINT_TOOL_ARGS }),
+  ADD('constraint.add', 'Add Constraint', { palette: false, args: CONSTRAINT_ADD_ARGS }),
+  EDIT('constraint.remove', 'Remove Constraint', {
+    args: {
+      type: 'object',
+      properties: {
+        asset: { type: 'string', maxLength: 256 },
+        id: { type: 'string', maxLength: 40 },
+      },
+    },
+  }),
+  EDIT('constraint.setValue', 'Change Dimension Value', {
+    palette: false,
+    args: {
+      type: 'object',
+      properties: {
+        asset: { type: 'string', maxLength: 256 },
+        id: { type: 'string', maxLength: 40 },
+        value: { type: 'number' },
+      },
+      required: ['asset', 'id', 'value'],
+    },
+  }),
+  EDIT('constraint.solve', 'Solve Constraints', {
+    args: { type: 'object', properties: { asset: { type: 'string', maxLength: 256 } } },
+  }),
+  VIEW('view.constraints', 'Constraints'),
   // gradient editor (prompt 032)
   EDIT('gradient.create', 'Create Gradient', { args: GRADIENT_CREATE_ARGS }),
   EDIT('gradient.set', 'Change Gradient', { palette: false, args: GRADIENT_SET_ARGS }),

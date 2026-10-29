@@ -133,6 +133,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               sketch-targets (Kanten/Kreise/Linienenden aus dem DOM), sketch-elements (Form → SVG im
                               Raum des Elternelements), SketchOverlay (Vorschau + Maßfelder), sketch-preview (rein),
                               sketch-actions (`sketch.*`), StyleMemory + draw-style (Stil je Formtyp), Texte
+  app/features/constraints/   Abhängigkeiten + treibende Maße (059): constraint-storage (metadata + data-cid),
+                              ConstraintService (Solver-Aufrufe als Commands), ConstraintTool (K), constraint-targets,
+                              ConstraintOverlay + constraint-view (Symbole, Maße), constraint-actions, Texte
   app/features/gradient/      Verlaufseditor (032): gradient-model (rein), GradientService, GradientSection (Panel),
                               GradientOverlay + gradient-handles (Griffe), gradient-actions (`gradient.*`), Texte
   app/features/clip/          Clip Paths (014): ClipEditStore (Bearbeitungsmodus), ClipEditLayer (Formen in der
@@ -145,7 +148,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               behalten / kürzeste Form), path-optimize (RDP mit Eckenschutz); 013 (rein): freehand
                               (RDP + Catmull-Rom), shape-path (Grundformen → `d`), path-translate; 014:
                               clip-geometry (Clip-Raum → Dokument über den Owner, Treffer durch Clips)
-                              grid-hint (rein: Rasterpunkte um den Zeiger); sketch/ (019, rein): sketch-shapes,
+                              grid-hint (rein: Rasterpunkte um den Zeiger); constraints/ (059, rein: solver,
+                              sketch-model, constraints); sketch/ (019, rein): sketch-shapes,
                               sketch-tools (Schritte, Maße), apollonius (Tangentenkreise), svg-arc (Bogen-Mittelpunkt)
   app/shared/controls/        Generische Editoren (009): DraftField (Basis: live/commit/cancel), NumberField (Stepped
                               Slider), ColorField + color-value (rein), SelectField, TextField, ToggleField, step-value

@@ -81,6 +81,8 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('path.convert'),
     a('path.offset'),
     a('path.outlineStroke'),
+    a('constraint.tool'),
+    a('constraint.solve'),
     sub(t.pathfinder, [
       a('pathfinder.unite'),
       a('pathfinder.minusFront'),
@@ -103,6 +105,7 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('view.rulers'),
     a('view.guides'),
     a('view.constructionLines'),
+    a('view.constraints'),
     a('view.smallPreview'),
     sub(t.pixelGrid, [
       a('view.pixelGrid.off'),

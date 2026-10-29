@@ -74,6 +74,17 @@ describe('exportSvg', () => {
     );
   });
 
+  it('leaves constraints and their cids out (prompt 059)', () => {
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">' +
+      '<metadata data-ai-constraints="1">{"v":1,"items":[]}</metadata>' +
+      '<rect data-cid="c1" width="9" height="9"/></svg>';
+    const t = exportSvg(doc([{ layers: [L('a.svg')] }], {}, { 'a.svg': svg }), 'light', NO_FX);
+    expect(t).not.toContain('data-ai-constraints');
+    expect(t).not.toContain('data-cid');
+    expect(t).toContain('<rect');
+  });
+
   it('prefixes ids per layer and rewrites url(), href and xlink:href', () => {
     // b.svg twice: the same asset in two layers must not give duplicate ids either
     const t = exportSvg(

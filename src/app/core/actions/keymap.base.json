@@ -51,6 +51,7 @@
     "x": "edit.toggleConstruction",
     "Shift+x": "sketch.toggleConstructionMode",
     "t": "trim.tool",
+    "k": "constraint.tool",
     "e": "extend.tool",
     "Shift+r": "transform.rotate",
     "Shift+s": "transform.scale",

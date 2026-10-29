@@ -1,0 +1,106 @@
+<svg class="overlay" aria-hidden="true">
+  @for (d of items().dims; track d.asset + d.id) {
+    <path class="dim" [class.selected]="isSelected(d.asset, d.id)" [attr.d]="d.d" />
+  }
+  @for (p of points(); track $index) {
+    <rect class="point" [attr.x]="p.x - 3" [attr.y]="p.y - 3" width="6" height="6" />
+  }
+  @for (m of marks(); track $index) {
+    @if (m.point; as p) {
+      <circle class="mark" [class.picked]="m.picked" [attr.cx]="p.x" [attr.cy]="p.y" r="6" />
+    }
+    @if (m.line; as l) {
+      <line
+        class="mark"
+        [class.picked]="m.picked"
+        [attr.x1]="l.a.x"
+        [attr.y1]="l.a.y"
+        [attr.x2]="l.b.x"
+        [attr.y2]="l.b.y"
+      />
+    }
+    @if (m.circle; as c) {
+      <circle
+        class="mark"
+        [class.picked]="m.picked"
+        [attr.cx]="c.c.x"
+        [attr.cy]="c.c.y"
+        [attr.r]="c.r"
+      />
+    }
+  }
+</svg>
+@for (b of items().badges; track b.asset + b.id) {
+  <button
+    type="button"
+    class="badge"
+    data-testid="constraint-badge"
+    [attr.data-type]="b.type"
+    [attr.data-id]="b.id"
+    [class.selected]="isSelected(b.asset, b.id)"
+    [style.left.px]="b.at.x"
+    [style.top.px]="b.at.y"
+    [attr.aria-label]="t.types[b.type]"
+    [title]="t.types[b.type]"
+    (pointerdown)="select($event, b.asset, b.id)"
+    (keydown)="badgeKey($event, b.asset, b.id)"
+  >
+    {{ b.glyph }}
+  </button>
+}
+@for (d of items().dims; track d.asset + d.id) {
+  @if (editing()?.id === d.id && editing()?.asset === d.asset) {
+    <input
+      #field
+      class="value-field"
+      data-testid="constraint-value-field"
+      inputmode="decimal"
+      [style.left.px]="d.label.x"
+      [style.top.px]="d.label.y"
+      [value]="'' + d.value"
+      [attr.aria-label]="t.editValue(t.types[d.type])"
+      (pointerdown)="stop($event)"
+      (keydown)="fieldKey($event)"
+      (blur)="editing.set(null)"
+    />
+  } @else {
+    <button
+      type="button"
+      class="value"
+      data-testid="constraint-value"
+      [attr.data-id]="d.id"
+      [class.selected]="isSelected(d.asset, d.id)"
+      [style.left.px]="d.label.x"
+      [style.top.px]="d.label.y"
+      [style.transform]="'translate(-50%, -100%) rotate(' + d.rotate + 'deg)'"
+      [attr.aria-label]="t.editValue(t.types[d.type]) + ': ' + d.text"
+      (pointerdown)="edit($event, d)"
+      (keydown)="badgeKey($event, d.asset, d.id)"
+    >
+      {{ d.text }}
+    </button>
+  }
+}
+@if (tool.on()) {
+  <div
+    class="bar"
+    role="toolbar"
+    [attr.aria-label]="t.toolbar"
+    data-testid="constraint-bar"
+    (pointerdown)="stop($event)"
+  >
+    @for (type of types; track type) {
+      <button
+        type="button"
+        class="type"
+        [attr.data-type]="type"
+        [attr.aria-pressed]="tool.type() === type"
+        [attr.aria-label]="t.types[type]"
+        [title]="t.types[type]"
+        (click)="chooseType(type)"
+      >
+        {{ glyphs[type] }}
+      </button>
+    }
+  </div>
+}

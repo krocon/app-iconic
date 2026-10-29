@@ -1,0 +1,109 @@
+:host,
+.overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.dim {
+  fill: none;
+  stroke: var(--ai-constraint);
+  stroke-width: 1.25;
+
+  &.selected {
+    stroke-width: 2.5;
+  }
+}
+.point {
+  fill: var(--ai-handle-stroke);
+  stroke: var(--ai-constraint);
+  stroke-width: 1.5;
+}
+.mark {
+  fill: none;
+  stroke: var(--ai-snap-magic);
+  stroke-width: 3;
+  opacity: 0.6;
+
+  &.picked {
+    stroke: var(--ai-constraint);
+    opacity: 0.9;
+  }
+}
+.badge,
+.value {
+  position: absolute;
+  pointer-events: auto;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border: 1px solid var(--ai-constraint);
+  border-radius: 3px;
+  background: var(--color-surface);
+  color: var(--ai-constraint);
+  font: 600 11px/14px var(--font-ui);
+  cursor: pointer;
+
+  &.selected {
+    background: var(--ai-constraint);
+    color: var(--color-surface);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+}
+.value {
+  height: auto;
+  padding: 1px 4px;
+  transform-origin: 50% 100%;
+  white-space: nowrap;
+}
+.value-field {
+  position: absolute;
+  pointer-events: auto;
+  width: 6em;
+  transform: translate(-50%, -100%);
+  font-size: var(--font-size-small);
+}
+.bar {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: nowrap;
+  max-width: calc(100% - 16px);
+  overflow-x: auto;
+  gap: 2px;
+  padding: 4px;
+  pointer-events: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-popup);
+}
+.type {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 4px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 13px;
+  cursor: pointer;
+
+  &[aria-pressed='true'] {
+    border-color: var(--color-accent);
+    background: var(--color-hover);
+  }
+  &:hover {
+    background: var(--color-hover);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+  }
+}

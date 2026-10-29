@@ -1,3 +1,4 @@
+import { stripConstraints } from '../constraints/constraint-storage';
 import { stripConstruction } from '../construction/construction';
 import { IconDocument } from '../document/icon-document';
 import { elementsOf, stripInternal, SVG_NS } from '../document/svg/node-ids';
@@ -184,6 +185,7 @@ class Builder {
     const copy = this.d.importNode(root, true) as Element;
     stripInternal(copy);
     stripConstruction(copy);
+    stripConstraints(copy);
     if (!this.opts.dimensions) {
       for (const dim of Array.from(copy.querySelectorAll('[data-dimension]'))) dim.remove();
     }

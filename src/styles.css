@@ -32,6 +32,7 @@
   --ai-cross: rgb(255 59 48 / 75%);
   --ai-guide: #0a84ff;
   --ai-guide-user: #0091b0;
+  --ai-constraint: #c8006c;
   --ai-handle-position: #0a84ff;
   --ai-handle-size: #30d158;
   --ai-handle-control: #ff9f0a;
@@ -102,6 +103,7 @@
     --ai-cross: rgb(255 105 97 / 80%);
     --ai-guide: #0a84ff;
     --ai-guide-user: #3dd6f5;
+    --ai-constraint: #ff5fb4;
     --ai-handle-position: #0a84ff;
     --ai-handle-size: #30d158;
     --ai-handle-control: #ff9f0a;
@@ -154,6 +156,7 @@
   --ai-cross: rgb(255 105 97 / 80%);
   --ai-guide: #0a84ff;
   --ai-guide-user: #3dd6f5;
+  --ai-constraint: #ff5fb4;
   --ai-handle-position: #0a84ff;
   --ai-handle-size: #30d158;
   --ai-handle-control: #ff9f0a;
