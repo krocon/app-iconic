@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { clientToDocument } from '../../shared/geometry/dom-geometry';
 import { fromDom, IDENTITY, Matrix, multiply, translation } from '../../shared/geometry/matrix';
-import { CANVAS_SIZE, iconGuides } from '../../shared/geometry/icon-guides';
+import { CANVAS_SIZE, guidesOf } from '../../shared/geometry/icon-guides';
 import { squirclePath } from '../../shared/geometry/squircle';
 import { documentToView, Point } from '../../shared/geometry/view-transform';
 import { zoomPercent } from '../../shared/geometry/zoom-steps';
@@ -84,7 +84,9 @@ export class CanvasView {
   protected readonly canvas = inject(CanvasViewStore);
   protected readonly t = CANVAS_TEXTS;
   protected readonly size = CANVAS_SIZE;
-  protected readonly guides = iconGuides();
+  protected readonly guides = computed(() =>
+    guidesOf(this.opt().guideTemplate, this.opt().guideDivisions),
+  );
   protected readonly opt = this.canvas.options;
   protected readonly view = this.canvas.view;
   protected readonly viewport = this.canvas.viewport;

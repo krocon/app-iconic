@@ -118,6 +118,8 @@ export function sanitizeSettings(s: Settings): Settings {
     canvas: {
       ...c,
       gridSize: clamp(c.gridSize, 1, 256),
+      guideTemplate: oneOf(c.guideTemplate, ['apple', 'material', 'grid'], d.canvas.guideTemplate),
+      guideDivisions: clamp(c.guideDivisions, 2, 64),
       gridOrigin: oneOf(c.gridOrigin, ['worldZero', 'svgCenter'], d.canvas.gridOrigin),
       selectionMode: oneOf(c.selectionMode, ['point', 'boxed', 'none'], d.canvas.selectionMode),
       zoom: !Number.isFinite(c.zoom) || c.zoom <= 0 ? 0 : clamp(c.zoom, 0.25, 2),

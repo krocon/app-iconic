@@ -63,10 +63,10 @@
       >
         @if (opt().guides) {
           <g class="guides">
-            @for (l of guides.lines; track $index) {
+            @for (l of guides().lines; track $index) {
               <line [attr.x1]="l.x1" [attr.y1]="l.y1" [attr.x2]="l.x2" [attr.y2]="l.y2" />
             }
-            @for (c of guides.circles; track $index) {
+            @for (c of guides().circles; track $index) {
               <circle [attr.cx]="c.cx" [attr.cy]="c.cy" [attr.r]="c.r" />
             }
           </g>

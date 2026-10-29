@@ -1,5 +1,5 @@
 import { ActionHandler } from '../../core/actions/action.service';
-import { CanvasToggle, CanvasViewStore, MaskShape } from './canvas-view.store';
+import { CanvasToggle, CanvasViewStore, GuideTemplate, MaskShape } from './canvas-view.store';
 import { GridOrigin } from '../../shared/geometry/snapping';
 import { Appearance } from './appearance';
 import { SelectionMode } from './selection-measure';
@@ -27,6 +27,10 @@ export function canvasActions(view: CanvasViewStore): Record<string, ActionHandl
     run: () => view.set('selectionMode', value),
     checked: () => view.options().selectionMode === value,
   });
+  const template = (value: GuideTemplate): ActionHandler => ({
+    run: () => view.set('guideTemplate', value),
+    checked: () => view.options().guideTemplate === value,
+  });
   const gridOrigin = (value: GridOrigin): ActionHandler => ({
     run: () => view.set('gridOrigin', value),
     checked: () => view.options().gridOrigin === value,
@@ -40,6 +44,17 @@ export function canvasActions(view: CanvasViewStore): Record<string, ActionHandl
     'view.zoomTo': { run: (args) => view.zoomTo((args as { zoom: number }).zoom) },
     'view.rulers': toggle('rulers'),
     'view.guides': toggle('guides'),
+    'view.guideTemplate.apple': template('apple'),
+    'view.guideTemplate.material': template('material'),
+    'view.guideTemplate.grid': template('grid'),
+    'view.guideDivisions': {
+      run: (a) => {
+        const n = (a as { divisions?: unknown } | undefined)?.divisions;
+        if (typeof n !== 'number') return false;
+        view.set('guideDivisions', Math.max(2, Math.min(64, Math.round(n))));
+        return true;
+      },
+    },
     'view.background': toggle('background'),
     'view.effects': toggle('effects'),
     'view.crossCursor': toggle('crossCursor'),

@@ -6,6 +6,7 @@ import { LayerStyleService } from '../canvas/layer-style.service';
 import { NodeRef } from '../document/icon-document';
 import { FilesService } from '../files/files.service';
 import { LOCK_ATTR, lockCommand, unlockAllCommand } from './lock';
+import { GuideService } from '../guides/guide.service';
 
 /**
  * The actions of prompt 055: `edit.toggleLock { nodes? }` (⌘L; locked nodes leave the selection),
@@ -17,6 +18,7 @@ export function registerLockActions(
   files: FilesService,
   edit: CanvasEditStore,
   style: LayerStyleService,
+  guides: GuideService,
   destroyRef?: DestroyRef,
 ): void {
   actions.registerAll(
@@ -64,6 +66,14 @@ export function registerLockActions(
         },
         enabled: () => !!edit.context() || (files.store()?.selection().length ?? 0) === 1,
         checked: () => !!edit.context(),
+      },
+      'guide.add': {
+        run: (a) => {
+          const g = (a ?? {}) as { axis?: unknown; at?: unknown };
+          return typeof g.at === 'number'
+            ? guides.addGuide(g.axis === 'vertical' ? 'vertical' : 'horizontal', g.at)
+            : false;
+        },
       },
       'view.constructionLines': {
         run: () => style.construction.update((v) => !v),

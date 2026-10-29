@@ -26,6 +26,8 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
       snapToGrid: false,
       magicSnap: true,
       smartGuides: true,
+      guideTemplate: 'apple',
+      guideDivisions: 8,
       gridSize: 10,
       gridOrigin: 'worldZero',
       selectionMode: 'point',

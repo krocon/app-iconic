@@ -18,6 +18,10 @@ const T = MENUS_TEXTS;
 const ROWS: Row[] = [
   { kind: 'item', id: 'view.rulers' },
   { kind: 'item', id: 'view.guides' },
+  { kind: 'group', label: 'iconGrid' },
+  { kind: 'item', id: 'view.guideTemplate.apple', label: 'gridApple' },
+  { kind: 'item', id: 'view.guideTemplate.material', label: 'gridMaterial' },
+  { kind: 'item', id: 'view.guideTemplate.grid', label: 'gridEven' },
   { kind: 'item', id: 'view.background' },
   { kind: 'item', id: 'view.effects' },
   { kind: 'item', id: 'view.crossCursor' },

@@ -25,7 +25,9 @@ export const CONSTRUCTION_TAGS: ReadonlySet<string> = new Set([
 export const CONSTRUCTION_CSS =
   `[${CONSTRUCTION_ATTR}]{opacity:1!important;fill:none!important;` +
   'stroke:var(--ai-construction,#0a84ff)!important;stroke-opacity:1!important;' +
-  'stroke-width:1.5px!important;stroke-dasharray:6 4!important;vector-effect:non-scaling-stroke}';
+  'stroke-width:1.5px!important;stroke-dasharray:6 4!important;vector-effect:non-scaling-stroke}' +
+  // guides out of the rulers (prompt 056): solid
+  '[data-guide]{stroke:var(--ai-guide-user,#00b4d8)!important;stroke-dasharray:none!important;stroke-width:1px!important}';
 
 export const isConstruction = (el: Element) => el.hasAttribute(CONSTRUCTION_ATTR);
 

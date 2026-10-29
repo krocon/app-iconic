@@ -495,6 +495,29 @@ export const ACTIONS: readonly ActionDef[] = [
   VIEW('view.selectionMode.point', 'Selection Mode: Point'),
   VIEW('view.selectionMode.boxed', 'Selection Mode: Boxed'),
   VIEW('view.selectionMode.none', 'Selection Mode: None'),
+  ADD('guide.add', 'Add Guide', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['axis', 'at'],
+      properties: {
+        axis: { type: 'string', enum: ['horizontal', 'vertical'] },
+        /** y of a horizontal, x of a vertical guide (document units). */
+        at: { type: 'number' },
+      },
+    },
+  }),
+  VIEW('view.guideTemplate.apple', 'Icon Grid: Apple'),
+  VIEW('view.guideTemplate.material', 'Icon Grid: Material Keylines'),
+  VIEW('view.guideTemplate.grid', 'Icon Grid: Even Grid'),
+  VIEW('view.guideDivisions', 'Icon Grid: Divisions', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['divisions'],
+      properties: { divisions: { type: 'integer', minimum: 2, maximum: 64 } },
+    },
+  }),
   VIEW('view.gridOrigin.worldZero', 'Grid Origin: World Zero'),
   VIEW('view.gridOrigin.svgCenter', 'Grid Origin: SVG Center'),
   // canvas keys (not in menus)

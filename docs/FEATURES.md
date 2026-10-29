@@ -104,6 +104,8 @@
   Ausrichten an Auswahl, Leinwand oder Basisobjekt; Abschnitt „Ausrichten“ im Properties-Panel.
 - [x] Sperren und Isolieren _(neu)_ (055): Sperren (⌘L, Schloss im Baum, bleibt fangbar), Alle entsperren, Gruppe
   isolieren (Rest gedimmt), Konstruktionslinien ausblenden.
+- [x] Hilfslinien aus dem Lineal und Icon-Raster _(neu)_ (056): Hilfslinien ziehen (gespeichert, fangbar, nicht im
+  Export), Raster Apple / Material-Keylines / gleichmäßig.
 - [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
       gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)

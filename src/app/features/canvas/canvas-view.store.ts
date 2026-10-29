@@ -17,6 +17,8 @@ import { SelectionMode } from './selection-measure';
 export type MaskShape = 'none' | 'squircle' | 'circle';
 
 /** View options of the canvas (design 004 E14; persisted since design 015 E6). */
+export type GuideTemplate = 'apple' | 'material' | 'grid';
+
 export interface CanvasOptions {
   rulers: boolean;
   guides: boolean;
@@ -31,6 +33,10 @@ export interface CanvasOptions {
   magicSnap: boolean;
   /** Smart Guides beyond Magic Snap: path, tangent, perpendicular, construction (prompt 040). */
   smartGuides: boolean;
+  /** The icon grid drawn as guides (prompt 056). */
+  guideTemplate: GuideTemplate;
+  /** Divisions of the `grid` template. */
+  guideDivisions: number;
   gridOrigin: GridOrigin;
   /** Grid spacing in document units (legacy 10, design 015 E9). */
   gridSize: number;
@@ -77,6 +83,8 @@ export class CanvasViewStore {
     snapToGrid: false,
     magicSnap: true,
     smartGuides: true,
+    guideTemplate: 'apple',
+    guideDivisions: 8,
     gridOrigin: 'worldZero',
     gridSize: 10,
     selectionMode: 'point',

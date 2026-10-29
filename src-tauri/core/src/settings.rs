@@ -58,6 +58,10 @@ pub struct CanvasSettings {
     pub magic_snap: bool,
     /// Smart Guides: path, tangent, perpendicular, construction guides (prompt 040).
     pub smart_guides: bool,
+    /// The icon grid drawn as guides: `apple` | `material` | `grid` (prompt 056).
+    pub guide_template: String,
+    /// Divisions of the `grid` template, 2…64.
+    pub guide_divisions: u32,
     /// Grid spacing in document units, 1…256.
     pub grid_size: u32,
     /// `worldZero` | `svgCenter`.
@@ -249,6 +253,8 @@ impl Default for Settings {
                 snap_to_grid: false,
                 magic_snap: true,
                 smart_guides: true,
+                guide_template: "apple".into(),
+                guide_divisions: 8,
                 grid_size: 10,
                 grid_origin: "worldZero".into(),
                 selection_mode: "point".into(),
@@ -388,6 +394,12 @@ pub fn sanitize(mut s: Settings) -> Settings {
     }
     let c = &mut s.canvas;
     c.grid_size = c.grid_size.clamp(1, 256);
+    one_of(
+        &mut c.guide_template,
+        &["apple", "material", "grid"],
+        &d.canvas.guide_template,
+    );
+    c.guide_divisions = c.guide_divisions.clamp(2, 64);
     one_of(
         &mut c.grid_origin,
         &["worldZero", "svgCenter"],

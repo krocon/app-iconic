@@ -111,6 +111,7 @@ const EN = {
   transform: 'Transform',
   lock: 'Lock',
   unlock: 'Unlock',
+  addGuide: 'Add Guide',
   // clip paths (design 014 E5)
   createClipPath: 'Create Clip Path',
   assignClip: 'Assign Clip Path',
@@ -219,6 +220,7 @@ export const UNDO_TEXTS = translatable('undo', EN, {
     transform: 'Transformieren',
     lock: 'Sperren',
     unlock: 'Entsperren',
+    addGuide: 'Hilfslinie hinzufügen',
     createClipPath: 'Beschneidungspfad anlegen',
     assignClip: 'Beschneidungspfad zuweisen',
     layerClip: 'Beschneidung der Ebene ändern',

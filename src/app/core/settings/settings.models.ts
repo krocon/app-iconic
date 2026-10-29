@@ -22,6 +22,10 @@ export interface CanvasSettings {
   magicSnap: boolean;
   /** Smart Guides: path, tangent, perpendicular, construction guides (prompt 040). */
   smartGuides: boolean;
+  /** The icon grid drawn as guides (prompt 056). */
+  guideTemplate: 'apple' | 'material' | 'grid';
+  /** Divisions of the `grid` template, 2…64. */
+  guideDivisions: number;
   /** 1…256 document units. */
   gridSize: number;
   gridOrigin: 'worldZero' | 'svgCenter';
@@ -124,6 +128,8 @@ export const DEFAULT_SETTINGS: Settings = {
     snapToGrid: false,
     magicSnap: true,
     smartGuides: true,
+    guideTemplate: 'apple',
+    guideDivisions: 8,
     gridSize: 10,
     gridOrigin: 'worldZero',
     selectionMode: 'point',

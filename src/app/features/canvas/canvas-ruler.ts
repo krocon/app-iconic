@@ -11,6 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { rulerTicks } from '../../shared/geometry/ruler-ticks';
+import { GuideService } from '../guides/guide.service';
 import { ViewTransform } from '../../shared/geometry/view-transform';
 
 /** Length of major / minor ticks relative to the ruler's thickness. */
@@ -25,9 +26,11 @@ const MINOR = 0.3;
 @Component({
   selector: 'app-canvas-ruler',
   template: `<canvas #canvas aria-hidden="true"></canvas>`,
+  host: { '(pointerdown)': 'drag($event)' },
   styles: `
     :host {
       display: block;
+      cursor: copy;
       overflow: hidden;
       background: var(--ai-ruler-bg);
       color: var(--ai-ruler-text);
@@ -49,6 +52,12 @@ export class CanvasRuler {
   readonly marker = input<number | null>(null);
   private readonly canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
   private readonly scheme = signal(0);
+  private readonly guides = inject(GuideService);
+
+  /** Out of the ruler a guide (prompt 056): top → horizontal, left → vertical. */
+  protected drag(e: PointerEvent): void {
+    this.guides.startDrag(this.orientation(), e);
+  }
 
   constructor() {
     const mq = globalThis.matchMedia?.('(prefers-color-scheme: dark)');

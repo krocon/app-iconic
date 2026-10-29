@@ -21,6 +21,7 @@ import { AlignService } from '../align/align.service';
 import { registerLockActions } from '../lock/lock-actions';
 import { CanvasEditStore } from '../canvas/canvas-edit.store';
 import { LayerStyleService } from '../canvas/layer-style.service';
+import { GuideService } from '../guides/guide.service';
 import { registerFilletActions } from '../fillet/fillet-actions';
 import { FilletService } from '../fillet/fillet.service';
 import { FilletTool } from '../fillet/fillet-tool';
@@ -77,6 +78,7 @@ export function registerPathTools(
     inject(FilesService),
     inject(CanvasEditStore),
     inject(LayerStyleService),
+    inject(GuideService),
     destroyRef,
   );
   registerTransformActions(
