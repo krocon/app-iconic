@@ -1,6 +1,16 @@
 # Prompt 032: Verlaufseditor
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 009, 011 · legacy §10 · Folge aus 031 (Parität)
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 009, 011 · legacy §10 · Folge aus 031 (Parität)
+
+## Stand
+
+- ✅ 29.10.2026: `features/gradient/` – gradient-model (lesen inkl. `href`-Kette, Nutzer zählen, Farbe an Position),
+  GradientService (Commands, Live-Geste = ein Undo-Schritt), GradientSection im Properties-Panel, GradientOverlay
+  (Griffe über Element-CTM · `gradientTransform` · Begrenzungsrahmen, über den Auswahl-Griffen), gradient-handles
+  (rein), Aktionen `gradient.create/set/addStop/setStop/removeStop/makeUnique/editOnCanvas`. Bewusst anders:
+  `gradientTransform` als Textfeld (nicht die Transform-Liste), Griffe ohne Snapping, geteilte Verläufe mit Hinweis +
+  Knopf „Nur hier (duplizieren)“ statt Rückfrage bei jeder Änderung; Griffe nur auf Wunsch („Auf der Zeichenfläche
+  bearbeiten“), weil Start/Ende sonst auf den Eck-Griffen der Auswahl liegen.
 
 ## Ziel
 

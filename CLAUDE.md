@@ -133,6 +133,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               sketch-targets (Kanten/Kreise/Linienenden aus dem DOM), sketch-elements (Form → SVG im
                               Raum des Elternelements), SketchOverlay (Vorschau + Maßfelder), sketch-preview (rein),
                               sketch-actions (`sketch.*`), StyleMemory + draw-style (Stil je Formtyp), Texte
+  app/features/gradient/      Verlaufseditor (032): gradient-model (rein), GradientService, GradientSection (Panel),
+                              GradientOverlay + gradient-handles (Griffe), gradient-actions (`gradient.*`), Texte
   app/features/clip/          Clip Paths (014): ClipEditStore (Bearbeitungsmodus), ClipEditLayer (Formen in der
                               Host-<svg>), ClipService + clip-actions (clip.*), clip-panel-model (rein),
                               ClipPathSection (Properties), clip-references (Copy/Duplicate/Delete), Texte

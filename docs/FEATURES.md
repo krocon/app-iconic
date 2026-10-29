@@ -157,8 +157,10 @@
 
 - [x] Elemente aus legacy §10 + `use`, `defs`, Verläufe rendern und bearbeiten (004 rendern, 009 Attribute von
       `use`/`stop`/`image` bearbeitbar, Verläufe über Stops und „Edit SVG…“)
-- [ ] Eigener Verlaufseditor (Richtung, Einheiten, Spread, Stops auf der Fläche) _(neu)_ – begründet offen, die
-      Vorlage hatte nur das Modell: Folge-Prompt [032](../prompts/032-verlaufseditor.md)
+- [x] Eigener Verlaufseditor (Richtung, Einheiten, Spread, Stops auf der Fläche) _(neu)_ (032): Abschnitt
+      „Gradient“ im Properties-Panel (Art, Einheiten, Spread, Transform, Stop-Leiste mit Ziehen/Klick/Tasten, geerbte
+      Stops), Griffe auf der Zeichenfläche (Start/Ende, Mitte/Radius/Fokus), geteilte Verläufe „nur hier“, Anlegen
+      für Fill/Stroke, Aktionen `gradient.*`
 - [x] Inline-`<style>`/Klassen beim Import in Attribute auflösen, Einheiten (003)
 - [x] Unbekannte Attribute/Elemente bleiben erhalten (002 unveränderte Assets byte-genau; 003 bearbeitete SVGs über DOM-Serialisierung)
 - [x] Fremdes SVG wird bereinigt (Skripte, Event-Handler, externe Referenzen) _(neu)_ (003)

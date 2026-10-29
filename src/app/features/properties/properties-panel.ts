@@ -12,6 +12,7 @@ import { IconInspector } from '../inspector/icon-inspector';
 import { itemTitle } from '../inspector/inspector-title';
 import { ClipPathSection } from '../clip/clip-path-section';
 import { AlignSection } from '../align/align-section';
+import { GradientSection } from '../gradient/gradient-section';
 
 /**
  * The properties panel (design 009 E9): header with the kind of the selection, Undo / Redo and
@@ -21,7 +22,14 @@ import { AlignSection } from '../align/align-section';
  */
 @Component({
   selector: 'app-properties-panel',
-  imports: [AlignSection, ClipPathSection, IconInspector, PropertyRow, TransformEditor],
+  imports: [
+    AlignSection,
+    GradientSection,
+    ClipPathSection,
+    IconInspector,
+    PropertyRow,
+    TransformEditor,
+  ],
   template: `
     <div class="head">
       <span class="kind" data-testid="properties-kind">{{ title() }}</span>
@@ -113,6 +121,7 @@ import { AlignSection } from '../align/align-section';
         </div>
       }
       <app-align-section />
+      <app-gradient-section />
       <app-clip-path-section />
       @if (actions.enabled('edit.editSvg') || actions.enabled('path.optimize')) {
         <div class="source-tools">

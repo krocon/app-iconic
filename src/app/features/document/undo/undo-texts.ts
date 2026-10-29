@@ -112,6 +112,8 @@ const EN = {
   lock: 'Lock',
   unlock: 'Unlock',
   addGuide: 'Add Guide',
+  editGradient: 'Edit Gradient',
+  createGradient: 'Create Gradient',
   // clip paths (design 014 E5)
   createClipPath: 'Create Clip Path',
   assignClip: 'Assign Clip Path',
@@ -221,6 +223,8 @@ export const UNDO_TEXTS = translatable('undo', EN, {
     lock: 'Sperren',
     unlock: 'Entsperren',
     addGuide: 'Hilfslinie hinzufügen',
+    editGradient: 'Verlauf bearbeiten',
+    createGradient: 'Verlauf anlegen',
     createClipPath: 'Beschneidungspfad anlegen',
     assignClip: 'Beschneidungspfad zuweisen',
     layerClip: 'Beschneidung der Ebene ändern',

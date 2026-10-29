@@ -2,6 +2,14 @@ import { ArgsSpec } from './action-args';
 import { IMAGE_ARGS, shapeArgsSpec, SNIPPET_ARGS } from './add-action-args';
 import { EXPORT_ARGS } from './export-action-args';
 import {
+  GRADIENT_ADD_STOP_ARGS,
+  GRADIENT_CREATE_ARGS,
+  GRADIENT_PAINT_ARGS,
+  GRADIENT_REMOVE_STOP_ARGS,
+  GRADIENT_SET_ARGS,
+  GRADIENT_SET_STOP_ARGS,
+} from './gradient-action-args';
+import {
   CLIP_ASSIGN_ARGS,
   CLIP_CREATE_ARGS,
   CLIP_REMOVE_ARGS,
@@ -415,6 +423,20 @@ export const ACTIONS: readonly ActionDef[] = [
   EDIT('edit.toggleConstruction', 'Construction Line'),
   // draw as construction (prompt 058)
   ADD('sketch.toggleConstructionMode', 'Draw as Construction'),
+  // gradient editor (prompt 032)
+  EDIT('gradient.create', 'Create Gradient', { args: GRADIENT_CREATE_ARGS }),
+  EDIT('gradient.set', 'Change Gradient', { palette: false, args: GRADIENT_SET_ARGS }),
+  EDIT('gradient.addStop', 'Add Gradient Stop', { palette: false, args: GRADIENT_ADD_STOP_ARGS }),
+  EDIT('gradient.setStop', 'Change Gradient Stop', {
+    palette: false,
+    args: GRADIENT_SET_STOP_ARGS,
+  }),
+  EDIT('gradient.removeStop', 'Remove Gradient Stop', {
+    palette: false,
+    args: GRADIENT_REMOVE_STOP_ARGS,
+  }),
+  EDIT('gradient.editOnCanvas', 'Edit Gradient on Canvas'),
+  EDIT('gradient.makeUnique', 'Make Gradient Unique', { args: GRADIENT_PAINT_ARGS }),
   // lock and isolate (prompt 055)
   EDIT('edit.toggleLock', 'Lock / Unlock', {
     args: { type: 'object', properties: { nodes: { type: 'json' } } },

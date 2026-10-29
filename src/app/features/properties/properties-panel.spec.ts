@@ -95,6 +95,7 @@ describe('PropertiesPanel (design 009 E9)', () => {
       'transform',
       'advanced',
       'align',
+      'gradient',
       'clip',
     ]);
     expect(field('width').value).toBe('10');

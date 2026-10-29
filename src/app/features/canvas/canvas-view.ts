@@ -49,6 +49,7 @@ import { CurvatureStore } from '../pen/curvature.store';
 import { PenStore } from '../pen/pen.store';
 import { PenOverlay } from '../pen/pen-overlay';
 import { ToolOverlays } from './tool-overlays';
+import { GradientOverlay } from '../gradient/gradient-overlay';
 import { CanvasTools } from './canvas-tools';
 import { followSelection } from './follow-selection';
 import { SketchOverlay } from '../sketch/sketch-overlay';
@@ -74,6 +75,7 @@ const WHEEL_ZOOM = 0.01;
     SketchOverlay,
     PenOverlay,
     ToolOverlays,
+    GradientOverlay,
   ],
   templateUrl: './canvas-view.html',
   styleUrl: './canvas-view.css',

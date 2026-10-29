@@ -124,6 +124,8 @@
       [snap]="edit.snap()"
       [active]="edit.activePoint()"
     />
+    <!-- above the selection handles: a gradient's start / end often sits on a corner (prompt 032) -->
+    <app-gradient-overlay [toView]="toView()" />
     @if (opt().crossCursor && pointerView(); as p) {
       <div class="cross-h" [style.top.px]="p.y"></div>
       <div class="cross-v" [style.left.px]="p.x"></div>
