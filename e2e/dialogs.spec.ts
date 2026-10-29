@@ -79,6 +79,16 @@ const DIALOGS: { name: string; open: (page: Page) => Promise<void> }[] = [
     },
   },
   {
+    name: 'fillet',
+    open: async (p) => {
+      await centerOn(p, 0.4, { x: 400, y: 360 });
+      await run(p, 'fillet.tool');
+      await new Promise((r) => setTimeout(r, 300));
+      const c = await toClient(p, 500, 300);
+      await p.mouse.click(c.clientX, c.clientY);
+    },
+  },
+  {
     name: 'shape size',
     open: async (p) => {
       await run(p, 'sketch.dragPolygon');

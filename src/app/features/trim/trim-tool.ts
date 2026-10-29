@@ -123,6 +123,11 @@ export class TrimTool implements CanvasTool {
   }
 
   press(e: ToolPointer): void {
+    if (!this.scope) {
+      // paper.js is still loading (first use): act once it is there
+      void this.ready().then(() => this.press(e));
+      return;
+    }
     const p = this.doc(e);
     if (this.mode() === 'extend') {
       this.extend(p);

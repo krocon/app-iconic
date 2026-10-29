@@ -52,6 +52,9 @@ export const COMMAND_ICONS: Record<string, string> = {
   // Trim and Extend (prompt 050)
   'trim.tool': 'M2 8h12 M8 2v4 M8 10v4 M10.5 4.5l3 3 M13.5 4.5l-3 3',
   'extend.tool': 'M2 8h7 M11 8h3 M14 3v10 M9 6l2 2-2 2',
+  // Fillet and Chamfer (prompt 051)
+  'fillet.tool': 'M2.5 13.5V9a6.5 6.5 0 0 1 6.5-6.5h4.5',
+  'chamfer.tool': 'M2.5 13.5V7l4.5-4.5h6.5',
   // path tools (prompt 046)
   'path.addAnchor': 'M2 13L13 2 M6.5 7.5h2v2h-2z M11 12h4 M13 10v4',
   'path.deleteAnchor': 'M2 13L13 2 M6.5 7.5h2v2h-2z M11 12h4',

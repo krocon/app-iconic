@@ -318,6 +318,24 @@ export const ACTIONS: readonly ActionDef[] = [
       properties: { x: { type: 'number' }, y: { type: 'number' } },
     },
   }),
+  // Fillet and Chamfer between outlines (prompt 051)
+  EDIT('fillet.tool', 'Fillet'),
+  EDIT('chamfer.tool', 'Chamfer'),
+  EDIT('fillet.at', 'Fillet / Chamfer at Points', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['a', 'radius'],
+      properties: {
+        kind: { type: 'string', enum: ['fillet', 'chamfer'] },
+        /** {x, y} on the first side (the part that stays). */
+        a: { type: 'json' },
+        /** {x, y} on the second side; without it the corner of one path at `a`. */
+        b: { type: 'json' },
+        radius: { type: 'number', minimum: 0 },
+      },
+    },
+  }),
   EDIT('path.addAnchor', 'Add Anchor Point Tool'),
   EDIT('path.deleteAnchor', 'Delete Anchor Point Tool'),
   EDIT('path.anchorPoint', 'Anchor Point Tool'),

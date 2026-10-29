@@ -60,7 +60,7 @@ dann 056, 057, 058, 032 (Verlaufseditor), zuletzt 059.
 | 048 | [048-bemassung-messen.md](048-bemassung-messen.md) | Messen und Bemaßung | 040 | M | ✅ 29.10.2026 |
 | 049 | [049-muster-konstruktion.md](049-muster-konstruktion.md) | Konstruktionslinien, kreisförmiges/rechteckiges Muster, Spiegeln, Klonen | 040 | M | ✅ 29.10.2026 |
 | 050 | [050-trimmen-verlaengern.md](050-trimmen-verlaengern.md) | Trimmen und Verlängern an Schnittpunkten | 040, 046 | M | ✅ 29.10.2026 |
-| 051 | [051-verrunden-fasen.md](051-verrunden-fasen.md) | Verrunden und Fasen zwischen Elementen | 050 | M | offen |
+| 051 | [051-verrunden-fasen.md](051-verrunden-fasen.md) | Verrunden und Fasen zwischen Elementen | 050 | M | ✅ 29.10.2026 |
 | 052 | [052-versatz-kontur.md](052-versatz-kontur.md) | Versatz (Offset) und Kontur in Fläche | 047 | L | offen |
 | 053 | [053-transformieren.md](053-transformieren.md) | Transformieren mit Bezugspunkt und Zahlen | 007 | M | offen |
 | 054 | [054-verteilen-ausrichten.md](054-verteilen-ausrichten.md) | Verteilen; Ausrichten an Leinwand/Schlüsselobjekt | 007 | S | offen |

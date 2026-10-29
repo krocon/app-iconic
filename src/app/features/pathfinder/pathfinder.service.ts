@@ -95,10 +95,25 @@ export class PathfinderService {
    */
   replace(old: readonly PathTarget[], pieces: readonly Piece[], label: UndoLabel): boolean {
     const store = this.files.store();
-    if (!store || !old.length) return false;
+    const plan = this.replacePlan(old, pieces, label);
+    if (!store || !plan) return false;
+    store.execute(plan.command);
+    store.selection.set(plan.refs());
+    return true;
+  }
+
+  /** The command of {@link replace} without running it (previews run it as a gesture). */
+  replacePlan(
+    old: readonly PathTarget[],
+    pieces: readonly Piece[],
+    label: UndoLabel,
+  ): { command: DocCommand; refs(): NodeRef[] } | null {
+    const store = this.files.store();
+    if (!store || !old.length) return null;
     const doc = store.document();
     const sim = new Map<Element, Element[]>();
     const inserts: InsertNode[] = [];
+    const named = new Set<Element>();
     for (const p of pieces) {
       const parent = p.source.el.parentElement;
       const parentRef = parent ? doc.refOf(parent) : null;
@@ -110,11 +125,15 @@ export class PathfinderService {
       const d = fromSubpaths(mapSubpaths(sub, (q) => apply(p.source.toLocal, q)));
       const marker = parent.ownerDocument.createElementNS(parent.namespaceURI, 'path');
       list.splice(at, 0, marker);
-      inserts.push(new InsertNode(parentRef, pathMarkup(p.source.el, d, false), at, label));
+      // the first piece of a shape that goes keeps its id (references to it stay intact)
+      const keepId = !named.has(p.source.el) && old.some((o) => o.el === p.source.el);
+      named.add(p.source.el);
+      inserts.push(new InsertNode(parentRef, pathMarkup(p.source.el, d, keepId), at, label));
     }
     const cmds: DocCommand[] = [...inserts, ...old.map((t) => new RemoveNode(t.ref))];
-    store.execute(new CompositeCommand(label, cmds));
-    store.selection.set(inserts.map((i) => i.ref).filter((r): r is NodeRef => r !== null));
-    return true;
+    return {
+      command: new CompositeCommand(label, cmds),
+      refs: () => inserts.map((i) => i.ref).filter((r): r is NodeRef => r !== null),
+    };
   }
 }

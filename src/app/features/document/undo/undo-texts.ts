@@ -104,6 +104,8 @@ const EN = {
   linkedClone: 'Clone (Linked)',
   trim: 'Trim',
   extend: 'Extend',
+  fillet: 'Fillet',
+  chamfer: 'Chamfer',
   // clip paths (design 014 E5)
   createClipPath: 'Create Clip Path',
   assignClip: 'Assign Clip Path',
@@ -205,6 +207,8 @@ export const UNDO_TEXTS = translatable('undo', EN, {
     linkedClone: 'Klonen (verknüpft)',
     trim: 'Trimmen',
     extend: 'Verlängern',
+    fillet: 'Verrunden',
+    chamfer: 'Fasen',
     createClipPath: 'Beschneidungspfad anlegen',
     assignClip: 'Beschneidungspfad zuweisen',
     layerClip: 'Beschneidung der Ebene ändern',

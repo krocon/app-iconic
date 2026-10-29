@@ -11,6 +11,9 @@ import { PathfinderService } from './pathfinder.service';
 import { ShapeBuilderTool } from './shape-builder-tool';
 import { registerTrimActions } from '../trim/trim-actions';
 import { TrimTool } from '../trim/trim-tool';
+import { registerFilletActions } from '../fillet/fillet-actions';
+import { FilletService } from '../fillet/fillet.service';
+import { FilletTool } from '../fillet/fillet-tool';
 import { AddService } from '../commands/add.service';
 import { registerDimensionActions } from '../dimension/dimension-actions';
 import { DimensionService } from '../dimension/dimension.service';
@@ -57,6 +60,14 @@ export function registerPathTools(
     destroyRef,
   );
   registerTrimActions(actions, inject(TrimTool), tools, freehand, destroyRef);
+  registerFilletActions(
+    actions,
+    inject(FilletService),
+    inject(FilletTool),
+    tools,
+    freehand,
+    destroyRef,
+  );
   registerPatternActions(
     actions,
     inject(PatternService),

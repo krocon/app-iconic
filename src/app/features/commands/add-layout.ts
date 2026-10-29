@@ -75,6 +75,8 @@ export const ADD_LAYOUT: readonly AddSection[] = [
       group('editPath', [
         'trim.tool',
         'extend.tool',
+        'fillet.tool',
+        'chamfer.tool',
         'path.addAnchor',
         'path.deleteAnchor',
         'path.anchorPoint',
