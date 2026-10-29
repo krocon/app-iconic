@@ -49,6 +49,9 @@ export const COMMAND_ICONS: Record<string, string> = {
   'sketch.dragPolygon': 'M8 2.5l5 3.6-1.9 5.9H4.9L3 6.1z M12 11l3 3',
   'sketch.dragLine': 'M3 13L12 4 M12 11l3 3',
   'sketch.polygonEdge': 'M5 13l-2.5-5L8 2.5l5.5 5.5L11 13z M4 12h2v2H4z M10 12h2v2h-2z',
+  // Trim and Extend (prompt 050)
+  'trim.tool': 'M2 8h12 M8 2v4 M8 10v4 M10.5 4.5l3 3 M13.5 4.5l-3 3',
+  'extend.tool': 'M2 8h7 M11 8h3 M14 3v10 M9 6l2 2-2 2',
   // path tools (prompt 046)
   'path.addAnchor': 'M2 13L13 2 M6.5 7.5h2v2h-2z M11 12h4 M13 10v4',
   'path.deleteAnchor': 'M2 13L13 2 M6.5 7.5h2v2h-2z M11 12h4',

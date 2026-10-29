@@ -102,6 +102,8 @@ const EN = {
   rectangularPattern: 'Rectangular Pattern',
   mirror: 'Mirror',
   linkedClone: 'Clone (Linked)',
+  trim: 'Trim',
+  extend: 'Extend',
   // clip paths (design 014 E5)
   createClipPath: 'Create Clip Path',
   assignClip: 'Assign Clip Path',
@@ -201,6 +203,8 @@ export const UNDO_TEXTS = translatable('undo', EN, {
     rectangularPattern: 'Rechteckiges Muster',
     mirror: 'Spiegeln',
     linkedClone: 'Klonen (verknüpft)',
+    trim: 'Trimmen',
+    extend: 'Verlängern',
     createClipPath: 'Beschneidungspfad anlegen',
     assignClip: 'Beschneidungspfad zuweisen',
     layerClip: 'Beschneidung der Ebene ändern',

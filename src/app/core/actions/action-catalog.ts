@@ -299,6 +299,25 @@ export const ACTIONS: readonly ActionDef[] = [
   }),
   EDIT('icon.copyJson', 'Copy icon.json'),
   // path tools (prompt 046): on/off; they edit the selected paths and shapes
+  // Trim and Extend like Fusion 360 (prompt 050)
+  EDIT('trim.tool', 'Trim'),
+  EDIT('extend.tool', 'Extend'),
+  EDIT('trim.at', 'Trim at Point', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['x', 'y'],
+      properties: { x: { type: 'number' }, y: { type: 'number' } },
+    },
+  }),
+  EDIT('extend.at', 'Extend at Point', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['x', 'y'],
+      properties: { x: { type: 'number' }, y: { type: 'number' } },
+    },
+  }),
   EDIT('path.addAnchor', 'Add Anchor Point Tool'),
   EDIT('path.deleteAnchor', 'Delete Anchor Point Tool'),
   EDIT('path.anchorPoint', 'Anchor Point Tool'),

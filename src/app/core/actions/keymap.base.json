@@ -49,6 +49,8 @@
     "d": "dimension.tool",
     "i": "measure.tool",
     "x": "edit.toggleConstruction",
+    "t": "trim.tool",
+    "e": "extend.tool",
     "Mod+Alt+d": "edit.cloneLinked"
   },
   "drawing": {

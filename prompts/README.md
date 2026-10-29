@@ -59,7 +59,7 @@ dann 056, 057, 058, 032 (Verlaufseditor), zuletzt 059.
 | 047 | [047-shape-builder-pathfinder.md](047-shape-builder-pathfinder.md) | Pathfinder (boolesche Operationen) und Shape Builder | 046 | L | ✅ 29.10.2026 |
 | 048 | [048-bemassung-messen.md](048-bemassung-messen.md) | Messen und Bemaßung | 040 | M | ✅ 29.10.2026 |
 | 049 | [049-muster-konstruktion.md](049-muster-konstruktion.md) | Konstruktionslinien, kreisförmiges/rechteckiges Muster, Spiegeln, Klonen | 040 | M | ✅ 29.10.2026 |
-| 050 | [050-trimmen-verlaengern.md](050-trimmen-verlaengern.md) | Trimmen und Verlängern an Schnittpunkten | 040, 046 | M | offen |
+| 050 | [050-trimmen-verlaengern.md](050-trimmen-verlaengern.md) | Trimmen und Verlängern an Schnittpunkten | 040, 046 | M | ✅ 29.10.2026 |
 | 051 | [051-verrunden-fasen.md](051-verrunden-fasen.md) | Verrunden und Fasen zwischen Elementen | 050 | M | offen |
 | 052 | [052-versatz-kontur.md](052-versatz-kontur.md) | Versatz (Offset) und Kontur in Fläche | 047 | L | offen |
 | 053 | [053-transformieren.md](053-transformieren.md) | Transformieren mit Bezugspunkt und Zahlen | 007 | M | offen |

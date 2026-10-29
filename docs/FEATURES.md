@@ -92,6 +92,8 @@
 - [x] Konstruktionslinien, Muster, Spiegeln, Klonen wie Fusion 360 _(neu)_ (049): Konstruktion (X, im SVG
   transparent, im Canvas gestrichelt blau), kreisförmiges und rechteckiges Muster mit Live-Vorschau, Spiegeln an
   zwei Punkten, verknüpfter Klon (`<use>`).
+- [x] Trimmen und Verlängern wie Fusion 360 _(neu)_ (050): Stück zwischen Schnittpunkten wegschneiden (Klick oder
+  Ziehen), offenes Ende bis zur nächsten Kontur verlängern.
 - [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
       gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)

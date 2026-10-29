@@ -48,11 +48,7 @@ import { CurvatureTool } from '../pen/curvature-tool';
 import { CurvatureStore } from '../pen/curvature.store';
 import { PenStore } from '../pen/pen.store';
 import { PenOverlay } from '../pen/pen-overlay';
-import { PathEditOverlay } from '../path-edit/path-edit-overlay';
-import { PathfinderOverlay } from '../pathfinder/pathfinder-overlay';
-import { DimensionOverlay } from '../dimension/dimension-overlay';
-import { PatternOverlay } from '../pattern/pattern-overlay';
-import { CornerOverlay } from '../corners/corner-overlay';
+import { ToolOverlays } from './tool-overlays';
 import { CanvasTools } from './canvas-tools';
 import { followSelection } from './follow-selection';
 import { SketchOverlay } from '../sketch/sketch-overlay';
@@ -77,11 +73,7 @@ const WHEEL_ZOOM = 0.01;
     SelectionOverlay,
     SketchOverlay,
     PenOverlay,
-    PathEditOverlay,
-    PathfinderOverlay,
-    DimensionOverlay,
-    PatternOverlay,
-    CornerOverlay,
+    ToolOverlays,
   ],
   templateUrl: './canvas-view.html',
   styleUrl: './canvas-view.css',

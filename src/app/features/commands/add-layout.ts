@@ -73,6 +73,8 @@ export const ADD_LAYOUT: readonly AddSection[] = [
       group('ellipse', ['add.ellipse', 'sketch.dragEllipse']),
       group('path', ['add.path', 'pen.tool', 'curvature.tool']),
       group('editPath', [
+        'trim.tool',
+        'extend.tool',
         'path.addAnchor',
         'path.deleteAnchor',
         'path.anchorPoint',
