@@ -26,6 +26,9 @@ import { PenService } from './features/pen/pen.service';
 import { CurvatureService } from './features/pen/curvature.service';
 import { FreehandStore } from './features/tools/freehand.store';
 import { registerPenActions } from './features/pen/pen-actions';
+import { registerPathEditActions } from './features/path-edit/path-edit-actions';
+import { PathEditService } from './features/path-edit/path-edit.service';
+import { PathEditTool } from './features/path-edit/path-edit-tool';
 import { registerFileActions } from './features/files/file-actions';
 import { FILES_TEXTS } from './features/files/files-texts';
 import { FilesService } from './features/files/files.service';
@@ -327,6 +330,14 @@ export class App implements OnInit {
           enabled: () => corners.canApply(),
         },
       },
+      this.destroyRef,
+    );
+    registerPathEditActions(
+      this.actions,
+      inject(PathEditService),
+      inject(PathEditTool),
+      canvasTools,
+      inject(FreehandStore),
       this.destroyRef,
     );
     registerPenActions(

@@ -83,6 +83,8 @@
       Bogen – Ziehen mit ↑/↓, Shift, Alt; Größendialog
 - [x] Live Corners wie VectorCraft _(neu)_ (045): Ecken-Widgets an Rechteck/Polygon/geradem Pfad, rund/invers/Fase,
       Dialog „Ecken…“
+- [x] Pfade bearbeiten wie VectorCraft _(neu)_ (046): Ankerpunkt hinzufügen/löschen/umwandeln, Schere, Glätten,
+  Pfad-Radiergummi, Join (⌘J), Convert to Path, Auto Add/Delete des Zeichenstifts; Messer/Cuts mit 047.
 - [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
       gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)

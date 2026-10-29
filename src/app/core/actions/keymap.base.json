@@ -40,7 +40,11 @@
     "c": "sketch.circleCenter",
     "m": "sketch.dragRect",
     "p": "pen.tool",
-    "Shift+`": "curvature.tool"
+    "Shift+`": "curvature.tool",
+    "+": "path.addAnchor",
+    "-": "path.deleteAnchor",
+    "Shift+c": "path.anchorPoint",
+    "Mod+j": "path.join"
   },
   "drawing": {
     "ArrowUp": "sketch.sidesUp",

@@ -124,6 +124,13 @@ export function roundRectSubpath(c: Point, w: number, h: number, r: number): Sub
   const [x0, y0, x1, y1] = [c.x - w / 2, c.y - h / 2, c.x + w / 2, c.y + h / 2];
   const k = rr * (1 - KAPPA);
   const p = (x: number, y: number) => ({ x, y });
+  if (!(rr > 0)) {
+    // without radius four corners, no doubled points
+    return {
+      anchors: [p(x0, y0), p(x1, y0), p(x1, y1), p(x0, y1)].map(corner),
+      closed: true,
+    };
+  }
   return {
     anchors: [
       { p: p(x0 + rr, y0), hin: p(x0 + k, y0), hout: null },

@@ -298,6 +298,15 @@ export const ACTIONS: readonly ActionDef[] = [
     args: { type: 'object', required: ['appearance'], properties: { appearance: APPEARANCE_ARG } },
   }),
   EDIT('icon.copyJson', 'Copy icon.json'),
+  // path tools (prompt 046): on/off; they edit the selected paths and shapes
+  EDIT('path.addAnchor', 'Add Anchor Point Tool'),
+  EDIT('path.deleteAnchor', 'Delete Anchor Point Tool'),
+  EDIT('path.anchorPoint', 'Anchor Point Tool'),
+  EDIT('path.scissors', 'Scissors Tool'),
+  EDIT('path.smooth', 'Smooth Tool'),
+  EDIT('path.eraser', 'Path Eraser Tool'),
+  EDIT('path.join', 'Join Paths'),
+  EDIT('path.convert', 'Convert to Path'),
   // Live Corners (prompt 045): without arguments the dialog
   EDIT('corners.set', 'Corners…', {
     args: {

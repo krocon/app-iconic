@@ -72,6 +72,8 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('edit.editSvg'),
     a('corners.set'),
     a('path.optimize'),
+    a('path.join'),
+    a('path.convert'),
     sep,
     a('edit.selectAll'),
     a('edit.deselect'),

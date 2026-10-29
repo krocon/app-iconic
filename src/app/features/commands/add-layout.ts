@@ -5,7 +5,7 @@
  */
 export type AddSectionKey = 'structure' | 'shapes' | 'text' | 'import';
 export type AddGroupKey =
-  'line' | 'rectangle' | 'circle' | 'ellipse' | 'arc' | 'polygon' | 'path' | 'more';
+  'line' | 'rectangle' | 'circle' | 'ellipse' | 'arc' | 'polygon' | 'path' | 'editPath' | 'more';
 
 export type AddEntry =
   { kind: 'action'; id: string } | { kind: 'group'; group: AddGroupKey; ids: readonly string[] };
@@ -61,6 +61,14 @@ export const ADD_LAYOUT: readonly AddSection[] = [
       ]),
       group('ellipse', ['add.ellipse', 'sketch.dragEllipse']),
       group('path', ['add.path', 'pen.tool', 'curvature.tool']),
+      group('editPath', [
+        'path.addAnchor',
+        'path.deleteAnchor',
+        'path.anchorPoint',
+        'path.scissors',
+        'path.smooth',
+        'path.eraser',
+      ]),
       group('more', ['sketch.dragSpiral', 'sketch.dragRectGrid', 'sketch.dragPolarGrid']),
       act('add.freehand'),
     ],

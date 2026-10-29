@@ -48,6 +48,7 @@ import { CurvatureTool } from '../pen/curvature-tool';
 import { CurvatureStore } from '../pen/curvature.store';
 import { PenStore } from '../pen/pen.store';
 import { PenOverlay } from '../pen/pen-overlay';
+import { PathEditOverlay } from '../path-edit/path-edit-overlay';
 import { CornerOverlay } from '../corners/corner-overlay';
 import { CanvasTools } from './canvas-tools';
 import { followSelection } from './follow-selection';
@@ -73,6 +74,7 @@ const WHEEL_ZOOM = 0.01;
     SelectionOverlay,
     SketchOverlay,
     PenOverlay,
+    PathEditOverlay,
     CornerOverlay,
   ],
   templateUrl: './canvas-view.html',

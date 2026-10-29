@@ -1,3 +1,10 @@
+import { PathEditService } from '../path-edit/path-edit.service';
+import {
+  addAnchor,
+  hitAnchor,
+  hitSegment,
+  removeAnchor,
+} from '../../shared/geometry/pen/path-model';
 import { inject, Injectable } from '@angular/core';
 import { apply, fromDom, invert } from '../../shared/geometry/matrix';
 import { openTail, reverseAnchors, mapAnchors } from '../../shared/geometry/pen/pen-path';
@@ -27,6 +34,7 @@ export class PenTool implements CanvasTool {
   private readonly service = inject(PenService);
   private readonly view = inject(CanvasViewStore);
   private readonly files = inject(FilesService);
+  private readonly pathEdit = inject(PathEditService);
   private readonly snap = new DrawSnap(this.view, inject(CanvasEditStore), this.files);
   private pressed = false;
 
@@ -58,6 +66,7 @@ export class PenTool implements CanvasTool {
   press(e: ToolPointer): void {
     const p = this.point(e);
     if (!this.pen.drawing() && this.goOn(this.snap.raw(e))) return;
+    if (!this.pen.drawing() && this.autoEdit(this.snap.raw(e))) return;
     this.pen.press(p, { x: e.clientX, y: e.clientY }, this.tol(), !!e.shiftKey);
     this.pressed = true;
   }
@@ -98,6 +107,27 @@ export class PenTool implements CanvasTool {
 
   reset(): void {
     this.pen.reset();
+  }
+
+  /**
+   * Auto Add/Delete (prompt 046, like VectorCraft): before drawing, a press on a point of a
+   * selected path deletes it, a press on its outline adds one.
+   */
+  private autoEdit(p: Point): boolean {
+    for (const t of this.pathEdit.targets()) {
+      if (t.el.localName !== 'path') continue;
+      const a = hitAnchor(t.subpaths, p, this.tol());
+      if (a) {
+        this.pathEdit.write(t, removeAnchor(t.subpaths, a.s, a.i));
+        return true;
+      }
+      const s = hitSegment(t.subpaths, p, this.tol());
+      if (s) {
+        this.pathEdit.write(t, addAnchor(t.subpaths, s.s, s.i, s.t));
+        return true;
+      }
+    }
+    return false;
   }
 
   /** A press on an end of the selected open path: the pen goes on from there. */

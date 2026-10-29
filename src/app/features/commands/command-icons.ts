@@ -49,5 +49,13 @@ export const COMMAND_ICONS: Record<string, string> = {
   'sketch.dragPolygon': 'M8 2.5l5 3.6-1.9 5.9H4.9L3 6.1z M12 11l3 3',
   'sketch.dragLine': 'M3 13L12 4 M12 11l3 3',
   'sketch.polygonEdge': 'M5 13l-2.5-5L8 2.5l5.5 5.5L11 13z M4 12h2v2H4z M10 12h2v2h-2z',
+  // path tools (prompt 046)
+  'path.addAnchor': 'M2 13L13 2 M6.5 7.5h2v2h-2z M11 12h4 M13 10v4',
+  'path.deleteAnchor': 'M2 13L13 2 M6.5 7.5h2v2h-2z M11 12h4',
+  'path.anchorPoint': 'M2 12l6-8 6 8 M7 3h2v2H7z',
+  'path.scissors':
+    'M4.5 11.5a2 2 0 1 0 0.01 0 M11.5 11.5a2 2 0 1 0 0.01 0 M5.8 10L11 2.5 M10.2 10L5 2.5',
+  'path.smooth': 'M2 11l3-4 3 4 3-4 3 4 M2 13c4-3 8-3 12 0',
+  'path.eraser': 'M2 12c3-6 6-6 7-4 M9.5 13.5l4-4-2-2-4 4z',
   'add.image': 'M2.5 3.5h11v9h-11z M5.5 6.5h0.01 M2.5 11l4-4 3 3 1.5-1.5 2.5 2.5',
 };
