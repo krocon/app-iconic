@@ -7,6 +7,7 @@ import { PathfinderOverlay } from '../pathfinder/pathfinder-overlay';
 import { PatternOverlay } from '../pattern/pattern-overlay';
 import { TrimOverlay } from '../trim/trim-overlay';
 import { FilletOverlay } from '../fillet/fillet-overlay';
+import { TransformOverlay } from '../transform/transform-overlay';
 
 /**
  * The overlays of the construction tools (prompts 045–050) in one place: each draws only while its
@@ -22,6 +23,7 @@ import { FilletOverlay } from '../fillet/fillet-overlay';
     PatternOverlay,
     TrimOverlay,
     FilletOverlay,
+    TransformOverlay,
   ],
   template: `
     <app-corner-overlay [toView]="toView()" />
@@ -31,6 +33,7 @@ import { FilletOverlay } from '../fillet/fillet-overlay';
     <app-pattern-overlay [toView]="toView()" />
     <app-trim-overlay [toView]="toView()" />
     <app-fillet-overlay [toView]="toView()" />
+    <app-transform-overlay [toView]="toView()" />
   `,
   styles: `
     :host {

@@ -51,6 +51,10 @@
     "x": "edit.toggleConstruction",
     "t": "trim.tool",
     "e": "extend.tool",
+    "Shift+r": "transform.rotate",
+    "Shift+s": "transform.scale",
+    "Shift+o": "transform.reflect",
+    "Mod+Shift+m": "transform.dialog",
     "Mod+Alt+d": "edit.cloneLinked"
   },
   "drawing": {

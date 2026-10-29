@@ -588,6 +588,31 @@ export const ACTIONS: readonly ActionDef[] = [
   ARRANGE('arrange.align.top', 'Align Top'),
   ARRANGE('arrange.align.middle', 'Align Centers Vertically'),
   ARRANGE('arrange.align.bottom', 'Align Bottom'),
+  // Transform with a pivot and numbers (prompt 053)
+  ARRANGE('transform.rotate', 'Rotate Tool'),
+  ARRANGE('transform.scale', 'Scale Tool'),
+  ARRANGE('transform.reflect', 'Reflect Tool'),
+  ARRANGE('transform.dialog', 'Transform…'),
+  ARRANGE('transform.apply', 'Transform with Values', {
+    palette: false,
+    args: {
+      type: 'object',
+      properties: {
+        dx: { type: 'number' },
+        dy: { type: 'number' },
+        /** Degrees, clockwise on screen. */
+        rotate: { type: 'number' },
+        /** Factors (1 = 100 %). */
+        sx: { type: 'number' },
+        sy: { type: 'number' },
+        reflect: { type: 'string', enum: ['none', 'horizontal', 'vertical'] },
+        /** [x, y] in document units or one of tl t tr l c r bl b br (default c). */
+        pivot: { type: 'json' },
+        each: { type: 'boolean' },
+        copy: { type: 'boolean' },
+      },
+    },
+  }),
   // clip paths (design 014 E14)
   ARRANGE('clip.create', 'Create Clip Path', { args: CLIP_CREATE_ARGS }),
   ARRANGE('clip.assign', 'Assign Clip Path', { palette: false, args: CLIP_ASSIGN_ARGS }),

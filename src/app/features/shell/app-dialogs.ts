@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DialogService } from '../../shared/dialog/dialog.service';
+import { TransformDialog } from '../transform/transform-dialog';
 import { AboutDialog } from '../../features/about/about-dialog';
 import { AskDialog } from '../../shared/ask/ask-dialog';
 import { CommandPalette } from '../../features/menus/command-palette';
@@ -21,6 +22,7 @@ import { SettingsDialog } from '../../features/settings/settings-dialog';
 @Component({
   selector: 'app-dialogs',
   imports: [
+    TransformDialog,
     AboutDialog,
     AskDialog,
     CommandPalette,
@@ -69,6 +71,9 @@ import { SettingsDialog } from '../../features/settings/settings-dialog';
       }
       @case ('symbolPicker') {
         <app-symbol-picker-dialog />
+      }
+      @case ('transform') {
+        <app-transform-dialog />
       }
       @case ('offset') {
         <app-offset-dialog />

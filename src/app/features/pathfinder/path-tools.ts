@@ -13,6 +13,9 @@ import { registerTrimActions } from '../trim/trim-actions';
 import { TrimTool } from '../trim/trim-tool';
 import { registerOffsetActions } from '../offset/offset-actions';
 import { OffsetService } from '../offset/offset.service';
+import { registerTransformActions } from '../transform/transform-actions';
+import { TransformService } from '../transform/transform.service';
+import { TransformTool } from '../transform/transform-tool';
 import { registerFilletActions } from '../fillet/fillet-actions';
 import { FilletService } from '../fillet/fillet.service';
 import { FilletTool } from '../fillet/fillet-tool';
@@ -63,6 +66,16 @@ export function registerPathTools(
   );
   registerTrimActions(actions, inject(TrimTool), tools, freehand, destroyRef);
   registerOffsetActions(actions, inject(OffsetService), inject(DialogService), destroyRef);
+  registerTransformActions(
+    actions,
+    inject(TransformService),
+    inject(TransformTool),
+    tools,
+    freehand,
+    inject(FilesService),
+    inject(DialogService),
+    destroyRef,
+  );
   registerFilletActions(
     actions,
     inject(FilletService),

@@ -156,6 +156,11 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('arrange.group'),
     a('arrange.ungroup'),
     sep,
+    a('transform.dialog'),
+    a('transform.rotate'),
+    a('transform.scale'),
+    a('transform.reflect'),
+    sep,
     sub(t.align, [
       a('arrange.align.left', t.alignLeft),
       a('arrange.align.centerH', t.alignCenterH),

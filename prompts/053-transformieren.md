@@ -2,6 +2,17 @@
 
 > Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 007 · Vorbild: Illustrator „Rotate/Scale/Reflect Tool“ + „Transform Each“; Fusion „Move/Copy“
 
+## Stand
+
+- ✅ 29.10.2026: Werkzeuge **Drehen** (⇧R), **Skalieren** (⇧S), **Spiegeln** (⇧O) (Menü Arrange): der Bezugspunkt
+  steht in der Mitte der Auswahl, ein Klick setzt ihn (gefangen); Ziehen dreht/skaliert/spiegelt live darum,
+  ⇧ rastet (15°, proportional, 45°-Achse), ⌥ beim Loslassen = Kopie; Statuszeile zeigt Winkel/Faktor; ein
+  Undo-Schritt. Dialog **Transformieren…** (⌘⇧M): Verschieben X/Y, Drehen, Skalieren %, Spiegeln H/V, Bezugspunkt
+  im 9er-Raster, „Einzeln transformieren“, „Kopie“; Vorschau live. Spiegeln des Originals geht jetzt (Dialog,
+  Werkzeug). Die Änderung steht im Raum des Elternelements vor dem eigenen `transform` (mit einer führenden
+  Matrix verschmolzen) – auch in gedrehten Gruppen richtig. `transform.apply {dx, dy, rotate, sx, sy, reflect,
+  pivot, each, copy}` für die KI.
+
 ## Ziel
 
 Drehen, Skalieren und Spiegeln geht heute nur über die Griffe der Auswahl um deren Mitte. Zum Konstruieren
