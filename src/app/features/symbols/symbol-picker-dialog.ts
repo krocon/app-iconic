@@ -18,7 +18,7 @@ export const MAX_TILES = 240;
   selector: 'app-symbol-picker-dialog',
   imports: [Modal],
   template: `
-    <app-modal [heading]="t.title" width="44rem" (closed)="dialogs.close()">
+    <app-modal [heading]="t.title" width="45rem" (closed)="dialogs.close()">
       <div class="top">
         @if (service.providers.length > 1) {
           <label class="field">
