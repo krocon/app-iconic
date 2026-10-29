@@ -113,3 +113,19 @@ export function distributeCommand(
   );
   return moveCommand(doc, host, nodes, deltas);
 }
+
+/** Align to pixels (prompt 057): each node's box moves so its top left lies on a `cell` edge. */
+export function pixelAlignCommand(
+  doc: IconDocument,
+  host: SVGSVGElement | null,
+  refs: readonly NodeRef[],
+  cell: number,
+): DocCommand | null {
+  const nodes = measurable(doc, host, refs);
+  if (!host || !nodes.length || !(cell > 0)) return null;
+  const deltas = nodes.map(({ rect }) => ({
+    x: Math.round(rect.x / cell) * cell - rect.x,
+    y: Math.round(rect.y / cell) * cell - rect.y,
+  }));
+  return moveCommand(doc, host, nodes, deltas);
+}

@@ -103,6 +103,14 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('view.rulers'),
     a('view.guides'),
     a('view.constructionLines'),
+    a('view.smallPreview'),
+    sub(t.pixelGrid, [
+      a('view.pixelGrid.off'),
+      a('view.pixelGrid.16'),
+      a('view.pixelGrid.32'),
+      a('view.pixelGrid.64'),
+      a('view.pixelGrid.128'),
+    ]),
     a('view.background'),
     a('view.effects'),
     a('view.crossCursor'),
@@ -164,6 +172,7 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('transform.rotate'),
     a('transform.scale'),
     a('transform.reflect'),
+    a('arrange.alignToPixels'),
     sep,
     sub(t.align, [
       a('arrange.align.left', t.alignLeft),

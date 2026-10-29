@@ -10,6 +10,8 @@ import { FilletOverlay } from '../fillet/fillet-overlay';
 import { TransformOverlay } from '../transform/transform-overlay';
 import { KeyObjectOverlay } from '../align/key-object-overlay';
 import { GuideOverlay } from '../guides/guide-overlay';
+import { PixelGridOverlay } from '../preview/pixel-grid-overlay';
+import { SmallPreview } from '../preview/small-preview';
 
 /**
  * The overlays of the construction tools (prompts 045–050) in one place: each draws only while its
@@ -28,8 +30,11 @@ import { GuideOverlay } from '../guides/guide-overlay';
     TransformOverlay,
     KeyObjectOverlay,
     GuideOverlay,
+    PixelGridOverlay,
+    SmallPreview,
   ],
   template: `
+    <app-pixel-grid-overlay [toView]="toView()" />
     <app-corner-overlay [toView]="toView()" />
     <app-path-edit-overlay [toView]="toView()" />
     <app-pathfinder-overlay [toView]="toView()" />
@@ -40,6 +45,7 @@ import { GuideOverlay } from '../guides/guide-overlay';
     <app-transform-overlay [toView]="toView()" />
     <app-key-object-overlay [toView]="toView()" />
     <app-guide-overlay [toView]="toView()" />
+    <app-small-preview />
   `,
   styles: `
     :host {

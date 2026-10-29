@@ -22,6 +22,9 @@ import { registerLockActions } from '../lock/lock-actions';
 import { CanvasEditStore } from '../canvas/canvas-edit.store';
 import { LayerStyleService } from '../canvas/layer-style.service';
 import { GuideService } from '../guides/guide.service';
+import { registerPreviewActions } from '../preview/preview-actions';
+import { SmallPreviewService } from '../preview/small-preview.service';
+import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { registerFilletActions } from '../fillet/fillet-actions';
 import { FilletService } from '../fillet/fillet.service';
 import { FilletTool } from '../fillet/fillet-tool';
@@ -73,6 +76,13 @@ export function registerPathTools(
   registerTrimActions(actions, inject(TrimTool), tools, freehand, destroyRef);
   registerOffsetActions(actions, inject(OffsetService), inject(DialogService), destroyRef);
   registerAlignActions(actions, inject(AlignService), destroyRef);
+  registerPreviewActions(
+    actions,
+    inject(SmallPreviewService),
+    inject(FilesService),
+    inject(CanvasViewStore),
+    destroyRef,
+  );
   registerLockActions(
     actions,
     inject(FilesService),

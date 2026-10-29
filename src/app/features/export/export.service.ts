@@ -26,7 +26,7 @@ export type ExportOutcome =
   | { kind: 'noDocument' };
 
 /** Natural sizes of the raster assets (design 012 E7); unknown ones are left out. */
-async function rasterSizes(doc: IconDocument): Promise<RasterSizes> {
+export async function rasterSizes(doc: IconDocument): Promise<RasterSizes> {
   const out = new Map<string, { width: number; height: number }>();
   for (const a of doc.assets.values()) {
     if (a.svg || !a.dataUrl) continue;
