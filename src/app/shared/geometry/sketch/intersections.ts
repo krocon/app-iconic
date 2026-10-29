@@ -1,13 +1,52 @@
 import { Point } from '../view-transform';
+import { Curve, curveCrossings, nearestOnCurve, Param, samples } from './outline-curves';
 
 /**
  * Where the outlines of shapes cross ("intersect", like the Smart Guides of Marc's VectorCraft,
- * `crates/tools/src/guides/targets.rs` `crossing`): exact for straight edges and circles, the two
- * kinds the sketch targets give (design 019 E10). Document units. Pure.
+ * `crates/tools/src/guides/targets.rs` `crossing`): exact for straight edges and circles, settled
+ * with Newton's method where a curve takes part (ellipses, Bézier and elliptic arcs, prompt 040).
+ * Document units. Pure.
  */
 
 export type Outline =
-  { kind: 'segment'; a: Point; b: Point } | { kind: 'circle'; c: Point; r: number };
+  { kind: 'segment'; a: Point; b: Point } | { kind: 'circle'; c: Point; r: number } | Curve;
+
+/** An outline as a function of `t ∈ [0, 1]` with its sample count. */
+function asParam(o: Outline): { at: Param; n: number; closed?: boolean } {
+  if (o.kind === 'curve') return o;
+  if (o.kind === 'segment') {
+    return {
+      at: (t) => ({ x: o.a.x + (o.b.x - o.a.x) * t, y: o.a.y + (o.b.y - o.a.y) * t }),
+      n: 1,
+    };
+  }
+  return {
+    at: (t) => ({
+      x: o.c.x + o.r * Math.cos(2 * Math.PI * t),
+      y: o.c.y + o.r * Math.sin(2 * Math.PI * t),
+    }),
+    n: 64,
+    closed: true,
+  };
+}
+
+/** The point of an outline nearest to `p`. */
+export function nearestOn(o: Outline, p: Point): Point {
+  if (o.kind === 'segment') {
+    const d = { x: o.b.x - o.a.x, y: o.b.y - o.a.y };
+    const l2 = d.x * d.x + d.y * d.y;
+    const k =
+      l2 > EPS ? Math.max(0, Math.min(1, ((p.x - o.a.x) * d.x + (p.y - o.a.y) * d.y) / l2)) : 0;
+    return { x: o.a.x + d.x * k, y: o.a.y + d.y * k };
+  }
+  if (o.kind === 'circle') {
+    const v = { x: p.x - o.c.x, y: p.y - o.c.y };
+    const l = Math.hypot(v.x, v.y);
+    if (l <= EPS) return { x: o.c.x + o.r, y: o.c.y };
+    return { x: o.c.x + (v.x / l) * o.r, y: o.c.y + (v.y / l) * o.r };
+  }
+  return nearestOnCurve(o, p);
+}
 
 /** One outline of one shape (`owner`: where two edges of one shape meet is its corner – no news). */
 export interface OwnedOutline {
@@ -17,8 +56,8 @@ export interface OwnedOutline {
 
 /** Most crossings collected (huge imported icons). */
 export const MAX_CROSSINGS = 20_000;
-/** Most pairs looked at. */
-export const MAX_PAIRS = 400_000;
+/** Most work for all crossings: pairs looked at, and sample segments compared for curves. */
+export const MAX_WORK = 2_000_000;
 
 const EPS = 1e-9;
 
@@ -77,7 +116,7 @@ export function intersect(p: Outline, q: Outline): Point[] {
   if (p.kind === 'segment' && q.kind === 'circle') return segCircle(p.a, p.b, q.c, q.r);
   if (p.kind === 'circle' && q.kind === 'segment') return segCircle(q.a, q.b, p.c, p.r);
   if (p.kind === 'circle' && q.kind === 'circle') return circleCircle(p.c, p.r, q.c, q.r);
-  return [];
+  return curveCrossings(asParam(p), asParam(q));
 }
 
 /** `x` is an end of a segment (rounding-tolerant). */
@@ -87,7 +126,28 @@ function atEnd(x: Point, o: Outline): boolean {
   return Math.hypot(x.x - o.a.x, x.y - o.a.y) <= tol || Math.hypot(x.x - o.b.x, x.y - o.b.y) <= tol;
 }
 
+const boxes = new WeakMap<object, { x0: number; y0: number; x1: number; y1: number }>();
+
+/** The bounds of an outline (kept per outline object). */
+export function outlineBounds(o: Outline): { x0: number; y0: number; x1: number; y1: number } {
+  const known = boxes.get(o);
+  if (known) return known;
+  const b = bounds(o);
+  boxes.set(o, b);
+  return b;
+}
+
 function bounds(o: Outline): { x0: number; y0: number; x1: number; y1: number } {
+  if (o.kind === 'curve') {
+    const ps = samples(o);
+    const x0 = Math.min(...ps.map((q) => q.x));
+    const y0 = Math.min(...ps.map((q) => q.y));
+    const x1 = Math.max(...ps.map((q) => q.x));
+    const y1 = Math.max(...ps.map((q) => q.y));
+    // the curve bulges past its samples a little
+    const pad = 0.02 * Math.max(x1 - x0, y1 - y0) + 1e-6;
+    return { x0: x0 - pad, y0: y0 - pad, x1: x1 + pad, y1: y1 + pad };
+  }
   if (o.kind === 'circle') {
     return { x0: o.c.x - o.r, y0: o.c.y - o.r, x1: o.c.x + o.r, y1: o.c.y + o.r };
   }
@@ -109,13 +169,17 @@ export function crossings(all: readonly OwnedOutline[]): Point[] {
     .filter((o) => [o.b.x0, o.b.y0, o.b.x1, o.b.y1].every(Number.isFinite))
     .sort((p, q) => p.b.x0 - q.b.x0);
   const out: Point[] = [];
-  let pairs = 0;
+  // every pair in reach costs, a curve pair as many as the sample segments it compares
+  const cost = (o: Outline) => (o.kind === 'curve' ? o.n : o.kind === 'circle' ? 64 : 1);
+  let work = 0;
   for (let i = 0; i < items.length; i++) {
     const p = items[i];
     for (let j = i + 1; j < items.length && items[j].b.x0 <= p.b.x1 + EPS; j++) {
+      if (++work > MAX_WORK) return out;
       const q = items[j];
       if (q.b.y0 > p.b.y1 + EPS || q.b.y1 < p.b.y0 - EPS) continue;
-      if (++pairs > MAX_PAIRS) return out;
+      const curved = p.outline.kind === 'curve' || q.outline.kind === 'curve';
+      if (curved && (work += cost(p.outline) * cost(q.outline)) > MAX_WORK) return out;
       const same = q.owner === p.owner;
       for (const x of intersect(p.outline, q.outline)) {
         // two edges of one shape meet at its corners: those are its points already

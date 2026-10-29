@@ -76,13 +76,18 @@ const pts = (ps: readonly Point[]) => ps.map((p) => `${p.x},${p.y}`).join(' ');
         />
       }
       @if (snapPoint(); as s) {
-        @if (s.kind === 'align') {
-          <!-- "align" like VectorCraft's Smart Guides: lines from the points it lines up with -->
-          <g class="align" data-testid="align-guides">
+        @if (s.guides.length) {
+          <!-- Smart Guides like VectorCraft: lines from the points it lines up with, construction -->
+          <g
+            class="align"
+            [attr.data-testid]="s.kind === 'align' ? 'align-guides' : 'smart-guides'"
+          >
             @for (g of s.guides; track $index) {
               <line [attr.x1]="g.x1" [attr.y1]="g.y1" [attr.x2]="g.x2" [attr.y2]="g.y2" />
             }
-            <text [attr.x]="s.x + 8" [attr.y]="s.y - 8">{{ t.align }}</text>
+            @if (s.kind === 'align') {
+              <text [attr.x]="s.x + 8" [attr.y]="s.y - 8">{{ t.align }}</text>
+            }
           </g>
         }
         @if (s.tag) {

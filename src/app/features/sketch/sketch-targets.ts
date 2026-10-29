@@ -2,7 +2,14 @@ import { nodeToDocument } from '../../shared/geometry/dom-geometry';
 import { apply, applyLinear, fromDom, Matrix } from '../../shared/geometry/matrix';
 import { PathSeg } from '../../shared/geometry/path-data';
 import { Tangent } from '../../shared/geometry/sketch/apollonius';
-import { crossings, OwnedOutline } from '../../shared/geometry/sketch/intersections';
+import { crossings, Outline, OwnedOutline } from '../../shared/geometry/sketch/intersections';
+import {
+  Curve,
+  cubicAt,
+  ellipseAt,
+  quadAt,
+  sampleCount,
+} from '../../shared/geometry/sketch/outline-curves';
 import { SnapCandidate } from '../../shared/geometry/snapping';
 import { dist, dot, sub, unit } from '../../shared/geometry/sketch/sketch-shapes';
 import { Anchor } from '../../shared/geometry/sketch/sketch-tools';
@@ -35,6 +42,8 @@ export interface SketchAnchor {
 export interface SketchTargets {
   targets: SketchTarget[];
   anchors: SketchAnchor[];
+  /** Curved outlines (ellipses, Bézier and elliptic arcs) for the Smart Guides (prompt 040). */
+  curves?: { key: string; curve: Curve }[];
 }
 
 /** Most targets collected (huge imported icons). */
@@ -90,7 +99,24 @@ function ofElement(el: Element, key: string, m: Matrix, out: SketchTargets): voi
   const sim = similarity(m) ?? (m.a * m.d - m.b * m.c < 0 ? mirrored(m) : null);
   const push = (t: SketchTarget | null) => t && out.targets.push(t);
   const anchor = (a: SketchAnchor | null) => a && out.anchors.push(a);
+  // a curve in local units, mapped into the document
+  const curve = (i: string, local: (t: number) => Point) => {
+    const at = (t: number) => map(local(t));
+    let len = 0;
+    for (let k = 0; k < 16; k++) {
+      const a = at(k / 16);
+      const b = at((k + 1) / 16);
+      len += Math.hypot(b.x - a.x, b.y - a.y);
+    }
+    if (!(len > 0) || !Number.isFinite(len)) return;
+    const closed = dist(at(0), at(1)) < 1e-9;
+    (out.curves ??= []).push({
+      key: `${key}:${i}`,
+      curve: { kind: 'curve', at, n: sampleCount(len), closed },
+    });
+  };
   const circle = (i: string, c: Point, r: number) => {
+    if (!sim && r > 0) curve(i, ellipseAt(c, r, r));
     if (sim && r > 0) {
       const cc = map(c);
       const rr = r * sim.k;
@@ -137,6 +163,7 @@ function ofElement(el: Element, key: string, m: Matrix, out: SketchTargets): voi
     case 'ellipse':
       if (Math.abs(g.rx - g.ry) <= 1e-9 * Math.max(g.rx, g.ry))
         circle('c', { x: g.cx, y: g.cy }, g.rx);
+      else if (g.rx > 0 && g.ry > 0) curve('e', ellipseAt({ x: g.cx, y: g.cy }, g.rx, g.ry));
       break;
     case 'path': {
       let first: PathSeg | null = null;
@@ -168,8 +195,15 @@ function ofElement(el: Element, key: string, m: Matrix, out: SketchTargets): voi
           push(segmentTarget(`${key}:${i}`, map(s.start), map(s.p)));
         } else if (s.cmd === 'A' && s.arc) {
           const a = arcCenter(s.start, s.p, s.arc);
-          if (a && Math.abs(a.rx - a.ry) <= 1e-9 * Math.max(a.rx, a.ry))
+          if (a && Math.abs(a.rx - a.ry) <= 1e-9 * Math.max(a.rx, a.ry) && sim) {
             circle(String(i), a.c, a.rx);
+          } else if (a) {
+            curve(String(i), ellipseAt(a.c, a.rx, a.ry, a.phi, a.theta1, a.delta));
+          }
+        } else if ((s.cmd === 'C' || s.cmd === 'S') && s.c2) {
+          curve(String(i), cubicAt(s.start, s.c1 ?? s.start, s.c2, s.p));
+        } else if ((s.cmd === 'Q' || s.cmd === 'T') && s.c1) {
+          curve(String(i), quadAt(s.start, s.c1, s.p));
         }
       });
       close();
@@ -214,7 +248,20 @@ export function crossingPoints(targets: SketchTargets): SnapCandidate[] {
     owner: t.key.slice(0, t.key.lastIndexOf(':')),
     outline: t.draw.kind === 'circle' ? t.draw : { kind: 'segment', a: t.draw.a, b: t.draw.b },
   }));
+  for (const c of targets.curves ?? []) {
+    outlines.push({ owner: c.key.slice(0, c.key.lastIndexOf(':')), outline: c.curve });
+  }
   return crossings(outlines).map((p) => ({ ...p, tag: 'intersect' as const }));
+}
+
+/** Every outline (edges, circles, curves) for the Smart Guides (prompt 040). */
+export function sceneOutlines(targets: SketchTargets): Outline[] {
+  return [
+    ...targets.targets.map((t): Outline =>
+      t.draw.kind === 'circle' ? t.draw : { kind: 'segment', a: t.draw.a, b: t.draw.b },
+    ),
+    ...(targets.curves ?? []).map((c) => c.curve),
+  ];
 }
 
 /** Distance of `p` from what a target draws. */

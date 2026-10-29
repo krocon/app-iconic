@@ -322,6 +322,7 @@ export const ACTIONS: readonly ActionDef[] = [
   VIEW('view.handles', 'Show Handles'),
   VIEW('view.snapToGrid', 'Snap to Grid'),
   VIEW('view.magicSnap', 'Magic Snap'),
+  VIEW('view.smartGuides', 'Smart Guides'),
   VIEW('view.zoomIn', 'Zoom In', { repeat: true }),
   VIEW('view.zoomOut', 'Zoom Out', { repeat: true }),
   VIEW('view.actualSize', 'Actual Size'),

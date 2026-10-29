@@ -24,6 +24,7 @@ const ROWS: Row[] = [
   { kind: 'item', id: 'view.handles' },
   { kind: 'item', id: 'view.snapToGrid' },
   { kind: 'item', id: 'view.magicSnap' },
+  { kind: 'item', id: 'view.smartGuides' },
   { kind: 'group', label: 'gridOrigin' },
   { kind: 'item', id: 'view.gridOrigin.worldZero', label: 'gridWorldZero' },
   { kind: 'item', id: 'view.gridOrigin.svgCenter', label: 'gridSvgCenter' },

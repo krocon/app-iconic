@@ -16,6 +16,7 @@ export const ACTION_TOGGLES: readonly { key: string; action: string; section: Se
   { key: 'canvas.handles', action: 'view.handles', section: 'canvas' },
   { key: 'canvas.snapToGrid', action: 'view.snapToGrid', section: 'snapping' },
   { key: 'canvas.magicSnap', action: 'view.magicSnap', section: 'snapping' },
+  { key: 'canvas.smartGuides', action: 'view.smartGuides', section: 'snapping' },
 ];
 
 /** Start zoom of new windows: 0 = fit, then the zoom steps (legacy §5). */

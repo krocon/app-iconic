@@ -340,8 +340,9 @@ for (const zoom of [0.5, 1.5]) {
     await click(page, 250, 250);
     await hover(page, 300 - 2 / zoom, 380);
     await expect(guides.locator('line')).toHaveCount(1);
-    await hover(page, 300 - 2 / zoom, 250 + 2 / zoom);
-    await expect(guides.locator('line')).toHaveCount(2);
+    // on the 0° construction guide from the first point, slid into line with the corner
+    await hover(page, 300 - 2 / zoom, 250 - 2 / zoom);
+    await expect(page.getByTestId('smart-guides').locator('line')).toHaveCount(2);
     expect(errors).toEqual([]);
   });
 }
@@ -497,5 +498,65 @@ test.describe('drag tools like VectorCraft (prompt 041)', () => {
     expect([s!.attrs['cx'], s!.attrs['cy'], s!.attrs['rx'], s!.attrs['ry']].map(Number)).toEqual([
       240, 320, 40, 20,
     ]);
+  });
+});
+
+test.describe('Smart Guides (prompt 040)', () => {
+  test('a line from a point lands on the tangent of a circle, on a contour, on 45°', async ({
+    page,
+  }) => {
+    const errors = collectErrors(page);
+    await setup(page, '<circle cx="500" cy="300" r="100" fill="none" stroke="#000"/>');
+    await snapping(page, true);
+    await centerOn(page, 1, { x: 400, y: 350 });
+    await tool(page, 'sketch.line');
+    await click(page, 200, 300);
+    // tangent from (200, 300) to the circle (500, 300) r 100
+    const d = 300;
+    const ang = Math.acos(100 / d);
+    const t = { x: 500 + 100 * Math.cos(Math.PI - ang), y: 300 - 100 * Math.sin(Math.PI - ang) };
+    await hover(page, t.x + 3, t.y + 2);
+    await expect(page.getByTestId('snap-label')).toHaveText('tangent');
+    await page.mouse.down();
+    await page.mouse.up();
+    await frames(page);
+    let s = await selected(page);
+    expect(Number(s!.attrs['x2'])).toBeCloseTo(t.x, 3);
+    expect(Number(s!.attrs['y2'])).toBeCloseTo(t.y, 3);
+    // on the contour, away from the tangents
+    await tool(page, 'sketch.line');
+    await click(page, 200, 500);
+    await hover(page, 553, 389);
+    await expect(page.getByTestId('snap-label')).toHaveText('path');
+    // a 45° construction guide from the start
+    await hover(page, 300, 397);
+    await expect(page.getByTestId('smart-guides')).toBeVisible();
+    await page.mouse.down();
+    await page.mouse.up();
+    await frames(page);
+    s = await selected(page);
+    expect(Number(s!.attrs['x2']) - 200).toBeCloseTo(500 - Number(s!.attrs['y2']), 3);
+    expect(errors).toEqual([]);
+  });
+
+  test('an ellipse and a line cross exactly ("intersect" on curves)', async ({ page }) => {
+    await setup(
+      page,
+      '<ellipse cx="400" cy="400" rx="200" ry="100" fill="none" stroke="#000"/>' +
+        '<line x1="300" y1="200" x2="300" y2="600" stroke="#000"/>',
+    );
+    await snapping(page, true);
+    await centerOn(page, 1, { x: 400, y: 400 });
+    await tool(page, 'sketch.line');
+    await click(page, 150, 250);
+    const y = 400 - 100 * Math.sqrt(1 - (100 * 100) / (200 * 200));
+    await hover(page, 303, y + 2);
+    await expect(page.getByTestId('snap-label')).toHaveText('intersect');
+    await page.mouse.down();
+    await page.mouse.up();
+    await frames(page);
+    const s = await selected(page);
+    expect(Number(s!.attrs['x2'])).toBeCloseTo(300, 3);
+    expect(Number(s!.attrs['y2'])).toBeCloseTo(y, 3);
   });
 });

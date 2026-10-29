@@ -6,7 +6,8 @@ import { CanvasEditStore } from '../canvas/canvas-edit.store';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { magicPoints } from '../canvas/magic-points';
 import { DocumentStore } from '../document/document.store';
-import { collectSketchTargets, crossingPoints } from './sketch-targets';
+import { Outline } from '../../shared/geometry/sketch/intersections';
+import { collectSketchTargets, crossingPoints, sceneOutlines } from './sketch-targets';
 import { SketchService } from './sketch.service';
 import { SketchStore } from './sketch.store';
 
@@ -27,7 +28,7 @@ interface PointerLike {
  * are not snapped – the targets are collected once per step. Plain class; `CanvasView` owns it.
  */
 export class SketchInteraction {
-  private magic: { revision: number; points: SnapCandidate[] } | null = null;
+  private magic: { revision: number; points: SnapCandidate[]; outlines: Outline[] } | null = null;
   private down: { x: number; y: number; step: number } | null = null;
 
   constructor(
@@ -54,8 +55,11 @@ export class SketchInteraction {
       zoom: this.view.zoom(),
       grid: o.snapToGrid && !off,
       magic: o.magicSnap && !off,
+      smart: o.magicSnap && o.smartGuides && !off,
       origin: gridOriginPoint(o.gridOrigin),
       step: o.gridSize,
+      // Smart Guides (prompt 040): from the last point placed – tangent, perpendicular, 45° steps
+      scene: { outlines: this.magic?.outlines ?? [], from: this.sketch.placed().at(-1)?.p ?? null },
     });
     if (r.kind !== 'none' && r.target) {
       this.edit.snap.set({ point: r.target, kind: r.kind, guides: r.guides, tag: r.tag });
@@ -72,12 +76,14 @@ export class SketchInteraction {
     if (!this.view.options().magicSnap || !store) return [];
     const revision = store.revision();
     if (!this.magic || this.magic.revision !== revision) {
+      const shapes = collectSketchTargets(this.layers(), this.host());
       this.magic = {
         revision,
         points: [
           ...magicPoints(this.layers(), this.host(), store.document(), []),
-          ...crossingPoints(collectSketchTargets(this.layers(), this.host())),
+          ...crossingPoints(shapes),
         ],
+        outlines: sceneOutlines(shapes),
       };
     }
     return [...this.magic.points, ...this.sketch.placed().map((p) => p.p)];

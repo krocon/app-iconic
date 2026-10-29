@@ -1,4 +1,5 @@
 import { CANVAS_SIZE } from './icon-guides';
+import { GuideTag, SmartScene, smartSnap } from './smart-guides';
 import { Point } from './view-transform';
 
 /**
@@ -11,17 +12,20 @@ import { Point } from './view-transform';
  * marked point within a few pixels, and guide lines run from those points. Pure.
  */
 
-export type SnapKind = 'none' | 'grid' | 'magic' | 'align';
+export type SnapKind = 'none' | 'grid' | 'magic' | 'align' | 'guide';
 export type GridOrigin = 'worldZero' | 'svgCenter';
 
 /** Activation distance in screen pixels (legacy §6). */
 export const SNAP_TOLERANCE_PX = 20;
 export const GRID_STEP = 10;
+/** Tangent, perpendicular, on a path, construction guides: closer than this (screen px). */
+export const SMART_TOLERANCE_PX = 8;
+
 /** Lining up with a marked point: closer than this in screen pixels on one axis (VectorCraft: a few px). */
 export const ALIGN_TOLERANCE_PX = 6;
 
 /** What a marked point is, when the indicator names it (VectorCraft's labels). */
-export type SnapTag = 'intersect';
+export type SnapTag = 'intersect' | 'anchor' | 'center' | GuideTag;
 
 /** A marked point of Magic Snap, optionally named. */
 export type SnapCandidate = Point & { tag?: SnapTag };
@@ -39,6 +43,10 @@ export interface SnapOptions {
   step?: number;
   origin?: Point;
   tolerancePx?: number;
+  /** Outlines, the point drawn from, extensions: the Smart Guides of prompt 040. */
+  scene?: SmartScene;
+  /** Use the scene (default: with Magic Snap). */
+  smart?: boolean;
   /** Line up with the marked points (default: with Magic Snap). */
   align?: boolean;
   alignTolerancePx?: number;
@@ -88,7 +96,7 @@ function nearestOnAxis(
   let bestAll = Infinity;
   for (const c of candidates) {
     // crossings are places to land on, not lines to keep to (too many, by chance)
-    if (c.tag) continue;
+    if (c.tag === 'intersect') continue;
     const d = Math.abs(c[axis] - p[axis]);
     if (d > tol) continue;
     const all = Math.hypot(c.x - p.x, c.y - p.y);
@@ -157,6 +165,26 @@ export function snapPoint(
       best = { point: g, kind: 'grid', target: g, distancePx: d, guides: [] };
   }
   if (best.kind === 'magic') return best;
+  if (o.scene && (o.smart ?? o.magic)) {
+    const lines = candidates.filter((c) => c.tag !== 'intersect');
+    const hit = smartSnap(
+      p,
+      o.scene,
+      SMART_TOLERANCE_PX / z,
+      lines,
+      (o.alignTolerancePx ?? ALIGN_TOLERANCE_PX) / z,
+    );
+    if (hit) {
+      return {
+        point: hit.point,
+        kind: 'guide',
+        target: hit.point,
+        distancePx: hit.distance * z,
+        guides: hit.guides,
+        tag: hit.tag,
+      };
+    }
+  }
   // lining up beats the grid (it is what the pointer is near on purpose; the other axis keeps it)
   const aligned = (o.align ?? o.magic) ? alignPoint(p, candidates, o) : null;
   return aligned ?? best;

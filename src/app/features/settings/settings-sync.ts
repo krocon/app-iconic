@@ -26,6 +26,7 @@ const CANVAS_KEYS = [
   'handles',
   'snapToGrid',
   'magicSnap',
+  'smartGuides',
   'gridSize',
   'gridOrigin',
   'selectionMode',

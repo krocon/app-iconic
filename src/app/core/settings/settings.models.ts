@@ -20,6 +20,8 @@ export interface CanvasSettings {
   handles: boolean;
   snapToGrid: boolean;
   magicSnap: boolean;
+  /** Smart Guides: path, tangent, perpendicular, construction guides (prompt 040). */
+  smartGuides: boolean;
   /** 1…256 document units. */
   gridSize: number;
   gridOrigin: 'worldZero' | 'svgCenter';
@@ -121,6 +123,7 @@ export const DEFAULT_SETTINGS: Settings = {
     handles: true,
     snapToGrid: false,
     magicSnap: true,
+    smartGuides: true,
     gridSize: 10,
     gridOrigin: 'worldZero',
     selectionMode: 'point',

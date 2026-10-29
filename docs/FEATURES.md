@@ -72,6 +72,9 @@
 - [x] Formen aufziehen wie VectorCraft _(neu)_ (041): Rectangle / Ellipse / Polygon / Line Segment Tool – Ziehen,
       Shift (Quadrat/Kreis/45°/aufrecht), Alt (von der Mitte), Leertaste (verschieben), ↑/↓ (Ecken), Klick → Größendialog;
       Snap-Ziele: Magic-Punkte, „align“ und Schnittpunkte („intersect“, 040)
+- [x] Smart Guides wie VectorCraft _(neu)_ (040): Schnittpunkte auch mit Kurven, Labels (anchor, center, path,
+      intersect, tangent, perpendicular, align), Kontur, Tangente/Senkrecht, Konstruktionswinkel 45°, Verlängerung;
+      Schalter „Smart Guides“
 - [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
       gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)

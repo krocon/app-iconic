@@ -56,6 +56,8 @@ pub struct CanvasSettings {
     pub handles: bool,
     pub snap_to_grid: bool,
     pub magic_snap: bool,
+    /// Smart Guides: path, tangent, perpendicular, construction guides (prompt 040).
+    pub smart_guides: bool,
     /// Grid spacing in document units, 1…256.
     pub grid_size: u32,
     /// `worldZero` | `svgCenter`.
@@ -246,6 +248,7 @@ impl Default for Settings {
                 handles: true,
                 snap_to_grid: false,
                 magic_snap: true,
+                smart_guides: true,
                 grid_size: 10,
                 grid_origin: "worldZero".into(),
                 selection_mode: "point".into(),

@@ -29,6 +29,8 @@ export interface CanvasOptions {
   /** Snapping (legacy §6: grid off, magic on; design 007 E13). */
   snapToGrid: boolean;
   magicSnap: boolean;
+  /** Smart Guides beyond Magic Snap: path, tangent, perpendicular, construction (prompt 040). */
+  smartGuides: boolean;
   gridOrigin: GridOrigin;
   /** Grid spacing in document units (legacy 10, design 015 E9). */
   gridSize: number;
@@ -46,7 +48,8 @@ export type CanvasToggle =
   | 'crossCursor'
   | 'handles'
   | 'snapToGrid'
-  | 'magicSnap';
+  | 'magicSnap'
+  | 'smartGuides';
 
 function systemAppearance(): Appearance {
   return globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -73,6 +76,7 @@ export class CanvasViewStore {
     handles: true,
     snapToGrid: false,
     magicSnap: true,
+    smartGuides: true,
     gridOrigin: 'worldZero',
     gridSize: 10,
     selectionMode: 'point',

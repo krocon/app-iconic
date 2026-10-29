@@ -63,6 +63,7 @@ const FIXED: Record<string, string> = {
   'view.handles': 'Griffe zeigen',
   'view.snapToGrid': 'Am Raster ausrichten',
   'view.magicSnap': 'Magnetisches Ausrichten',
+  'view.smartGuides': 'Intelligente Hilfslinien',
   'view.zoomIn': 'Vergrößern',
   'view.zoomOut': 'Verkleinern',
   'view.actualSize': 'Originalgröße',

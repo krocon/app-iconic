@@ -14,13 +14,7 @@ import {
 } from '../../shared/geometry/box-selection';
 import { clientToDocument, nodeBoundsInDocument, Rect } from '../../shared/geometry/dom-geometry';
 import { apply, invert } from '../../shared/geometry/matrix';
-import {
-  gridOriginPoint,
-  SnapCandidate,
-  snapMove,
-  snapPoint,
-  SnapOptions,
-} from '../../shared/geometry/snapping';
+import { gridOriginPoint, snapMove, snapPoint, SnapOptions } from '../../shared/geometry/snapping';
 import { Point } from '../../shared/geometry/view-transform';
 import { AttributeChange, SetAttributes } from '../document/commands';
 import { DocumentStore } from '../document/document.store';
@@ -47,7 +41,8 @@ import {
   paintedRoots,
   selectableRef,
 } from './hit-test';
-import { snapCandidates } from './magic-points';
+import { snapCandidates, SnapSources } from './magic-points';
+import { dragExtensions } from './handles/drag-extensions';
 import { HandleSet, nodeSnaps } from './selection-measure';
 
 export const sameRef = (a: NodeRef, b: NodeRef) => a.asset === b.asset && a.id === b.id;
@@ -179,14 +174,15 @@ export class CanvasInteraction {
     const snaps = nodeSnaps(doc, host, refs, scope);
     const union = this.edit.model().union ?? this.unionOf(store, refs);
     const keys = union ? boxKeyPoints(union) : [];
-    let candidates: SnapCandidate[] | null = null;
+    let sources: SnapSources | null = null;
     const p0 = this.toDoc(e);
     return {
       label: 'moveNode',
       update: (p, mods) => {
-        candidates ??= this.snapTargets(doc, refs, scope);
+        sources ??= this.snapTargets(doc, refs, scope);
         let d = { x: p.x - p0.x, y: p.y - p0.y };
-        const s = snapMove(keys, d, candidates, this.snapOptions(mods));
+        // a move lines up by its points (VectorCraft: boxes, not paths)
+        const s = snapMove(keys, d, sources.points, this.snapOptions(mods));
         d = s.delta;
         this.edit.snap.set(shownSnap(s));
         // the BoundsGuard keeps nodes on the canvas – not clip shapes (design 014 E7): a clip
@@ -206,7 +202,7 @@ export class CanvasInteraction {
       doc,
       refs,
       scope,
-      this.view.options().magicSnap,
+      this.view.options().magicSnap && this.view.options().smartGuides,
     );
   }
 
@@ -321,12 +317,17 @@ export class CanvasInteraction {
         : set.kind === 'box'
           ? [set.single!.ref]
           : [set.ref];
-    let candidates: SnapCandidate[] | null = null;
+    let sources: SnapSources | null = null;
+    // a dragged point keeps to the straight segments it ends (prompt 040)
+    const extensions = set.kind === 'point' ? dragExtensions(set.geometry, h.role, set.toDoc) : [];
     // a handle that starts off the canvas may stay there (nothing jumps, design 007 E14)
     const bounds = withPoint(CANVAS_BOUNDS, apply(set.toDoc, h.local));
     const target = (p: Point, mods: Modifiers) => {
-      candidates ??= this.snapTargets(doc, excluded, scope);
-      const s = snapPoint(p, candidates, this.snapOptions(mods));
+      sources ??= this.snapTargets(doc, excluded, scope);
+      const s = snapPoint(p, sources.points, {
+        ...this.snapOptions(mods),
+        scene: { outlines: sources.outlines, extensions },
+      });
       this.edit.snap.set(shownSnap(s));
       return scope ? s.point : clampPoint(bounds, s.point);
     };

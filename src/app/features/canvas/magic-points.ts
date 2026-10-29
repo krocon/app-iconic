@@ -9,7 +9,8 @@ import { boxKeyPoints } from './edit-ops';
 import { readGeometry } from './handles/node-geometry';
 import { handlesOf } from './handles/node-handles';
 import { SnapCandidate } from '../../shared/geometry/snapping';
-import { collectSketchTargets, crossingPoints } from '../sketch/sketch-targets';
+import { Outline } from '../../shared/geometry/sketch/intersections';
+import { collectSketchTargets, crossingPoints, sceneOutlines } from '../sketch/sketch-targets';
 import { isRendered, paintedRoots } from './hit-test';
 
 /** Most candidates collected for one gesture. */
@@ -30,8 +31,16 @@ export function magicPoints(
   doc: IconDocument,
   exclude: readonly NodeRef[],
   scope: Element | null = null,
-): Point[] {
-  const out: Point[] = boxKeyPoints({ x: 0, y: 0, width: CANVAS_SIZE, height: CANVAS_SIZE });
+): SnapCandidate[] {
+  // the middle of a box is its centre; a rectangle's corners and the handles are anchors
+  const tagged = (ps: Point[], corners: boolean): SnapCandidate[] =>
+    ps.map((p, i) =>
+      i === 4 ? { ...p, tag: 'center' } : corners && i % 2 === 0 ? { ...p, tag: 'anchor' } : p,
+    );
+  const out: SnapCandidate[] = tagged(
+    boxKeyPoints({ x: 0, y: 0, width: CANVAS_SIZE, height: CANVAS_SIZE }),
+    false,
+  );
   if (!host) return out;
   const moving = exclude.flatMap((r) => {
     const el = doc.node(r);
@@ -49,27 +58,36 @@ export function magicPoints(
       if (!m) continue;
       const toDoc = fromDom(m);
       const b = localBBox(el);
-      const local: Point[] = b
-        ? boxKeyPoints({ x: b.x, y: b.y, width: b.width, height: b.height })
-        : [];
       const g = readGeometry(el);
+      const local: SnapCandidate[] = b
+        ? tagged(
+            boxKeyPoints({ x: b.x, y: b.y, width: b.width, height: b.height }),
+            g.kind === 'rect',
+          )
+        : [];
       if (g.kind !== 'rect' && g.kind !== 'text' && g.kind !== 'box') {
         local.push(
           ...handlesOf(g)
             .filter((h) => h.kind !== 'midpoint' && h.kind !== 'control')
-            .map((h) => h.local),
+            .map((h): SnapCandidate => ({ ...h.local, tag: 'anchor' })),
         );
       }
-      for (const p of local) out.push(apply(toDoc, p));
+      for (const p of local) out.push(p.tag ? { ...apply(toDoc, p), tag: p.tag } : apply(toDoc, p));
     }
   }
   return out.slice(0, MAX_MAGIC_POINTS);
 }
 
+/** What a drag snaps to: marked points (with crossings) and outlines. */
+export interface SnapSources {
+  points: SnapCandidate[];
+  outlines: Outline[];
+}
+
 /**
- * Magic Snap candidates of a drag: the marked points of the other shapes and, outside the clip
- * edit mode, where their outlines cross ("intersect", like VectorCraft's Smart Guides); the
- * dragged nodes `exclude` left out.
+ * What a drag snaps to (Magic Snap, prompt 040): the marked points of the other shapes and,
+ * outside the clip edit mode, where their outlines cross ("intersect") and the outlines
+ * themselves (Smart Guides); the dragged nodes `exclude` left out.
  */
 export function snapCandidates(
   box: HTMLElement,
@@ -77,10 +95,10 @@ export function snapCandidates(
   doc: IconDocument,
   exclude: readonly NodeRef[],
   scope: Element | null,
-  crossings: boolean,
-): SnapCandidate[] {
+  smart: boolean,
+): SnapSources {
   const points: SnapCandidate[] = magicPoints(box, host, doc, exclude, scope);
-  if (scope || !crossings || !host) return points;
+  if (scope || !smart || !host) return { points, outlines: [] };
   const moving = exclude.flatMap((r) => {
     const el = doc.node(r);
     return el ? [{ asset: r.asset, el }] : [];
@@ -90,5 +108,6 @@ export function snapCandidates(
     const live = id ? doc.node({ asset, id }) : null;
     return !!live && moving.some((m) => m.asset === asset && m.el.contains(live));
   };
-  return [...points, ...crossingPoints(collectSketchTargets(box, host, skip))];
+  const targets = collectSketchTargets(box, host, skip);
+  return { points: [...points, ...crossingPoints(targets)], outlines: sceneOutlines(targets) };
 }

@@ -287,7 +287,7 @@ test('rulers, guides and cross cursor follow their toggles', async ({ page }) =>
     'aria-checked',
     'false',
   );
-  await options.getByRole('menuitemcheckbox', { name: 'Guides' }).click();
+  await options.getByRole('menuitemcheckbox', { name: 'Guides', exact: true }).click();
   await expect(page.locator('app-canvas-view svg.host .guides')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await expect(options).toBeHidden();

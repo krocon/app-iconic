@@ -46,6 +46,7 @@ export function canvasActions(view: CanvasViewStore): Record<string, ActionHandl
     'view.handles': toggle('handles'),
     'view.snapToGrid': toggle('snapToGrid'),
     'view.magicSnap': toggle('magicSnap'),
+    'view.smartGuides': toggle('smartGuides'),
     'view.appearance.light': appearance('light'),
     'view.appearance.dark': appearance('dark'),
     'view.mask.squircle': mask('squircle'),

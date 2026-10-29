@@ -91,6 +91,7 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     sep,
     a('view.snapToGrid'),
     a('view.magicSnap'),
+    a('view.smartGuides'),
     sub(t.gridOrigin, [
       a('view.gridOrigin.worldZero', t.gridWorldZero),
       a('view.gridOrigin.svgCenter', t.gridSvgCenter),

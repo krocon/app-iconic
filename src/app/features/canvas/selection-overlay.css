@@ -82,7 +82,8 @@
     stroke: var(--ai-snap-grid);
   }
 
-  &.align {
+  &.align,
+  &.guide {
     stroke: var(--ai-snap-align);
   }
 }

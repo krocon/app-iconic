@@ -11,9 +11,14 @@ der Smart Guides.
 
 ## Stand
 
-- ✅ 29.10.2026: Schnittpunkte von Kanten (Linie, Rechteck, Polygon/Polyline, gerade Pfad-Segmente) und Kreisen
-  (auch Kreisbögen in Pfaden) – exakt, Label „intersect“, beim Zeichnen und beim Ziehen von Griffen/Formen
-  (`shared/geometry/sketch/intersections.ts`, `crossingPoints`). Offen: Ellipsen, Bézier- und Ellipsenbögen.
+- ✅ 29.10.2026 Schnittpunkte von Kanten und Kreisen (`intersections.ts`, Label „intersect“).
+- ✅ 29.10.2026 Rest: Kurven (Ellipsen, Bézier, Ellipsenbögen, Kreise in ungleich skalierten Gruppen) als
+  Parameter-Kurven, Schnittpunkte per Abtastung + Newton exakt (`outline-curves.ts`); Labels `anchor`/`center`
+  an den Magic-Punkten; `smart-guides.ts`: Tangente/Senkrecht vom zuletzt gesetzten Punkt, Kontur („path“),
+  Konstruktionswinkel 0/45/90/135° mit Gleiten auf `align`-Linien, Verlängerung gerader Segmente beim Ziehen eines
+  Linienendes / Polygonpunkts. Vorrang wie VectorCraft. Ein Schalter „Smart Guides“ (View-Optionen, Menü,
+  Einstellungen `canvas.smartGuides`) statt einem je Ziel; beim Verschieben ganzer Formen nur Punkte und `align`
+  (wie VectorCraft – Konturen kosten bei 20 000 Formen zu viel).
 
 ## Umfang
 

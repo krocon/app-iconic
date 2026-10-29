@@ -28,7 +28,14 @@ const EN = {
   outside: '–',
   unknownFill: 'This background is not known yet – shown as Automatic.',
   align: 'align',
-  snapTags: { intersect: 'intersect' },
+  snapTags: {
+    intersect: 'intersect',
+    anchor: 'anchor',
+    center: 'center',
+    path: 'path',
+    tangent: 'tangent',
+    perpendicular: 'perpendicular',
+  },
 } as const;
 
 export const CANVAS_TEXTS = translatable('canvas', EN, {
@@ -59,6 +66,13 @@ export const CANVAS_TEXTS = translatable('canvas', EN, {
     outside: '–',
     unknownFill: 'Dieser Hintergrund ist noch unbekannt – gezeigt als „Automatisch“.',
     align: 'ausrichten',
-    snapTags: { intersect: 'Schnittpunkt' },
+    snapTags: {
+      intersect: 'Schnittpunkt',
+      anchor: 'Punkt',
+      center: 'Mitte',
+      path: 'Kontur',
+      tangent: 'Tangente',
+      perpendicular: 'senkrecht',
+    },
   },
 });
