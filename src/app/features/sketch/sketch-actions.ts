@@ -43,11 +43,11 @@ export function registerSketchActions(
     {
       'sketch.sidesUp': {
         run: () => store.stepSides(1),
-        enabled: () => store.dragging() && store.tool() === 'dragPolygon',
+        enabled: () => store.dragging() && store.counted(),
       },
       'sketch.sidesDown': {
         run: () => store.stepSides(-1),
-        enabled: () => store.dragging() && store.tool() === 'dragPolygon',
+        enabled: () => store.dragging() && store.counted(),
       },
       'sketch.moveHold': {
         run: () => {

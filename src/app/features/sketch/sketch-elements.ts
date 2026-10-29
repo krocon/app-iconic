@@ -52,6 +52,7 @@ export function kindOf(shape: SketchShape): { kind: StyleKind; label: UndoLabel 
     case 'ellipse':
       return { kind: 'ellipse', label: 'addEllipse' };
     case 'bezier':
+    case 'paths':
       return { kind: 'path', label: 'addPath' };
   }
 }
@@ -83,6 +84,7 @@ function build(
         width: fmt(w),
         height: fmt(h),
       };
+      if (shape.r) attrs['rx'] = attrs['ry'] = fmt(Math.min(shape.r * k, w / 2, h / 2));
       const deg = degrees(shape.angle + theta);
       if (deg !== 0) attrs['transform'] = `rotate(${fmt(deg)} ${fmt(c.x)} ${fmt(c.y)})`;
       return { tag: 'rect', attrs };
@@ -105,6 +107,13 @@ function build(
       return {
         tag: 'path',
         attrs: { d: penPathData(mapAnchors(shape.anchors, map), shape.closed) },
+      };
+    case 'paths':
+      return {
+        tag: 'path',
+        attrs: {
+          d: shape.subpaths.map((s) => penPathData(mapAnchors(s.anchors, map), s.closed)).join(' '),
+        },
       };
     case 'ellipse': {
       const c = map(shape.c);

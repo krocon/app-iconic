@@ -560,3 +560,47 @@ test.describe('Smart Guides (prompt 040)', () => {
     expect(Number(s!.attrs['y2'])).toBeCloseTo(y, 3);
   });
 });
+
+test.describe('more shapes (prompt 044)', () => {
+  async function dragFrom(
+    page: Page,
+    from: { x: number; y: number },
+    to: { x: number; y: number },
+    during?: () => Promise<void>,
+  ) {
+    const a = await toClient(page, from.x, from.y);
+    const b = await toClient(page, to.x, to.y);
+    await page.mouse.move(a.clientX, a.clientY);
+    await page.mouse.down();
+    await page.mouse.move(b.clientX, b.clientY, { steps: 6 });
+    await during?.();
+    await page.mouse.up();
+    await frames(page);
+  }
+
+  test('a star with ↑ gets a point more; a rounded rectangle has rx; a grid is one path', async ({
+    page,
+  }) => {
+    const errors = collectErrors(page);
+    await setup(page);
+    await centerOn(page, 1, { x: 400, y: 400 });
+    await tool(page, 'sketch.dragStar');
+    await page.locator('.viewport').focus();
+    await dragFrom(page, { x: 400, y: 400 }, { x: 400, y: 300 }, async () => {
+      await page.keyboard.press('ArrowUp');
+    });
+    let s = await selected(page);
+    expect(s?.tag).toBe('path');
+    expect(s!.attrs['d'].match(/L/g)).toHaveLength(11);
+    await tool(page, 'sketch.dragRoundRect');
+    await dragFrom(page, { x: 300, y: 300 }, { x: 400, y: 360 });
+    s = await selected(page);
+    expect(s?.tag).toBe('rect');
+    expect(Number(s!.attrs['rx'])).toBe(12);
+    await tool(page, 'sketch.dragRectGrid');
+    await dragFrom(page, { x: 250, y: 250 }, { x: 550, y: 550 });
+    s = await selected(page);
+    expect(s!.attrs['d'].match(/M/g)).toHaveLength(11);
+    expect(errors).toEqual([]);
+  });
+});

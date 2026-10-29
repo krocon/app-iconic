@@ -14,6 +14,12 @@ const FIELDS: Record<string, readonly SizeKey[]> = {
   dragEllipse: ['width', 'height'],
   dragPolygon: ['radius', 'sides'],
   dragLine: ['length', 'angle'],
+  dragRoundRect: ['width', 'height'],
+  dragStar: ['radius', 'sides'],
+  dragSpiral: ['radius'],
+  dragRectGrid: ['width', 'height'],
+  dragPolarGrid: ['width', 'height'],
+  dragArc: ['width', 'height'],
 };
 
 /**

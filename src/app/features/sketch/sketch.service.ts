@@ -98,7 +98,7 @@ export class SketchService {
   /** The size dialog's values: the shape at the click, one undo step; the tool goes off. */
   async insertSized(values: SizeValues): Promise<boolean> {
     const at = this.tool.sizing();
-    const shape = at ? sizedShape(at.tool, at.p, values) : null;
+    const shape = at ? sizedShape(at.tool, at.p, values, this.tool.countOf(at.tool)) : null;
     this.tool.sized(at?.tool === 'dragPolygon' ? values.sides : undefined);
     return shape ? this.insert(shape) : false;
   }

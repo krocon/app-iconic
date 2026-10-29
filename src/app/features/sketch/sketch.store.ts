@@ -12,7 +12,13 @@ import {
 } from '../../shared/geometry/sketch/sketch-tools';
 import { measure } from '../../shared/geometry/sketch/sketch-measure';
 import { DEFAULT_SIDES, MAX_SIDES, MIN_SIDES } from '../../shared/geometry/sketch/polygon';
-import { DragMods, DragToolId, isDragTool } from '../../shared/geometry/sketch/drag-shapes';
+import {
+  countOf,
+  DRAG_COUNTS,
+  DragMods,
+  DragToolId,
+  isDragTool,
+} from '../../shared/geometry/sketch/drag-shapes';
 import { Point } from '../../shared/geometry/view-transform';
 import {
   nearestAnchor,
@@ -61,6 +67,8 @@ export class SketchStore {
   private sweep = 0;
   /** The sides of the last polygon (the next one starts with them, like Fusion). */
   private sides = DEFAULT_SIDES;
+  /** What ↑/↓ set for the other drag tools (points, turns, dividers, radius – prompt 044). */
+  private counts: Partial<Record<DragToolId, number>> = {};
   /** The keys held while dragging (the drag tools, prompt 041). */
   readonly mods = signal<DragMods>({});
   /** Space held while dragging: the shape moves with the pointer (VectorCraft). */
@@ -172,7 +180,11 @@ export class SketchStore {
   /** The typed values and, for a step with sides, the last polygon's sides unless typed. */
   private stepLocks(): Locks {
     const locks = this.locks();
-    const sided = this.fields().includes('sides') || this.tool() === 'dragPolygon';
+    const t = this.tool();
+    if (t && isDragTool(t) && t !== 'dragPolygon' && DRAG_COUNTS[t]) {
+      return { sides: countOf(t, this.counts[t]), ...locks };
+    }
+    const sided = this.fields().includes('sides') || t === 'dragPolygon';
     return sided ? { sides: this.sides, ...locks } : locks;
   }
 
@@ -200,10 +212,26 @@ export class SketchStore {
     return this.sides;
   }
 
-  /** ↑/↓ while dragging a polygon: one side more or less (3 … 64). */
+  /** ↑/↓ while dragging: one side / point / turn / divider more or less, or a bigger radius. */
   stepSides(d: number): void {
-    this.sides = Math.max(MIN_SIDES, Math.min(MAX_SIDES, this.sides + d));
+    const t = this.tool();
+    if (t && isDragTool(t) && t !== 'dragPolygon' && DRAG_COUNTS[t]) {
+      this.counts[t] = countOf(t, countOf(t, this.counts[t]) + d * DRAG_COUNTS[t]!.step);
+    } else {
+      this.sides = Math.max(MIN_SIDES, Math.min(MAX_SIDES, this.sides + d));
+    }
     if (this.lastPointer) this.move(this.lastPointer);
+  }
+
+  /** The count of a drag tool (for the size dialog). */
+  countOf(tool: DragToolId): number {
+    return tool === 'dragPolygon' ? this.sides : countOf(tool, this.counts[tool]);
+  }
+
+  /** A drag tool that ↑/↓ change while dragging. */
+  counted(): boolean {
+    const t = this.tool();
+    return !!t && isDragTool(t) && !!DRAG_COUNTS[t];
   }
 
   /** A drag tool was clicked without a drag: drop the start and ask for a size there. */

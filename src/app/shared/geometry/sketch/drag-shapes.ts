@@ -1,5 +1,6 @@
 import { Point } from '../view-transform';
 import { polygonAround } from './polygon';
+import { polarGrid, quarterArc, rectGrid, spiral, star, straightRatio } from './more-shapes';
 import { SketchShape } from './sketch-shapes';
 
 /**
@@ -8,14 +9,53 @@ import { SketchShape } from './sketch-shapes';
  * circle, 45° steps, an upright polygon; Alt: from the centre. Document units. Pure.
  */
 
-export type DragToolId = 'dragRect' | 'dragEllipse' | 'dragPolygon' | 'dragLine';
+export type DragToolId =
+  | 'dragRect'
+  | 'dragEllipse'
+  | 'dragPolygon'
+  | 'dragLine'
+  | 'dragRoundRect'
+  | 'dragStar'
+  | 'dragSpiral'
+  | 'dragRectGrid'
+  | 'dragPolarGrid'
+  | 'dragArc';
 
 export const DRAG_TOOL_IDS: readonly DragToolId[] = [
   'dragRect',
   'dragEllipse',
   'dragPolygon',
   'dragLine',
+  'dragRoundRect',
+  'dragStar',
+  'dragSpiral',
+  'dragRectGrid',
+  'dragPolarGrid',
+  'dragArc',
 ];
+
+/**
+ * What ↑/↓ change while dragging (prompt 044): start value, range and step – the sides of a
+ * polygon, a star's points, a spiral's quarter turns, a grid's dividers, the corner radius.
+ */
+export const DRAG_COUNTS: Partial<
+  Record<DragToolId, { start: number; min: number; max: number; step: number }>
+> = {
+  dragPolygon: { start: 6, min: 3, max: 64, step: 1 },
+  dragStar: { start: 5, min: 3, max: 64, step: 1 },
+  dragSpiral: { start: 10, min: 1, max: 64, step: 1 },
+  dragRectGrid: { start: 5, min: 0, max: 64, step: 1 },
+  dragPolarGrid: { start: 5, min: 0, max: 64, step: 1 },
+  dragRoundRect: { start: 12, min: 0, max: 512, step: 2 },
+};
+
+/** `v` as a count of `tool` (its start when missing, clamped, whole steps). */
+export function countOf(tool: DragToolId, v: number | undefined): number {
+  const c = DRAG_COUNTS[tool];
+  if (!c) return 0;
+  const x = v !== undefined && Number.isFinite(v) ? v : c.start;
+  return Math.max(c.min, Math.min(c.max, Math.round(x)));
+}
 
 export function isDragTool(tool: string): tool is DragToolId {
   return (DRAG_TOOL_IDS as readonly string[]).includes(tool);
@@ -56,8 +96,10 @@ export function dragShape(
   a: Point,
   b: Point,
   m: DragMods = {},
-  sides = 6,
+  count?: number,
 ): SketchShape | null {
+  const n = countOf(tool, count);
+  const sides = tool === 'dragPolygon' ? n : 6;
   switch (tool) {
     case 'dragRect': {
       const r = box(a, b, m);
@@ -79,6 +121,44 @@ export function dragShape(
       const start = m.alt ? { x: a.x - d.x, y: a.y - d.y } : a;
       return { kind: 'line', a: start, b: { x: a.x + d.x, y: a.y + d.y } };
     }
+    case 'dragRoundRect': {
+      const r = box(a, b, m);
+      return { kind: 'rect', c: r.c, w: r.w, h: r.h, angle: 0, r: Math.min(n, r.w / 2, r.h / 2) };
+    }
+    case 'dragStar': {
+      // from the centre: the pointer is a tip; Shift keeps a tip up, Alt straight shoulders
+      const r1 = Math.hypot(b.x - a.x, b.y - a.y);
+      const ratio = (m.alt ? straightRatio(n) : null) ?? 0.5;
+      const angle = m.shift ? -Math.PI / 2 : Math.atan2(b.y - a.y, b.x - a.x);
+      return { kind: 'paths', subpaths: [star(a, r1, r1 * ratio, n, angle)] };
+    }
+    case 'dragSpiral': {
+      const r = Math.hypot(b.x - a.x, b.y - a.y);
+      return {
+        kind: 'paths',
+        subpaths: [spiral(a, r, n, Math.atan2(b.y - a.y, b.x - a.x), !m.alt)],
+      };
+    }
+    case 'dragRectGrid':
+    case 'dragPolarGrid': {
+      const r = box(a, b, m);
+      const [x0, y0, x1, y1] = [r.c.x - r.w / 2, r.c.y - r.h / 2, r.c.x + r.w / 2, r.c.y + r.h / 2];
+      return {
+        kind: 'paths',
+        subpaths:
+          tool === 'dragRectGrid'
+            ? rectGrid(x0, y0, x1, y1, n, n)
+            : polarGrid(x0, y0, x1, y1, n, n),
+      };
+    }
+    case 'dragArc': {
+      const raw = { x: b.x - a.x, y: b.y - a.y };
+      const d = m.shift ? square(raw) : raw;
+      return {
+        kind: 'paths',
+        subpaths: [quarterArc(a, { x: a.x + d.x, y: a.y + d.y }, m.alt ? -50 : 50)],
+      };
+    }
   }
 }
 
@@ -94,6 +174,7 @@ export function sizedShape(
     length?: number;
     angle?: number;
   },
+  count?: number,
 ): SketchShape | null {
   const ok = (x: number | undefined): x is number => x !== undefined && Number.isFinite(x) && x > 0;
   switch (tool) {
@@ -108,6 +189,22 @@ export function sizedShape(
     case 'dragPolygon':
       if (!ok(v.radius) || !ok(v.sides)) return null;
       return { kind: 'polygon', c: p, r: v.radius, sides: v.sides, angle: -Math.PI / 2 };
+    case 'dragRoundRect':
+    case 'dragRectGrid':
+    case 'dragPolarGrid':
+    case 'dragArc':
+      if (!ok(v.width) || !ok(v.height)) return null;
+      return dragShape(tool, p, { x: p.x + v.width, y: p.y + v.height }, {}, count);
+    case 'dragStar':
+    case 'dragSpiral':
+      if (!ok(v.radius)) return null;
+      return dragShape(
+        tool,
+        p,
+        { x: p.x, y: p.y - v.radius },
+        { shift: true },
+        tool === 'dragStar' ? (v.sides ?? count) : count,
+      );
     case 'dragLine': {
       if (!ok(v.length)) return null;
       const a = (-(v.angle ?? 0) * Math.PI) / 180;

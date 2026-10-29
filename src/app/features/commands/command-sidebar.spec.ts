@@ -60,6 +60,7 @@ describe('CommandSidebar (design 008 E10)', () => {
       'polygon',
       'ellipse',
       'path',
+      'more',
       'add.freehand',
       'add.text',
       'add.textToPath',
@@ -99,9 +100,9 @@ describe('CommandSidebar (design 008 E10)', () => {
     await type('zzz');
     expect(options()).toHaveLength(0);
     await key('Escape');
-    expect(options()).toHaveLength(15);
+    expect(options()).toHaveLength(16);
     await key('End');
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-14');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-15');
   });
 
   it('keyboard: → opens the submenu, ↑/↓ move in it, ← closes, Enter runs', async () => {
@@ -143,7 +144,12 @@ describe('CommandSidebar (design 008 E10)', () => {
       .dispatchEvent(new PointerEvent('pointerenter'));
     await new Promise((r) => setTimeout(r, 200));
     await fixture.whenStable();
-    expect(ids(submenu())).toEqual(['sketch.arc3p', 'sketch.arcCenter', 'sketch.arcTangent']);
+    expect(ids(submenu())).toEqual([
+      'sketch.dragArc',
+      'sketch.arc3p',
+      'sketch.arcCenter',
+      'sketch.arcTangent',
+    ]);
     options()
       .find((o) => o.dataset['group'] === 'rectangle')!
       .click();
@@ -163,7 +169,7 @@ describe('CommandSidebar (design 008 E10)', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('input')).toBeNull();
     const tools = Array.from(el.querySelectorAll<HTMLButtonElement>('[role="toolbar"] button'));
-    expect(tools).toHaveLength(15);
+    expect(tools).toHaveLength(16);
     expect(el.querySelectorAll('[role="separator"]')).toHaveLength(3);
     const circle = tools.find((b) => b.dataset['group'] === 'circle')!;
     expect(circle.getAttribute('aria-haspopup')).toBe('listbox');

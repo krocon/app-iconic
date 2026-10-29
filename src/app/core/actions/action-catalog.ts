@@ -392,6 +392,13 @@ export const ACTIONS: readonly ActionDef[] = [
   ADD('sketch.dragEllipse', 'Ellipse Tool', { args: SKETCH_ARGS }),
   ADD('sketch.dragPolygon', 'Polygon Tool', { args: SKETCH_ARGS }),
   ADD('sketch.dragLine', 'Line Segment Tool', { args: SKETCH_ARGS }),
+  // more shapes with one drag (prompt 044)
+  ADD('sketch.dragRoundRect', 'Rounded Rectangle Tool', { args: SKETCH_ARGS }),
+  ADD('sketch.dragStar', 'Star Tool', { args: SKETCH_ARGS }),
+  ADD('sketch.dragSpiral', 'Spiral Tool', { args: SKETCH_ARGS }),
+  ADD('sketch.dragRectGrid', 'Rectangular Grid Tool', { args: SKETCH_ARGS }),
+  ADD('sketch.dragPolarGrid', 'Polar Grid Tool', { args: SKETCH_ARGS }),
+  ADD('sketch.dragArc', 'Arc Tool', { args: SKETCH_ARGS }),
   // only while dragging one of them (the "drawing" keys come before the canvas's)
   // the pen (prompt 042): click / drag points; Enter ends
   ADD('pen.tool', 'Pen', { args: PEN_ARGS }),

@@ -1,4 +1,5 @@
 import type { PenAnchor } from '../pen/pen-path';
+import type { Subpath } from './more-shapes';
 import { Point } from '../view-transform';
 
 /**
@@ -14,8 +15,10 @@ export interface Circle {
 
 export type SketchShape =
   | { kind: 'line'; a: Point; b: Point }
-  /** Centre, size (≥ 0) and rotation of the unrotated rectangle about its centre. */
-  | { kind: 'rect'; c: Point; w: number; h: number; angle: number }
+  /** Centre, size (≥ 0) and rotation of the unrotated rectangle about its centre; `r` = corner radius. */
+  | { kind: 'rect'; c: Point; w: number; h: number; angle: number; r?: number }
+  /** Several subpaths in one `<path>` (star, spiral, arc, grids – prompt 044). */
+  | { kind: 'paths'; subpaths: readonly Subpath[] }
   | { kind: 'circle'; c: Point; r: number }
   /** A path of the pen / curvature tools (prompts 042, 043). */
   | { kind: 'bezier'; anchors: readonly PenAnchor[]; closed: boolean }
@@ -196,6 +199,10 @@ export function isDegenerate(shape: SketchShape, min: number): boolean {
       return !(shape.rx >= min && shape.ry >= min);
     case 'bezier': {
       const ps = shape.anchors.map((a) => a.p);
+      return ps.length < 2 || ps.every((p) => dist(p, ps[0]) < min);
+    }
+    case 'paths': {
+      const ps = shape.subpaths.flatMap((s) => s.anchors.map((a) => a.p));
       return ps.length < 2 || ps.every((p) => dist(p, ps[0]) < min);
     }
   }

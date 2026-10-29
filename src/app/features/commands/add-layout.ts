@@ -4,7 +4,8 @@
  * the one-click variant at the centre first, then the sketch tools. Pure.
  */
 export type AddSectionKey = 'structure' | 'shapes' | 'text' | 'import';
-export type AddGroupKey = 'line' | 'rectangle' | 'circle' | 'ellipse' | 'arc' | 'polygon' | 'path';
+export type AddGroupKey =
+  'line' | 'rectangle' | 'circle' | 'ellipse' | 'arc' | 'polygon' | 'path' | 'more';
 
 export type AddEntry =
   { kind: 'action'; id: string } | { kind: 'group'; group: AddGroupKey; ids: readonly string[] };
@@ -36,6 +37,7 @@ export const ADD_LAYOUT: readonly AddSection[] = [
       group('rectangle', [
         'add.rect',
         'sketch.dragRect',
+        'sketch.dragRoundRect',
         'sketch.rect2p',
         'sketch.rect3p',
         'sketch.rectCenter',
@@ -48,16 +50,18 @@ export const ADD_LAYOUT: readonly AddSection[] = [
         'sketch.circle2t',
         'sketch.circle3t',
       ]),
-      group('arc', ['sketch.arc3p', 'sketch.arcCenter', 'sketch.arcTangent']),
+      group('arc', ['sketch.dragArc', 'sketch.arc3p', 'sketch.arcCenter', 'sketch.arcTangent']),
       group('polygon', [
         'add.polygon',
         'sketch.dragPolygon',
+        'sketch.dragStar',
         'sketch.polygonCircumscribed',
         'sketch.polygonInscribed',
         'sketch.polygonEdge',
       ]),
       group('ellipse', ['add.ellipse', 'sketch.dragEllipse']),
       group('path', ['add.path', 'pen.tool', 'curvature.tool']),
+      group('more', ['sketch.dragSpiral', 'sketch.dragRectGrid', 'sketch.dragPolarGrid']),
       act('add.freehand'),
     ],
   },

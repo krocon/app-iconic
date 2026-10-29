@@ -52,7 +52,7 @@ unabhängig.
 | 041 | [041-formen-aufziehen.md](041-formen-aufziehen.md) | Formen per Klicken und Ziehen (Shift/Alt/Leertaste/↑↓), Klick → Größendialog | 019, 040 | M | ✅ 29.10.2026 (Stern mit 044) |
 | 042 | [042-pen.md](042-pen.md) | Zeichenstift: Ecken/glatte Punkte, Griffe, schließen, fortsetzen, Auto Add/Delete | 040 | L | ✅ 29.10.2026 (Auto Add/Delete mit 046) |
 | 043 | [043-curvature.md](043-curvature.md) | Curvature-Werkzeug: glatte Kurve durch Klicks, vorhandene Pfade krümmen | 042 | M | ✅ 29.10.2026 |
-| 044 | [044-weitere-formen.md](044-weitere-formen.md) | Rounded Rectangle, Stern, Spirale, Rechteck-/Polarraster, Bogen | 041 | M | offen |
+| 044 | [044-weitere-formen.md](044-weitere-formen.md) | Rounded Rectangle, Stern, Spirale, Rechteck-/Polarraster, Bogen | 041 | M | ✅ 29.10.2026 |
 | 045 | [045-live-corners.md](045-live-corners.md) | Live Corners: Ecken runden/fasen per Griff | 007 | M | offen |
 | 046 | [046-pfade-bearbeiten.md](046-pfade-bearbeiten.md) | Punkte hinzufügen/löschen/umwandeln, Schere, Messer, Cuts, Join, Smooth | 042 | L | offen |
 | 047 | [047-shape-builder-pathfinder.md](047-shape-builder-pathfinder.md) | Pathfinder (boolesche Operationen) und Shape Builder | 046 | L | offen |

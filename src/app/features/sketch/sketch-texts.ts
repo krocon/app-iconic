@@ -106,6 +106,30 @@ const EN = {
       'Line Segment: drag from the start, or click for a size',
       'Line Segment: drag · Shift 45° · Alt from the centre · Space moves',
     ],
+    dragRoundRect: [
+      'Rounded Rectangle: drag from a corner, or click for a size',
+      'Rounded Rectangle: drag · ↑/↓ corner radius · Shift square · Alt from the centre',
+    ],
+    dragStar: [
+      'Star: drag from the centre, or click for a size',
+      'Star: drag · ↑/↓ points · Shift upright · Alt straight shoulders',
+    ],
+    dragSpiral: [
+      'Spiral: drag from the centre, or click for a size',
+      'Spiral: drag · ↑/↓ turns · Alt the other way',
+    ],
+    dragRectGrid: [
+      'Rectangular Grid: drag from a corner, or click for a size',
+      'Rectangular Grid: drag · ↑/↓ dividers · Shift square · Alt from the centre',
+    ],
+    dragPolarGrid: [
+      'Polar Grid: drag from a corner, or click for a size',
+      'Polar Grid: drag · ↑/↓ dividers · Shift circle · Alt from the centre',
+    ],
+    dragArc: [
+      'Arc: drag from the start, or click for a size',
+      'Arc: drag · Shift square · Alt concave',
+    ],
   },
   size: {
     title: {
@@ -113,6 +137,12 @@ const EN = {
       dragEllipse: 'Ellipse',
       dragPolygon: 'Polygon',
       dragLine: 'Line Segment',
+      dragRoundRect: 'Rounded Rectangle',
+      dragStar: 'Star',
+      dragSpiral: 'Spiral',
+      dragRectGrid: 'Rectangular Grid',
+      dragPolarGrid: 'Polar Grid',
+      dragArc: 'Arc',
     },
     width: 'Width',
     height: 'Height',
@@ -232,6 +262,30 @@ export const SKETCH_TEXTS = translatable('sketch', EN, {
         'Linie: vom Start aus ziehen oder für eine Größe klicken',
         'Linie: ziehen · Shift 45° · Alt von der Mitte · Leertaste verschiebt',
       ],
+      dragRoundRect: [
+        'Abgerundetes Rechteck: von einer Ecke aus ziehen oder für eine Größe klicken',
+        'Abgerundetes Rechteck: ziehen · ↑/↓ Eckenradius · Shift Quadrat · Alt von der Mitte',
+      ],
+      dragStar: [
+        'Stern: von der Mitte aus ziehen oder für eine Größe klicken',
+        'Stern: ziehen · ↑/↓ Zacken · Shift aufrecht · Alt gerade Schultern',
+      ],
+      dragSpiral: [
+        'Spirale: von der Mitte aus ziehen oder für eine Größe klicken',
+        'Spirale: ziehen · ↑/↓ Windungen · Alt andersherum',
+      ],
+      dragRectGrid: [
+        'Rechteckiges Raster: von einer Ecke aus ziehen oder für eine Größe klicken',
+        'Rechteckiges Raster: ziehen · ↑/↓ Teiler · Shift Quadrat · Alt von der Mitte',
+      ],
+      dragPolarGrid: [
+        'Polarraster: von einer Ecke aus ziehen oder für eine Größe klicken',
+        'Polarraster: ziehen · ↑/↓ Teiler · Shift Kreis · Alt von der Mitte',
+      ],
+      dragArc: [
+        'Bogen: vom Start aus ziehen oder für eine Größe klicken',
+        'Bogen: ziehen · Shift Quadrat · Alt nach innen',
+      ],
     },
     size: {
       title: {
@@ -239,6 +293,12 @@ export const SKETCH_TEXTS = translatable('sketch', EN, {
         dragEllipse: 'Ellipse',
         dragPolygon: 'Polygon',
         dragLine: 'Linie',
+        dragRoundRect: 'Abgerundetes Rechteck',
+        dragStar: 'Stern',
+        dragSpiral: 'Spirale',
+        dragRectGrid: 'Rechteckiges Raster',
+        dragPolarGrid: 'Polarraster',
+        dragArc: 'Bogen',
       },
       width: 'Breite',
       height: 'Höhe',

@@ -110,6 +110,12 @@ export const SKETCH_TOOLS: Record<SketchToolId, { steps: StepDef[] }> = {
   dragEllipse: { steps: [P(), P()] },
   dragPolygon: { steps: [P(), P()] },
   dragLine: { steps: [P(), P()] },
+  dragRoundRect: { steps: [P(), P()] },
+  dragStar: { steps: [P(), P()] },
+  dragSpiral: { steps: [P(), P()] },
+  dragRectGrid: { steps: [P(), P()] },
+  dragPolarGrid: { steps: [P(), P()] },
+  dragArc: { steps: [P(), P()] },
 };
 
 /** The fields in degrees (any value); the others are sizes (> 0) or the number of sides. */
@@ -379,10 +385,8 @@ export function shapeOf(
     }
     case 'polygonEdge':
       return a && b ? polygonOnEdge(a, b, sidesOf(steps[1].locks?.sides), c) : null;
-    case 'dragRect':
-    case 'dragEllipse':
-    case 'dragPolygon':
-    case 'dragLine':
-      return a && b ? dragShape(tool, a, b, steps[1].mods, sidesOf(steps[1].locks?.sides)) : null;
+    default:
+      // the drag tools (prompts 041, 044): the count (sides, points, …) travels as `sides`
+      return a && b ? dragShape(tool, a, b, steps[1].mods, steps[1].locks?.sides) : null;
   }
 }

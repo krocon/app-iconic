@@ -7,6 +7,7 @@ import {
   SketchShape,
 } from '../../shared/geometry/sketch/sketch-shapes';
 import { mapAnchors, penPathData } from '../../shared/geometry/pen/pen-path';
+import { roundRectSubpath } from '../../shared/geometry/sketch/more-shapes';
 import { Point } from '../../shared/geometry/view-transform';
 import { SketchAnchor, SketchTarget } from './sketch-targets';
 
@@ -31,6 +32,13 @@ export function shapePath(shape: SketchShape | null, m: Matrix): string | null {
     case 'line':
       return `M ${pt(apply(m, shape.a))} L ${pt(apply(m, shape.b))}`;
     case 'rect': {
+      if (shape.r) {
+        const s = roundRectSubpath(shape.c, shape.w, shape.h, shape.r);
+        return penPathData(
+          mapAnchors(s.anchors, (p) => apply(m, p)),
+          true,
+        );
+      }
       const c = rectCorners(shape).map((p) => apply(m, p));
       return `M ${pt(c[0])} L ${pt(c[1])} L ${pt(c[2])} L ${pt(c[3])} Z`;
     }
@@ -49,6 +57,17 @@ export function shapePath(shape: SketchShape | null, m: Matrix): string | null {
           mapAnchors(shape.anchors, (p) => apply(m, p)),
           shape.closed,
         ) || null
+      );
+    case 'paths':
+      return (
+        shape.subpaths
+          .map((s) =>
+            penPathData(
+              mapAnchors(s.anchors, (p) => apply(m, p)),
+              s.closed,
+            ),
+          )
+          .join(' ') || null
       );
     case 'ellipse': {
       // the view matrix is a similarity without rotation (zoom and pan)
