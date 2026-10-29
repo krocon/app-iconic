@@ -2,6 +2,8 @@ import { nodeToDocument } from '../../shared/geometry/dom-geometry';
 import { apply, applyLinear, fromDom, Matrix } from '../../shared/geometry/matrix';
 import { PathSeg } from '../../shared/geometry/path-data';
 import { Tangent } from '../../shared/geometry/sketch/apollonius';
+import { crossings, OwnedOutline } from '../../shared/geometry/sketch/intersections';
+import { SnapCandidate } from '../../shared/geometry/snapping';
 import { dist, dot, sub, unit } from '../../shared/geometry/sketch/sketch-shapes';
 import { Anchor } from '../../shared/geometry/sketch/sketch-tools';
 import { arcCenter, arcTangentAt } from '../../shared/geometry/sketch/svg-arc';
@@ -181,10 +183,11 @@ function mirrored(m: Matrix) {
   return similarity({ ...m, c: -m.c, d: -m.d });
 }
 
-/** Every target and anchor of the painted, visible shapes. */
+/** Every target and anchor of the painted, visible shapes (but those `skip` leaves out). */
 export function collectSketchTargets(
   box: HTMLElement | null,
   host: SVGSVGElement | null,
+  skip?: (asset: string, el: Element) => boolean,
 ): SketchTargets {
   const out: SketchTargets = { targets: [], anchors: [] };
   if (!box || !host) return out;
@@ -193,13 +196,25 @@ export function collectSketchTargets(
       if (out.targets.length >= MAX_TARGETS) return out;
       if (!(el instanceof SVGGraphicsElement) || el.children.length > 0) continue;
       const id = el.getAttribute(ID_ATTR);
-      if (!id || !isRendered(el, root)) continue;
+      if (!id || !isRendered(el, root) || skip?.(asset, el)) continue;
       const m = nodeToDocument(host, el);
       if (!m) continue;
       ofElement(el, `${asset}:${id}`, fromDom(m), out);
     }
   }
   return out;
+}
+
+/**
+ * Where the edges and circles of different shapes (and of one shape, away from its corners)
+ * cross: Magic Snap points named "intersect" (like VectorCraft's Smart Guides).
+ */
+export function crossingPoints(targets: SketchTargets): SnapCandidate[] {
+  const outlines: OwnedOutline[] = targets.targets.map((t) => ({
+    owner: t.key.slice(0, t.key.lastIndexOf(':')),
+    outline: t.draw.kind === 'circle' ? t.draw : { kind: 'segment', a: t.draw.a, b: t.draw.b },
+  }));
+  return crossings(outlines).map((p) => ({ ...p, tag: 'intersect' as const }));
 }
 
 /** Distance of `p` from what a target draws. */

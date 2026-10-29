@@ -345,3 +345,53 @@ for (const zoom of [0.5, 1.5]) {
     expect(errors).toEqual([]);
   });
 }
+
+/** Rectangle 300…500 × 300…500 and circle (520, 520) r 100: they cross at (500, 422.02…). */
+const CROSS = { x: 500, y: 520 - Math.sqrt(100 * 100 - 20 * 20) };
+const SHAPES =
+  '<rect x="300" y="300" width="200" height="200" fill="none" stroke="#000"/>' +
+  '<circle cx="520" cy="520" r="100" fill="none" stroke="#000"/>';
+
+/** `p` rotated by 30° about (400, 400). */
+function rotated(p: { x: number; y: number }) {
+  const r = Math.PI / 6;
+  const dx = p.x - 400;
+  const dy = p.y - 400;
+  return {
+    x: 400 + dx * Math.cos(r) - dy * Math.sin(r),
+    y: 400 + dx * Math.sin(r) + dy * Math.cos(r),
+  };
+}
+
+for (const c of [
+  { name: 'zoom 50 %', zoom: 0.5, body: SHAPES, at: CROSS },
+  { name: 'zoom 150 %', zoom: 1.5, body: SHAPES, at: CROSS },
+  {
+    name: 'in a rotated group',
+    zoom: 1,
+    body: `<g transform="rotate(30 400 400)">${SHAPES}</g>`,
+    at: rotated(CROSS),
+  },
+]) {
+  test(`intersect: a line ends exactly where a rectangle and a circle cross (${c.name})`, async ({
+    page,
+  }) => {
+    const errors = collectErrors(page);
+    await setup(page, c.body);
+    await snapping(page, true);
+    await centerOn(page, c.zoom, { x: 420, y: 420 });
+    await tool(page, 'sketch.line');
+    await click(page, 330, 260);
+    // a few screen pixels beside the crossing
+    await hover(page, c.at.x + 4 / c.zoom, c.at.y - 3 / c.zoom);
+    await expect(page.getByTestId('snap-label')).toHaveText('intersect');
+    await page.mouse.down();
+    await page.mouse.up();
+    await frames(page);
+    const s = await selected(page);
+    expect(s?.tag).toBe('line');
+    expect(Number(s!.attrs['x2'])).toBeCloseTo(c.at.x, 3);
+    expect(Number(s!.attrs['y2'])).toBeCloseTo(c.at.y, 3);
+    expect(errors).toEqual([]);
+  });
+}

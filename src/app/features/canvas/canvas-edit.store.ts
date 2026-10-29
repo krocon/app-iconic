@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { Rect } from '../../shared/geometry/dom-geometry';
-import { SnapGuide, SnapKind } from '../../shared/geometry/snapping';
+import { SnapGuide, SnapKind, SnapTag } from '../../shared/geometry/snapping';
 import { Point } from '../../shared/geometry/view-transform';
 import { NodeRef } from '../document/icon-document';
 import { GestureController } from './canvas-gesture';
@@ -12,6 +12,20 @@ export interface CanvasSnap {
   point: Point;
   kind: Exclude<SnapKind, 'none'>;
   guides?: readonly SnapGuide[];
+  /** What the point is, when it is named ("intersect"). */
+  tag?: SnapTag;
+}
+
+/** The indicator of a snap result (`null` without snap). */
+export function shownSnap(s: {
+  target: Point | null;
+  kind: SnapKind;
+  guides: readonly SnapGuide[];
+  tag?: SnapTag;
+}): CanvasSnap | null {
+  return s.target && s.kind !== 'none'
+    ? { point: s.target, kind: s.kind, guides: s.guides, tag: s.tag }
+    : null;
 }
 
 /** A point handle chosen by a click (Delete removes it, design 007 E6). */

@@ -85,6 +85,11 @@ const pts = (ps: readonly Point[]) => ps.map((p) => `${p.x},${p.y}`).join(' ');
             <text [attr.x]="s.x + 8" [attr.y]="s.y - 8">{{ t.align }}</text>
           </g>
         }
+        @if (s.tag) {
+          <text class="snap-label" data-testid="snap-label" [attr.x]="s.x + 8" [attr.y]="s.y - 8">
+            {{ t.snapTags[s.tag] }}
+          </text>
+        }
         <g
           [class]="'snap ' + s.kind"
           data-testid="snap-indicator"
@@ -173,6 +178,6 @@ export class SelectionOverlay {
       const b = apply(v, g.to);
       return { x1: a.x, y1: a.y, x2: b.x, y2: b.y };
     });
-    return { x: p.x, y: p.y, kind: s.kind, doc: s.point, guides };
+    return { x: p.x, y: p.y, kind: s.kind, doc: s.point, guides, tag: s.tag };
   });
 }

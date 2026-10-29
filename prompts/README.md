@@ -48,7 +48,7 @@ unabhängig.
 | 031 | [031-haertung-paritaet.md](done/031-haertung-paritaet.md) | Parität gegen `docs/FEATURES.md`, Review durch separaten Agenten, feindliche Dateien, Performance großer SVGs, Barrierefreiheit, Doku | 002–030 | M | ✅ 27.10.2026 |
 | 032 | [032-verlaufseditor.md](032-verlaufseditor.md) | Verlaufseditor: Panel-Abschnitt Gradient (Art, Units, Spread, Transform, Stop-Leiste), Griffe auf der Fläche, geteilte Verläufe, `gradient.*` | 009, 011 | M | offen |
 | 033 | [033-haertung-folgen.md](033-haertung-folgen.md) | Folgen aus dem Review von 031: Pfade nur aus vertrauten Quellen, Transform-Rechnung über den Browser, Dateien teilen, Leistung auf dem Mac messen | 031 | M | offen |
-| 040 | [040-snap-ziele.md](040-snap-ziele.md) | Smart Guides wie VectorCraft: Schnittpunkte („intersect“), Kontur („path“), Labels, Konstruktionswinkel, Tangente/Senkrecht, Verlängerung | 007, 019 | M–L | offen |
+| 040 | [040-snap-ziele.md](040-snap-ziele.md) | Smart Guides wie VectorCraft: Schnittpunkte („intersect“), Kontur („path“), Labels, Konstruktionswinkel, Tangente/Senkrecht, Verlängerung | 007, 019 | M–L | teilweise (Schnittpunkte ✅) |
 | 041 | [041-formen-aufziehen.md](041-formen-aufziehen.md) | Formen per Klicken und Ziehen (Shift/Alt/Leertaste/↑↓), Klick → Größendialog | 019, 040 | M | offen |
 | 042 | [042-pen.md](042-pen.md) | Zeichenstift: Ecken/glatte Punkte, Griffe, schließen, fortsetzen, Auto Add/Delete | 040 | L | offen |
 | 043 | [043-curvature.md](043-curvature.md) | Curvature-Werkzeug: glatte Kurve durch Klicks, vorhandene Pfade krümmen | 042 | M | offen |

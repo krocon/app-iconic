@@ -1,11 +1,11 @@
 import { clientToDocument } from '../../shared/geometry/dom-geometry';
-import { gridOriginPoint, snapPoint } from '../../shared/geometry/snapping';
+import { gridOriginPoint, SnapCandidate, snapPoint } from '../../shared/geometry/snapping';
 import { Point } from '../../shared/geometry/view-transform';
 import { CanvasEditStore } from '../canvas/canvas-edit.store';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { magicPoints } from '../canvas/magic-points';
 import { DocumentStore } from '../document/document.store';
-import { collectSketchTargets } from './sketch-targets';
+import { collectSketchTargets, crossingPoints } from './sketch-targets';
 import { SketchService } from './sketch.service';
 import { SketchStore } from './sketch.store';
 
@@ -25,7 +25,7 @@ interface PointerLike {
  * are not snapped – the targets are collected once per step. Plain class; `CanvasView` owns it.
  */
 export class SketchInteraction {
-  private magic: { revision: number; points: Point[] } | null = null;
+  private magic: { revision: number; points: SnapCandidate[] } | null = null;
   private down: { x: number; y: number; step: number } | null = null;
 
   constructor(
@@ -54,20 +54,26 @@ export class SketchInteraction {
       step: o.gridSize,
     });
     if (r.kind !== 'none' && r.target) {
-      this.edit.snap.set({ point: r.target, kind: r.kind, guides: r.guides });
+      this.edit.snap.set({ point: r.target, kind: r.kind, guides: r.guides, tag: r.tag });
     }
     return r.point;
   }
 
-  /** Magic Snap candidates: the painted shapes (once per document revision) and the placed points. */
-  private candidates(): Point[] {
+  /**
+   * Magic Snap candidates: the marked points of the painted shapes and where their outlines cross
+   * (once per document revision), and the placed points.
+   */
+  private candidates(): SnapCandidate[] {
     const store = this.store();
     if (!this.view.options().magicSnap || !store) return [];
     const revision = store.revision();
     if (!this.magic || this.magic.revision !== revision) {
       this.magic = {
         revision,
-        points: magicPoints(this.layers(), this.host(), store.document(), []),
+        points: [
+          ...magicPoints(this.layers(), this.host(), store.document(), []),
+          ...crossingPoints(collectSketchTargets(this.layers(), this.host())),
+        ],
       };
     }
     return [...this.magic.points, ...this.sketch.placed().map((p) => p.p)];

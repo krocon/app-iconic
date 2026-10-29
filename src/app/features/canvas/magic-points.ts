@@ -8,6 +8,8 @@ import { ID_ATTR } from '../document/svg/node-ids';
 import { boxKeyPoints } from './edit-ops';
 import { readGeometry } from './handles/node-geometry';
 import { handlesOf } from './handles/node-handles';
+import { SnapCandidate } from '../../shared/geometry/snapping';
+import { collectSketchTargets, crossingPoints } from '../sketch/sketch-targets';
 import { isRendered, paintedRoots } from './hit-test';
 
 /** Most candidates collected for one gesture. */
@@ -62,4 +64,31 @@ export function magicPoints(
     }
   }
   return out.slice(0, MAX_MAGIC_POINTS);
+}
+
+/**
+ * Magic Snap candidates of a drag: the marked points of the other shapes and, outside the clip
+ * edit mode, where their outlines cross ("intersect", like VectorCraft's Smart Guides); the
+ * dragged nodes `exclude` left out.
+ */
+export function snapCandidates(
+  box: HTMLElement,
+  host: SVGSVGElement | null,
+  doc: IconDocument,
+  exclude: readonly NodeRef[],
+  scope: Element | null,
+  crossings: boolean,
+): SnapCandidate[] {
+  const points: SnapCandidate[] = magicPoints(box, host, doc, exclude, scope);
+  if (scope || !crossings || !host) return points;
+  const moving = exclude.flatMap((r) => {
+    const el = doc.node(r);
+    return el ? [{ asset: r.asset, el }] : [];
+  });
+  const skip = (asset: string, el: Element) => {
+    const id = el.getAttribute(ID_ATTR);
+    const live = id ? doc.node({ asset, id }) : null;
+    return !!live && moving.some((m) => m.asset === asset && m.el.contains(live));
+  };
+  return [...points, ...crossingPoints(collectSketchTargets(box, host, skip))];
 }

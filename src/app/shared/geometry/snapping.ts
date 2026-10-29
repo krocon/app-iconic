@@ -20,6 +20,12 @@ export const GRID_STEP = 10;
 /** Lining up with a marked point: closer than this in screen pixels on one axis (VectorCraft: a few px). */
 export const ALIGN_TOLERANCE_PX = 6;
 
+/** What a marked point is, when the indicator names it (VectorCraft's labels). */
+export type SnapTag = 'intersect';
+
+/** A marked point of Magic Snap, optionally named. */
+export type SnapCandidate = Point & { tag?: SnapTag };
+
 /** A guide line of "align": from the marked point to where the point landed (document units). */
 export interface SnapGuide {
   from: Point;
@@ -47,6 +53,8 @@ export interface SnapResult {
   distancePx: number;
   /** The guide lines of "align" (empty otherwise). */
   guides: SnapGuide[];
+  /** What the marked point snapped to is ("intersect"), if it is named. */
+  tag?: SnapTag;
 }
 
 export function gridOriginPoint(origin: GridOrigin): Point {
@@ -69,11 +77,18 @@ const NONE = (p: Point): SnapResult => ({
 });
 
 /** The marked point nearest to `p` along one axis within `tol` (document units); on a tie the nearest overall. */
-function nearestOnAxis(p: Point, candidates: readonly Point[], axis: 'x' | 'y', tol: number) {
+function nearestOnAxis(
+  p: Point,
+  candidates: readonly SnapCandidate[],
+  axis: 'x' | 'y',
+  tol: number,
+) {
   let best: Point | null = null;
   let bestD = Infinity;
   let bestAll = Infinity;
   for (const c of candidates) {
+    // crossings are places to land on, not lines to keep to (too many, by chance)
+    if (c.tag) continue;
     const d = Math.abs(c[axis] - p[axis]);
     if (d > tol) continue;
     const all = Math.hypot(c.x - p.x, c.y - p.y);
@@ -87,7 +102,11 @@ function nearestOnAxis(p: Point, candidates: readonly Point[], axis: 'x' | 'y', 
 }
 
 /** "align": each axis on the x / y of the nearest marked point; the other axis on the grid. */
-function alignPoint(p: Point, candidates: readonly Point[], o: SnapOptions): SnapResult | null {
+function alignPoint(
+  p: Point,
+  candidates: readonly SnapCandidate[],
+  o: SnapOptions,
+): SnapResult | null {
   const z = o.zoom > 0 ? o.zoom : 1;
   const tol = (o.alignTolerancePx ?? ALIGN_TOLERANCE_PX) / z;
   const ax = nearestOnAxis(p, candidates, 'x', tol);
@@ -106,7 +125,11 @@ function alignPoint(p: Point, candidates: readonly Point[], o: SnapOptions): Sna
 }
 
 /** Snaps one point: the nearest magic candidate and the grid crossing within the tolerance. */
-export function snapPoint(p: Point, candidates: readonly Point[], o: SnapOptions): SnapResult {
+export function snapPoint(
+  p: Point,
+  candidates: readonly SnapCandidate[],
+  o: SnapOptions,
+): SnapResult {
   const tol = o.tolerancePx ?? SNAP_TOLERANCE_PX;
   const z = o.zoom > 0 ? o.zoom : 1;
   const dist = (q: Point) => Math.hypot(q.x - p.x, q.y - p.y) * z;
@@ -115,7 +138,14 @@ export function snapPoint(p: Point, candidates: readonly Point[], o: SnapOptions
     for (const c of candidates) {
       const d = dist(c);
       if (d <= tol && d < best.distancePx)
-        best = { point: c, kind: 'magic', target: c, distancePx: d, guides: [] };
+        best = {
+          point: { x: c.x, y: c.y },
+          kind: 'magic',
+          target: { x: c.x, y: c.y },
+          distancePx: d,
+          guides: [],
+          tag: c.tag,
+        };
     }
   }
 
@@ -139,9 +169,9 @@ export function snapPoint(p: Point, candidates: readonly Point[], o: SnapOptions
 export function snapMove(
   keyPoints: readonly Point[],
   delta: Point,
-  candidates: readonly Point[],
+  candidates: readonly SnapCandidate[],
   o: SnapOptions,
-): { delta: Point; kind: SnapKind; target: Point | null; guides: SnapGuide[] } {
+): { delta: Point; kind: SnapKind; target: Point | null; guides: SnapGuide[]; tag?: SnapTag } {
   let best: { r: SnapResult; from: Point } | null = null;
   for (const k of keyPoints) {
     const moved = { x: k.x + delta.x, y: k.y + delta.y };
@@ -157,5 +187,6 @@ export function snapMove(
     kind: best.r.kind,
     target: best.r.target,
     guides: best.r.guides,
+    tag: best.r.tag,
   };
 }

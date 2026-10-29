@@ -101,3 +101,10 @@
     font-family: var(--font-ui);
   }
 }
+
+/* the name of a snapped point ("intersect"), like VectorCraft's Smart Guide labels */
+.snap-label {
+  fill: var(--ai-snap-align);
+  font-size: 11px;
+  font-family: var(--font-ui);
+}

@@ -126,4 +126,12 @@ describe('snapping (design 007 E13)', () => {
     );
     expect(r.guides[0].from).toEqual({ x: 50, y: 280 });
   });
+
+  it('a crossing is a point to land on ("intersect"), never a line to align with', () => {
+    const x = { x: 200, y: 300, tag: 'intersect' as const };
+    const o = { zoom: 1, grid: false, magic: true };
+    const r = snapPoint({ x: 205, y: 304 }, [x], o);
+    expect(r).toMatchObject({ kind: 'magic', point: { x: 200, y: 300 }, tag: 'intersect' });
+    expect(snapPoint({ x: 203, y: 380 }, [x], o).kind).toBe('none');
+  });
 });

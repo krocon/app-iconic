@@ -38,3 +38,31 @@ export function clampTranslation(b: Rect, rect: Rect, delta: Point): Point {
     y: axis(b.y, b.y + b.height, rect.y, rect.y + rect.height, delta.y),
   };
 }
+
+/** `r` grown to contain `p`. */
+export function withPoint(r: Rect, p: Point): Rect {
+  const x = Math.min(r.x, p.x);
+  const y = Math.min(r.y, p.y);
+  return {
+    x,
+    y,
+    width: Math.max(r.x + r.width, p.x) - x,
+    height: Math.max(r.y + r.height, p.y) - y,
+  };
+}
+
+/** Point in polygon (even-odd ray casting). */
+export function insidePolygon(
+  poly: readonly { x: number; y: number }[],
+  p: { x: number; y: number },
+): boolean {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const a = poly[i];
+    const b = poly[j];
+    if (a.y > p.y !== b.y > p.y && p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y) + a.x) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}

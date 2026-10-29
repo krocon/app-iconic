@@ -9,6 +9,12 @@ Gezeichnete und gezogene Punkte landen genau auf dem, was schon da ist – nicht
 dem Align-Commit (`c4c4700`) richten sie sich an x/y der Magic-Punkte aus („align“); es fehlen die übrigen Ziele
 der Smart Guides.
 
+## Stand
+
+- ✅ 29.10.2026: Schnittpunkte von Kanten (Linie, Rechteck, Polygon/Polyline, gerade Pfad-Segmente) und Kreisen
+  (auch Kreisbögen in Pfaden) – exakt, Label „intersect“, beim Zeichnen und beim Ziehen von Griffen/Formen
+  (`shared/geometry/sketch/intersections.ts`, `crossingPoints`). Offen: Ellipsen, Bézier- und Ellipsenbögen.
+
 ## Umfang
 
 - **Schnittpunkte („intersect“):** Wo sich zwei Formen kreuzen (Linie, Rechteck, Kreis, Ellipse, Polygon/Polyline,

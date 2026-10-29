@@ -1,4 +1,10 @@
-import { CANVAS_BOUNDS, clampPoint, clampTranslation } from '../../shared/geometry/bounds-guard';
+import {
+  CANVAS_BOUNDS,
+  clampPoint,
+  clampTranslation,
+  insidePolygon,
+  withPoint,
+} from '../../shared/geometry/bounds-guard';
 import {
   combineSelection,
   intersects,
@@ -8,15 +14,21 @@ import {
 } from '../../shared/geometry/box-selection';
 import { clientToDocument, nodeBoundsInDocument, Rect } from '../../shared/geometry/dom-geometry';
 import { apply, invert } from '../../shared/geometry/matrix';
-import { gridOriginPoint, snapMove, snapPoint, SnapOptions } from '../../shared/geometry/snapping';
+import {
+  gridOriginPoint,
+  SnapCandidate,
+  snapMove,
+  snapPoint,
+  SnapOptions,
+} from '../../shared/geometry/snapping';
 import { Point } from '../../shared/geometry/view-transform';
 import { AttributeChange, SetAttributes } from '../document/commands';
 import { DocumentStore } from '../document/document.store';
-import { NodeRef } from '../document/icon-document';
+import { IconDocument, NodeRef } from '../document/icon-document';
 import { UndoLabel } from '../document/undo/undo-texts';
 import { paintedNodes } from '../hierarchy/arrange-operations';
 import { isClipGroup } from '../document/model/clip-model';
-import { CanvasEditStore } from './canvas-edit.store';
+import { CanvasEditStore, shownSnap } from './canvas-edit.store';
 import { DragOp, Modifiers } from './canvas-gesture';
 import { CanvasViewStore } from './canvas-view.store';
 import {
@@ -35,20 +47,8 @@ import {
   paintedRoots,
   selectableRef,
 } from './hit-test';
-import { magicPoints } from './magic-points';
+import { snapCandidates } from './magic-points';
 import { HandleSet, nodeSnaps } from './selection-measure';
-
-/** `r` grown to contain `p`. */
-function withPoint(r: Rect, p: Point): Rect {
-  const x = Math.min(r.x, p.x);
-  const y = Math.min(r.y, p.y);
-  return {
-    x,
-    y,
-    width: Math.max(r.x + r.width, p.x) - x,
-    height: Math.max(r.y + r.height, p.y) - y,
-  };
-}
 
 export const sameRef = (a: NodeRef, b: NodeRef) => a.asset === b.asset && a.id === b.id;
 
@@ -179,20 +179,16 @@ export class CanvasInteraction {
     const snaps = nodeSnaps(doc, host, refs, scope);
     const union = this.edit.model().union ?? this.unionOf(store, refs);
     const keys = union ? boxKeyPoints(union) : [];
-    let candidates: Point[] | null = null;
+    let candidates: SnapCandidate[] | null = null;
     const p0 = this.toDoc(e);
     return {
       label: 'moveNode',
       update: (p, mods) => {
-        candidates ??= magicPoints(this.layers(), host, doc, refs, scope);
+        candidates ??= this.snapTargets(doc, refs, scope);
         let d = { x: p.x - p0.x, y: p.y - p0.y };
         const s = snapMove(keys, d, candidates, this.snapOptions(mods));
         d = s.delta;
-        this.edit.snap.set(
-          s.target && s.kind !== 'none'
-            ? { point: s.target, kind: s.kind, guides: s.guides }
-            : null,
-        );
+        this.edit.snap.set(shownSnap(s));
         // the BoundsGuard keeps nodes on the canvas – not clip shapes (design 014 E7): a clip
         // moved partly off the canvas is how a picture gets cut
         if (union && !scope) d = clampTranslation(CANVAS_BOUNDS, union, d);
@@ -200,6 +196,18 @@ export class CanvasInteraction {
       },
       end: () => this.edit.snap.set(null),
     };
+  }
+
+  /** Magic Snap candidates of a drag (marked points and crossings of the other shapes). */
+  private snapTargets(doc: IconDocument, refs: readonly NodeRef[], scope: Element | null) {
+    return snapCandidates(
+      this.layers(),
+      this.host(),
+      doc,
+      refs,
+      scope,
+      this.view.options().magicSnap,
+    );
   }
 
   private unionOf(store: DocumentStore, refs: readonly NodeRef[]) {
@@ -313,15 +321,13 @@ export class CanvasInteraction {
         : set.kind === 'box'
           ? [set.single!.ref]
           : [set.ref];
-    let candidates: Point[] | null = null;
+    let candidates: SnapCandidate[] | null = null;
     // a handle that starts off the canvas may stay there (nothing jumps, design 007 E14)
     const bounds = withPoint(CANVAS_BOUNDS, apply(set.toDoc, h.local));
     const target = (p: Point, mods: Modifiers) => {
-      candidates ??= magicPoints(this.layers(), host, doc, excluded, scope);
+      candidates ??= this.snapTargets(doc, excluded, scope);
       const s = snapPoint(p, candidates, this.snapOptions(mods));
-      this.edit.snap.set(
-        s.target && s.kind !== 'none' ? { point: s.target, kind: s.kind, guides: s.guides } : null,
-      );
+      this.edit.snap.set(shownSnap(s));
       return scope ? s.point : clampPoint(bounds, s.point);
     };
     const end = () => this.edit.snap.set(null);
@@ -380,20 +386,4 @@ export class CanvasInteraction {
       end,
     };
   }
-}
-
-/** Point in polygon (even-odd ray casting). */
-export function insidePolygon(
-  poly: readonly { x: number; y: number }[],
-  p: { x: number; y: number },
-): boolean {
-  let inside = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const a = poly[i];
-    const b = poly[j];
-    if (a.y > p.y !== b.y > p.y && p.x < ((b.x - a.x) * (p.y - a.y)) / (b.y - a.y) + a.x) {
-      inside = !inside;
-    }
-  }
-  return inside;
 }
