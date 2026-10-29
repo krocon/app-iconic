@@ -65,7 +65,10 @@
   }
   &:hover .eye,
   &.selected .eye,
-  .eye.off {
+  .eye.off,
+  &:hover .lock,
+  &.selected .lock,
+  .lock.on {
     visibility: visible;
   }
 }
@@ -172,7 +175,8 @@
   }
 }
 
-.eye {
+.eye,
+.lock {
   display: inline-flex;
   flex: none;
   align-items: center;

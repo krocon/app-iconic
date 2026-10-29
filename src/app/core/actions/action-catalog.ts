@@ -413,6 +413,13 @@ export const ACTIONS: readonly ActionDef[] = [
   }),
   EDIT('edit.cloneLinked', 'Clone (Linked)'),
   EDIT('edit.toggleConstruction', 'Construction Line'),
+  // lock and isolate (prompt 055)
+  EDIT('edit.toggleLock', 'Lock / Unlock', {
+    args: { type: 'object', properties: { nodes: { type: 'json' } } },
+  }),
+  EDIT('edit.unlockAll', 'Unlock All'),
+  EDIT('edit.isolate', 'Isolate Group'),
+  VIEW('view.constructionLines', 'Construction Lines'),
   // Measure and Dimension (prompt 048)
   ADD('dimension.tool', 'Dimension Tool'),
   VIEW('measure.tool', 'Measure Tool'),

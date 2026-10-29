@@ -55,6 +55,8 @@
     "Shift+s": "transform.scale",
     "Shift+o": "transform.reflect",
     "Mod+Shift+m": "transform.dialog",
+    "Mod+l": "edit.toggleLock",
+    "Mod+Alt+l": "edit.unlockAll",
     "Mod+Alt+d": "edit.cloneLinked"
   },
   "drawing": {

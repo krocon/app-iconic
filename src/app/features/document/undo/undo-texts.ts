@@ -109,6 +109,8 @@ const EN = {
   offsetPath: 'Offset Path',
   outlineStroke: 'Outline Stroke',
   transform: 'Transform',
+  lock: 'Lock',
+  unlock: 'Unlock',
   // clip paths (design 014 E5)
   createClipPath: 'Create Clip Path',
   assignClip: 'Assign Clip Path',
@@ -215,6 +217,8 @@ export const UNDO_TEXTS = translatable('undo', EN, {
     offsetPath: 'Pfad verschieben',
     outlineStroke: 'Konturlinie',
     transform: 'Transformieren',
+    lock: 'Sperren',
+    unlock: 'Entsperren',
     createClipPath: 'Beschneidungspfad anlegen',
     assignClip: 'Beschneidungspfad zuweisen',
     layerClip: 'Beschneidung der Ebene ändern',

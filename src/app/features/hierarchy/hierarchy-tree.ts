@@ -300,6 +300,11 @@ export class HierarchyTree {
     this.edit.toggleVisibility(sel, e.altKey);
   }
 
+  protected onLock(e: MouseEvent, row: TreeRow): void {
+    e.stopPropagation();
+    if (row.node.ref) this.actions.run('edit.toggleLock', { nodes: [row.node.ref] });
+  }
+
   protected onContextMenu(e: MouseEvent, row: TreeRow): void {
     e.preventDefault();
     if (!this.selectedIds().has(row.node.id)) selectSingle(this.store(), row.node);

@@ -34,6 +34,8 @@ export interface TreeNode {
   stroke: Swatch | null;
   /** Hidden itself (`display: none` / `hidden: true`). */
   hidden: boolean;
+  /** Locked itself (`data-locked`, prompt 055); elements only. */
+  locked?: boolean;
   /** Paints nothing (inside "Definitions"): no canvas actions. */
   definition: boolean;
   /** May take children (drop "into"). */
@@ -83,6 +85,7 @@ function nodeOf(el: Element, asset: string, parentId: string, root: Element): Tr
     fill: swatchOf(el, 'fill', root),
     stroke: swatchOf(el, 'stroke', root),
     hidden: isHiddenElement(el),
+    ...(el.hasAttribute('data-locked') ? { locked: true } : {}),
     definition: isDefinitionElement(el),
     container: isContainerElement(el),
     children: Array.from(el.children).map((c) => nodeOf(c, asset, rowId, root)),

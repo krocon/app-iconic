@@ -2,6 +2,15 @@
 
 > Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 006, 007 · Vorbild: Illustrator „Lock“/„Isolation Mode“
 
+## Stand
+
+- ✅ 29.10.2026: **Sperren** (`edit.toggleLock`, ⌘L, Schloss im Ebenenbaum, Menü Edit): gesperrte Elemente (und alles in
+  einer gesperrten Gruppe) sind per Klick und Rahmen nicht auswählbar, bleiben aber Fangpunkte; `data-locked` bleibt
+  in der Datei; Sperren nimmt sie aus der Auswahl; **Alle entsperren** (⌘⌥L). **Isolieren** (`edit.isolate`, auch
+  Doppelklick in eine Gruppe): die Gruppe wird Kontext, alles daneben im Canvas auf 25 % gedimmt (Regeln im Shadow
+  Root der Ebenen, das Dokument ändert sich nicht); erneut, Esc oder Klick daneben verlässt. **Konstruktionslinien
+  ein/aus** (View-Menü, `view.constructionLines`) – für die Sitzung, nicht in den Einstellungen.
+
 ## Ziel
 
 Hintergrund, Konstruktionsgeometrie und fertige Teile stören beim Zeichnen: man trifft sie beim Klicken und

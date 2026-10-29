@@ -75,6 +75,28 @@
         @if (r.node.warning) {
           <span class="warn">{{ r.node.warning }}</span>
         }
+        @if (r.node.ref && r.node.kind === 'node') {
+          <button
+            type="button"
+            class="lock"
+            tabindex="-1"
+            data-testid="tree-lock"
+            [class.on]="r.node.locked"
+            [attr.aria-label]="(r.node.locked ? t.unlock : t.lock) + ' ' + r.node.label"
+            [title]="r.node.locked ? t.unlock : t.lock"
+            (pointerdown)="$event.stopPropagation()"
+            (click)="onLock($event, r)"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M4 7.5h8v6H4z" />
+              @if (r.node.locked) {
+                <path d="M5.5 7.5V5.5a2.5 2.5 0 0 1 5 0v2" />
+              } @else {
+                <path d="M5.5 7.5V5.5a2.5 2.5 0 0 1 5 0" />
+              }
+            </svg>
+          </button>
+        }
         @if (r.node.kind !== 'root' && r.node.kind !== 'defs') {
           <button
             type="button"

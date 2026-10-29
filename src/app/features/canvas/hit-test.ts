@@ -2,6 +2,7 @@ import { clipOwnerOf, clipShapeAt, insideClips } from '../../shared/geometry/cli
 import { IconDocument, NodeRef } from '../document/icon-document';
 import { isClipGroup } from '../document/model/clip-model';
 import { ID_ATTR } from '../document/svg/node-ids';
+import { isLocked } from '../lock/lock';
 
 /**
  * Hit testing of the canvas (design 007 E2). The layer hosts take no pointer events (design 004),
@@ -142,7 +143,7 @@ export function hitTest(
         continue;
       // cheap first: far from the element's box (prompt 031 – 20 000 shapes took seconds)
       if (!nearBox(el, p.clientX, p.clientY, tol)) continue;
-      if (!isRendered(el, root)) continue;
+      if (!isRendered(el, root) || isLocked(el, root)) continue;
       if (!hitsElement(el, p.clientX, p.clientY, tol)) continue;
       if (!insideClips(el, root, p.clientX, p.clientY)) continue;
       const id = el.getAttribute(ID_ATTR);

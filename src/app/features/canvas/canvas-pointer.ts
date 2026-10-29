@@ -1,3 +1,4 @@
+import { isLocked } from '../lock/lock';
 import {
   CANVAS_BOUNDS,
   clampPoint,
@@ -284,6 +285,7 @@ export class CanvasInteraction {
       const refs = kids.flatMap((c) => doc.refOf(c) ?? []);
       for (const node of paintedNodes(doc, refs)) {
         if (!(node instanceof SVGGraphicsElement) || !isRendered(node, root)) continue;
+        if (isLocked(node, root)) continue;
         const rect = nodeBoundsInDocument(host, node);
         const ref = doc.refOf(node);
         if (rect && ref) out.push({ ref, rect });
