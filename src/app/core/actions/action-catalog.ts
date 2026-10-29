@@ -342,6 +342,19 @@ export const ACTIONS: readonly ActionDef[] = [
   EDIT('path.scissors', 'Scissors Tool'),
   EDIT('path.smooth', 'Smooth Tool'),
   EDIT('path.eraser', 'Path Eraser Tool'),
+  // Offset Path and Outline Stroke (prompt 052)
+  EDIT('path.offset', 'Offset Path…', {
+    args: {
+      type: 'object',
+      properties: {
+        /** > 0 grows, < 0 shrinks (document units); without it the dialog. */
+        distance: { type: 'number' },
+        join: { type: 'string', enum: ['miter', 'round', 'bevel'] },
+        replace: { type: 'boolean' },
+      },
+    },
+  }),
+  EDIT('path.outlineStroke', 'Outline Stroke'),
   EDIT('path.join', 'Join Paths'),
   EDIT('path.convert', 'Convert to Path'),
   // Pathfinder, Shape Builder, cuts (prompt 047)

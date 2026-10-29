@@ -122,6 +122,8 @@ const FIXED: Record<string, string> = {
   'path.scissors': 'Schere',
   'path.smooth': 'Glätten',
   'path.eraser': 'Pfad-Radiergummi',
+  'path.offset': 'Pfad verschieben …',
+  'path.outlineStroke': 'Konturlinie',
   'path.join': 'Pfade zusammenfügen',
   'path.convert': 'In Pfad umwandeln',
   'pathfinder.unite': 'Vereinigen',

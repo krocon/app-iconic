@@ -76,6 +76,8 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('path.optimize'),
     a('path.join'),
     a('path.convert'),
+    a('path.offset'),
+    a('path.outlineStroke'),
     sub(t.pathfinder, [
       a('pathfinder.unite'),
       a('pathfinder.minusFront'),

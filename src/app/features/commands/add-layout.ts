@@ -77,6 +77,8 @@ export const ADD_LAYOUT: readonly AddSection[] = [
         'extend.tool',
         'fillet.tool',
         'chamfer.tool',
+        'path.offset',
+        'path.outlineStroke',
         'path.addAnchor',
         'path.deleteAnchor',
         'path.anchorPoint',

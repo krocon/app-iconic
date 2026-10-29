@@ -96,6 +96,8 @@
   Ziehen), offenes Ende bis zur nächsten Kontur verlängern.
 - [x] Verrunden und Fasen zwischen Elementen _(neu)_ (051): Linie/Linie, Linie/Bogen, Kurven, Ecke eines Pfads; Radius
   im Dialog mit Live-Vorschau.
+- [x] Versatz und Kontur in Fläche _(neu)_ (052): Pfad verschieben (außen/innen, Ecken, Vorschau live), Konturlinie
+  (Strich wird Fläche).
 - [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
       gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)

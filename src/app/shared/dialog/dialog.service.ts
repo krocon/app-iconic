@@ -16,7 +16,8 @@ export type DialogKind =
   | 'shapeSize'
   | 'corners'
   | 'pattern'
-  | 'fillet';
+  | 'fillet'
+  | 'offset';
 
 /**
  * Which modal dialog is open. Remembers the focused element on `show` and gives the focus back

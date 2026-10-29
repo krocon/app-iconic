@@ -4,21 +4,13 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '
 import { ActionService } from './core/actions/action.service';
 import { KeyboardDispatcher } from './core/actions/keyboard-dispatcher';
 import { WindowApi } from './core/window/window-api';
-import { AboutDialog } from './features/about/about-dialog';
 import { CanvasView } from './features/canvas/canvas-view';
 import { registerAddActions } from './features/commands/add-actions';
 import { AddService } from './features/commands/add.service';
 import { CommandSidebar } from './features/commands/command-sidebar';
-import { SvgSnippetDialog } from './features/commands/svg-snippet-dialog';
-import { SymbolPickerDialog } from './features/symbols/symbol-picker-dialog';
-import { ShapeSizeDialog } from './features/sketch/shape-size-dialog';
-import { CornersDialog } from './features/corners/corners-dialog';
-import { PatternDialog } from './features/pattern/pattern-dialog';
-import { FilletDialog } from './features/fillet/fillet-dialog';
 import { CornersService } from './features/corners/corners.service';
 import { SymbolService } from './features/symbols/symbol.service';
 import { FreehandService } from './features/tools/freehand.service';
-import { TextPathDialog } from './features/tools/text-path-dialog';
 import { TextPathService } from './features/tools/text-path.service';
 import { registerToolActions } from './features/tools/tools-actions';
 import { registerSketchActions } from './features/sketch/sketch-actions';
@@ -29,6 +21,7 @@ import { CurvatureService } from './features/pen/curvature.service';
 import { FreehandStore } from './features/tools/freehand.store';
 import { registerPenActions } from './features/pen/pen-actions';
 import { registerPathTools } from './features/pathfinder/path-tools';
+import { AppDialogs } from './features/shell/app-dialogs';
 import { registerFileActions } from './features/files/file-actions';
 import { FILES_TEXTS } from './features/files/files-texts';
 import { FilesService } from './features/files/files.service';
@@ -37,7 +30,6 @@ import { registerEditActions } from './features/hierarchy/edit-actions';
 import { EditService } from './features/hierarchy/edit.service';
 import { HierarchyTree } from './features/hierarchy/hierarchy-tree';
 import { registerAppActions } from './features/menus/app-actions';
-import { CommandPalette } from './features/menus/command-palette';
 import { MenuBar } from './features/menus/menu-bar';
 import { MenuService } from './features/menus/menu.service';
 import { registerPropertiesActions } from './features/properties/properties-actions';
@@ -45,23 +37,17 @@ import { registerIconActions } from './features/inspector/icon-actions';
 import { IconInspectorService } from './features/inspector/icon-inspector.service';
 import { PropertiesPanel } from './features/properties/properties-panel';
 import { PropertiesService } from './features/properties/properties.service';
-import { ShortcutsDialog } from './features/menus/shortcuts-dialog';
 import { LayoutStore } from './features/shell/layout.store';
 import { SHELL_TEXTS } from './features/shell/shell-texts';
 import { PanelStrip, SidePanel } from './features/shell/side-panel';
 import { Splitter } from './features/shell/splitter';
 import { registerSettingsActions } from './features/settings/settings-actions';
-import { SettingsDialog } from './features/settings/settings-dialog';
 import { SettingsStore } from './features/settings/settings.store';
 import { AskService } from './shared/ask/ask.service';
-import { AskDialog } from './shared/ask/ask-dialog';
 import { DialogService } from './shared/dialog/dialog.service';
-import { OptimizePathDialog } from './features/svg-source/optimize-path-dialog';
 import { registerSvgSourceActions } from './features/svg-source/svg-source-actions';
 import { registerExportActions } from './features/export/export-actions';
 import { ExportService } from './features/export/export.service';
-import { ExportDialog } from './features/export/export-dialog';
-import { SvgSourceDialog } from './features/svg-source/svg-source-dialog';
 import { SvgSourceService } from './features/svg-source/svg-source.service';
 import { McpStore } from './features/mcp/mcp.store';
 import { MCP_TEXTS } from './features/mcp/mcp-texts';
@@ -76,29 +62,15 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
 @Component({
   selector: 'app-root',
   imports: [
-    AboutDialog,
-    AskDialog,
+    AppDialogs,
     CanvasView,
-    CommandPalette,
     CommandSidebar,
     HierarchyTree,
     MenuBar,
-    OptimizePathDialog,
-    ExportDialog,
     PropertiesPanel,
-    ShortcutsDialog,
-    SettingsDialog,
     SidePanel,
     PanelStrip,
     Splitter,
-    SvgSnippetDialog,
-    SymbolPickerDialog,
-    ShapeSizeDialog,
-    CornersDialog,
-    PatternDialog,
-    FilletDialog,
-    TextPathDialog,
-    SvgSourceDialog,
   ],
   template: `
     <header class="toolbar">
@@ -223,53 +195,7 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
         </button>
       </div>
     }
-    @switch (dialogs.open()) {
-      @case ('about') {
-        <app-about-dialog />
-      }
-      @case ('ask') {
-        <app-ask-dialog />
-      }
-      @case ('palette') {
-        <app-command-palette />
-      }
-      @case ('shortcuts') {
-        <app-shortcuts-dialog />
-      }
-      @case ('svgSnippet') {
-        <app-svg-snippet-dialog />
-      }
-      @case ('svgSource') {
-        <app-svg-source-dialog />
-      }
-      @case ('optimizePath') {
-        <app-optimize-path-dialog />
-      }
-      @case ('export') {
-        <app-export-dialog />
-      }
-      @case ('textPath') {
-        <app-text-path-dialog />
-      }
-      @case ('symbolPicker') {
-        <app-symbol-picker-dialog />
-      }
-      @case ('fillet') {
-        <app-fillet-dialog />
-      }
-      @case ('pattern') {
-        <app-pattern-dialog />
-      }
-      @case ('corners') {
-        <app-corners-dialog />
-      }
-      @case ('shapeSize') {
-        <app-shape-size-dialog />
-      }
-      @case ('settings') {
-        <app-settings-dialog />
-      }
-    }
+    <app-dialogs />
   `,
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

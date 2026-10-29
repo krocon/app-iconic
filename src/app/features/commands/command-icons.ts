@@ -55,6 +55,9 @@ export const COMMAND_ICONS: Record<string, string> = {
   // Fillet and Chamfer (prompt 051)
   'fillet.tool': 'M2.5 13.5V9a6.5 6.5 0 0 1 6.5-6.5h4.5',
   'chamfer.tool': 'M2.5 13.5V7l4.5-4.5h6.5',
+  // Offset Path and Outline Stroke (prompt 052)
+  'path.offset': 'M5 5h6v6H5z M2.5 2.5h11v11h-11z',
+  'path.outlineStroke': 'M2 11L11 2 M4.5 13.5L13.5 4.5 M2 11l2.5 2.5 M11 2l2.5 2.5',
   // path tools (prompt 046)
   'path.addAnchor': 'M2 13L13 2 M6.5 7.5h2v2h-2z M11 12h4 M13 10v4',
   'path.deleteAnchor': 'M2 13L13 2 M6.5 7.5h2v2h-2z M11 12h4',

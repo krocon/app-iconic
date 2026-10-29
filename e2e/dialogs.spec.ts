@@ -78,6 +78,7 @@ const DIALOGS: { name: string; open: (page: Page) => Promise<void> }[] = [
       await run(p, 'pattern.centerHere');
     },
   },
+  { name: 'offset', open: async (p) => (await selectRect(p), run(p, 'path.offset')) },
   {
     name: 'fillet',
     open: async (p) => {

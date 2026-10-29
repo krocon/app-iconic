@@ -22,6 +22,8 @@ export interface Piece {
   source: PathTarget;
   /** Path data in document units. */
   d: string;
+  /** Attributes to change on the copy of the source's look (`null` removes one). */
+  attrs?: Readonly<Record<string, string | null>>;
 }
 
 /**
@@ -107,9 +109,11 @@ export class PathfinderService {
     old: readonly PathTarget[],
     pieces: readonly Piece[],
     label: UndoLabel,
+    /** Insert the pieces after (above) their source instead of before it. */
+    after = false,
   ): { command: DocCommand; refs(): NodeRef[] } | null {
     const store = this.files.store();
-    if (!store || !old.length) return null;
+    if (!store || (!old.length && !pieces.length)) return null;
     const doc = store.document();
     const sim = new Map<Element, Element[]>();
     const inserts: InsertNode[] = [];
@@ -121,14 +125,16 @@ export class PathfinderService {
       if (!parent || !parentRef || !sub?.length) continue;
       const list = sim.get(parent) ?? [...Array.from(parent.children)];
       sim.set(parent, list);
-      const at = list.indexOf(p.source.el);
+      const at = list.indexOf(p.source.el) + (after ? 1 : 0);
       const d = fromSubpaths(mapSubpaths(sub, (q) => apply(p.source.toLocal, q)));
       const marker = parent.ownerDocument.createElementNS(parent.namespaceURI, 'path');
       list.splice(at, 0, marker);
       // the first piece of a shape that goes keeps its id (references to it stay intact)
       const keepId = !named.has(p.source.el) && old.some((o) => o.el === p.source.el);
       named.add(p.source.el);
-      inserts.push(new InsertNode(parentRef, pathMarkup(p.source.el, d, keepId), at, label));
+      inserts.push(
+        new InsertNode(parentRef, pathMarkup(p.source.el, d, keepId, p.attrs), at, label),
+      );
     }
     const cmds: DocCommand[] = [...inserts, ...old.map((t) => new RemoveNode(t.ref))];
     return {

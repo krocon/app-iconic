@@ -81,7 +81,12 @@ export function shapeSubpaths(el: Element): Subpath[] | null {
 }
 
 /** A `<path>` with the attributes of `el` (paint, transform …) but its geometry, and `d`. */
-export function pathMarkup(el: Element, d: string, keepId = true): string {
+export function pathMarkup(
+  el: Element,
+  d: string,
+  keepId = true,
+  attrs: Readonly<Record<string, string | null>> = {},
+): string {
   const path = el.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'path');
   for (const a of Array.from(el.attributes)) {
     if (a.name === 'id' && !keepId) continue;
@@ -90,6 +95,10 @@ export function pathMarkup(el: Element, d: string, keepId = true): string {
     }
   }
   path.setAttribute('d', d);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null) path.removeAttribute(k);
+    else path.setAttribute(k, v);
+  }
   for (const c of Array.from(el.childNodes)) path.appendChild(c.cloneNode(true));
   return new XMLSerializer().serializeToString(path);
 }

@@ -2,6 +2,18 @@
 
 > Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 047 · Vorbild: Illustrator „Offset Path“/„Outline Stroke“, Fusion „Offset“; VectorCraft (`~/RustroverProjects/vectorcraft`, Marcs eigenes Projekt, MIT/Apache – Algorithmen dürfen mit Herkunftsvermerk übertragen werden), `crates/pathops/src/offset.rs`
 
+## Stand
+
+- ✅ 29.10.2026: **Pfad verschieben** (`path.offset`, Menü Edit, Seitenleiste „Pfad bearbeiten“): Dialog mit Abstand
+  (− / +; positiv außen, negativ innen), Ecken spitz/rund/abgeflacht, „Original ersetzen“; Vorschau live, OK = ein
+  Undo-Schritt; ohne Ersetzen liegt der neue Pfad über dem Original. Offene Pfade werden zum Band. **Konturlinie**
+  (`path.outlineStroke`): der Strich jeder ausgewählten Form wird eine Fläche in der Strichfarbe (Breite, Enden,
+  Ecken, Gehrungsgrenze aus dem berechneten Stil, Strichmuster nicht); eine gefüllte Form bleibt ohne Strich darunter.
+  Rechnung kurvenerhaltend in TypeScript (`shared/geometry/pathops/offset.ts`): ein Band je Segment (Linien exakt,
+  Béziers per Tiller–Hanson bis 0,02 Einheiten genau), Ecken- und Endstücke, mit paper.js vereinigt; Versatz =
+  Fläche ∪/− Strich der doppelten Breite wie VectorCraft. `path.offset {distance, join, replace}` für die KI.
+- Offen: ein eigenes Offset-Werkzeug zum Ziehen (wie Fusion) – Dialog reicht vorerst.
+
 ## Ziel
 
 Gleichmäßige Wandstärken, Ränder und Ringe sind bei Icons Alltag; Strich-Icons müssen für Icon Composer
