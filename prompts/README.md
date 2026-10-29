@@ -21,6 +21,8 @@ grün, Commit + Push auf `main`, Prompt samt Design nach [`done/`](done/).
 Kritischer Pfad zum ersten nutzbaren Editor: **001 → 002 → 003 → 004 → 005 → 006 → 007 → 008 → 009**.
 Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 jederzeit nach 005, 030 nach 012,
 031 schließt ab (die Nummern dazwischen bleiben für weitere Prompts frei); 032 und 033 sind Folgen aus 031.
+040–048: Zeichnen wie VectorCraft (Marc, 29.10.2026) – zuerst 040 und 041, dann 042 → 043 → 046 → 047; 044, 045, 048
+unabhängig.
 
 | Nr. | Prompt | Inhalt | Braucht | Umfang | Status |
 |---|---|---|---|---|---|
@@ -46,10 +48,19 @@ Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 je
 | 031 | [031-haertung-paritaet.md](done/031-haertung-paritaet.md) | Parität gegen `docs/FEATURES.md`, Review durch separaten Agenten, feindliche Dateien, Performance großer SVGs, Barrierefreiheit, Doku | 002–030 | M | ✅ 27.10.2026 |
 | 032 | [032-verlaufseditor.md](032-verlaufseditor.md) | Verlaufseditor: Panel-Abschnitt Gradient (Art, Units, Spread, Transform, Stop-Leiste), Griffe auf der Fläche, geteilte Verläufe, `gradient.*` | 009, 011 | M | offen |
 | 033 | [033-haertung-folgen.md](033-haertung-folgen.md) | Folgen aus dem Review von 031: Pfade nur aus vertrauten Quellen, Transform-Rechnung über den Browser, Dateien teilen, Leistung auf dem Mac messen | 031 | M | offen |
+| 040 | [040-snap-ziele.md](040-snap-ziele.md) | Smart Guides wie VectorCraft: Schnittpunkte („intersect“), Kontur („path“), Labels, Konstruktionswinkel, Tangente/Senkrecht, Verlängerung | 007, 019 | M–L | offen |
+| 041 | [041-formen-aufziehen.md](041-formen-aufziehen.md) | Formen per Klicken und Ziehen (Shift/Alt/Leertaste/↑↓), Klick → Größendialog | 019, 040 | M | offen |
+| 042 | [042-pen.md](042-pen.md) | Zeichenstift: Ecken/glatte Punkte, Griffe, schließen, fortsetzen, Auto Add/Delete | 040 | L | offen |
+| 043 | [043-curvature.md](043-curvature.md) | Curvature-Werkzeug: glatte Kurve durch Klicks, vorhandene Pfade krümmen | 042 | M | offen |
+| 044 | [044-weitere-formen.md](044-weitere-formen.md) | Rounded Rectangle, Stern, Spirale, Rechteck-/Polarraster, Bogen | 041 | M | offen |
+| 045 | [045-live-corners.md](045-live-corners.md) | Live Corners: Ecken runden/fasen per Griff | 007 | M | offen |
+| 046 | [046-pfade-bearbeiten.md](046-pfade-bearbeiten.md) | Punkte hinzufügen/löschen/umwandeln, Schere, Messer, Cuts, Join, Smooth | 042 | L | offen |
+| 047 | [047-shape-builder-pathfinder.md](047-shape-builder-pathfinder.md) | Pathfinder (boolesche Operationen) und Shape Builder | 046 | L | offen |
+| 048 | [048-bemassung-messen.md](048-bemassung-messen.md) | Messen und Bemaßung | 040 | M | offen |
 
 ## Folge-Ideen (noch ohne Prompt)
 
 - Werbe-Webseite `/site` wie bei den Schwesterprojekten.
 - Weitere Icon-Sets im Symbol-Picker; eigene Bibliothek wiederverwendbarer Formen.
-- Boolesche Pfad-Operationen (Vereinigen, Schneiden), Konturen in Pfade umwandeln.
+- Konturen in Pfade umwandeln.
 - Import von Icon-Composer-Projekten mit PNG-Assets bearbeiten (heute nur durchreichen).
