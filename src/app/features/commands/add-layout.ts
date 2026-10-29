@@ -57,7 +57,7 @@ export const ADD_LAYOUT: readonly AddSection[] = [
         'sketch.polygonEdge',
       ]),
       group('ellipse', ['add.ellipse', 'sketch.dragEllipse']),
-      group('path', ['add.path', 'pen.tool']),
+      group('path', ['add.path', 'pen.tool', 'curvature.tool']),
       act('add.freehand'),
     ],
   },

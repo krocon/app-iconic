@@ -21,6 +21,7 @@ import { registerSketchActions } from './features/sketch/sketch-actions';
 import { SketchService } from './features/sketch/sketch.service';
 import { CanvasTools } from './features/canvas/canvas-tools';
 import { PenService } from './features/pen/pen.service';
+import { CurvatureService } from './features/pen/curvature.service';
 import { FreehandStore } from './features/tools/freehand.store';
 import { registerPenActions } from './features/pen/pen-actions';
 import { registerFileActions } from './features/files/file-actions';
@@ -309,6 +310,7 @@ export class App implements OnInit {
       penService,
       canvasTools,
       inject(FreehandStore),
+      inject(CurvatureService),
       this.destroyRef,
     );
     registerPropertiesActions(this.actions, inject(PropertiesService), this.destroyRef);

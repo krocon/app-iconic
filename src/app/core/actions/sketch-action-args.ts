@@ -39,6 +39,18 @@ export const PEN_ARGS: ArgsSpec = {
   },
 };
 
+/** The curvature tool (prompt 043): `points` `[[x, y], …]`, `corners` `[bool, …]`, `closed`. */
+export const CURVATURE_ARGS: ArgsSpec = {
+  type: 'object',
+  properties: {
+    points: { type: 'json' },
+    corners: { type: 'json' },
+    closed: { type: 'boolean' },
+    ...PAINT,
+    ...PLACE,
+  },
+};
+
 export const SKETCH_ARGS: ArgsSpec = {
   type: 'object',
   properties: {

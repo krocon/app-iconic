@@ -122,3 +122,30 @@ function toCubic(s: PathSeg): { c1: Point; c2: Point } | null {
   }
   return null;
 }
+
+/**
+ * A path of one subpath as anchors (open or closed, lines and curves; a quadratic becomes the
+ * same cubic) – what the Curvature tool edits (prompt 043); `null` for anything else.
+ */
+export function singlePath(d: string): { anchors: PenAnchor[]; closed: boolean } | null {
+  const segs = parsePath(d);
+  if (!segs || !segs.length || segs[0].cmd !== 'M') return null;
+  if (segs.slice(1).some((s) => s.cmd === 'M' || s.cmd === 'A')) return null;
+  const z = segs.findIndex((s) => s.cmd === 'Z');
+  if (z >= 0 && z !== segs.length - 1) return null;
+  const closed = z >= 0;
+  const anchors: PenAnchor[] = [{ p: segs[0].p, hin: null, hout: null }];
+  for (const s of segs.slice(1, closed ? -1 : undefined)) {
+    const prev = anchors[anchors.length - 1];
+    const cubic = toCubic(s);
+    if (cubic) prev.hout = cubic.c1;
+    anchors.push({ p: s.p, hin: cubic ? cubic.c2 : null, hout: null });
+  }
+  // a closing segment that ends on the first point: that point, with its incoming handle
+  const last = anchors[anchors.length - 1];
+  if (closed && anchors.length > 2 && same(last.p, anchors[0].p)) {
+    anchors[0].hin = last.hin ?? null;
+    anchors.pop();
+  }
+  return anchors.length >= 2 ? { anchors, closed } : null;
+}

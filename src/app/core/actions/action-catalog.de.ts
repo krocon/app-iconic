@@ -110,6 +110,8 @@ const FIXED: Record<string, string> = {
   'sketch.polygonEdge': 'Polygon über Kante',
   'pen.tool': 'Zeichenstift',
   'pen.finish': 'Pfad beenden',
+  'curvature.tool': 'Kurvenzeichner',
+  'curvature.removePoint': 'Punkt entfernen (Kurvenzeichner)',
   'sketch.dragRect': 'Rechteck aufziehen',
   'sketch.dragEllipse': 'Ellipse aufziehen',
   'sketch.dragPolygon': 'Polygon aufziehen',

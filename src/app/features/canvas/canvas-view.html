@@ -89,6 +89,14 @@
         [placed]="pen.anchors().length"
       />
     }
+    @if (curvature.on()) {
+      <app-pen-overlay
+        [toView]="toView()"
+        [anchors]="curvature.preview().anchors"
+        [closed]="curvature.preview().closed"
+        [placed]="curvature.preview().placed"
+      />
+    }
     @if (sketch.active()) {
       <app-sketch-overlay [toView]="toView()" />
     }

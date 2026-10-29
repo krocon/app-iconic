@@ -39,13 +39,16 @@
     "r": "sketch.rect2p",
     "c": "sketch.circleCenter",
     "m": "sketch.dragRect",
-    "p": "pen.tool"
+    "p": "pen.tool",
+    "Shift+`": "curvature.tool"
   },
   "drawing": {
     "ArrowUp": "sketch.sidesUp",
     "ArrowDown": "sketch.sidesDown",
     "Space": "sketch.moveHold",
-    "Enter": "pen.finish"
+    "Enter": "pen.finish",
+    "Backspace": "curvature.removePoint",
+    "Delete": "curvature.removePoint"
   },
   "canvas": {
     "Space": "canvas.panHold",

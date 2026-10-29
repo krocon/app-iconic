@@ -44,6 +44,8 @@ import { ClipEditLayer } from '../clip/clip-edit-layer';
 import { CLIP_TEXTS } from '../clip/clip-texts';
 import { SketchTool } from '../sketch/sketch-tool';
 import { PenTool } from '../pen/pen-tool';
+import { CurvatureTool } from '../pen/curvature-tool';
+import { CurvatureStore } from '../pen/curvature.store';
 import { PenStore } from '../pen/pen.store';
 import { PenOverlay } from '../pen/pen-overlay';
 import { CanvasTools } from './canvas-tools';
@@ -127,6 +129,8 @@ export class CanvasView {
   /** Created here so that they register with `CanvasTools` (root services). */
   private readonly sketchTool = inject(SketchTool);
   private readonly penTool = inject(PenTool);
+  private readonly curvatureTool = inject(CurvatureTool);
+  protected readonly curvature = inject(CurvatureStore);
   protected readonly pen = inject(PenStore);
   protected readonly tt = TOOLS_TEXTS;
   /** The clip path edit mode (design 014 E7). */

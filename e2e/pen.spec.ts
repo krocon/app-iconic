@@ -91,3 +91,54 @@ test('a press on the end of the selected open path goes on with it', async ({ pa
     'Undo Edit Path',
   );
 });
+
+test.describe('curvature (prompt 043)', () => {
+  test('four clicks make a smooth wave; Enter ends', async ({ page }) => {
+    const errors = collectErrors(page);
+    await setup(page);
+    await page.evaluate(() => window.__appIconic!.run('curvature.tool'));
+    await expect(page.getByTestId('sketch-hint')).toContainText('Curvature');
+    for (const [x, y] of [
+      [250, 400],
+      [330, 330],
+      [420, 450],
+      [520, 380],
+    ]) {
+      await click(page, x, y);
+    }
+    await page.keyboard.press('Enter');
+    await frames(page);
+    const s = await selected(page);
+    expect(s?.tag).toBe('path');
+    expect(s!.d!.match(/C/g)).toHaveLength(3);
+    expect(s!.d!.startsWith('M 250 400 C')).toBe(true);
+    expect(errors).toEqual([]);
+  });
+
+  test('on the selected path: click adds a point, drag bends, Backspace removes', async ({
+    page,
+  }) => {
+    await setup(page, '<path id="p" d="M 250 400 L 550 400" fill="none" stroke="#000"/>');
+    await page.evaluate(() => {
+      const h = window.__appIconic!;
+      const doc = h.store()!.document();
+      const el = [...doc.assets.get('pen.svg')!.svg!.root.querySelectorAll('path')][0];
+      h.store()!.selection.set([doc.refOf(el)!]);
+    });
+    await page.evaluate(() => window.__appIconic!.run('curvature.tool'));
+    await at(page, 400, 400);
+    await page.mouse.down();
+    await at(page, 400, 300);
+    await page.mouse.up();
+    await frames(page);
+    let s = await selected(page);
+    expect(s!.d).toMatch(/^M 250 400 .* 400 300 .* 550 400$/);
+    await page.keyboard.press('Backspace');
+    await frames(page);
+    s = await selected(page);
+    expect(s!.d).toBe('M 250 400 L 550 400');
+    expect(await page.evaluate(() => window.__appIconic!.store()!.undoLabel())).toBe(
+      'Undo Edit Path',
+    );
+  });
+});
