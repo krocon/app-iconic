@@ -89,6 +89,9 @@
   Unterteilen, Formerstellung (Ziehen vereinigt, Alt löscht), Messer, Linien- und Rechteckschnitt (paper.js).
 - [x] Messen und Bemaßen _(neu)_ (048): Messwerkzeug (Abstand, Winkel, Δx/Δy), Bemaßung von Kante, Ecke (Winkel),
   Kreis (Radius/Durchmesser) oder zwei Punkten; beim Export wählbar weggelassen.
+- [x] Konstruktionslinien, Muster, Spiegeln, Klonen wie Fusion 360 _(neu)_ (049): Konstruktion (X, im SVG
+  transparent, im Canvas gestrichelt blau), kreisförmiges und rechteckiges Muster mit Live-Vorschau, Spiegeln an
+  zwei Punkten, verknüpfter Klon (`<use>`).
 - [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
       gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)

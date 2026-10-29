@@ -13,6 +13,7 @@ import { SvgSnippetDialog } from './features/commands/svg-snippet-dialog';
 import { SymbolPickerDialog } from './features/symbols/symbol-picker-dialog';
 import { ShapeSizeDialog } from './features/sketch/shape-size-dialog';
 import { CornersDialog } from './features/corners/corners-dialog';
+import { PatternDialog } from './features/pattern/pattern-dialog';
 import { CornersService } from './features/corners/corners.service';
 import { SymbolService } from './features/symbols/symbol.service';
 import { FreehandService } from './features/tools/freehand.service';
@@ -93,6 +94,7 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
     SymbolPickerDialog,
     ShapeSizeDialog,
     CornersDialog,
+    PatternDialog,
     TextPathDialog,
     SvgSourceDialog,
   ],
@@ -249,6 +251,9 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
       }
       @case ('symbolPicker') {
         <app-symbol-picker-dialog />
+      }
+      @case ('pattern') {
+        <app-pattern-dialog />
       }
       @case ('corners') {
         <app-corners-dialog />

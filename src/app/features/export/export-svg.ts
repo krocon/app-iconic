@@ -1,3 +1,4 @@
+import { stripConstruction } from '../construction/construction';
 import { IconDocument } from '../document/icon-document';
 import { elementsOf, stripInternal, SVG_NS } from '../document/svg/node-ids';
 import { rewriteReferences } from '../document/svg/svg-references';
@@ -182,6 +183,7 @@ class Builder {
     const place = this.el('svg', { ...assetPlacement(root) });
     const copy = this.d.importNode(root, true) as Element;
     stripInternal(copy);
+    stripConstruction(copy);
     if (!this.opts.dimensions) {
       for (const dim of Array.from(copy.querySelectorAll('[data-dimension]'))) dim.remove();
     }

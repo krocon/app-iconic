@@ -62,6 +62,12 @@ export const COMMAND_ICONS: Record<string, string> = {
   'cut.knife': 'M2.5 13.5L11 5l2.5 0.5-1 2.5L4 14z',
   'cut.lineCut': 'M3 3h10v10H3z M1.5 14.5l13-13',
   'cut.rectCut': 'M2.5 2.5h8v8h-8z M6 6h7.5v7.5H6z',
+  // patterns, mirror, clone (prompt 049)
+  'pattern.circular':
+    'M8 2.5a1.5 1.5 0 1 0 0.01 0 M13 7a1.5 1.5 0 1 0 0.01 0 M11 12.5a1.5 1.5 0 1 0 0.01 0 M5 12.5a1.5 1.5 0 1 0 0.01 0 M3 7a1.5 1.5 0 1 0 0.01 0',
+  'pattern.rectangular': 'M2.5 2.5h3v3h-3z M10.5 2.5h3v3h-3z M2.5 10.5h3v3h-3z M10.5 10.5h3v3h-3z',
+  'pattern.mirror': 'M8 1.5v13 M6 4L2 12h4z M10 4l4 8h-4z',
+  'edit.cloneLinked': 'M2.5 2.5h7v7h-7z M6.5 6.5h7v7h-7z M9 11l1.5 1.5L13 10',
   // Measure and Dimension (prompt 048)
   'dimension.tool': 'M2 11h12 M2 8.5v5 M14 8.5v5 M4 9.5L2 11l2 1.5 M12 9.5l2 1.5-2 1.5 M6 6h4',
   'measure.tool': 'M2 10.5L10.5 2 14 5.5 5.5 14z M5 9l1.5 1.5 M7 7l1 1 M9 5l1.5 1.5',

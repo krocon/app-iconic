@@ -317,6 +317,46 @@ export const ACTIONS: readonly ActionDef[] = [
   EDIT('cut.knife', 'Knife Tool'),
   EDIT('cut.lineCut', 'Line Cut Tool'),
   EDIT('cut.rectCut', 'Rectangle Cut Tool'),
+  // patterns, mirror, clone, construction lines like Fusion 360 (prompt 049)
+  ADD('pattern.circular', 'Circular Pattern…', {
+    args: {
+      type: 'object',
+      properties: {
+        count: { type: 'integer', minimum: 2, maximum: 1001 },
+        /** Total angle in degrees; 360 = full turn. */
+        angle: { type: 'number', minimum: -360, maximum: 360 },
+        /** Centre [x, y] in document units; default: centre of the selection. */
+        center: { type: 'json' },
+      },
+    },
+  }),
+  ADD('pattern.rectangular', 'Rectangular Pattern…', {
+    args: {
+      type: 'object',
+      properties: {
+        columns: { type: 'integer', minimum: 1, maximum: 1001 },
+        rows: { type: 'integer', minimum: 1, maximum: 1001 },
+        dx: { type: 'number' },
+        dy: { type: 'number' },
+      },
+    },
+  }),
+  ADD('pattern.mirror', 'Mirror', {
+    args: {
+      type: 'object',
+      properties: {
+        /** Two points [x, y] of the mirror line (document units). */
+        a: { type: 'json' },
+        b: { type: 'json' },
+      },
+    },
+  }),
+  ADD('pattern.centerHere', 'Circular Pattern: Centre of the Selection', {
+    context: 'canvas',
+    palette: false,
+  }),
+  EDIT('edit.cloneLinked', 'Clone (Linked)'),
+  EDIT('edit.toggleConstruction', 'Construction Line'),
   // Measure and Dimension (prompt 048)
   ADD('dimension.tool', 'Dimension Tool'),
   VIEW('measure.tool', 'Measure Tool'),

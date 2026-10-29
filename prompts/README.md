@@ -57,6 +57,7 @@ unabhängig.
 | 046 | [046-pfade-bearbeiten.md](046-pfade-bearbeiten.md) | Punkte hinzufügen/löschen/umwandeln, Schere, Messer, Cuts, Join, Smooth | 042 | L | ✅ 29.10.2026 (Messer/Cuts mit 047) |
 | 047 | [047-shape-builder-pathfinder.md](047-shape-builder-pathfinder.md) | Pathfinder (boolesche Operationen) und Shape Builder | 046 | L | ✅ 29.10.2026 |
 | 048 | [048-bemassung-messen.md](048-bemassung-messen.md) | Messen und Bemaßung | 040 | M | ✅ 29.10.2026 |
+| 049 | [049-muster-konstruktion.md](049-muster-konstruktion.md) | Konstruktionslinien, kreisförmiges/rechteckiges Muster, Spiegeln, Klonen | 040 | M | ✅ 29.10.2026 |
 
 ## Folge-Ideen (noch ohne Prompt)
 

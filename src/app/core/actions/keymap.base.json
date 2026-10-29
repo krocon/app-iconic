@@ -47,7 +47,9 @@
     "Mod+j": "path.join",
     "Shift+m": "shapeBuilder.tool",
     "d": "dimension.tool",
-    "i": "measure.tool"
+    "i": "measure.tool",
+    "x": "edit.toggleConstruction",
+    "Mod+Alt+d": "edit.cloneLinked"
   },
   "drawing": {
     "ArrowUp": "sketch.sidesUp",
@@ -60,6 +62,7 @@
   "canvas": {
     "Space": "canvas.panHold",
     "Escape": "canvas.escape",
+    "Enter": "pattern.centerHere",
     "Delete": "canvas.deletePoint",
     "Backspace": "canvas.deletePoint",
     "c": "freehand.toggleClosed",

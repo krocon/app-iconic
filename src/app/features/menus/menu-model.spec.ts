@@ -58,6 +58,7 @@ describe('menu model (design 005 E5)', () => {
       'Path',
       'Edit Path',
       'Combine & Cut',
+      'Pattern & Mirror',
       'Measure & Dimension',
       'Spiral & Grids',
     ]);

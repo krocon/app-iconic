@@ -14,7 +14,8 @@ export type DialogKind =
   | 'symbolPicker'
   | 'settings'
   | 'shapeSize'
-  | 'corners';
+  | 'corners'
+  | 'pattern';
 
 /**
  * Which modal dialog is open. Remembers the focused element on `show` and gives the focus back

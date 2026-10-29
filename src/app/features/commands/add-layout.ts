@@ -14,6 +14,7 @@ export type AddGroupKey =
   | 'path'
   | 'editPath'
   | 'combine'
+  | 'pattern'
   | 'measure'
   | 'more';
 
@@ -80,6 +81,12 @@ export const ADD_LAYOUT: readonly AddSection[] = [
         'path.eraser',
       ]),
       group('combine', ['shapeBuilder.tool', 'cut.knife', 'cut.lineCut', 'cut.rectCut']),
+      group('pattern', [
+        'pattern.circular',
+        'pattern.rectangular',
+        'pattern.mirror',
+        'edit.cloneLinked',
+      ]),
       group('measure', ['dimension.tool', 'measure.tool']),
       group('more', ['sketch.dragSpiral', 'sketch.dragRectGrid', 'sketch.dragPolarGrid']),
       act('add.freehand'),

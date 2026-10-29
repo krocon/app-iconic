@@ -1,3 +1,4 @@
+import { CONSTRUCTION_CSS } from '../construction/construction';
 import { IconGroup, IconLayer } from '../../core/icon-file/icon-file.models';
 import { AssetState, IconDocument } from '../document/icon-document';
 import { groups, layers } from '../document/model/icon-json';
@@ -20,7 +21,8 @@ const SHADOW_ID = 'ai-fx-shadow';
 /** Styles inside every layer's shadow root (design 004 E2). */
 const LAYER_CSS =
   ':host{position:absolute;inset:0;pointer-events:none}' +
-  '.layer-host{display:block;position:absolute;inset:0;width:100%;height:100%}';
+  '.layer-host{display:block;position:absolute;inset:0;width:100%;height:100%}' +
+  CONSTRUCTION_CSS;
 
 /** One layer to paint. */
 export interface StackLayer {

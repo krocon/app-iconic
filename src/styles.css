@@ -46,6 +46,7 @@
   /* clip path edit mode (design 014 E7) */
   --ai-clip-fill: rgb(255 45 146 / 18%);
   --ai-clip-stroke: #e0217f;
+  --ai-construction: #0a84ff;
   --ai-clip-dim: 0.35;
   /* SVG source editor (prompt 011): syntax colours, contrast ≥ 4.5:1 on --color-surface */
   --code-tag: #1d5fbf;
@@ -113,6 +114,7 @@
     --ai-snap-align: #ff3dfc;
     --ai-clip-fill: rgb(255 90 168 / 22%);
     --ai-clip-stroke: #ff5aa8;
+    --ai-construction: #5eb0ff;
     --ai-clip-dim: 0.3;
     --code-tag: #7cb4ff;
     --code-attr: #f0b46a;
@@ -163,6 +165,7 @@
   --ai-snap-align: #ff3dfc;
   --ai-clip-fill: rgb(255 90 168 / 22%);
   --ai-clip-stroke: #ff5aa8;
+  --ai-construction: #5eb0ff;
   --ai-clip-dim: 0.3;
   --code-tag: #7cb4ff;
   --code-attr: #f0b46a;
