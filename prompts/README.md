@@ -63,7 +63,7 @@ dann 056, 057, 058, 032 (Verlaufseditor), zuletzt 059.
 | 051 | [051-verrunden-fasen.md](051-verrunden-fasen.md) | Verrunden und Fasen zwischen Elementen | 050 | M | ✅ 29.10.2026 |
 | 052 | [052-versatz-kontur.md](052-versatz-kontur.md) | Versatz (Offset) und Kontur in Fläche | 047 | L | ✅ 29.10.2026 |
 | 053 | [053-transformieren.md](053-transformieren.md) | Transformieren mit Bezugspunkt und Zahlen | 007 | M | ✅ 29.10.2026 |
-| 054 | [054-verteilen-ausrichten.md](054-verteilen-ausrichten.md) | Verteilen; Ausrichten an Leinwand/Schlüsselobjekt | 007 | S | offen |
+| 054 | [054-verteilen-ausrichten.md](054-verteilen-ausrichten.md) | Verteilen; Ausrichten an Leinwand/Schlüsselobjekt | 007 | S | ✅ 29.10.2026 |
 | 055 | [055-sperren-isolieren.md](055-sperren-isolieren.md) | Sperren, Isolieren, Konstruktion ausblenden | 006, 007 | M | offen |
 | 056 | [056-hilfslinien-raster.md](056-hilfslinien-raster.md) | Hilfslinien aus dem Lineal, Icon-Raster-Vorlagen | 004 | M | offen |
 | 057 | [057-kleine-groessen.md](057-kleine-groessen.md) | Vorschau in kleinen Größen, Pixelraster | 012 | M | offen |

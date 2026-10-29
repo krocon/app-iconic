@@ -53,6 +53,12 @@ const INDEX = { type: 'integer', minimum: 0 } as const;
 /** Group / layer of an icon property; none = the icon itself. */
 const TARGET_ARGS = { group: INDEX, layer: INDEX } as const;
 
+/** Align to (prompt 054): the selection's box (default: the current choice), the canvas or the key object. */
+const ALIGN_ARGS: ArgsSpec = {
+  type: 'object',
+  properties: { to: { type: 'string', enum: ['selection', 'canvas', 'key'] } },
+};
+
 /** Recently used files reachable from the menu ("Open Recent ›"). */
 export const MAX_RECENT_ACTIONS = 10;
 
@@ -582,12 +588,30 @@ export const ACTIONS: readonly ActionDef[] = [
   }),
   ARRANGE('arrange.group', 'Group <g>'),
   ARRANGE('arrange.ungroup', 'Ungroup'),
-  ARRANGE('arrange.align.left', 'Align Left'),
-  ARRANGE('arrange.align.centerH', 'Align Centers Horizontally'),
-  ARRANGE('arrange.align.right', 'Align Right'),
-  ARRANGE('arrange.align.top', 'Align Top'),
-  ARRANGE('arrange.align.middle', 'Align Centers Vertically'),
-  ARRANGE('arrange.align.bottom', 'Align Bottom'),
+  ARRANGE('arrange.align.left', 'Align Left', { args: ALIGN_ARGS }),
+  ARRANGE('arrange.align.centerH', 'Align Centers Horizontally', { args: ALIGN_ARGS }),
+  ARRANGE('arrange.align.right', 'Align Right', { args: ALIGN_ARGS }),
+  ARRANGE('arrange.align.top', 'Align Top', { args: ALIGN_ARGS }),
+  ARRANGE('arrange.align.middle', 'Align Centers Vertically', { args: ALIGN_ARGS }),
+  ARRANGE('arrange.align.bottom', 'Align Bottom', { args: ALIGN_ARGS }),
+  // align to, distribute (prompt 054)
+  ARRANGE('arrange.alignTo.selection', 'Align to Selection'),
+  ARRANGE('arrange.alignTo.canvas', 'Align to Canvas'),
+  ARRANGE('arrange.alignTo.key', 'Align to Key Object'),
+  ARRANGE('arrange.distribute.horizontalCenters', 'Distribute Horizontal Centres'),
+  ARRANGE('arrange.distribute.verticalCenters', 'Distribute Vertical Centres'),
+  ARRANGE('arrange.distribute.horizontalGaps', 'Distribute Horizontal Spacing'),
+  ARRANGE('arrange.distribute.verticalGaps', 'Distribute Vertical Spacing'),
+  ARRANGE('arrange.distribute.spacing', 'Distribute at Fixed Spacing', {
+    palette: false,
+    args: {
+      type: 'object',
+      properties: {
+        axis: { type: 'string', enum: ['horizontal', 'vertical'] },
+        gap: { type: 'number' },
+      },
+    },
+  }),
   // Transform with a pivot and numbers (prompt 053)
   ARRANGE('transform.rotate', 'Rotate Tool'),
   ARRANGE('transform.scale', 'Scale Tool'),

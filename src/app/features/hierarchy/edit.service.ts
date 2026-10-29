@@ -1,7 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { ClipboardApi } from '../../core/clipboard/clipboard-api';
 import { AskService } from '../../shared/ask/ask.service';
-import { AlignMode } from '../../shared/geometry/align';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { CommandError, CompositeCommand, DocCommand, ReorderNode } from '../document/commands';
 import { DocumentStore } from '../document/document.store';
@@ -14,7 +13,6 @@ import { clipDefsMarkup } from '../clip/clip-references';
 import { formatElement, formatSvg } from '../document/svg/svg-format';
 import { brokenReferences } from '../document/svg/svg-references';
 import { FilesService } from '../files/files.service';
-import { alignCommand, measurable } from './align';
 import {
   backCommand,
   frontCommand,
@@ -318,19 +316,6 @@ export class EditService {
   canUngroup(): boolean {
     const s = this.store();
     return !!s && ungroupCommand(s.document(), this.selection()) !== null;
-  }
-
-  /** At least two painted nodes with layout (design 006 E13). */
-  canAlign(): boolean {
-    const s = this.store();
-    return !!s && measurable(s.document(), this.canvas.host, this.selection().nodes).length >= 2;
-  }
-
-  align(mode: AlignMode): boolean {
-    const s = this.store();
-    return (
-      !!s && this.run(alignCommand(s.document(), this.canvas.host, this.selection().nodes, mode))
-    );
   }
 
   // ---- visibility, select all ----

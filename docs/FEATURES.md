@@ -100,6 +100,8 @@
   (Strich wird Fläche).
 - [x] Transformieren mit Bezugspunkt _(neu)_ (053): Dreh-, Skalier-, Spiegelwerkzeug (Bezugspunkt per Klick, ⌥ Kopie),
   Dialog Transformieren… mit Zahlen, 9er-Bezugspunkt, einzeln, Kopie.
+- [x] Verteilen und Ausrichten an Leinwand/Basisobjekt _(neu)_ (054): Mitten/Abstände verteilen, fester Abstand,
+  Ausrichten an Auswahl, Leinwand oder Basisobjekt; Abschnitt „Ausrichten“ im Properties-Panel.
 - [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
       gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)

@@ -8,6 +8,7 @@ import { PatternOverlay } from '../pattern/pattern-overlay';
 import { TrimOverlay } from '../trim/trim-overlay';
 import { FilletOverlay } from '../fillet/fillet-overlay';
 import { TransformOverlay } from '../transform/transform-overlay';
+import { KeyObjectOverlay } from '../align/key-object-overlay';
 
 /**
  * The overlays of the construction tools (prompts 045–050) in one place: each draws only while its
@@ -24,6 +25,7 @@ import { TransformOverlay } from '../transform/transform-overlay';
     TrimOverlay,
     FilletOverlay,
     TransformOverlay,
+    KeyObjectOverlay,
   ],
   template: `
     <app-corner-overlay [toView]="toView()" />
@@ -34,6 +36,7 @@ import { TransformOverlay } from '../transform/transform-overlay';
     <app-trim-overlay [toView]="toView()" />
     <app-fillet-overlay [toView]="toView()" />
     <app-transform-overlay [toView]="toView()" />
+    <app-key-object-overlay [toView]="toView()" />
   `,
   styles: `
     :host {

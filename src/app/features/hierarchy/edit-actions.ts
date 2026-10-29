@@ -1,8 +1,7 @@
 import { DestroyRef } from '@angular/core';
-import { ActionHandler, ActionService } from '../../core/actions/action.service';
+import { ActionService } from '../../core/actions/action.service';
 import { isTextField } from '../../core/actions/keyboard-dispatcher';
 import { DialogService } from '../../shared/dialog/dialog.service';
-import { ALIGN_MODES } from '../../shared/geometry/align';
 import { NodeRef } from '../document/icon-document';
 import { IconItem } from '../document/model/selection';
 import { EditService } from './edit.service';
@@ -60,12 +59,6 @@ export function registerEditActions(
 ): void {
   const has = () => edit.hasSelection();
   const nodes = () => edit.selection().nodes.length > 0;
-  const align = Object.fromEntries(
-    ALIGN_MODES.map((m): [string, ActionHandler] => [
-      `arrange.align.${m}`,
-      { run: () => edit.align(m), enabled: () => edit.canAlign() },
-    ]),
-  );
   actions.registerAll(
     {
       'edit.copy': { run: () => edit.copy(), enabled: () => edit.canCopy() },
@@ -111,7 +104,6 @@ export function registerEditActions(
       'arrange.moveOut': { run: () => edit.move('out'), enabled: () => !!edit.moveCommand('out') },
       'arrange.group': { run: () => edit.group(), enabled: () => nodes() && edit.canGroup() },
       'arrange.ungroup': { run: () => edit.ungroup(), enabled: () => edit.canUngroup() },
-      ...align,
     },
     destroyRef,
   );

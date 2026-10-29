@@ -2,6 +2,15 @@
 
 > Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 007 · Vorbild: Illustrator „Align“-Panel
 
+## Stand
+
+- ✅ 29.10.2026: **Verteilen** (Menü Arrange › Verteilen, Abschnitt „Ausrichten“ im Properties-Panel): Mitten
+  horizontal/vertikal gleichmäßig, Abstände gleich (äußere bleiben), fester Abstand (Feld mit − / +, zwei Knöpfe).
+  **Ausrichten an** Auswahl / Leinwand (1024 × 1024, auch für ein einzelnes Element) / Basisobjekt (das zuletzt
+  zur Auswahl gekommene Element, mit dickem Rahmen markiert); Wahl im Panel und im Menü (`arrange.alignTo.*`),
+  `arrange.align.* {to}` und `arrange.distribute.spacing {axis, gap}` für die KI. Ausrichten/Verteilen aus der
+  EditService in eine eigene AlignService verlegt; ein Undo-Schritt „Transform ändern“.
+
 ## Ziel
 
 Ausrichten gibt es nur untereinander (Auswahlrahmen). Für Icons braucht es gleichmäßige Abstände und die

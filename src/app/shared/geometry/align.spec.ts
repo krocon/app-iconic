@@ -1,4 +1,4 @@
-import { alignDeltas, fmt, localDelta, unionRect } from './align';
+import { alignDeltas, fmt, localDelta, unionRect, distributeDeltas } from './align';
 
 const rects = [
   { x: 10, y: 20, width: 10, height: 10 },
@@ -40,5 +40,28 @@ describe('align (design 006 E13)', () => {
 
   it('formats numbers for attributes', () => {
     expect([fmt(1.234567), fmt(-0.00001), fmt(10)]).toEqual(['1.2346', '0', '10']);
+  });
+});
+
+describe('align to a reference, distribute (prompt 054)', () => {
+  const R = (x: number, y: number, w: number, h: number) => ({ x, y, width: w, height: h });
+  it('aligns to a given reference (canvas, key object)', () => {
+    const d = alignDeltas([R(10, 10, 20, 20)], 'centerH', R(0, 0, 1024, 1024));
+    expect(d).toEqual([{ x: 492, y: 0 }]);
+  });
+  it('distributes centres and gaps between the outer ones; fixed gap from the first', () => {
+    const rs = [R(0, 0, 10, 10), R(100, 0, 30, 10), R(20, 0, 10, 10)];
+    // order by centre: 0, 2, 1
+    expect(distributeDeltas(rs, 'horizontal', 'centers').map((p) => p.x)).toEqual([0, 0, 35]);
+    // gaps: span 0..130, sizes 50 → 2 gaps of 40: middle at 50
+    expect(distributeDeltas(rs, 'horizontal', 'gaps').map((p) => p.x)).toEqual([0, 0, 30]);
+    expect(distributeDeltas(rs, 'horizontal', 'gaps', 5).map((p) => p.x)).toEqual([0, -70, -5]);
+    expect(
+      distributeDeltas(
+        [R(0, 0, 10, 10), R(0, 50, 10, 10), R(0, 70, 10, 30)],
+        'vertical',
+        'centers',
+      ).map((p) => p.y),
+    ).toEqual([0, -10, 0]);
   });
 });

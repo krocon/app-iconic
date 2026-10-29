@@ -24,9 +24,16 @@ export function unionRect(rects: readonly Rect[]): Rect {
   return { x, y, width: right - x, height: bottom - y };
 }
 
-/** The move of every rect in document units. */
-export function alignDeltas(rects: readonly Rect[], mode: AlignMode): Point[] {
-  const u = unionRect(rects);
+/**
+ * The move of every rect in document units, to the edge / centre of `reference` (default: the
+ * union of the rects; prompt 054 adds the canvas and a key object).
+ */
+export function alignDeltas(
+  rects: readonly Rect[],
+  mode: AlignMode,
+  reference: Rect = unionRect(rects),
+): Point[] {
+  const u = reference;
   return rects.map((r) => {
     switch (mode) {
       case 'left':
@@ -57,6 +64,64 @@ export function localDelta(
   const det = m.a * m.d - m.b * m.c;
   if (!Number.isFinite(det) || Math.abs(det) < 1e-12) return null;
   return { x: (m.d * d.x - m.c * d.y) / det, y: (-m.b * d.x + m.a * d.y) / det };
+}
+
+export type DistributeAxis = 'horizontal' | 'vertical';
+/** Centres evenly apart, or the gaps between neighbours equal (`gap` given: that gap). */
+export type DistributeKind = 'centers' | 'gaps';
+
+/**
+ * Distribute (prompt 054): the first and the last rect along the axis stay (by position), the
+ * others move so their centres are evenly apart or the gaps between neighbours are equal; with a
+ * fixed `gap` everything after the first follows at that gap. Moves in document units, in the
+ * order of `rects`.
+ */
+export function distributeDeltas(
+  rects: readonly Rect[],
+  axis: DistributeAxis,
+  kind: DistributeKind,
+  gap?: number,
+): Point[] {
+  const h = axis === 'horizontal';
+  const pos = (r: Rect) => (h ? r.x : r.y);
+  const size = (r: Rect) => (h ? r.width : r.height);
+  const order = rects
+    .map((r, i) => ({ r, i }))
+    .sort((a, b) => pos(a.r) + size(a.r) / 2 - (pos(b.r) + size(b.r) / 2));
+  const out: Point[] = rects.map(() => ({ x: 0, y: 0 }));
+  const put = (i: number, d: number) => (out[i] = h ? { x: d, y: 0 } : { x: 0, y: d });
+  const n = order.length;
+  if (n < 2) return out;
+  const first = order[0].r;
+  const last = order[n - 1].r;
+  if (gap !== undefined) {
+    let at = pos(first) + size(first) + gap;
+    for (let k = 1; k < n; k++) {
+      const { r, i } = order[k];
+      put(i, at - pos(r));
+      at += size(r) + gap;
+    }
+    return out;
+  }
+  if (n < 3) return out;
+  if (kind === 'centers') {
+    const c0 = pos(first) + size(first) / 2;
+    const c1 = pos(last) + size(last) / 2;
+    for (let k = 1; k < n - 1; k++) {
+      const { r, i } = order[k];
+      put(i, c0 + ((c1 - c0) * k) / (n - 1) - (pos(r) + size(r) / 2));
+    }
+    return out;
+  }
+  const total = order.reduce((s, o) => s + size(o.r), 0);
+  const space = (pos(last) + size(last) - pos(first) - total) / (n - 1);
+  let at = pos(first) + size(first) + space;
+  for (let k = 1; k < n - 1; k++) {
+    const { r, i } = order[k];
+    put(i, at - pos(r));
+    at += size(r) + space;
+  }
+  return out;
 }
 
 /** A number for an attribute: at most 4 decimals, no `-0`. */

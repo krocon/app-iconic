@@ -88,7 +88,15 @@ describe('PropertiesPanel (design 009 E9)', () => {
     const sections = Array.from(el.querySelectorAll('section')).map((s) =>
       s.getAttribute('data-section'),
     );
-    expect(sections).toEqual(['geometry', 'appearance', 'stroke', 'transform', 'advanced', 'clip']);
+    expect(sections).toEqual([
+      'geometry',
+      'appearance',
+      'stroke',
+      'transform',
+      'advanced',
+      'align',
+      'clip',
+    ]);
     expect(field('width').value).toBe('10');
     expect(field('fill').value).toBe('red');
     // Advanced is closed until opened
