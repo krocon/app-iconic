@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { validSides } from '../../shared/geometry/sketch/polygon';
+import { MAX_SIDES, MIN_SIDES, validSides } from '../../shared/geometry/sketch/polygon';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { Modal } from '../../shared/dialog/modal';
+import { StepperField } from '../../shared/controls/stepper-field';
 import { parseValue } from './sketch-overlay';
 import { SketchService, SizeValues } from './sketch.service';
 import { SKETCH_TEXTS } from './sketch-texts';
@@ -22,6 +23,16 @@ const FIELDS: Record<string, readonly SizeKey[]> = {
   dragArc: ['width', 'height'],
 };
 
+/** What − / + do per field. */
+const STEPS: Record<SizeKey, { step: number; min?: number; max?: number }> = {
+  width: { step: 10, min: 0 },
+  height: { step: 10, min: 0 },
+  radius: { step: 10, min: 0 },
+  length: { step: 10, min: 0 },
+  sides: { step: 1, min: MIN_SIDES, max: MAX_SIDES },
+  angle: { step: 15, min: -360, max: 360 },
+};
+
 /**
  * The size of a shape whose tool was clicked without a drag (prompt 041, like the shape dialogs
  * of Marc's VectorCraft): width/height, radius/sides or length/angle; OK places it at the click
@@ -29,28 +40,24 @@ const FIELDS: Record<string, readonly SizeKey[]> = {
  */
 @Component({
   selector: 'app-shape-size-dialog',
-  imports: [Modal],
+  imports: [Modal, StepperField],
   template: `
     @if (sizing(); as s) {
-      <app-modal [heading]="t.size.title[s.tool]" width="22rem" (closed)="cancel()">
+      <app-modal [heading]="t.size.title[s.tool]" width="24rem" (closed)="cancel()">
         <form class="form" (submit)="$event.preventDefault(); ok()">
           @for (f of fields(); track f; let first = $first) {
             <label class="row">
               <span>{{ t.size[f] }}</span>
-              <input
-                class="input"
-                type="text"
-                inputmode="decimal"
-                autocomplete="off"
-                spellcheck="false"
-                [attr.data-autofocus]="first ? '' : null"
-                [attr.data-field]="f"
+              <app-stepper-field
+                [field]="f"
+                [autofocus]="first"
+                [step]="steps[f].step"
+                [min]="steps[f].min"
+                [max]="steps[f].max"
+                [unit]="f === 'angle' ? '°' : ''"
                 [value]="text()[f] ?? ''"
-                (input)="typed(f, $event)"
+                (valueChange)="typed(f, $event)"
               />
-              @if (f === 'angle') {
-                <span aria-hidden="true">°</span>
-              }
             </label>
           }
           <p class="error" role="alert">{{ valid() ? '' : t.size.invalid }}</p>
@@ -72,7 +79,7 @@ const FIELDS: Record<string, readonly SizeKey[]> = {
     }
     .row {
       display: grid;
-      grid-template-columns: 6rem 1fr 1rem;
+      grid-template-columns: 6rem minmax(0, 1fr);
       align-items: center;
       gap: var(--space-2);
     }
@@ -94,6 +101,7 @@ export class ShapeSizeDialog {
   private readonly dialogs = inject(DialogService);
   private readonly service = inject(SketchService);
   protected readonly t = SKETCH_TEXTS;
+  protected readonly steps = STEPS;
   protected readonly sizing = this.service.tool.sizing;
   protected readonly fields = computed(() => FIELDS[this.sizing()?.tool ?? ''] ?? []);
   protected readonly text = signal<Partial<Record<SizeKey, string>>>({
@@ -123,8 +131,7 @@ export class ShapeSizeDialog {
     }),
   );
 
-  protected typed(f: SizeKey, e: Event): void {
-    const v = (e.target as HTMLInputElement).value;
+  protected typed(f: SizeKey, v: string): void {
     this.text.update((t) => ({ ...t, [f]: v }));
   }
 

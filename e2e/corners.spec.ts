@@ -82,7 +82,7 @@ test('a polygon: Alt-click cycles the kind; double-click opens Corners…', asyn
   await widgets.first().dblclick();
   const dialog = page.getByRole('dialog', { name: 'Corners' });
   await expect(dialog).toBeVisible();
-  await page.getByTestId('corners-radius').fill('20');
+  await page.getByTestId('corners-radius').locator('input').fill('20');
   await page.getByTestId('corners-kind').selectOption('chamfer');
   await page.keyboard.press('Enter');
   await expect(dialog).toBeHidden();

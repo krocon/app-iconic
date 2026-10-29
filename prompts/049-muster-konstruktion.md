@@ -17,5 +17,9 @@
   Elternelements, also auch in gedrehten Gruppen richtig), ids eindeutig; jede Aktion ein Undo-Schritt, die Kopien
   sind danach ausgewählt. Alle Aktionen nehmen Argumente für die KI (`count/angle/center`, `columns/rows/dx/dy`,
   `a/b`). Seitenleiste: Gruppe „Muster & Spiegeln“.
+- ✅ 29.10.2026 (Nachtrag): Dialoge zu schmal (Felder ragten heraus) – Kreis-/Rechteck-Muster, Größe, Ecken
+  breiter, Felder schrumpfen mit (`minmax(0, 1fr)`, `.input { min-width: 0 }`); Zahlenfelder als `StepperField`
+  (`shared/controls`) mit − / + (Halten wiederholt, ⇧ × 10) und ↑/↓. Playwright `dialogs.spec.ts` prüft jeden
+  Dialog in zwei Fenstergrößen auf herausragende Elemente.
 - Offen: Muster entlang eines Pfads; Kopien sind nicht mit dem Original verknüpft (außer dem Klon); neue Formen
   direkt als Konstruktion zeichnen (jetzt: zeichnen, dann X).

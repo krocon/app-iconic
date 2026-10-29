@@ -3,6 +3,7 @@ import { ActionService } from '../../core/actions/action.service';
 import { CORNER_KINDS, CornerKind } from '../../shared/geometry/corners';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { Modal } from '../../shared/dialog/modal';
+import { StepperField } from '../../shared/controls/stepper-field';
 import { FilesService } from '../files/files.service';
 import { parseValue } from '../sketch/sketch-overlay';
 import { cornerSource } from './corner-source';
@@ -14,20 +15,20 @@ import { CORNERS_TEXTS as T } from './corners-texts';
  */
 @Component({
   selector: 'app-corners-dialog',
-  imports: [Modal],
+  imports: [Modal, StepperField],
   template: `
-    <app-modal [heading]="t.title" width="20rem" (closed)="dialogs.close()">
+    <app-modal [heading]="t.title" width="24rem" (closed)="dialogs.close()">
       <form class="form" (submit)="$event.preventDefault(); ok()">
         <label class="row">
           <span>{{ t.radius }}</span>
-          <input
-            class="input"
-            type="text"
-            inputmode="decimal"
-            data-autofocus
+          <app-stepper-field
             data-testid="corners-radius"
+            field="radius"
+            [autofocus]="true"
+            [min]="0"
+            [step]="1"
             [value]="radius()"
-            (input)="radius.set($any($event.target).value)"
+            (valueChange)="radius.set($event)"
           />
         </label>
         <label class="row">
@@ -57,9 +58,13 @@ import { CORNERS_TEXTS as T } from './corners-texts';
     }
     .row {
       display: grid;
-      grid-template-columns: 5rem 1fr;
+      grid-template-columns: 6rem minmax(0, 1fr);
       align-items: center;
       gap: var(--space-2);
+    }
+    .row .input {
+      width: 100%;
+      min-width: 0;
     }
     .actions {
       display: flex;

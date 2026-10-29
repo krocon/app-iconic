@@ -8,12 +8,23 @@ import {
 } from '@angular/core';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { Modal } from '../../shared/dialog/modal';
+import { StepperField } from '../../shared/controls/stepper-field';
 import { MAX_PATTERN_COPIES } from '../../shared/geometry/pattern';
 import { parseValue } from '../sketch/sketch-overlay';
 import { PatternService } from './pattern.service';
 import { PATTERN_TEXTS as T } from './pattern-texts';
 
 type Field = 'count' | 'angle' | 'columns' | 'rows' | 'dx' | 'dy';
+
+/** What − / + do per field. */
+const STEPS: Record<Field, { step: number; min?: number; max?: number; unit?: string }> = {
+  count: { step: 1, min: 2, max: MAX_PATTERN_COPIES + 1 },
+  angle: { step: 15, min: -360, max: 360, unit: '°' },
+  columns: { step: 1, min: 1, max: MAX_PATTERN_COPIES + 1 },
+  rows: { step: 1, min: 1, max: MAX_PATTERN_COPIES + 1 },
+  dx: { step: 10 },
+  dy: { step: 10 },
+};
 
 const round = (v: number) => String(Math.round(v * 10) / 10);
 
@@ -24,28 +35,27 @@ const round = (v: number) => String(Math.round(v * 10) / 10);
  */
 @Component({
   selector: 'app-pattern-dialog',
-  imports: [Modal],
+  imports: [Modal, StepperField],
   template: `
     @if (state(); as s) {
       <app-modal
         [heading]="s.kind === 'circular' ? t.circularTitle : t.rectangularTitle"
-        width="20rem"
+        width="24rem"
         (closed)="cancel()"
       >
         <form class="form" (submit)="$event.preventDefault(); ok()">
           @for (f of fields(); track f; let first = $first) {
             <label class="row">
               <span>{{ t[f] }}</span>
-              <input
-                class="input"
-                type="text"
-                inputmode="decimal"
-                autocomplete="off"
-                spellcheck="false"
-                [attr.data-autofocus]="first ? '' : null"
-                [attr.data-field]="f"
+              <app-stepper-field
+                [field]="f"
+                [autofocus]="first"
+                [step]="steps[f].step"
+                [min]="steps[f].min"
+                [max]="steps[f].max"
+                [unit]="steps[f].unit ?? ''"
                 [value]="text()[f]"
-                (input)="typed(f, $event)"
+                (valueChange)="typed(f, $event)"
               />
             </label>
           }
@@ -73,7 +83,7 @@ const round = (v: number) => String(Math.round(v * 10) / 10);
     }
     .row {
       display: grid;
-      grid-template-columns: 7rem 1fr;
+      grid-template-columns: 7rem minmax(0, 1fr);
       align-items: center;
       gap: var(--space-2);
     }
@@ -95,6 +105,7 @@ export class PatternDialog implements OnInit {
   private readonly dialogs = inject(DialogService);
   private readonly service = inject(PatternService);
   protected readonly t = T;
+  protected readonly steps = STEPS;
   protected readonly state = this.service.dialog;
   protected readonly fields = computed((): Field[] =>
     this.state()?.kind === 'circular' ? ['count', 'angle'] : ['columns', 'rows', 'dx', 'dy'],
@@ -148,8 +159,7 @@ export class PatternDialog implements OnInit {
     this.update();
   }
 
-  protected typed(f: Field, e: Event): void {
-    const v = (e.target as HTMLInputElement).value;
+  protected typed(f: Field, v: string): void {
     this.text.update((t) => ({ ...t, [f]: v }));
     this.update();
   }

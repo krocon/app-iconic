@@ -10,6 +10,8 @@ const EN = {
   gradient: 'Gradient',
   slider: 'Slider',
   dragHint: 'Drag to change',
+  increase: 'Increase',
+  decrease: 'Decrease',
 } as const;
 
 export const CONTROLS_TEXTS = translatable('controls', EN, {
@@ -22,5 +24,7 @@ export const CONTROLS_TEXTS = translatable('controls', EN, {
     gradient: 'Verlauf',
     slider: 'Schieberegler',
     dragHint: 'Ziehen zum Ändern',
+    increase: 'Erhöhen',
+    decrease: 'Verringern',
   },
 });

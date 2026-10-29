@@ -36,6 +36,12 @@ module.exports = defineConfig([
   {
     files: ['**/*.html'],
     extends: [angular.configs.templateRecommended, angular.configs.templateAccessibility],
-    rules: {},
+    rules: {
+      // the stepper field's <input> is inside the component (a <label> around it names it)
+      '@angular-eslint/template/label-has-associated-control': [
+        'error',
+        { controlComponents: ['app-stepper-field'] },
+      ],
+    },
   },
 ]);
