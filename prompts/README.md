@@ -22,7 +22,8 @@ Kritischer Pfad zum ersten nutzbaren Editor: **001 → 002 → 003 → 004 → 0
 Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 jederzeit nach 005, 030 nach 012,
 031 schließt ab (die Nummern dazwischen bleiben für weitere Prompts frei); 032 und 033 sind Folgen aus 031.
 040–048: Zeichnen wie VectorCraft (Marc, 29.10.2026) – zuerst 040 und 041, dann 042 → 043 → 046 → 047; 044, 045, 048
-unabhängig.
+unabhängig. 050–059: Konstruieren wie Fusion (Marc, 29.10.2026) – Reihenfolge 050 → 051 → 052 → 053 → 054 → 055,
+dann 056, 057, 058, 032 (Verlaufseditor), zuletzt 059.
 
 | Nr. | Prompt | Inhalt | Braucht | Umfang | Status |
 |---|---|---|---|---|---|
@@ -58,10 +59,19 @@ unabhängig.
 | 047 | [047-shape-builder-pathfinder.md](047-shape-builder-pathfinder.md) | Pathfinder (boolesche Operationen) und Shape Builder | 046 | L | ✅ 29.10.2026 |
 | 048 | [048-bemassung-messen.md](048-bemassung-messen.md) | Messen und Bemaßung | 040 | M | ✅ 29.10.2026 |
 | 049 | [049-muster-konstruktion.md](049-muster-konstruktion.md) | Konstruktionslinien, kreisförmiges/rechteckiges Muster, Spiegeln, Klonen | 040 | M | ✅ 29.10.2026 |
+| 050 | [050-trimmen-verlaengern.md](050-trimmen-verlaengern.md) | Trimmen und Verlängern an Schnittpunkten | 040, 046 | M | offen |
+| 051 | [051-verrunden-fasen.md](051-verrunden-fasen.md) | Verrunden und Fasen zwischen Elementen | 050 | M | offen |
+| 052 | [052-versatz-kontur.md](052-versatz-kontur.md) | Versatz (Offset) und Kontur in Fläche | 047 | L | offen |
+| 053 | [053-transformieren.md](053-transformieren.md) | Transformieren mit Bezugspunkt und Zahlen | 007 | M | offen |
+| 054 | [054-verteilen-ausrichten.md](054-verteilen-ausrichten.md) | Verteilen; Ausrichten an Leinwand/Schlüsselobjekt | 007 | S | offen |
+| 055 | [055-sperren-isolieren.md](055-sperren-isolieren.md) | Sperren, Isolieren, Konstruktion ausblenden | 006, 007 | M | offen |
+| 056 | [056-hilfslinien-raster.md](056-hilfslinien-raster.md) | Hilfslinien aus dem Lineal, Icon-Raster-Vorlagen | 004 | M | offen |
+| 057 | [057-kleine-groessen.md](057-kleine-groessen.md) | Vorschau in kleinen Größen, Pixelraster | 012 | M | offen |
+| 058 | [058-als-konstruktion-zeichnen.md](058-als-konstruktion-zeichnen.md) | Direkt als Konstruktion zeichnen | 049 | S | offen |
+| 059 | [059-abhaengigkeiten.md](059-abhaengigkeiten.md) | Abhängigkeiten und treibende Maße (parametrisch) | 048, 050, 051 | XL | offen |
 
 ## Folge-Ideen (noch ohne Prompt)
 
 - Werbe-Webseite `/site` wie bei den Schwesterprojekten.
 - Weitere Icon-Sets im Symbol-Picker; eigene Bibliothek wiederverwendbarer Formen.
-- Konturen in Pfade umwandeln.
 - Import von Icon-Composer-Projekten mit PNG-Assets bearbeiten (heute nur durchreichen).
