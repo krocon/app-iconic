@@ -307,6 +307,16 @@ export const ACTIONS: readonly ActionDef[] = [
   EDIT('path.eraser', 'Path Eraser Tool'),
   EDIT('path.join', 'Join Paths'),
   EDIT('path.convert', 'Convert to Path'),
+  // Pathfinder, Shape Builder, cuts (prompt 047)
+  EDIT('pathfinder.unite', 'Unite'),
+  EDIT('pathfinder.minusFront', 'Minus Front'),
+  EDIT('pathfinder.intersect', 'Intersect'),
+  EDIT('pathfinder.exclude', 'Exclude'),
+  EDIT('pathfinder.divide', 'Divide'),
+  EDIT('shapeBuilder.tool', 'Shape Builder Tool'),
+  EDIT('cut.knife', 'Knife Tool'),
+  EDIT('cut.lineCut', 'Line Cut Tool'),
+  EDIT('cut.rectCut', 'Rectangle Cut Tool'),
   // Live Corners (prompt 045): without arguments the dialog
   EDIT('corners.set', 'Corners…', {
     args: {

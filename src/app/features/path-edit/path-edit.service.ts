@@ -81,9 +81,10 @@ export function shapeSubpaths(el: Element): Subpath[] | null {
 }
 
 /** A `<path>` with the attributes of `el` (paint, transform …) but its geometry, and `d`. */
-export function pathMarkup(el: Element, d: string): string {
+export function pathMarkup(el: Element, d: string, keepId = true): string {
   const path = el.ownerDocument.createElementNS('http://www.w3.org/2000/svg', 'path');
   for (const a of Array.from(el.attributes)) {
+    if (a.name === 'id' && !keepId) continue;
     if (!GEOMETRY.includes(a.name) && a.name !== ID_ATTR && a.name !== CORNERS_ATTR) {
       path.setAttribute(a.name, a.value);
     }
@@ -157,7 +158,7 @@ export class PathEditService {
     const parentRef = parent ? store?.document().refOf(parent) : null;
     if (!parentRef) return null;
     const d = fromSubpaths(mapSubpaths(subpaths, (p) => apply(t.toLocal, p)));
-    return new InsertNode(parentRef, pathMarkup(t.el, d));
+    return new InsertNode(parentRef, pathMarkup(t.el, d, false));
   }
 
   canConvert(): boolean {

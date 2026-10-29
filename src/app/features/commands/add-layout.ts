@@ -5,7 +5,16 @@
  */
 export type AddSectionKey = 'structure' | 'shapes' | 'text' | 'import';
 export type AddGroupKey =
-  'line' | 'rectangle' | 'circle' | 'ellipse' | 'arc' | 'polygon' | 'path' | 'editPath' | 'more';
+  | 'line'
+  | 'rectangle'
+  | 'circle'
+  | 'ellipse'
+  | 'arc'
+  | 'polygon'
+  | 'path'
+  | 'editPath'
+  | 'combine'
+  | 'more';
 
 export type AddEntry =
   { kind: 'action'; id: string } | { kind: 'group'; group: AddGroupKey; ids: readonly string[] };
@@ -69,6 +78,7 @@ export const ADD_LAYOUT: readonly AddSection[] = [
         'path.smooth',
         'path.eraser',
       ]),
+      group('combine', ['shapeBuilder.tool', 'cut.knife', 'cut.lineCut', 'cut.rectCut']),
       group('more', ['sketch.dragSpiral', 'sketch.dragRectGrid', 'sketch.dragPolarGrid']),
       act('add.freehand'),
     ],

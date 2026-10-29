@@ -50,11 +50,11 @@
 
 ## npm – runtime (in the app bundle)
 
-25 packages.
+26 packages.
 
 | Licence | Count |
 |---|---|
-| MIT | 21 |
+| MIT | 22 |
 | 0BSD | 1 |
 | Apache-2.0 | 1 |
 | Apache-2.0 OR MIT | 1 |
@@ -73,5 +73,5 @@
 
 ## npm – development tooling (not shipped)
 
-371 packages; not purely permissive: 6
+372 packages; not purely permissive: 6
 (build tools only, not part of the distributed app).

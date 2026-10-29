@@ -44,7 +44,8 @@
     "+": "path.addAnchor",
     "-": "path.deleteAnchor",
     "Shift+c": "path.anchorPoint",
-    "Mod+j": "path.join"
+    "Mod+j": "path.join",
+    "Shift+m": "shapeBuilder.tool"
   },
   "drawing": {
     "ArrowUp": "sketch.sidesUp",

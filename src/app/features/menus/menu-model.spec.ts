@@ -57,6 +57,7 @@ describe('menu model (design 005 E5)', () => {
       'Ellipse',
       'Path',
       'Edit Path',
+      'Combine & Cut',
       'Spiral & Grids',
     ]);
     const circle = add.items.find((i) => i.kind === 'submenu' && i.label === 'Circle')!;

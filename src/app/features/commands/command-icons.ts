@@ -57,5 +57,10 @@ export const COMMAND_ICONS: Record<string, string> = {
     'M4.5 11.5a2 2 0 1 0 0.01 0 M11.5 11.5a2 2 0 1 0 0.01 0 M5.8 10L11 2.5 M10.2 10L5 2.5',
   'path.smooth': 'M2 11l3-4 3 4 3-4 3 4 M2 13c4-3 8-3 12 0',
   'path.eraser': 'M2 12c3-6 6-6 7-4 M9.5 13.5l4-4-2-2-4 4z',
+  // Shape Builder and cuts (prompt 047)
+  'shapeBuilder.tool': 'M6 3a4 4 0 1 0 0.01 0 M10 5a4 4 0 1 0 0.01 0 M9 9l4.5 4.5 M12 14h2v-2',
+  'cut.knife': 'M2.5 13.5L11 5l2.5 0.5-1 2.5L4 14z',
+  'cut.lineCut': 'M3 3h10v10H3z M1.5 14.5l13-13',
+  'cut.rectCut': 'M2.5 2.5h8v8h-8z M6 6h7.5v7.5H6z',
   'add.image': 'M2.5 3.5h11v9h-11z M5.5 6.5h0.01 M2.5 11l4-4 3 3 1.5-1.5 2.5 2.5',
 };

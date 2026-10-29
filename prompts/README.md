@@ -55,7 +55,7 @@ unabhängig.
 | 044 | [044-weitere-formen.md](044-weitere-formen.md) | Rounded Rectangle, Stern, Spirale, Rechteck-/Polarraster, Bogen | 041 | M | ✅ 29.10.2026 |
 | 045 | [045-live-corners.md](045-live-corners.md) | Live Corners: Ecken runden/fasen per Griff | 007 | M | ✅ 29.10.2026 |
 | 046 | [046-pfade-bearbeiten.md](046-pfade-bearbeiten.md) | Punkte hinzufügen/löschen/umwandeln, Schere, Messer, Cuts, Join, Smooth | 042 | L | ✅ 29.10.2026 (Messer/Cuts mit 047) |
-| 047 | [047-shape-builder-pathfinder.md](047-shape-builder-pathfinder.md) | Pathfinder (boolesche Operationen) und Shape Builder | 046 | L | offen |
+| 047 | [047-shape-builder-pathfinder.md](047-shape-builder-pathfinder.md) | Pathfinder (boolesche Operationen) und Shape Builder | 046 | L | ✅ 29.10.2026 |
 | 048 | [048-bemassung-messen.md](048-bemassung-messen.md) | Messen und Bemaßung | 040 | M | offen |
 
 ## Folge-Ideen (noch ohne Prompt)
