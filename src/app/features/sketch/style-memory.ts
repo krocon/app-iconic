@@ -20,7 +20,8 @@ export class StyleMemory {
 
   /** Remembers the paint of `el` for its kind (nothing for text, images, groups …). */
   record(el: Element | null | undefined): void {
-    if (!el) return;
+    // construction geometry (prompt 049/058) is transparent on purpose: not a paint to reuse
+    if (!el || el.hasAttribute('data-construction')) return;
     const kind = styleKindOf(el);
     if (!kind) return;
     const now = this.settings.settings().drawing?.styles[kind];

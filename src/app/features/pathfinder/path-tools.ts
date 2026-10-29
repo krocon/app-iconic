@@ -22,6 +22,7 @@ import { registerLockActions } from '../lock/lock-actions';
 import { CanvasEditStore } from '../canvas/canvas-edit.store';
 import { LayerStyleService } from '../canvas/layer-style.service';
 import { GuideService } from '../guides/guide.service';
+import { ConstructionMode } from '../construction/construction-mode';
 import { registerPreviewActions } from '../preview/preview-actions';
 import { SmallPreviewService } from '../preview/small-preview.service';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
@@ -89,6 +90,7 @@ export function registerPathTools(
     inject(CanvasEditStore),
     inject(LayerStyleService),
     inject(GuideService),
+    inject(ConstructionMode),
     destroyRef,
   );
   registerTransformActions(

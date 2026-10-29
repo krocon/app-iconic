@@ -12,6 +12,7 @@ import { isDefinitionTag } from '../document/model/reorder-rules';
 import { collectIds } from '../document/svg/svg-references';
 import { SVG_NS } from '../document/svg/node-ids';
 import { StyleMemory } from '../sketch/style-memory';
+import { ConstructionMode } from '../construction/construction-mode';
 import { UndoLabel } from '../document/undo/undo-texts';
 import { FilesService } from '../files/files.service';
 import { EditService } from '../hierarchy/edit.service';
@@ -116,6 +117,7 @@ export class AddService {
   private readonly dialogs = inject(DialogService);
   private readonly clipEdit = inject(ClipEditStore);
   private readonly memory = inject(StyleMemory);
+  private readonly construction = inject(ConstructionMode);
 
   /** Adding works when no file action is running. */
   canAdd(): boolean {
@@ -235,7 +237,8 @@ export class AddService {
     const store = await this.ensureStore();
     if (!store) return false;
     const place = this.place(store, args);
-    const markups = place ? build(place.center, place.local, place.matrix) : null;
+    const built = place ? build(place.center, place.local, place.matrix) : null;
+    const markups = built ? this.construction.apply(label, built) : null;
     if (!place || !markups?.length) {
       this.files.notice.set(T.addFailed);
       return false;

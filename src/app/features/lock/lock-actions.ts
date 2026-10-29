@@ -7,6 +7,7 @@ import { NodeRef } from '../document/icon-document';
 import { FilesService } from '../files/files.service';
 import { LOCK_ATTR, lockCommand, unlockAllCommand } from './lock';
 import { GuideService } from '../guides/guide.service';
+import { ConstructionMode } from '../construction/construction-mode';
 
 /**
  * The actions of prompt 055: `edit.toggleLock { nodes? }` (⌘L; locked nodes leave the selection),
@@ -19,6 +20,7 @@ export function registerLockActions(
   edit: CanvasEditStore,
   style: LayerStyleService,
   guides: GuideService,
+  mode: ConstructionMode,
   destroyRef?: DestroyRef,
 ): void {
   actions.registerAll(
@@ -74,6 +76,10 @@ export function registerLockActions(
             ? guides.addGuide(g.axis === 'vertical' ? 'vertical' : 'horizontal', g.at)
             : false;
         },
+      },
+      'sketch.toggleConstructionMode': {
+        run: () => mode.on.update((v) => !v),
+        checked: () => mode.on(),
       },
       'view.constructionLines': {
         run: () => style.construction.update((v) => !v),

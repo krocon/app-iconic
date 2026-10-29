@@ -108,6 +108,7 @@
   Export), Raster Apple / Material-Keylines / gleichmäßig.
 - [x] Vorschau in kleinen Größen und Pixelraster _(neu)_ (057): 16/32/64/128 px live im Canvas, Pixelraster mit
   Fangen, Am Pixelraster ausrichten.
+- [x] Direkt als Konstruktion zeichnen _(neu)_ (058): Schalter Konstruktion (⇧X) in der Canvas-Werkzeugleiste.
 - [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt
       gezeichneten oder geänderten Form ihres Typs (`settings.json` `drawing.styles`); Default dünne Linie ohne Fill
 - [x] Image ⌘I als Data-URL (008; PNG/JPEG/WebP/SVG ≤ 20 MiB, natürliche Größe ≤ 512)

@@ -159,6 +159,7 @@ const FIXED: Record<string, string> = {
   'pattern.centerHere': 'Kreisförmiges Muster: Mitte der Auswahl',
   'edit.cloneLinked': 'Klonen (verknüpft)',
   'edit.toggleConstruction': 'Konstruktionslinie',
+  'sketch.toggleConstructionMode': 'Als Konstruktion zeichnen',
   'edit.toggleLock': 'Sperren / Entsperren',
   'edit.unlockAll': 'Alle entsperren',
   'edit.isolate': 'Gruppe isolieren',

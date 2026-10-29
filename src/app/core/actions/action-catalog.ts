@@ -413,6 +413,8 @@ export const ACTIONS: readonly ActionDef[] = [
   }),
   EDIT('edit.cloneLinked', 'Clone (Linked)'),
   EDIT('edit.toggleConstruction', 'Construction Line'),
+  // draw as construction (prompt 058)
+  ADD('sketch.toggleConstructionMode', 'Draw as Construction'),
   // lock and isolate (prompt 055)
   EDIT('edit.toggleLock', 'Lock / Unlock', {
     args: { type: 'object', properties: { nodes: { type: 'json' } } },

@@ -49,6 +49,7 @@
     "d": "dimension.tool",
     "i": "measure.tool",
     "x": "edit.toggleConstruction",
+    "Shift+x": "sketch.toggleConstructionMode",
     "t": "trim.tool",
     "e": "extend.tool",
     "Shift+r": "transform.rotate",

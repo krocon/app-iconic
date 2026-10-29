@@ -6,6 +6,7 @@ import { CanvasViewStore } from './canvas-view.store';
 import { ViewOptionsMenu } from './view-options-menu';
 import { FreehandOptions } from '../tools/freehand-options';
 import { FreehandStore } from '../tools/freehand.store';
+import { ConstructionMode } from '../construction/construction-mode';
 
 /**
  * Toolbar of the canvas (design 004 E9/E14, 005 E10): zoom out / level / in, 100 %, Fit, Center –
@@ -72,6 +73,17 @@ import { FreehandStore } from '../tools/freehand.store';
           {{ t.centerShort }}
         </button>
       </div>
+      <button
+        type="button"
+        class="btn quiet construction"
+        data-testid="construction-mode"
+        [class.on]="construction.on()"
+        [attr.aria-pressed]="construction.on()"
+        [title]="actions.tooltip('sketch.toggleConstructionMode')"
+        (click)="actions.run('sketch.toggleConstructionMode')"
+      >
+        {{ t.constructionMode }}
+      </button>
       @if (freehand.active()) {
         <app-freehand-options />
       }
@@ -112,6 +124,10 @@ import { FreehandStore } from '../tools/freehand.store';
     .zoom {
       width: 6.5em;
     }
+    .construction.on {
+      color: var(--color-accent-text);
+      background: var(--ai-construction);
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -119,6 +135,7 @@ export class CanvasToolbar {
   protected readonly view = inject(CanvasViewStore);
   protected readonly actions = inject(ActionService);
   protected readonly freehand = inject(FreehandStore);
+  protected readonly construction = inject(ConstructionMode);
   protected readonly t = CANVAS_TEXTS;
   protected readonly steps = ZOOM_STEPS;
   protected readonly opt = this.view.options;
