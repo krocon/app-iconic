@@ -9,8 +9,13 @@ import { CutTool } from './cut-tool';
 import { registerPathfinderActions } from './pathfinder-actions';
 import { PathfinderService } from './pathfinder.service';
 import { ShapeBuilderTool } from './shape-builder-tool';
+import { AddService } from '../commands/add.service';
+import { registerDimensionActions } from '../dimension/dimension-actions';
+import { DimensionService } from '../dimension/dimension.service';
+import { DimensionTool } from '../dimension/dimension-tool';
+import { MeasureTool } from '../dimension/measure-tool';
 
-/** Registers the path tools of prompts 046 and 047 (in an injection context: the app's constructor). */
+/** Registers the path tools of prompts 046 and 047 and Measure / Dimension of 048 (in an injection context: the app's constructor). */
 export function registerPathTools(
   actions: ActionService,
   tools: CanvasTools,
@@ -30,6 +35,16 @@ export function registerPathTools(
     inject(PathfinderService),
     inject(ShapeBuilderTool),
     inject(CutTool),
+    tools,
+    freehand,
+    destroyRef,
+  );
+  registerDimensionActions(
+    actions,
+    inject(AddService),
+    inject(DimensionService),
+    inject(DimensionTool),
+    inject(MeasureTool),
     tools,
     freehand,
     destroyRef,

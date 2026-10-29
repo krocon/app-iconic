@@ -63,6 +63,17 @@ describe('exportSvg', () => {
     expect(d.assets.values().next().value!.svg!.root.getAttribute('data-ai-id')).not.toBeNull();
   });
 
+  it('leaves the dimensions out unless asked for (prompt 048)', () => {
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><rect width="9" height="9"/>' +
+      '<g data-dimension="linear"><path d="M0 0L9 0"/><text>9</text></g></svg>';
+    const d = doc([{ layers: [L('a.svg')] }], {}, { 'a.svg': svg });
+    expect(exportSvg(d, 'light', NO_FX)).not.toContain('data-dimension');
+    expect(exportSvg(d, 'light', { ...NO_FX, dimensions: true })).toContain(
+      'data-dimension="linear"',
+    );
+  });
+
   it('prefixes ids per layer and rewrites url(), href and xlink:href', () => {
     // b.svg twice: the same asset in two layers must not give duplicate ids either
     const t = exportSvg(

@@ -86,7 +86,7 @@ export class ExportService {
   /** Builds the SVG of every chosen appearance from the current document. */
   async variants(doc: IconDocument, req: ExportChoice): Promise<ExportVariant[]> {
     const raster = await rasterSizes(doc);
-    const opts = { mask: req.mask, effects: req.effects };
+    const opts = { mask: req.mask, effects: req.effects, dimensions: req.dimensions };
     return req.appearances.map((appearance) => ({
       appearance,
       svg: exportSvg(doc, appearance, opts, raster),

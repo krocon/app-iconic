@@ -96,6 +96,7 @@ const EN = {
   divide: 'Divide',
   shapeBuilder: 'Shape Builder',
   cutPath: 'Cut',
+  addDimension: 'Add Dimension',
   // clip paths (design 014 E5)
   createClipPath: 'Create Clip Path',
   assignClip: 'Assign Clip Path',
@@ -189,6 +190,7 @@ export const UNDO_TEXTS = translatable('undo', EN, {
     divide: 'Unterteilen',
     shapeBuilder: 'Formerstellung',
     cutPath: 'Schneiden',
+    addDimension: 'Bemaßung hinzufügen',
     createClipPath: 'Beschneidungspfad anlegen',
     assignClip: 'Beschneidungspfad zuweisen',
     layerClip: 'Beschneidung der Ebene ändern',

@@ -24,6 +24,8 @@ export interface ExportSvgOptions {
   mask: MaskShape;
   /** Shadow, translucency and blend modes as approximation (design 012 E6). */
   effects: boolean;
+  /** Keep the dimensions (`data-dimension`, prompt 048); default: left out. */
+  dimensions?: boolean;
 }
 
 /** Natural pixel size of raster assets by name (design 012 E7). */
@@ -180,6 +182,9 @@ class Builder {
     const place = this.el('svg', { ...assetPlacement(root) });
     const copy = this.d.importNode(root, true) as Element;
     stripInternal(copy);
+    if (!this.opts.dimensions) {
+      for (const dim of Array.from(copy.querySelectorAll('[data-dimension]'))) dim.remove();
+    }
     prefixIds(copy, `l${n}-`);
     place.append(copy);
     return place;

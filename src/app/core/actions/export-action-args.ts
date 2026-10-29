@@ -13,6 +13,8 @@ export const EXPORT_ARGS: ArgsSpec = {
     sizes: { type: 'json' },
     mask: { type: 'string', enum: ['none', 'squircle', 'circle'] },
     effects: { type: 'boolean' },
+    /** Keep the dimensions (default: left out). */
+    dimensions: { type: 'boolean' },
     targetDir: { type: 'string' },
     overwrite: { type: 'boolean' },
   },

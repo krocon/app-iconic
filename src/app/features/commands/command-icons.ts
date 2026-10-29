@@ -62,5 +62,8 @@ export const COMMAND_ICONS: Record<string, string> = {
   'cut.knife': 'M2.5 13.5L11 5l2.5 0.5-1 2.5L4 14z',
   'cut.lineCut': 'M3 3h10v10H3z M1.5 14.5l13-13',
   'cut.rectCut': 'M2.5 2.5h8v8h-8z M6 6h7.5v7.5H6z',
+  // Measure and Dimension (prompt 048)
+  'dimension.tool': 'M2 11h12 M2 8.5v5 M14 8.5v5 M4 9.5L2 11l2 1.5 M12 9.5l2 1.5-2 1.5 M6 6h4',
+  'measure.tool': 'M2 10.5L10.5 2 14 5.5 5.5 14z M5 9l1.5 1.5 M7 7l1 1 M9 5l1.5 1.5',
   'add.image': 'M2.5 3.5h11v9h-11z M5.5 6.5h0.01 M2.5 11l4-4 3 3 1.5-1.5 2.5 2.5',
 };

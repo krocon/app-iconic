@@ -17,6 +17,8 @@ export interface ExportChoice {
   sizes: PngSize[];
   mask: MaskShape;
   effects: boolean;
+  /** Keep the dimensions (prompt 048); not kept in the settings. */
+  dimensions: boolean;
   /** Opaque path of the target folder; `null` = not chosen yet. */
   targetDir: string | null;
 }
@@ -27,6 +29,7 @@ export const DEFAULT_CHOICE: ExportChoice = {
   sizes: [1024],
   mask: 'none',
   effects: false,
+  dimensions: false,
   targetDir: null,
 };
 
@@ -61,6 +64,7 @@ export function exportRequest(
     sizes,
     mask: (args['mask'] as MaskShape | undefined) ?? base.mask,
     effects: (args['effects'] as boolean | undefined) ?? base.effects,
+    dimensions: (args['dimensions'] as boolean | undefined) ?? base.dimensions,
     targetDir: (args['targetDir'] as string | undefined) ?? base.targetDir,
     overwrite: (args['overwrite'] as boolean | undefined) ?? false,
   };

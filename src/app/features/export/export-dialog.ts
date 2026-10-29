@@ -103,6 +103,16 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
           />
           {{ t.effects }}
         </label>
+        <label class="check">
+          <input
+            type="checkbox"
+            data-testid="export-dimensions"
+            [disabled]="phase() === 'running'"
+            [checked]="choice().dimensions"
+            (change)="service.update({ dimensions: !choice().dimensions })"
+          />
+          {{ t.dimensions }}
+        </label>
         <div class="field">
           <span id="export-target-label">{{ t.target }}</span>
           <div class="target">

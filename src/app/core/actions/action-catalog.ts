@@ -317,6 +317,24 @@ export const ACTIONS: readonly ActionDef[] = [
   EDIT('cut.knife', 'Knife Tool'),
   EDIT('cut.lineCut', 'Line Cut Tool'),
   EDIT('cut.rectCut', 'Rectangle Cut Tool'),
+  // Measure and Dimension (prompt 048)
+  ADD('dimension.tool', 'Dimension Tool'),
+  VIEW('measure.tool', 'Measure Tool'),
+  ADD('dimension.add', 'Add Dimension', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['kind', 'points', 'at'],
+      properties: {
+        kind: { type: 'string', enum: ['linear', 'radius', 'diameter', 'angle'] },
+        /** linear: [[x1, y1], [x2, y2]]; radius / diameter: [[cx, cy]]; angle: corner, ray 1, ray 2. */
+        points: { type: 'json' },
+        /** Where it is placed: [x, y]. */
+        at: { type: 'json' },
+        r: { type: 'number', minimum: 0 },
+      },
+    },
+  }),
   // Live Corners (prompt 045): without arguments the dialog
   EDIT('corners.set', 'Corners…', {
     args: {
