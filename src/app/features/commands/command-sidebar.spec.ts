@@ -12,6 +12,7 @@ import { AddService } from './add.service';
 import { CommandSidebar } from './command-sidebar';
 import { COMMAND_ICONS } from './command-icons';
 import { SvgSnippetDialog } from './svg-snippet-dialog';
+import { SettingsStore } from '../settings/settings.store';
 
 describe('CommandSidebar (design 008 E10)', () => {
   let store: DocumentStore;
@@ -46,32 +47,30 @@ describe('CommandSidebar (design 008 E10)', () => {
     return { fixture, el, input, options, key, type };
   }
 
-  const ids = (els: HTMLElement[]) => els.map((o) => o.dataset['action'] ?? o.dataset['group']);
+  const ids = (els: HTMLElement[]) =>
+    els.map((o) => o.dataset['action'] ?? o.dataset['group'] ?? o.dataset['sectionToggle']);
   const submenu = () =>
     Array.from(document.querySelectorAll<HTMLElement>('#command-sub [role="option"]'));
 
-  it('lists the add actions, the variants of a shape as a submenu; later ones disabled', async () => {
+  it('lists tools, a closed construction section and what is inserted (prompt 068)', async () => {
     const { options, el } = await render();
     expect(ids(options())).toEqual([
       'tool.select',
       'tool.direct',
-      'add.iconGroup',
-      'add.container',
-      'line',
-      'rectangle',
-      'circle',
-      'arc',
-      'polygon',
-      'ellipse',
+      'shapes',
       'path',
-      'editPath',
-      'combine',
-      'pattern',
-      'measure',
-      'constrain',
-      'more',
       'add.freehand',
       'fill.tool',
+      'shapeBuilder.tool',
+      'editPath',
+      'combine',
+      'transform',
+      'constraint.tool',
+      'measure',
+      'construction',
+      'add.iconGroup',
+      'add.container',
+      'centre',
       'add.text',
       'add.textToPath',
       'add.symbol',
@@ -80,63 +79,82 @@ describe('CommandSidebar (design 008 E10)', () => {
     ]);
     const image = options().find((o) => o.dataset['action'] === 'add.image')!;
     expect(image.textContent).toContain('Ctrl+I');
-    const circle = options().find((o) => o.dataset['group'] === 'circle')!;
-    expect(circle.getAttribute('aria-label')).toBe('Circle, submenu');
+    const centre = options().find((o) => o.dataset['group'] === 'centre')!;
+    expect(centre.getAttribute('aria-label')).toBe('Shape at Centre, submenu');
     const free = options().find((o) => o.dataset['action'] === 'add.freehand')!;
     expect(free.getAttribute('aria-disabled')).toBe('true');
     free.click();
     expect(store.selection()).toEqual([]);
-    expect(el.textContent).toContain('Shapes');
+    expect(el.textContent).toContain('Tools');
+    expect(el.textContent).toContain('Insert');
+    // Modify is not in the list
+    expect(ids(options())).not.toContain('path.offset');
     expect(submenu()).toHaveLength(0);
   });
 
-  it('filters flat over all variants, moves with the keys and runs with Enter', async () => {
+  it('the construction section opens and closes; its state is a setting', async () => {
+    const { options, fixture } = await render();
+    const toggle = () => options().find((o) => o.dataset['sectionToggle'] === 'construction')!;
+    expect(toggle().getAttribute('aria-expanded')).toBe('false');
+    toggle().click();
+    await fixture.whenStable();
+    expect(toggle().getAttribute('aria-expanded')).toBe('true');
+    expect(ids(options())).toContain('circle');
+    expect(TestBed.inject(SettingsStore).settings().sidebar.constructionOpen).toBe(true);
+    toggle().click();
+    await fixture.whenStable();
+    expect(ids(options())).not.toContain('circle');
+  });
+
+  it('filters flat over all variants – Modify too – moves with the keys and runs with Enter', async () => {
     const { options, input, key, type } = await render();
     await type('poly');
     expect(ids(options())).toEqual([
-      'add.polyline',
-      'add.polygon',
       'sketch.dragPolygon',
       'sketch.polygonCircumscribed',
       'sketch.polygonInscribed',
       'sketch.polygonEdge',
+      'add.polyline',
+      'add.polygon',
     ]);
-    await key('ArrowDown');
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-1');
+    await key('ArrowUp'); // wraps to the last row
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-5');
     await key('Enter');
     expect(store.document().node(store.selection()[0])!.localName).toBe('polygon');
+    await type('offset');
+    expect(ids(options())).toEqual(['path.offset']);
     await type('circle');
     expect(ids(options())).toContain('sketch.circle3t');
     await type('zzz');
     expect(options()).toHaveLength(0);
     await key('Escape');
-    expect(options()).toHaveLength(24);
-    await key('End');
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-23');
+    expect(options()).toHaveLength(21);
   });
 
   it('keyboard: → opens the submenu, ↑/↓ move in it, ← closes, Enter runs', async () => {
     const { input, key } = await render();
-    for (let i = 0; i < 6; i++) await key('ArrowDown');
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-6');
+    // the "Shape at Centre" group (row 15)
+    for (let i = 0; i < 15; i++) await key('ArrowDown');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-15');
     await key('ArrowRight');
     expect(ids(submenu())).toEqual([
+      'add.rect',
       'add.circle',
-      'sketch.circleCenter',
-      'sketch.circle2p',
-      'sketch.circle3p',
-      'sketch.circle2t',
-      'sketch.circle3t',
+      'add.ellipse',
+      'add.line',
+      'add.polyline',
+      'add.polygon',
+      'add.path',
     ]);
     expect(input.getAttribute('aria-activedescendant')).toBe('command-sub-0');
     expect(input.getAttribute('aria-controls')).toBe('command-list command-sub');
     await key('ArrowUp');
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-sub-5');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-sub-6');
     await key('ArrowLeft');
     expect(submenu()).toHaveLength(0);
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-6');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-15');
     await key('Enter');
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-sub-0');
+    await key('ArrowDown');
     await key('Enter');
     expect(submenu()).toHaveLength(0);
     expect(store.document().node(store.selection()[0])!.localName).toBe('circle');
@@ -145,23 +163,18 @@ describe('CommandSidebar (design 008 E10)', () => {
   it('a click opens the submenu, a click in it runs; hovering opens another', async () => {
     const { options, fixture } = await render();
     options()
-      .find((o) => o.dataset['group'] === 'rectangle')!
+      .find((o) => o.dataset['group'] === 'centre')!
       .click();
     await fixture.whenStable();
     expect(ids(submenu())[0]).toBe('add.rect');
     options()
-      .find((o) => o.dataset['group'] === 'arc')!
+      .find((o) => o.dataset['group'] === 'transform')!
       .dispatchEvent(new PointerEvent('pointerenter'));
     await new Promise((r) => setTimeout(r, 200));
     await fixture.whenStable();
-    expect(ids(submenu())).toEqual([
-      'sketch.dragArc',
-      'sketch.arc3p',
-      'sketch.arcCenter',
-      'sketch.arcTangent',
-    ]);
+    expect(ids(submenu())).toEqual(['transform.rotate', 'transform.scale', 'transform.reflect']);
     options()
-      .find((o) => o.dataset['group'] === 'rectangle')!
+      .find((o) => o.dataset['group'] === 'centre')!
       .click();
     await fixture.whenStable();
     submenu()[0].click();
@@ -179,19 +192,22 @@ describe('CommandSidebar (design 008 E10)', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('input')).toBeNull();
     const tools = Array.from(el.querySelectorAll<HTMLButtonElement>('[role="toolbar"] button'));
-    expect(tools).toHaveLength(24);
-    expect(el.querySelectorAll('[role="separator"]')).toHaveLength(4);
-    const circle = tools.find((b) => b.dataset['group'] === 'circle')!;
-    expect(circle.getAttribute('aria-haspopup')).toBe('listbox');
-    expect(circle.title).toBe('Circle');
-    circle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(tools).toHaveLength(21);
+    expect(el.querySelectorAll('[role="separator"]')).toHaveLength(3);
+    expect(tools.find((b) => b.dataset['sectionToggle'])!.getAttribute('aria-expanded')).toBe(
+      'false',
+    );
+    const centre = tools.find((b) => b.dataset['group'] === 'centre')!;
+    expect(centre.getAttribute('aria-haspopup')).toBe('listbox');
+    expect(centre.title).toBe('Shape at Centre');
+    centre.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     await fixture.whenStable();
-    expect(circle.getAttribute('aria-expanded')).toBe('true');
-    expect(circle.getAttribute('aria-activedescendant')).toBe('command-sub-0');
-    circle.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    expect(centre.getAttribute('aria-expanded')).toBe('true');
+    expect(centre.getAttribute('aria-activedescendant')).toBe('command-sub-0');
+    centre.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
     await fixture.whenStable();
-    expect(circle.getAttribute('aria-activedescendant')).toBe('command-sub-1');
-    circle.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    expect(centre.getAttribute('aria-activedescendant')).toBe('command-sub-1');
+    centre.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     await fixture.whenStable();
     expect(submenu()).toHaveLength(0);
     tools.find((b) => b.dataset['action'] === 'add.text')!.click();
@@ -231,7 +247,7 @@ describe('CommandSidebar (design 008 E10)', () => {
     expect(opt('tool.select').getAttribute('aria-checked')).toBe('false');
     const path = group('path');
     expect(path.classList).toContain('checked');
-    expect(path.getAttribute('aria-label')).toBe('Path, submenu, active: Pen');
+    expect(path.getAttribute('aria-label')).toBe('Pen, submenu, active: Pen');
     const penIcon = COMMAND_ICONS['pen.tool'];
     expect(path.querySelector('path')!.getAttribute('d')).toBe(penIcon);
     // off again: the group keeps the icon of the last used variant

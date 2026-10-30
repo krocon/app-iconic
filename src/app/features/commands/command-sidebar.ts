@@ -16,6 +16,7 @@ import { matches } from '../menus/command-palette';
 import { ADD_LAYOUT, AddGroupKey, AddSectionKey, entryIds } from './add-layout';
 import { COMMAND_ICONS } from './command-icons';
 import { COMMANDS_TEXTS } from './commands-texts';
+import { SettingsStore } from '../settings/settings.store';
 
 interface Leaf {
   kind: 'action';
@@ -40,8 +41,17 @@ interface Group {
   items: Leaf[];
 }
 
+/** The header of a collapsible section (prompt 068: Construction). */
+interface Toggle {
+  kind: 'toggle';
+  id: string;
+  section: AddSectionKey;
+  label: string;
+  expanded: boolean;
+}
+
 /** A row of the list; `index` among the rows (for `aria-activedescendant`). */
-type Row = (Leaf | Group) & { index: number };
+type Row = (Leaf | Group | Toggle) & { index: number };
 
 /** Hover delay before a submenu opens or closes (lets the pointer cross other rows). */
 const HOVER_MS = 120;
@@ -81,6 +91,7 @@ export class CommandSidebar {
   /** The last active variant of each shape (its icon stands for the group, prompt 061). */
   private readonly lastUsed = signal<Partial<Record<AddGroupKey, string>>>({});
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+  private readonly settings = inject(SettingsStore);
   private timer: ReturnType<typeof setTimeout> | undefined;
 
   private leaf(id: string): Leaf {
@@ -95,36 +106,67 @@ export class CommandSidebar {
     };
   }
 
+  /** The construction section is open (setting `sidebar.constructionOpen`, prompt 068). */
+  protected readonly constructionOpen = computed(
+    () => this.settings.settings().sidebar?.constructionOpen ?? false,
+  );
+
+  protected toggleSection(): void {
+    this.close();
+    this.settings.set('sidebar.constructionOpen', !this.constructionOpen());
+  }
+
   protected readonly sections = computed(() => {
     const q = this.query();
+    const open = this.constructionOpen();
     let index = 0;
-    const row = (r: Leaf | Group): Row => ({ ...r, index: index++ });
-    return ADD_LAYOUT.map((s): { section: AddSectionKey; rows: Row[] } => ({
-      section: s.section,
-      rows: q
-        ? // with a filter: the matching variants, flat
-          s.entries
-            .flatMap(entryIds)
-            .map((id) => ({ id, label: this.actions.label(id) }))
-            .filter((e) => matches(e, q))
-            .map((e) => row(this.leaf(e.id)))
-        : s.entries.map((e) => {
-            if (e.kind === 'action') return row(this.leaf(e.id));
-            const items = e.ids.map((id) => this.leaf(id));
-            const on = items.find((i) => i.checked === true);
-            const last = items.find((i) => i.id === this.lastUsed()[e.group]);
-            return row({
-              kind: 'group',
-              id: `group:${e.group}`,
-              group: e.group,
-              label: this.t.groups[e.group],
-              icon: (on ?? last ?? items[0])?.icon ?? '',
-              checked: on?.label ?? null,
-              items,
-            });
-          }),
-    })).filter((s) => s.rows.length > 0);
+    const row = (r: Leaf | Group | Toggle): Row => ({ ...r, index: index++ });
+    // Modify only while filtering (its home is the Modify menu, prompt 068)
+    const layout = q ? ADD_LAYOUT : ADD_LAYOUT.filter((s) => s.section !== 'modify');
+    return layout
+      .map((s): { section: AddSectionKey; rows: Row[] } => ({
+        section: s.section,
+        rows: q
+          ? // with a filter: the matching variants, flat
+            s.entries
+              .flatMap(entryIds)
+              .map((id) => ({ id, label: this.actions.label(id) }))
+              .filter((e) => matches(e, q))
+              .map((e) => row(this.leaf(e.id)))
+          : s.section === 'construction'
+            ? [
+                row({
+                  kind: 'toggle',
+                  id: `toggle:${s.section}`,
+                  section: s.section,
+                  label: this.t.sections[s.section],
+                  expanded: open,
+                }),
+                ...(open ? s.entries.map((e) => this.entryRow(e, row)) : []),
+              ]
+            : s.entries.map((e) => this.entryRow(e, row)),
+      }))
+      .filter((s) => s.rows.length > 0);
   });
+
+  private entryRow(
+    e: (typeof ADD_LAYOUT)[number]['entries'][number],
+    row: (r: Leaf | Group | Toggle) => Row,
+  ): Row {
+    if (e.kind === 'action') return row(this.leaf(e.id));
+    const items = e.ids.map((id) => this.leaf(id));
+    const on = items.find((i) => i.checked === true);
+    const last = items.find((i) => i.id === this.lastUsed()[e.group]);
+    return row({
+      kind: 'group',
+      id: `group:${e.group}`,
+      group: e.group,
+      label: this.t.groups[e.group],
+      icon: (on ?? last ?? items[0])?.icon ?? '',
+      checked: on?.label ?? null,
+      items,
+    });
+  }
 
   protected readonly rows = computed(() => this.sections().flatMap((s) => s.rows));
 
@@ -316,6 +358,7 @@ export class CommandSidebar {
         return true;
       case 'Enter':
         if (row?.kind === 'group') this.openGroup(row, true);
+        else if (row?.kind === 'toggle') this.toggleSection();
         else if (row) this.actions.run(row.id);
         return true;
       case 'Escape':
@@ -332,6 +375,10 @@ export class CommandSidebar {
 
   protected click(r: Leaf | Row): void {
     if ('index' in r) this.active.set(r.index);
+    if (r.kind === 'toggle') {
+      this.toggleSection();
+      return;
+    }
     if (r.kind === 'group') {
       if (this.open() === r.group) this.close();
       else this.openGroup(r as Row, false);

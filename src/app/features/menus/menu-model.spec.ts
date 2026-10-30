@@ -1,6 +1,6 @@
 import { actionDef } from '../../core/actions/action-catalog';
 import { buildKeymap } from '../../core/actions/keymap';
-import { ADD_MENU_LAYOUT, addLayoutIds } from '../commands/add-layout';
+import { ADD_MENU_LAYOUT, addLayoutIds, MODIFY_IDS, TOOL_ACTION_IDS } from '../commands/add-layout';
 import { matches } from './command-palette';
 import {
   actionIds,
@@ -30,6 +30,7 @@ describe('menu model (design 005 E5)', () => {
       'Edit',
       'View',
       'Add',
+      'Modify',
       'Arrange',
       'Help',
     ]);
@@ -49,23 +50,34 @@ describe('menu model (design 005 E5)', () => {
     expect(actionIds(add.items)).toEqual(addLayoutIds(ADD_MENU_LAYOUT));
     const subs = add.items.filter((i) => i.kind === 'submenu').map((i) => i.label);
     expect(subs).toEqual([
+      'Shapes',
+      'Pen',
+      'Edit Path',
+      'Cut',
+      'Transform',
+      'Measure & Dimension',
       'Line',
       'Rectangle',
       'Circle',
       'Arc',
       'Polygon',
-      'Ellipse',
-      'Path',
-      'Edit Path',
-      'Combine & Cut',
-      'Pattern & Mirror',
-      'Measure & Dimension',
-      'Constraints',
-      'Spiral & Grids',
+      'Shape at Centre',
     ]);
     const circle = add.items.find((i) => i.kind === 'submenu' && i.label === 'Circle')!;
-    expect(actionIds([circle]).slice(0, 2)).toEqual(['add.circle', 'sketch.circleCenter']);
-    expect(add.items.filter((i) => i.kind === 'separator')).toHaveLength(3);
+    expect(actionIds([circle]).slice(0, 2)).toEqual(['sketch.circleCenter', 'sketch.circle2p']);
+    // tools · construction · insert
+    expect(add.items.filter((i) => i.kind === 'separator')).toHaveLength(2);
+  });
+
+  it('the Modify menu has the commands that change the selection (prompt 068)', () => {
+    const modify = buildMenuModel('other', { recent: [] }).find((m) => m.label === 'Modify')!;
+    const ids = actionIds(modify.items);
+    expect(ids.slice(0, MODIFY_IDS.length)).toEqual([...MODIFY_IDS]);
+    expect(ids).toContain('pathfinder.unite');
+    // no tool in it, no command twice in the menus
+    for (const id of ids) expect(TOOL_ACTION_IDS).not.toContain(id);
+    const everything = all('other');
+    expect(new Set(everything).size).toBe(everything.length);
   });
 
   it('puts About and Quit into the app menu on macOS', () => {

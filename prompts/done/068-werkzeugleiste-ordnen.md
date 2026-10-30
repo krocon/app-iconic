@@ -1,7 +1,13 @@
 # Prompt 068: Werkzeuge und Einmal-Aktionen trennen
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 061, 067 · Quelle:
-> [Analyse 30.10.2026](2026.10.30%20-%20analyse.md) §3.2 (P1)
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 061, 067 · Quelle:
+> [Analyse 30.10.2026](../2026.10.30%20-%20analyse.md) §3.2 (P1)
+
+## Stand
+
+- ✅ 30.10.2026: Abschnitte Auswahl · Werkzeuge · Konstruktion (einklappbar, Einstellung) · Einfügen; Menü „Modify“;
+  Transform-Werkzeuge in der Sidebar. Kürzelkonflikt T: es gab keinen (Text hat kein Kürzel; das Text-Werkzeug folgt
+  in 075). Design: [068-werkzeugleiste-ordnen.design.md](068-werkzeugleiste-ordnen.design.md).
 
 ## Ziel
 

@@ -144,6 +144,7 @@ export function sanitizeSettings(s: Settings): Settings {
     debug: { logUndoGrouping: s.debug.logUndoGrouping },
     mcp: { enabled: s.mcp.enabled, confirmFiles: s.mcp.confirmFiles },
     constraints: { autoSolve: s.constraints.autoSolve },
+    sidebar: { constructionOpen: s.sidebar.constructionOpen },
     drawing: {
       styles: Object.fromEntries(
         STYLE_KINDS.map((k) => [k, sanitizeStyle(s.drawing.styles[k])]),

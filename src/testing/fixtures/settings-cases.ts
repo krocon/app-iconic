@@ -47,6 +47,7 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
     debug: { logUndoGrouping: false },
     mcp: { enabled: false, confirmFiles: true },
     constraints: { autoSolve: false },
+    sidebar: { constructionOpen: false },
     drawing: {
       styles: {
         rect: {

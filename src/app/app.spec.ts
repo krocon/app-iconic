@@ -104,12 +104,12 @@ describe('App', () => {
     expect(el.querySelectorAll('app-canvas-view .layer')).toHaveLength(2);
   });
 
-  it('has the menus File, Edit, View, Add, Arrange, Help with the shortcuts of this OS', async () => {
+  it('has the menus File, Edit, View, Add, Modify, Arrange, Help with the shortcuts of this OS', async () => {
     const { fixture, el } = await app();
     const tops = [...el.querySelectorAll('[role="menubar"] > .top > button')].map((b) =>
       b.textContent?.trim(),
     );
-    expect(tops).toEqual(['File', 'Edit', 'View', 'Add', 'Arrange', 'Help']);
+    expect(tops).toEqual(['File', 'Edit', 'View', 'Add', 'Modify', 'Arrange', 'Help']);
     el.querySelector<HTMLButtonElement>('[role="menubar"] > .top > button')!.click();
     await fixture.whenStable();
     const save = [...el.querySelectorAll('[role="menu"] li[tabindex]')].find(

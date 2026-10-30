@@ -97,6 +97,8 @@ export interface Settings {
   mcp: { enabled: boolean; confirmFiles: boolean };
   /** Constraints (prompt 065): solve again after free changes. */
   constraints: { autoSolve: boolean };
+  /** The command sidebar (prompt 068): the construction section is open. */
+  sidebar: { constructionOpen: boolean };
   /** Paint of new shapes, remembered per kind (design 019 E12). */
   drawing: { styles: Record<StyleKind, DrawStyle> };
 }
@@ -151,6 +153,7 @@ export const DEFAULT_SETTINGS: Settings = {
   debug: { logUndoGrouping: false },
   mcp: { enabled: false, confirmFiles: true },
   constraints: { autoSolve: false },
+  sidebar: { constructionOpen: false },
   drawing: {
     styles: Object.fromEntries(STYLE_KINDS.map((k) => [k, { ...THIN_LINE }])) as Record<
       StyleKind,

@@ -2,7 +2,7 @@ import { MAX_RECENT_ACTIONS } from '../../core/actions/action-catalog';
 import { Os } from '../../core/actions/platform';
 import { formatChord } from '../../core/actions/shortcut';
 import { AppMenuSpec, MenuItemSpec, MenuSpec } from '../../core/menu/menu.models';
-import { ADD_MENU_LAYOUT } from '../commands/add-layout';
+import { ADD_MENU_LAYOUT, MODIFY_IDS } from '../commands/add-layout';
 import { COMMANDS_TEXTS } from '../commands/commands-texts';
 import { MENUS_TEXTS } from './menus-texts';
 
@@ -66,7 +66,6 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('edit.paste'),
     a('edit.copyXml'),
     a('edit.duplicate'),
-    a('edit.cloneLinked'),
     a('edit.delete'),
     sep,
     a('edit.toggleVisibility'),
@@ -75,21 +74,6 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('edit.unlockAll'),
     a('edit.isolate'),
     a('edit.editSvg'),
-    a('corners.set'),
-    a('path.optimize'),
-    a('path.join'),
-    a('path.convert'),
-    a('path.offset'),
-    a('path.outlineStroke'),
-    a('fill.detach'),
-    sub(t.pathfinder, [
-      a('pathfinder.unite'),
-      a('pathfinder.minusFront'),
-      a('pathfinder.intersect'),
-      a('pathfinder.exclude'),
-      sep,
-      a('pathfinder.divide'),
-    ]),
     sep,
     a('edit.selectAll'),
     a('edit.deselect'),
@@ -160,6 +144,19 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
           ),
     ),
   ]);
+  // what changes the selection by a command or a dialog (prompt 068): not in the tool bar
+  const modify: MenuNode[] = [
+    ...MODIFY_IDS.map((id) => a(id)),
+    sep,
+    sub(t.pathfinder, [
+      a('pathfinder.unite'),
+      a('pathfinder.minusFront'),
+      a('pathfinder.intersect'),
+      a('pathfinder.exclude'),
+      sep,
+      a('pathfinder.divide'),
+    ]),
+  ];
   const arrange: MenuNode[] = [
     a('arrange.bringToFront'),
     a('arrange.sendToBack'),
@@ -172,10 +169,8 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('arrange.group'),
     a('arrange.ungroup'),
     sep,
+    // the Rotate / Scale / Reflect tools are in Add › Transform (prompt 068)
     a('transform.dialog'),
-    a('transform.rotate'),
-    a('transform.scale'),
-    a('transform.reflect'),
     a('arrange.alignToPixels'),
     sep,
     sub(t.align, [
@@ -206,6 +201,7 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     { label: t.edit, items: edit },
     { label: t.view, items: view },
     { label: t.add, items: add },
+    { label: t.modify, items: modify },
     { label: t.arrange, items: arrange },
     { label: t.help, items: help },
   ];

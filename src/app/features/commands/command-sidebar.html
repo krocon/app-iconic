@@ -6,34 +6,53 @@
         <div class="sep" role="separator"></div>
       }
       @for (r of s.rows; track r.id) {
-        <button
-          type="button"
-          class="tool"
-          [id]="'command-' + r.index"
-          [attr.data-action]="r.kind === 'action' ? r.id : null"
-          [attr.data-group]="r.kind === 'group' ? r.group : null"
-          [attr.aria-label]="r.kind === 'group' ? groupLabel(r) : r.label"
-          [attr.aria-pressed]="r.kind === 'action' && r.checked !== undefined ? r.checked : null"
-          [attr.aria-haspopup]="r.kind === 'group' ? 'listbox' : null"
-          [attr.aria-expanded]="r.kind === 'group' ? r.group === open() : null"
-          [attr.aria-controls]="r.kind === 'group' && r.group === open() ? 'command-sub' : null"
-          [attr.aria-activedescendant]="
-            r.kind === 'group' && r.group === open() && sub() >= 0 ? 'command-sub-' + sub() : null
-          "
-          [attr.aria-disabled]="r.kind === 'action' && !r.enabled"
-          [class.open]="r.kind === 'group' && r.group === open()"
-          [class.disabled]="r.kind === 'action' && !r.enabled"
-          [class.checked]="r.kind === 'group' ? !!r.checked : r.checked === true"
-          [title]="tooltip(r)"
-          (pointerenter)="hover(r)"
-          (click)="click(r)"
-          (keydown)="railKey(r, $event)"
-        >
-          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true"><path [attr.d]="r.icon" /></svg>
-          @if (r.kind === 'group') {
-            <svg class="corner" viewBox="0 0 4 4" aria-hidden="true"><path d="M4 0v4H0z" /></svg>
-          }
-        </button>
+        @if (r.kind === 'toggle') {
+          <button
+            type="button"
+            class="tool toggle"
+            [id]="'command-' + r.index"
+            [attr.data-section-toggle]="r.section"
+            [attr.aria-expanded]="r.expanded"
+            [attr.aria-label]="t.toggleSection(r.label)"
+            [title]="t.toggleSection(r.label)"
+            (click)="click(r)"
+          >
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
+              <path [attr.d]="r.expanded ? 'M4 6l4 4 4-4' : 'M6 4l4 4-4 4'" />
+            </svg>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="tool"
+            [id]="'command-' + r.index"
+            [attr.data-action]="r.kind === 'action' ? r.id : null"
+            [attr.data-group]="r.kind === 'group' ? r.group : null"
+            [attr.aria-label]="r.kind === 'group' ? groupLabel(r) : r.label"
+            [attr.aria-pressed]="r.kind === 'action' && r.checked !== undefined ? r.checked : null"
+            [attr.aria-haspopup]="r.kind === 'group' ? 'listbox' : null"
+            [attr.aria-expanded]="r.kind === 'group' ? r.group === open() : null"
+            [attr.aria-controls]="r.kind === 'group' && r.group === open() ? 'command-sub' : null"
+            [attr.aria-activedescendant]="
+              r.kind === 'group' && r.group === open() && sub() >= 0 ? 'command-sub-' + sub() : null
+            "
+            [attr.aria-disabled]="r.kind === 'action' && !r.enabled"
+            [class.open]="r.kind === 'group' && r.group === open()"
+            [class.disabled]="r.kind === 'action' && !r.enabled"
+            [class.checked]="r.kind === 'group' ? !!r.checked : r.checked === true"
+            [title]="tooltip(r)"
+            (pointerenter)="hover(r)"
+            (click)="click(r)"
+            (keydown)="railKey(r, $event)"
+          >
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
+              <path [attr.d]="r.icon" />
+            </svg>
+            @if (r.kind === 'group') {
+              <svg class="corner" viewBox="0 0 4 4" aria-hidden="true"><path d="M4 0v4H0z" /></svg>
+            }
+          </button>
+        }
       }
     }
   </div>
@@ -63,40 +82,64 @@
     (scroll)="close()"
   >
     @for (s of sections(); track s.section) {
-      <li class="section" role="presentation">{{ t.sections[s.section] }}</li>
+      @if (s.rows[0]?.kind !== 'toggle') {
+        <li class="section" role="presentation">{{ t.sections[s.section] }}</li>
+      }
       @for (r of s.rows; track r.id) {
-        <!-- options of a combobox: the field keeps the focus (aria-activedescendant) -->
-        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
-        <li
-          role="option"
-          [id]="'command-' + r.index"
-          [attr.data-action]="r.kind === 'action' ? r.id : null"
-          [attr.data-group]="r.kind === 'group' ? r.group : null"
-          [attr.aria-label]="r.kind === 'group' ? groupLabel(r) : null"
-          [attr.aria-checked]="r.kind === 'action' && r.checked !== undefined ? r.checked : null"
-          [attr.aria-selected]="r.index === active() && sub() < 0"
-          [attr.aria-disabled]="r.kind === 'action' && !r.enabled"
-          [class.active]="r.index === active() && sub() < 0"
-          [class.open]="r.kind === 'group' && r.group === open()"
-          [class.disabled]="r.kind === 'action' && !r.enabled"
-          [class.checked]="r.kind === 'group' ? !!r.checked : r.checked === true"
-          [title]="tooltip(r)"
-          (pointerdown)="$event.preventDefault()"
-          (pointerenter)="hover(r)"
-          (click)="click(r)"
-        >
-          <svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
-            <path [attr.d]="r.icon" />
-          </svg>
-          <span class="label">{{ r.label }}</span>
-          @if (r.kind === 'group') {
+        @if (r.kind === 'toggle') {
+          <!-- a collapsible section (prompt 068): an option that opens / closes it -->
+          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+          <li
+            role="option"
+            class="section toggle"
+            [id]="'command-' + r.index"
+            [attr.data-section-toggle]="r.section"
+            [attr.aria-expanded]="r.expanded"
+            [attr.aria-selected]="r.index === active() && sub() < 0"
+            [attr.aria-label]="t.toggleSection(r.label)"
+            [class.active]="r.index === active() && sub() < 0"
+            (pointerdown)="$event.preventDefault()"
+            (click)="click(r)"
+          >
             <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M6 4l4 4-4 4" />
+              <path [attr.d]="r.expanded ? 'M4 6l4 4 4-4' : 'M6 4l4 4-4 4'" />
             </svg>
-          } @else if (r.shortcut) {
-            <kbd>{{ r.shortcut }}</kbd>
-          }
-        </li>
+            <span class="label">{{ r.label }}</span>
+          </li>
+        } @else {
+          <!-- options of a combobox: the field keeps the focus (aria-activedescendant) -->
+          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+          <li
+            role="option"
+            [id]="'command-' + r.index"
+            [attr.data-action]="r.kind === 'action' ? r.id : null"
+            [attr.data-group]="r.kind === 'group' ? r.group : null"
+            [attr.aria-label]="r.kind === 'group' ? groupLabel(r) : null"
+            [attr.aria-checked]="r.kind === 'action' && r.checked !== undefined ? r.checked : null"
+            [attr.aria-selected]="r.index === active() && sub() < 0"
+            [attr.aria-disabled]="r.kind === 'action' && !r.enabled"
+            [class.active]="r.index === active() && sub() < 0"
+            [class.open]="r.kind === 'group' && r.group === open()"
+            [class.disabled]="r.kind === 'action' && !r.enabled"
+            [class.checked]="r.kind === 'group' ? !!r.checked : r.checked === true"
+            [title]="tooltip(r)"
+            (pointerdown)="$event.preventDefault()"
+            (pointerenter)="hover(r)"
+            (click)="click(r)"
+          >
+            <svg class="icon" viewBox="0 0 16 16" aria-hidden="true">
+              <path [attr.d]="r.icon" />
+            </svg>
+            <span class="label">{{ r.label }}</span>
+            @if (r.kind === 'group') {
+              <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M6 4l4 4-4 4" />
+              </svg>
+            } @else if (r.shortcut) {
+              <kbd>{{ r.shortcut }}</kbd>
+            }
+          </li>
+        }
       }
     } @empty {
       <li class="empty" role="presentation">{{ t.noMatch }}</li>

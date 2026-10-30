@@ -25,6 +25,15 @@
     color: var(--color-text-muted);
   }
 
+  /* a collapsible section header (prompt 068) */
+  .section.toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: auto;
+    cursor: pointer;
+  }
+
   [role='option'] {
     display: flex;
     align-items: center;

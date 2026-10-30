@@ -66,6 +66,7 @@
 
 ## 5. Elemente hinzufügen
 
+- [x] Sidebar geordnet nach Werkzeugen, Konstruktion (einklappbar, gemerkt), Einfügen; Menü „Ändern“ für Befehle und Dialoge; Rotate/Scale/Reflect in der Sidebar _(neu)_ (068)
 - [x] Kontextleiste für jedes aktive Werkzeug _(neu)_ (067): Name, Optionen (Farbe/Kontur/Stärke beim Zeichnen, Ecken/Zacken, Fillet-Radius vor dem Klick, Glättung, Beziehungen, Füllfarbe), Tipp, Fertig; F6 hinein, Esc zurück; `tool.option` für die KI
 - [x] Group (Icon-Gruppe + Layer + Asset) und Container `<g>` (008; Command Sidebar mit Suche, Menü „Add“, Aktionen mit Argumenten; Sidebar und Menü nach Formen mit Untermenüs wie Fusion, `add-layout.ts`)
 - [x] Circle, Ellipse, Rectangle, Line, Polyline, Polygon, Path, Text mit der Geometrie der Vorlage, Stil dünne Linie ohne Fill bzw. der gemerkte je Formtyp (008, 019 E13; zentriert im sichtbaren Ausschnitt, auch in transformierten Gruppen; „… at Center“ seit 019)

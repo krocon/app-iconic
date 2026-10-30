@@ -153,7 +153,7 @@ test('Optimize Path: preview, one undo step', async ({ page }) => {
   await setup(page);
   const path = await idOf(page, A, '#line');
   await select(page, A, [path]);
-  await menu(page, 'Edit', 'Optimize Path…');
+  await menu(page, 'Modify', 'Optimize Path…');
   const opt = page.getByRole('dialog', { name: 'Optimize Path' });
   await expect(opt).toBeVisible();
   await expect(opt.getByTestId('optimize-summary')).toHaveText('1 path');

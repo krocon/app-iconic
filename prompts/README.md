@@ -81,7 +81,7 @@ Code bestätigen (roter Test) – sie stammen aus einer Fremdanalyse und können
 | 065 | [065-abhaengigkeiten-robust.md](done/065-abhaengigkeiten-robust.md) | Constraints: Verletzung anzeigen, optional live lösen, Maße löschbar, Overlay über CTM, Liste im Panel, keine Waisen | 059, 060 | M | ✅ 30.10.2026 |
 | 066 | [066-hilfslinien-fuellungen-alltag.md](done/066-hilfslinien-fuellungen-alltag.md) | Hilfslinien vor ⌘A geschützt, Kennzeichnung im Baum, Live-Fill im Panel, eingefrorene Füllungen melden | 048, 055, 056, 060 | M | ✅ 30.10.2026 |
 | 067 | [067-kontextleiste.md](done/067-kontextleiste.md) | Einheitliche Kontextleiste je Werkzeug (Name, Optionen, Tipp, Fertig) statt Pillen/Banner/Statuszeile | 061 | M | ✅ 30.10.2026 |
-| 068 | [068-werkzeugleiste-ordnen.md](068-werkzeugleiste-ordnen.md) | Werkzeuge vs. Einfügen vs. Ändern trennen, Sektion Konstruktion, Rotate/Scale/Reflect in der Leiste, Kürzelkonflikte | 061, 067 | M | offen |
+| 068 | [068-werkzeugleiste-ordnen.md](done/068-werkzeugleiste-ordnen.md) | Werkzeuge vs. Einfügen vs. Ändern trennen, Sektion Konstruktion, Rotate/Scale/Reflect in der Leiste, Kürzelkonflikte | 061, 067 | M | ✅ 30.10.2026 |
 | 069 | [069-toolbar-direktzugriffe.md](069-toolbar-direktzugriffe.md) | Appearance und Maske als Segmented Controls, Speichern/Export… in der Toolbar, Undo/Redo nur einmal | 004, 012, 015 | S | offen |
 | 070 | [070-kontextmenues.md](070-kontextmenues.md) | Rechtsklick-Menü auf dem Canvas, dasselbe Modell im Baum, Shift+F10 | 005, 006, 061 | M | offen |
 | 071 | [071-dateien-ziehen-bilder-einfuegen.md](071-dateien-ziehen-bilder-einfuegen.md) | `.icon`/`.svg`/Bilder ins Fenster ziehen, Bilder aus der Zwischenablage einfügen | 003, 008, 030 | M | offen |

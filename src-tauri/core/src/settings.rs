@@ -124,6 +124,14 @@ pub struct ConstraintSettings {
     pub auto_solve: bool,
 }
 
+/// The command sidebar (prompt 068).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SidebarSettings {
+    /// The construction section is open (default closed).
+    pub construction_open: bool,
+}
+
 /// The remembered paint of one kind of shape (design 019 E12): attribute values as written, `""`
 /// = not set.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -234,6 +242,7 @@ pub struct Settings {
     pub debug: DebugSettings,
     pub mcp: McpSettings,
     pub constraints: ConstraintSettings,
+    pub sidebar: SidebarSettings,
     pub drawing: DrawingSettings,
 }
 
@@ -292,6 +301,9 @@ impl Default for Settings {
                 confirm_files: true,
             },
             constraints: ConstraintSettings { auto_solve: false },
+            sidebar: SidebarSettings {
+                construction_open: false,
+            },
             drawing: DrawingSettings {
                 styles: DrawingStyles {
                     rect: DrawStyle::thin_line(),

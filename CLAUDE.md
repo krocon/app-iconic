@@ -83,7 +83,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               node-label, tree-icons; EditService + edit-actions (Cut/Copy/Paste/Duplicate/
                               Delete/Sichtbarkeit/Arrange/Align), edit-/arrange-operations, paste, align, visibility,
                               follow-up (Folge-Auswahl)
-  app/features/commands/      „Add“ (008): CommandSidebar (Liste + Suche), AddService, add-actions, insert-target
+  app/features/commands/      „Add“ (008): CommandSidebar (Liste + Suche; Abschnitte und Modify-Menü aus
+                              add-layout, 068), AddService, add-actions, insert-target
                               (Einfügeort, rein), insert-center (Zentrum über inverse CTM), element-defaults
                               (Legacy-Defaults, rein), add-args, icon-group, svg-snippet (+ Dialog), image-size
   app/features/properties/    Properties-Panel (009): property-spec (rein: Specs je Node-Typ), property-values (lesen:
