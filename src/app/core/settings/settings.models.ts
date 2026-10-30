@@ -95,6 +95,8 @@ export interface Settings {
   debug: { logUndoGrouping: boolean };
   /** AI control over MCP (design 018 E16): bridge open, ask before saving to a new path/export. */
   mcp: { enabled: boolean; confirmFiles: boolean };
+  /** Constraints (prompt 065): solve again after free changes. */
+  constraints: { autoSolve: boolean };
   /** Paint of new shapes, remembered per kind (design 019 E12). */
   drawing: { styles: Record<StyleKind, DrawStyle> };
 }
@@ -148,6 +150,7 @@ export const DEFAULT_SETTINGS: Settings = {
   freehand: { epsilon: 2.5, strokeWidth: 8, closed: false },
   debug: { logUndoGrouping: false },
   mcp: { enabled: false, confirmFiles: true },
+  constraints: { autoSolve: false },
   drawing: {
     styles: Object.fromEntries(STYLE_KINDS.map((k) => [k, { ...THIN_LINE }])) as Record<
       StyleKind,

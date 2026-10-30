@@ -121,6 +121,17 @@
               }
             </select>
           </label>
+          <label class="check">
+            <input
+              type="checkbox"
+              data-testid="settings-constraints-auto"
+              aria-describedby="settings-constraints-auto-hint"
+              [checked]="v.constraints.autoSolve"
+              (change)="set('constraints.autoSolve', checked($event))"
+            />
+            {{ t.autoSolve }}
+          </label>
+          <p class="hint" id="settings-constraints-auto-hint">{{ t.autoSolveHint }}</p>
           <label class="field">
             <span>{{ t.startZoom }}</span>
             <select

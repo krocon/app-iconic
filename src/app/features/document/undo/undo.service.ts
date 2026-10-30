@@ -47,33 +47,43 @@ export class UndoService {
   /** Id of the top entry when saved (0 = the empty stack, -1 = no longer reachable). */
   private savePoint = 0;
   private gesture: { label: UndoLabel; commands: DocCommand[]; follow?: DocCommand } | null = null;
-  private follower: (() => DocCommand | null) | null = null;
+  private readonly followers = new Map<string, { fn: () => DocCommand | null; order: number }>();
   private following = false;
 
   /**
    * Derived content (prompt 060: live fills): after every change `fn` may return a command that
    * brings what depends on the change up to date – it becomes part of the same step (undo takes
-   * both back, redo does both again). Not called for undo / redo.
+   * both back, redo does both again). Not called for undo / redo. Several followers (prompt 065:
+   * constraints before live fills) run by `order`, each seeing what the ones before did; `key`
+   * names one (`null` removes it).
    */
-  setFollower(fn: (() => DocCommand | null) | null): void {
-    this.follower = fn;
+  setFollower(fn: (() => DocCommand | null) | null, key = 'default', order = 0): void {
+    if (fn) this.followers.set(key, { fn, order });
+    else this.followers.delete(key);
   }
 
-  /** The follow-up of the change just done, already done (or `null`). */
+  /** The follow-ups of the change just done, already done (or `null`). */
   private follow(): DocCommand | null {
-    if (!this.follower || this.following) return null;
+    if (!this.followers.size || this.following) return null;
     this.following = true;
+    const done: DocCommand[] = [];
     try {
-      const f = this.follower();
-      if (!f) return null;
-      f.do(this.doc);
-      return f;
-    } catch (e) {
-      console.error('follow-up failed', e);
-      return null;
+      const list = [...this.followers.values()].sort((a, b) => a.order - b.order);
+      for (const { fn } of list) {
+        try {
+          const f = fn();
+          if (!f) continue;
+          f.do(this.doc);
+          done.push(f);
+        } catch (e) {
+          console.error('follow-up failed', e);
+        }
+      }
     } finally {
       this.following = false;
     }
+    if (!done.length) return null;
+    return done.length === 1 ? done[0] : new CompositeCommand(done[0].label, done);
   }
 
   private withFollow(command: DocCommand): DocCommand {

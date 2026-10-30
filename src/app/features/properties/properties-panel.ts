@@ -9,6 +9,7 @@ import { PropertyRow } from './property-row';
 import { SectionId } from './property-spec';
 import { TransformEditor } from './transform-editor';
 import { BoxSection } from './box-section';
+import { ConstraintSection } from '../constraints/constraint-section';
 import { IconInspector } from '../inspector/icon-inspector';
 import { itemTitle } from '../inspector/inspector-title';
 import { ClipPathSection } from '../clip/clip-path-section';
@@ -26,6 +27,7 @@ import { GradientSection } from '../gradient/gradient-section';
   imports: [
     AlignSection,
     BoxSection,
+    ConstraintSection,
     GradientSection,
     ClipPathSection,
     IconInspector,
@@ -123,6 +125,7 @@ import { GradientSection } from '../gradient/gradient-section';
           <p>{{ t.nothingSelectedHint }}</p>
         </div>
       }
+      <app-constraint-section />
       <app-align-section />
       <app-gradient-section />
       <app-clip-path-section />

@@ -236,7 +236,7 @@ test('keyboard: arrows, expand/collapse, range, context menu and Delete… with 
     row(page, `g0/l0/${id}`)
       .getAttribute('data-index')
       .then((v) => Number(v));
-  expect(await index(rect)).toBeLessThan(await index(g1));
+  await expect.poll(async () => (await index(rect)) < (await index(g1))).toBe(true);
 });
 
 test('visibility: eye buttons hide nodes and groups in the canvas at once; Alt = recursive', async ({

@@ -50,6 +50,19 @@ const EN = {
   editValue: (name: string) => `${name} – value`,
   remove: 'Remove constraint',
   notHolding: 'The constraints do not hold – “Solve Constraints” brings the geometry back.',
+  // prompt 065
+  broken: (n: number) =>
+    n === 1 ? '1 constraint does not hold.' : `${n} constraints do not hold.`,
+  solveNow: 'Solve now',
+  valueHint: 'Double-click or Enter: change the value · Delete: remove',
+  removedOrphans: (n: number) =>
+    n === 1
+      ? '1 constraint was removed – its element is gone or no longer a line, rectangle, circle or polygon.'
+      : `${n} constraints were removed – their elements are gone or no longer lines, rectangles, circles or polygons.`,
+  section: 'Constraints',
+  selectPartner: 'Select the other element',
+  none: 'No constraints on this element.',
+  with: 'with',
 } as const;
 
 export const CONSTRAINT_TEXTS = translatable('constraints', EN, {
@@ -103,5 +116,17 @@ export const CONSTRAINT_TEXTS = translatable('constraints', EN, {
     remove: 'Abhängigkeit entfernen',
     notHolding:
       'Die Abhängigkeiten gelten nicht mehr – „Abhängigkeiten anwenden“ bringt die Geometrie zurück.',
+    broken: (n: number) =>
+      n === 1 ? '1 Abhängigkeit gilt nicht.' : `${n} Abhängigkeiten gelten nicht.`,
+    solveNow: 'Jetzt lösen',
+    valueHint: 'Doppelklick oder Enter: Wert ändern · Entf: entfernen',
+    removedOrphans: (n: number) =>
+      n === 1
+        ? '1 Abhängigkeit wurde entfernt – ihr Element fehlt oder ist keine Linie, kein Rechteck, Kreis oder Polygon mehr.'
+        : `${n} Abhängigkeiten wurden entfernt – ihre Elemente fehlen oder sind keine Linien, Rechtecke, Kreise oder Polygone mehr.`,
+    section: 'Abhängigkeiten',
+    selectPartner: 'Das andere Element auswählen',
+    none: 'Keine Abhängigkeiten an diesem Element.',
+    with: 'mit',
   },
 });

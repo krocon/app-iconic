@@ -59,6 +59,35 @@ describe('UndoService', () => {
     expect(stroke()).toBe('red');
   });
 
+  it('several followers run by order, each sees the one before (prompt 065)', () => {
+    const { undo, fill, doc } = setup();
+    const attr = (n: string) => doc.node(rect)?.getAttribute(n);
+    // the later one (order 20) copies what the earlier one (order 10) wrote
+    undo.setFollower(
+      () =>
+        attr('opacity') === attr('stroke-width')
+          ? null
+          : new SetAttributes([{ ref: rect, name: 'opacity', value: attr('stroke-width')! }]),
+      'second',
+      20,
+    );
+    undo.setFollower(
+      () =>
+        attr('stroke-width') === '3'
+          ? null
+          : new SetAttributes([{ ref: rect, name: 'stroke-width', value: '3' }]),
+      'first',
+      10,
+    );
+    undo.execute(new SetAttribute(rect, 'fill', 'red', 'changeFill'));
+    expect([fill(), attr('stroke-width'), attr('opacity')]).toEqual(['red', '3', '3']);
+    undo.undo();
+    expect(attr('opacity')).toBeNull();
+    expect(attr('stroke-width')).toBeNull();
+    undo.setFollower(null, 'first');
+    undo.setFollower(null, 'second');
+  });
+
   it('folds the steps of an AI call into one "AI:" step (design 018 E10)', () => {
     const { undo, fill, doc } = setup();
     undo.execute(new SetAttribute(rect, 'fill', 'red', 'changeFill'));

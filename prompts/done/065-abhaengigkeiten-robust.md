@@ -1,7 +1,14 @@
 # Prompt 065: Abhängigkeiten ohne stille Brüche
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 059, 060 · Quelle:
-> [Analyse 30.10.2026](2026.10.30%20-%20analyse.md) §2.3 (P0, Aufwand M)
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 059, 060 · Quelle:
+> [Analyse 30.10.2026](../2026.10.30%20-%20analyse.md) §2.3 (P0, Aufwand M)
+
+## Stand
+
+- ✅ 30.10.2026: verletzte Beziehungen rot + Hinweis „Jetzt lösen“; Einstellung `constraints.autoSolve`; mehrere
+  Follower mit Reihenfolge im UndoService; Maße wählen/bearbeiten/löschen; Overlay nur für Gemaltes (die Lage über die
+  CTM war schon richtig – Test bleibt); Abschnitt im Properties-Panel; Aufräumen und Kopieren der Beziehungen als
+  Follower. Design: [065-abhaengigkeiten-robust.design.md](065-abhaengigkeiten-robust.design.md).
 
 ## Ziel
 

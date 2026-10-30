@@ -116,6 +116,7 @@
 - [x] Abhängigkeiten und treibende Maße wie Fusion 360 (059): deckungsgleich, horizontal, vertikal, parallel,
       senkrecht, tangential, gleich, konzentrisch, Mittelpunkt, symmetrisch, fixiert; Abstand, Länge, Radius, Durchmesser,
       Winkel als treibende Maße (Wert ändern → Geometrie folgt); Punkte ziehen hält alle Beziehungen; Werkzeug K
+- [x] Abhängigkeiten im Alltag _(neu)_ (065): verletzte rot + „Jetzt lösen“, optional automatisch nachlösen (Einstellung), Maße per Entf löschbar, Liste im Properties-Panel, keine Reste nach Löschen/Ersetzen, Kopien behalten ihre Beziehungen
 - [x] Flächen füllen wie „Interaktiv malen“ (060): Werkzeug F füllt jede von Linien, Bögen und Kreisen umschlossene
       Fläche (auch aus offenen Linien); die Füllung folgt live, wenn sich die Umrisse ändern (im selben Undo-Schritt)
 - [x] Stil-Gedächtnis je Formtyp _(neu)_ (019): neue Formen übernehmen Fill/Stroke/Breite/Deckkraft … der zuletzt

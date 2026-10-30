@@ -7,6 +7,7 @@ import { Settings, SettingsPatch } from '../../core/settings/settings.models';
 import { applyTheme } from '../../core/settings/theme';
 import { CanvasOptions, CanvasViewStore } from '../canvas/canvas-view.store';
 import { logUndoGrouping } from '../document/undo/undo-log';
+import { ConstraintFollower } from '../constraints/constraint-follower';
 import { ExportChoice } from '../export/export-options';
 import { ExportService } from '../export/export.service';
 import { FilesService } from '../files/files.service';
@@ -55,6 +56,7 @@ export class SettingsSync {
   private readonly exporter = inject(ExportService);
   private readonly freehand = inject(FreehandStore);
   private readonly files = inject(FilesService);
+  private readonly constraints = inject(ConstraintFollower);
   private readonly api = inject(SettingsApi, { optional: true });
   private readonly doc = inject(DOCUMENT);
   private readonly injector = inject(Injector);
@@ -93,6 +95,8 @@ export class SettingsSync {
       untracked(() => setLanguage(lang === 'system' ? systemLanguage() : lang));
     }, opts);
     effect(() => logUndoGrouping.set(this.store.settings().debug.logUndoGrouping), opts);
+    // constraints are solved again after free changes (prompt 065)
+    effect(() => this.constraints.autoSolve.set(this.store.settings().constraints.autoSolve), opts);
     // a change waiting in the bundle is sent when the window goes or loses the focus
     const flush = () => void this.store.flush();
     const win = this.doc.defaultView;

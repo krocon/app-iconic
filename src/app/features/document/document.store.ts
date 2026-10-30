@@ -62,9 +62,12 @@ export class DocumentStore {
     });
   }
 
-  /** Derived content kept up to date in the same step (prompt 060, `UndoService.setFollower`). */
-  setFollower(fn: (() => DocCommand | null) | null): void {
-    this.undoService.setFollower(fn);
+  /**
+   * Derived content kept up to date in the same step (prompt 060, `UndoService.setFollower`);
+   * several by `key`, run by `order` (prompt 065).
+   */
+  setFollower(fn: (() => DocCommand | null) | null, key = 'default', order = 0): void {
+    this.undoService.setFollower(fn, key, order);
   }
 
   execute(command: DocCommand): void {

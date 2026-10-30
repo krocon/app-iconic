@@ -139,6 +139,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/constraints/   Abhängigkeiten + treibende Maße (059): constraint-storage (metadata + data-cid),
                               ConstraintService (Solver-Aufrufe als Commands), ConstraintTool (K), constraint-targets,
                               ConstraintOverlay + constraint-view (Symbole, Maße), constraint-actions, Texte
+                              ConstraintFollower + constraint-housekeeping (Follower: Aufräumen, Nachlösen, 065),
+                              ConstraintSection (Properties)
   app/features/live-fill/     Flächen füllen, live (060): LiveFillService (Follower des UndoService), LiveFillTool (F),
                               LiveFillOverlay, live-fill-model (data-live-fill, Merkpunkte), live-fill-actions, Texte
   app/features/gradient/      Verlaufseditor (032): gradient-model (rein), GradientService, GradientSection (Panel),

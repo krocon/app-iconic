@@ -40,6 +40,8 @@ export interface Badge {
   type: Constraint['type'];
   glyph: string;
   at: Point;
+  /** Does not hold now (prompt 065). */
+  broken: boolean;
 }
 
 export interface DrivingDimension {
@@ -51,6 +53,7 @@ export interface DrivingDimension {
   rotate: number;
   text: string;
   value: number;
+  broken: boolean;
 }
 
 const n = (v: number) => String(Math.round(v * 1000) / 1000);
@@ -154,6 +157,7 @@ export function overlayItems(
   list: readonly Constraint[],
   at: (ref: string) => EntityValue | null,
   toView: Matrix,
+  broken: ReadonlySet<string> = new Set(),
 ): { badges: Badge[]; dims: DrivingDimension[] } {
   const badges: Badge[] = [];
   const dims: DrivingDimension[] = [];
@@ -171,6 +175,7 @@ export function overlayItems(
           rotate: s.rotate,
           text: valueText(c),
           value: Math.abs(c.value ?? 0),
+          broken: broken.has(c.id),
         });
         continue;
       }
@@ -188,6 +193,7 @@ export function overlayItems(
       type: c.type,
       glyph: GLYPHS[c.type] ?? '?',
       at: { x: p.x + 10 + i * 18, y: p.y - 14 },
+      broken: broken.has(c.id),
     });
   }
   return { badges, dims };

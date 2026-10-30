@@ -58,6 +58,9 @@ const EN = {
   mcpOff: 'Off – no connection is possible.',
   mcpListening: 'On – no AI is connected.',
   mcpConnected: (n: number) => (n === 1 ? 'AI connected.' : `${n} AI clients connected.`),
+  autoSolve: 'Solve constraints after free changes',
+  autoSolveHint:
+    'Moving or resizing constrained elements with the selection keeps their relations and driving dimensions.',
   logUndo: 'Log Undo Grouping',
   logUndoHint: 'Writes how changes are grouped into undo steps to the developer console.',
   reset: 'Reset to Default…',
@@ -133,6 +136,9 @@ export const SETTINGS_TEXTS = translatable('settings', EN, {
     mcpOff: 'Aus – keine Verbindung möglich.',
     mcpListening: 'An – keine KI verbunden.',
     mcpConnected: (n: number) => (n === 1 ? 'KI verbunden.' : `${n} KI-Clients verbunden.`),
+    autoSolve: 'Abhängigkeiten nach freien Änderungen lösen',
+    autoSolveHint:
+      'Verschieben oder Skalieren gebundener Elemente mit der Auswahl hält ihre Beziehungen und treibenden Maße.',
     logUndo: 'Undo-Gruppierung protokollieren',
     logUndoHint:
       'Schreibt in die Entwicklerkonsole, wie Änderungen zu Undo-Schritten zusammengefasst werden.',

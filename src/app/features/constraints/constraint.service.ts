@@ -297,13 +297,19 @@ export class ConstraintService {
 
   /** Brings the geometry of an asset back in line with its constraints (after free edits). */
   solveAsset(asset: string): ConstraintError | true {
+    const cmds = this.solveCommands(asset);
+    if (typeof cmds === 'string') return cmds;
+    this.run('solveConstraints', cmds);
+    return true;
+  }
+
+  /** The commands that solve an asset now (not run; prompt 065: the auto-solve follower). */
+  solveCommands(asset: string): DocCommand[] | ConstraintError {
     const s = this.sketch(asset);
     if (!s) return 'invalid';
-    if (!s.list.length) return true;
+    if (!s.list.length) return [];
     const r = this.solveList(s, s.list);
-    if (!r.ok) return 'conflict';
-    this.run('solveConstraints', this.commands(s, r.x, null));
-    return true;
+    return r.ok ? this.commands(s, r.x, null) : 'conflict';
   }
 
   /** The assets that have constraints. */
@@ -331,12 +337,22 @@ export class ConstraintService {
     };
   }
 
+  /** The ids of the constraints of an asset that do not hold now (prompt 065). */
+  broken(asset: string): string[] {
+    const s = this.sketch(asset);
+    if (!s) return [];
+    return s.list
+      .filter((c) =>
+        systemResiduals(s.sys, [c])
+          .f(s.sys.x0)
+          .some((v) => Math.abs(v) >= 1e-2),
+      )
+      .map((c) => c.id);
+  }
+
   /** Whether an asset's constraints hold now. */
   holds(asset: string): boolean {
-    const s = this.sketch(asset);
-    if (!s) return true;
-    const { f } = systemResiduals(s.sys, s.list);
-    return f(s.sys.x0).every((v) => Math.abs(v) < 1e-2);
+    return this.broken(asset).length === 0;
   }
 
   /** Starts dragging the point `ref` (`cid.part`) of `asset` – one undo step until {@link dragEnd}. */

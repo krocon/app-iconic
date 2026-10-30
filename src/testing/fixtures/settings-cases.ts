@@ -46,6 +46,7 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
     freehand: { epsilon: 2.5, strokeWidth: 8, closed: false },
     debug: { logUndoGrouping: false },
     mcp: { enabled: false, confirmFiles: true },
+    constraints: { autoSolve: false },
     drawing: {
       styles: {
         rect: {

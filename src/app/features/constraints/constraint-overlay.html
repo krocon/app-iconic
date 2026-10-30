@@ -1,6 +1,11 @@
 <svg class="overlay" aria-hidden="true">
   @for (d of items().dims; track d.asset + d.id) {
-    <path class="dim" [class.selected]="isSelected(d.asset, d.id)" [attr.d]="d.d" />
+    <path
+      class="dim"
+      [class.selected]="isSelected(d.asset, d.id)"
+      [class.broken]="d.broken"
+      [attr.d]="d.d"
+    />
   }
   @for (p of points(); track $index) {
     <rect class="point" [attr.x]="p.x - 3" [attr.y]="p.y - 3" width="6" height="6" />
@@ -38,6 +43,7 @@
     [attr.data-type]="b.type"
     [attr.data-id]="b.id"
     [class.selected]="isSelected(b.asset, b.id)"
+    [class.broken]="b.broken"
     [style.left.px]="b.at.x"
     [style.top.px]="b.at.y"
     [attr.aria-label]="t.types[b.type]"
@@ -70,16 +76,32 @@
       data-testid="constraint-value"
       [attr.data-id]="d.id"
       [class.selected]="isSelected(d.asset, d.id)"
+      [class.broken]="d.broken"
       [style.left.px]="d.label.x"
       [style.top.px]="d.label.y"
       [style.transform]="'translate(-50%, -100%) rotate(' + d.rotate + 'deg)'"
       [attr.aria-label]="t.editValue(t.types[d.type]) + ': ' + d.text"
-      (pointerdown)="edit($event, d)"
-      (keydown)="badgeKey($event, d.asset, d.id)"
+      [title]="t.valueHint"
+      (pointerdown)="select($event, d.asset, d.id)"
+      (dblclick)="edit($event, d)"
+      (keydown)="valueKey($event, d)"
     >
       {{ d.text }}
     </button>
   }
+}
+@if (brokenCount() > 0 && (tool.visible() || tool.on())) {
+  <div
+    class="broken-note"
+    role="status"
+    data-testid="constraint-broken"
+    (pointerdown)="stop($event)"
+  >
+    <span>{{ t.broken(brokenCount()) }}</span>
+    <button type="button" class="btn" data-testid="constraint-solve-now" (click)="solveNow()">
+      {{ t.solveNow }}
+    </button>
+  </div>
 }
 @if (tool.on()) {
   <div

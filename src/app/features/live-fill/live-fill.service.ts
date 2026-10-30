@@ -42,7 +42,8 @@ export class LiveFillService {
     effect(() => {
       const store = this.files.store();
       if (!store) return;
-      store.setFollower(() => this.follow());
+      // after the constraints (prompt 065): fills follow the solved geometry
+      store.setFollower(() => this.follow(), 'liveFill', 20);
       if (this.hasFills(store.document())) void this.ready();
     });
   }

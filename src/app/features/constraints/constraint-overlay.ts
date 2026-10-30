@@ -13,7 +13,10 @@ import {
 import { ActionService } from '../../core/actions/action.service';
 import { CONSTRAINT_TYPES, ConstraintType } from '../../shared/geometry/constraints/constraints';
 import { apply, IDENTITY, Matrix } from '../../shared/geometry/matrix';
+import { CanvasViewStore } from '../canvas/canvas-view.store';
+import { isRendered, paintedRoots } from '../canvas/hit-test';
 import { FilesService } from '../files/files.service';
+import { elementsByCid } from './constraint-storage';
 import { ConstraintService } from './constraint.service';
 import { ConstraintTool } from './constraint-tool';
 import { CONSTRAINT_TEXTS as T } from './constraint-texts';
@@ -37,6 +40,7 @@ export class ConstraintOverlay {
   private readonly service = inject(ConstraintService);
   private readonly files = inject(FilesService);
   private readonly actions = inject(ActionService);
+  private readonly view = inject(CanvasViewStore);
   protected readonly t = T;
   protected readonly types = CONSTRAINT_TYPES;
   protected readonly glyphs = GLYPHS;
@@ -44,24 +48,57 @@ export class ConstraintOverlay {
   private readonly field = viewChild<ElementRef<HTMLInputElement>>('field');
   private readonly injector = inject(Injector);
 
+  /**
+   * The assets painted now with their broken constraints (prompt 065): hidden layers and groups
+   * are not painted, so they show nothing.
+   */
+  private readonly painted = computed(() => {
+    const store = this.files.store();
+    if (!store) return [];
+    store.revision();
+    this.toView();
+    const box = this.view.layers;
+    const shown = new Set(box ? paintedRoots(box).map((r) => r.asset) : []);
+    return this.service
+      .assets()
+      .filter((a) => shown.has(a))
+      .map((asset) => ({ asset, broken: new Set(this.service.broken(asset)) }));
+  });
+
+  /** Constraints that do not hold, in all painted assets. */
+  protected readonly brokenCount = computed(() =>
+    this.painted().reduce((n, a) => n + a.broken.size, 0),
+  );
+
   protected readonly items = computed(() => {
     const store = this.files.store();
     if (!store || (!this.tool.visible() && !this.tool.on())) return { badges: [], dims: [] };
-    store.revision();
     const v = this.toView();
     const out = {
       badges: [] as ReturnType<typeof overlayItems>['badges'],
       dims: [] as DrivingDimension[],
     };
-    for (const asset of this.service.assets()) {
+    for (const { asset, broken } of this.painted()) {
       const s = this.service.snapshot(asset);
-      if (!s) continue;
-      const it = overlayItems(asset, s.list, s.at, v);
+      const root = store.document().asset(asset)?.svg?.root;
+      if (!s || !root) continue;
+      // only what is painted: an element hidden itself or inside a hidden group shows nothing
+      const els = elementsByCid(root);
+      const shown = (ref: string) => {
+        const el = els.get(ref.slice(0, ref.indexOf('.')));
+        return !!el && isRendered(el, root);
+      };
+      const list = s.list.filter((c) => c.refs.every(shown));
+      const it = overlayItems(asset, list, s.at, v, broken);
       out.badges.push(...it.badges);
       out.dims.push(...it.dims);
     }
     return out;
   });
+
+  protected solveNow(): void {
+    this.actions.run('constraint.solve');
+  }
 
   protected readonly points = computed(() => {
     const v = this.toView();
@@ -97,6 +134,18 @@ export class ConstraintOverlay {
   protected select(e: Event, asset: string, id: string): void {
     e.stopPropagation();
     this.tool.selected.set({ asset, id });
+    // WebKit does not focus buttons on click: Delete must reach this one (prompt 065)
+    (e.currentTarget as HTMLElement | null)?.focus?.();
+  }
+
+  /** Keys on a driving dimension: Enter edits its value, Delete / Backspace removes it (065). */
+  protected valueKey(e: KeyboardEvent, d: DrivingDimension): void {
+    if (e.key === 'Enter') {
+      this.edit(e, d);
+      e.preventDefault();
+      return;
+    }
+    this.badgeKey(e, d.asset, d.id);
   }
 
   protected badgeKey(e: KeyboardEvent, asset: string, id: string): void {

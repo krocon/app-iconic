@@ -116,6 +116,14 @@ pub struct McpSettings {
     pub confirm_files: bool,
 }
 
+/// Constraints (prompt 065).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConstraintSettings {
+    /// Solve the constraints again after free changes (default off).
+    pub auto_solve: bool,
+}
+
 /// The remembered paint of one kind of shape (design 019 E12): attribute values as written, `""`
 /// = not set.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -225,6 +233,7 @@ pub struct Settings {
     pub freehand: FreehandSettings,
     pub debug: DebugSettings,
     pub mcp: McpSettings,
+    pub constraints: ConstraintSettings,
     pub drawing: DrawingSettings,
 }
 
@@ -282,6 +291,7 @@ impl Default for Settings {
                 enabled: false,
                 confirm_files: true,
             },
+            constraints: ConstraintSettings { auto_solve: false },
             drawing: DrawingSettings {
                 styles: DrawingStyles {
                     rect: DrawStyle::thin_line(),

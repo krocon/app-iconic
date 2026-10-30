@@ -39,6 +39,7 @@
     "freehand": { "epsilon": 2.5, "strokeWidth": 8, "closed": false },
     "debug": { "logUndoGrouping": false },
     "mcp": { "enabled": false, "confirmFiles": true },
+    "constraints": { "autoSolve": false },
     "drawing": {
       "styles": {
         "rect": {
