@@ -138,6 +138,9 @@
   <span class="coords" data-testid="canvas-coords" [attr.aria-label]="t.position">
     X {{ coord(pointer()?.x) }} &nbsp; Y {{ coord(pointer()?.y) }}
   </span>
+  @if (toolName(); as name) {
+    <span class="tool-name" data-testid="tool-name">{{ name }}</span>
+  }
   @if (freehand.active()) {
     <span class="hint tool" data-testid="tool-hint">{{ tt.freehand.hint }}</span>
   }

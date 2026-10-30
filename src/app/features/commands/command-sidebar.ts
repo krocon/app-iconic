@@ -1,6 +1,7 @@
 import {
   afterRenderEffect,
   ChangeDetectionStrategy,
+  effect,
   Component,
   computed,
   DestroyRef,
@@ -8,6 +9,7 @@ import {
   inject,
   input,
   signal,
+  untracked,
 } from '@angular/core';
 import { ActionService } from '../../core/actions/action.service';
 import { matches } from '../menus/command-palette';
@@ -22,6 +24,8 @@ interface Leaf {
   shortcut: string;
   enabled: boolean;
   icon: string;
+  /** Toggle tools (prompt 061): on/off; `undefined` for one-shot actions. */
+  checked: boolean | undefined;
 }
 
 interface Group {
@@ -29,8 +33,10 @@ interface Group {
   id: string;
   group: AddGroupKey;
   label: string;
-  /** The icon of the first variant (the one at the centre). */
+  /** The icon of the active variant, else the last used one, else the first (prompt 061). */
   icon: string;
+  /** One of its variants is the active tool (its label, for the screen reader). */
+  checked: string | null;
   items: Leaf[];
 }
 
@@ -72,6 +78,8 @@ export class CommandSidebar {
   protected readonly sub = signal(-1);
   /** Where the submenu is (viewport pixels). */
   protected readonly at = signal({ left: 0, top: 0 });
+  /** The last active variant of each shape (its icon stands for the group, prompt 061). */
+  private readonly lastUsed = signal<Partial<Record<AddGroupKey, string>>>({});
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -83,6 +91,7 @@ export class CommandSidebar {
       shortcut: this.actions.shortcut(id),
       enabled: this.actions.enabled(id),
       icon: COMMAND_ICONS[id] ?? '',
+      checked: this.actions.checked(id),
     };
   }
 
@@ -102,12 +111,15 @@ export class CommandSidebar {
         : s.entries.map((e) => {
             if (e.kind === 'action') return row(this.leaf(e.id));
             const items = e.ids.map((id) => this.leaf(id));
+            const on = items.find((i) => i.checked === true);
+            const last = items.find((i) => i.id === this.lastUsed()[e.group]);
             return row({
               kind: 'group',
               id: `group:${e.group}`,
               group: e.group,
               label: this.t.groups[e.group],
-              icon: items[0]?.icon ?? '',
+              icon: (on ?? last ?? items[0])?.icon ?? '',
+              checked: on?.label ?? null,
               items,
             });
           }),
@@ -128,6 +140,16 @@ export class CommandSidebar {
   });
 
   constructor() {
+    // remember the variant that was on: it stays the group's icon (prompt 061)
+    effect(() => {
+      for (const s of ADD_LAYOUT)
+        for (const e of s.entries) {
+          if (e.kind !== 'group') continue;
+          const on = e.ids.find((id) => this.actions.checked(id) === true);
+          if (on && untracked(this.lastUsed)[e.group] !== on)
+            this.lastUsed.update((m) => ({ ...m, [e.group]: on }));
+        }
+    });
     afterRenderEffect(() => {
       this.host.querySelector(`#command-${this.active()}`)?.scrollIntoView?.({ block: 'nearest' });
     });
@@ -145,8 +167,14 @@ export class CommandSidebar {
     inject(DestroyRef).onDestroy(() => clearTimeout(this.timer));
   }
 
+  /** For the screen reader: the shape and its active tool ("Line, submenu, active: Pen"). */
+  protected groupLabel(r: Group): string {
+    const base = `${r.label}, ${this.t.submenu}`;
+    return r.checked ? `${base}, ${this.t.active}: ${r.checked}` : base;
+  }
+
   protected tooltip(r: Leaf | Group): string {
-    if (r.kind === 'group') return r.label;
+    if (r.kind === 'group') return r.checked ? `${r.label} – ${r.checked}` : r.label;
     return r.enabled ? this.actions.tooltip(r.id) : `${r.label} – ${this.t.later}`;
   }
 

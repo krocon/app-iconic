@@ -34,6 +34,7 @@ export function registerToolActions(
           return undefined;
         },
         enabled,
+        checked: () => freehand.tool.active(),
       },
       'freehand.toggleClosed': {
         run: () => freehand.tool.closed.update((c) => !c),

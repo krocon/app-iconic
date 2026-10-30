@@ -183,6 +183,11 @@
     white-space: nowrap;
   }
 
+  .tool-name {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
   .hint {
     color: var(--color-warning);
     overflow: hidden;

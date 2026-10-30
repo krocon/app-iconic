@@ -1,6 +1,6 @@
 import { actionDef } from '../../core/actions/action-catalog';
 import { buildKeymap } from '../../core/actions/keymap';
-import { addLayoutIds } from '../commands/add-layout';
+import { ADD_MENU_LAYOUT, addLayoutIds } from '../commands/add-layout';
 import { matches } from './command-palette';
 import {
   actionIds,
@@ -46,7 +46,7 @@ describe('menu model (design 005 E5)', () => {
 
   it('builds the Add menu from the sidebar layout: shapes in submenus like Fusion', () => {
     const add = buildMenuModel('other', { recent: [] }).find((m) => m.label === 'Add')!;
-    expect(actionIds(add.items)).toEqual(addLayoutIds());
+    expect(actionIds(add.items)).toEqual(addLayoutIds(ADD_MENU_LAYOUT));
     const subs = add.items.filter((i) => i.kind === 'submenu').map((i) => i.label);
     expect(subs).toEqual([
       'Line',

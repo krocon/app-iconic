@@ -3,7 +3,7 @@
  * E10; prompt 019): by shape like Fusion's "Create" menu – the variants of one shape in a submenu,
  * the one-click variant at the centre first, then the sketch tools. Pure.
  */
-export type AddSectionKey = 'structure' | 'shapes' | 'text' | 'import';
+export type AddSectionKey = 'select' | 'structure' | 'shapes' | 'text' | 'import';
 export type AddGroupKey =
   | 'line'
   | 'rectangle'
@@ -35,6 +35,8 @@ const group = (key: AddGroupKey, ids: readonly string[]): AddEntry => ({
 });
 
 export const ADD_LAYOUT: readonly AddSection[] = [
+  // the selection tools first (prompt 061); not part of the Add menu
+  { section: 'select', entries: [act('tool.select'), act('tool.direct')] },
   { section: 'structure', entries: [act('add.iconGroup'), act('add.container')] },
   {
     section: 'shapes',
@@ -104,6 +106,27 @@ export const ADD_LAYOUT: readonly AddSection[] = [
   { section: 'text', entries: [act('add.text'), act('add.textToPath')] },
   { section: 'import', entries: [act('add.symbol'), act('add.svgSnippet'), act('add.image')] },
 ];
+
+/** The sections of the Add menu: everything but the selection tools (prompt 061). */
+export const ADD_MENU_LAYOUT: readonly AddSection[] = ADD_LAYOUT.filter(
+  (s) => s.section !== 'select',
+);
+
+/**
+ * The tools whose name the status line shows (prompt 061): the selection tools, every entry of
+ * the layout and the transform tools of the Arrange menu; the active one is the checked one.
+ */
+export const TOOL_ACTION_IDS: readonly string[] = [
+  ...addLayoutIds(),
+  'transform.rotate',
+  'transform.scale',
+  'transform.reflect',
+];
+
+/** The checked tool of {@link TOOL_ACTION_IDS} (a tool on, else a selection tool), or `null`. */
+export function activeToolId(checked: (id: string) => boolean | undefined): string | null {
+  return TOOL_ACTION_IDS.find((id) => checked(id) === true) ?? null;
+}
 
 /** The action ids of one entry (a group: its variants). */
 export function entryIds(e: AddEntry): readonly string[] {

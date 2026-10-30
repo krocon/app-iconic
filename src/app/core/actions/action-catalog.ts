@@ -189,6 +189,9 @@ export const ACTIONS: readonly ActionDef[] = [
   }),
   EDIT('edit.selectAll', 'Select All', TEXT),
   EDIT('edit.deselect', 'Deselect'),
+  // the selection tools (prompt 061): end every tool; Boxed / Point selection mode
+  EDIT('tool.select', 'Selection Tool'),
+  EDIT('tool.direct', 'Direct Selection Tool'),
   // selection as JSON (AI, tests; design 006 E16): `{ nodes?: NodeRef[], items?: IconItem[] }`
   EDIT('edit.select', 'Select', {
     palette: false,

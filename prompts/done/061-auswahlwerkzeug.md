@@ -1,7 +1,14 @@
 # Prompt 061: Auswahlwerkzeug und sichtbarer Werkzeugstatus
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 005, 007, 008 · Quelle:
-> [Analyse 30.10.2026](2026.10.30%20-%20analyse.md) §3.1 (P0, Aufwand S)
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 005, 007, 008 · Quelle:
+> [Analyse 30.10.2026](../2026.10.30%20-%20analyse.md) §3.1 (P0, Aufwand S)
+
+## Stand
+
+- ✅ 30.10.2026: `tool.select` (V, Rahmen) und `tool.direct` (A, Punkte) beenden jedes Werkzeug (Freehand jetzt als
+  Modus in `CanvasTools`); Sektion „Select“ oben in der Sidebar; aktives Werkzeug mit Akzentfarbe und
+  `aria-checked`/`aria-pressed`, Gruppen zeigen die aktive bzw. zuletzt benutzte Variante; Statuszeile nennt das
+  Werkzeug; `add.freehand` meldet `checked`. Design: [061-auswahlwerkzeug.design.md](061-auswahlwerkzeug.design.md).
 
 ## Ziel
 

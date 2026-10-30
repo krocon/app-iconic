@@ -49,6 +49,9 @@
 ## 4. Auswahl & Manipulation
 
 - [x] Selection Modes none / point / boxed, Mehrfachauswahl ⇧/⌘, Rahmenauswahl (007)
+- [x] Auswahlwerkzeug V (Rahmen) und Direktauswahl A (Punkte) _(neu)_ (061): beenden jedes Werkzeug; aktives
+      Werkzeug in der Command Sidebar markiert (auch eingeklappt, Gruppen zeigen die aktive Variante) und in der
+      Statuszeile genannt
 - [x] Hit-Testing, Klick ins Leere hebt Auswahl auf, Doppelklick in Gruppe, Esc heraus (007)
 - [x] Handles position/size/control/anchor/midpoint/pivot mit Farben/Größen der Vorlage, Box-Handles (007)
 - [x] Punktbearbeitung Polyline/Polygon/Pfad (alle Befehle, relativ bleibt relativ), Punkt einfügen über Mitte, löschen mit ⌥-Klick/Entf (007)

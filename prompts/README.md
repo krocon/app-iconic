@@ -74,7 +74,7 @@ Code bestätigen (roter Test) – sie stammen aus einer Fremdanalyse und können
 | 058 | [058-als-konstruktion-zeichnen.md](done/058-als-konstruktion-zeichnen.md) | Direkt als Konstruktion zeichnen | 049 | S | ✅ 29.10.2026 |
 | 059 | [059-abhaengigkeiten.md](done/059-abhaengigkeiten.md) | Abhängigkeiten und treibende Maße (parametrisch) | 048, 050, 051 | XL | ✅ 29.10.2026 |
 | 060 | [060-flaechen-fuellen.md](done/060-flaechen-fuellen.md) | Flächen füllen (live): durch Überlagerung entstehende Flächen einfärben | 047, 050 | L | ✅ 29.10.2026 |
-| 061 | [061-auswahlwerkzeug.md](061-auswahlwerkzeug.md) | Auswahl `V` / Direktauswahl `A`, ein ToolStore, aktives Werkzeug sichtbar (`aria-pressed`, auch eingeklappt) | 005, 007, 008 | S | offen |
+| 061 | [061-auswahlwerkzeug.md](done/061-auswahlwerkzeug.md) | Auswahl `V` / Direktauswahl `A`, ein ToolStore, aktives Werkzeug sichtbar (`aria-pressed`, auch eingeklappt) | 005, 007, 008 | S | ✅ 30.10.2026 |
 | 062 | [062-bbox-inspektor.md](062-bbox-inspektor.md) | Transform-Kopf im Properties-Panel: X, Y, B, H, Drehung, Spiegeln, Bezugspunkt – für Pfade, Gruppen, Mehrfachauswahl | 007, 009, 053 | M | offen |
 | 063 | [063-z-reihenfolge-baum.md](063-z-reihenfolge-baum.md) | SVG-Kinder im Baum „oben = vorn“ wie Gruppen/Layer (Frage 006/1) | 006 | S–M | offen |
 | 064 | [064-fehlerbehebungen.md](064-fehlerbehebungen.md) | Gesperrte Objekte vor Trim & Co. schützen, Display-P3 ↔ sRGB, Pattern-Grenze, Blend-Modes im PNG-Export prüfen | 010, 012, 049–051, 055 | S–M | offen |

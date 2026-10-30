@@ -10,8 +10,10 @@ const EN = {
   listLabel: 'Add commands',
   noMatch: 'No command matches.',
   later: 'Coming in a later version',
+  active: 'active',
   submenu: 'submenu',
   sections: {
+    select: 'Select',
     structure: 'Structure',
     shapes: 'Shapes',
     text: 'Text',
@@ -53,8 +55,10 @@ export const COMMANDS_TEXTS = translatable('commands', EN, {
     listLabel: 'Befehle zum Hinzufügen',
     noMatch: 'Kein Befehl passt.',
     later: 'Kommt in einer späteren Version',
+    active: 'aktiv',
     submenu: 'Untermenü',
     sections: {
+      select: 'Auswahl',
       structure: 'Struktur',
       shapes: 'Formen',
       text: 'Text',

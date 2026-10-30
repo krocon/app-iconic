@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
+import { CanvasTools } from '../canvas/canvas-tools';
 import { acceptSample, FREEHAND_DEFAULTS, shouldAutoClose } from '../../shared/geometry/freehand';
 import { Point } from '../../shared/geometry/view-transform';
 
@@ -27,6 +28,15 @@ export class FreehandStore {
   readonly epsilon = signal<number>(FREEHAND_DEFAULTS.epsilon);
   readonly strokeWidth = signal(FREEHAND_STROKE_WIDTH);
   private last: { p: Point; t: number } | null = null;
+
+  constructor() {
+    // one tool at a time (prompt 061): another tool or the selection switches freehand off
+    inject(CanvasTools).registerMode({
+      id: 'freehand',
+      active: () => this.active(),
+      stop: () => this.toggle(false),
+    });
+  }
 
   /** Switches the tool on/off (`add.freehand`); a running stroke is dropped. */
   toggle(on = !this.active()): void {

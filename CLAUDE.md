@@ -121,7 +121,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
                               icon-color, asset-placement (004), effects (Vorschau-Annäherung, 010),
-                              canvas-actions, View-Options-Menü (005);
+                              canvas-actions, View-Options-Menü (005); CanvasTools (ein Werkzeug zur Zeit, Modi
+                              wie Freehand) + selection-tools (`tool.select` V / `tool.direct` A, 061);
                               Auswahl/Handles (007): CanvasEditStore (Kontext, Punkt, Rahmen, Snap), canvas-pointer
                               (Klick/Rahmen/Ziehen), canvas-gesture (Geste je Ziehen), hit-test, selection-measure
                               (Rahmen + Handle-Sets über CTM), selection-overlay, magic-points, edit-ops (rein),

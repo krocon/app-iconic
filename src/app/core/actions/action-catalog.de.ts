@@ -36,6 +36,8 @@ const FIXED: Record<string, string> = {
   'edit.toggleVisibility': 'Ein-/Ausblenden',
   'edit.selectAll': 'Alles auswählen',
   'edit.deselect': 'Auswahl aufheben',
+  'tool.select': 'Auswahlwerkzeug',
+  'tool.direct': 'Direktauswahl-Werkzeug',
   'edit.select': 'Auswählen',
   'edit.runCommand': 'Dokument-Befehl ausführen',
   'properties.set': 'Eigenschaft setzen',

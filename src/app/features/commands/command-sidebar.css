@@ -46,6 +46,17 @@
     &.disabled {
       color: var(--color-text-muted);
     }
+
+    /* the active tool (prompt 061) */
+    &.checked {
+      color: var(--color-accent-text);
+      background: var(--color-accent);
+
+      .chevron,
+      kbd {
+        color: inherit;
+      }
+    }
   }
 
   .icon,
@@ -146,6 +157,10 @@
     }
     &.disabled {
       color: var(--color-text-muted);
+    }
+    &.checked {
+      color: var(--color-accent-text);
+      background: var(--color-accent);
     }
     &:focus-visible {
       outline: 2px solid var(--color-focus);

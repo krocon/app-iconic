@@ -35,6 +35,8 @@
     "Mod+/": "app.shortcuts",
     "Mod+,": "app.settings",
     "Mod+Shift+h": "edit.toggleVisibility",
+    "v": "tool.select",
+    "a": "tool.direct",
     "l": "sketch.line",
     "r": "sketch.rect2p",
     "c": "sketch.circleCenter",

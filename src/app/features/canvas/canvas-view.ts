@@ -52,6 +52,8 @@ import { ToolOverlays } from './tool-overlays';
 import { GradientOverlay } from '../gradient/gradient-overlay';
 import { ConstraintOverlay } from '../constraints/constraint-overlay';
 import { LiveFillOverlay } from '../live-fill/live-fill-overlay';
+import { selectionToolActions } from './selection-tools';
+import { activeToolId } from '../commands/add-layout';
 import { CanvasTools } from './canvas-tools';
 import { followSelection } from './follow-selection';
 import { SketchOverlay } from '../sketch/sketch-overlay';
@@ -136,6 +138,12 @@ export class CanvasView {
   protected readonly sketch = inject(SketchStore);
   /** The tool modes (sketch, pen, curvature …): the active one gets the left button. */
   protected readonly tools = inject(CanvasTools);
+  private readonly actionList = inject(ActionService);
+  /** The name of the active tool for the status line (prompt 061). */
+  protected readonly toolName = computed(() => {
+    const id = activeToolId((a) => this.actionList.checked(a));
+    return id ? this.actionList.label(id) : null;
+  });
   /** Created here so that they register with `CanvasTools` (root services). */
   private readonly sketchTool = inject(SketchTool);
   private readonly penTool = inject(PenTool);
@@ -203,6 +211,7 @@ export class CanvasView {
     // zoom, view options … and Space held = pan (design 005 E16: actions instead of listeners)
     const actions = inject(ActionService);
     actions.registerAll(canvasActions(this.canvas), destroy);
+    actions.registerAll(selectionToolActions(this.canvas, this.tools), destroy);
     registerCanvasEditActions(
       actions,
       () => this.store(),

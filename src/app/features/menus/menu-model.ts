@@ -2,7 +2,7 @@ import { MAX_RECENT_ACTIONS } from '../../core/actions/action-catalog';
 import { Os } from '../../core/actions/platform';
 import { formatChord } from '../../core/actions/shortcut';
 import { AppMenuSpec, MenuItemSpec, MenuSpec } from '../../core/menu/menu.models';
-import { ADD_LAYOUT } from '../commands/add-layout';
+import { ADD_MENU_LAYOUT } from '../commands/add-layout';
 import { COMMANDS_TEXTS } from '../commands/commands-texts';
 import { MENUS_TEXTS } from './menus-texts';
 
@@ -147,7 +147,7 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('app.palette'),
   ];
   // by shape like Fusion's "Create" menu (prompt 019): the layout of the command sidebar
-  const add: MenuNode[] = ADD_LAYOUT.flatMap((section, i) => [
+  const add: MenuNode[] = ADD_MENU_LAYOUT.flatMap((section, i) => [
     ...(i > 0 ? [sep] : []),
     ...section.entries.map((e) =>
       e.kind === 'action'
