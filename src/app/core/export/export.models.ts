@@ -6,7 +6,8 @@
 export const PNG_SIZES = [1024, 512, 256, 128, 64, 32, 16] as const;
 export type PngSize = (typeof PNG_SIZES)[number];
 
-export type ExportAppearance = 'light' | 'dark';
+/** `tinted`: the approximation of prompt 077 E2 (Rust `APPEARANCES`). */
+export type ExportAppearance = 'light' | 'dark' | 'tinted';
 
 /** One appearance of the icon as SVG text. */
 export interface ExportVariant {

@@ -6,7 +6,7 @@ import { CANVAS_SIZE } from '../../shared/geometry/icon-guides';
 
 /**
  * The preview approximation of Icon Composer's group effects (design 010 E13) – Apple's Liquid
- * Glass is not rebuilt: shadow as an SVG filter per layer (on the canvas composited on the layer's
+ * Glass is approximated in `glass.ts` (077 E6): shadow as an SVG filter per layer (on the canvas composited on the layer's
  * box, prompt 033 E5), translucency as an opacity gradient, blend modes as CSS `mix-blend-mode`. Values per appearance (specializations first). Pure.
  */
 
@@ -29,9 +29,19 @@ export const SHADOW_BLUR = 16;
 const num = (v: unknown, fallback: number) =>
   typeof v === 'number' && Number.isFinite(v) ? Math.min(Math.max(v, 0), 1) : fallback;
 
-/** CSS `mix-blend-mode` of an Icon Composer blend mode; `null` = normal / none in CSS. */
-export function blendCss(mode: unknown): string | null {
-  if (typeof mode !== 'string' || mode === 'normal' || mode === 'plus-darker') return null;
+/** Can this engine blend with `plus-darker` (WebKit; prompt 077 E4)? */
+export function supportsPlusDarker(): boolean {
+  return globalThis.CSS?.supports?.('mix-blend-mode', 'plus-darker') === true;
+}
+
+/**
+ * CSS `mix-blend-mode` of an Icon Composer blend mode; `null` = normal / none in CSS.
+ * `plus-darker` (Linear Burn) natively where the engine can (`nativePlusDarker`), else – and in
+ * the export, resvg knows neither plus mode – as `multiply` (approximation, prompt 077 E4).
+ */
+export function blendCss(mode: unknown, nativePlusDarker = false): string | null {
+  if (mode === 'plus-darker') return nativePlusDarker ? 'plus-darker' : 'multiply';
+  if (typeof mode !== 'string' || mode === 'normal') return null;
   const css = [
     'multiply',
     'screen',
@@ -49,7 +59,11 @@ export function blendCss(mode: unknown): string | null {
   return css.includes(mode) ? mode : null;
 }
 
-export function groupEffects(group: IconGroup, appearance: Appearance): GroupEffects {
+export function groupEffects(
+  group: IconGroup,
+  appearance: Appearance,
+  nativePlusDarker = false,
+): GroupEffects {
   const shadow = fieldFor(group, 'shadow', appearance, { kind: 'neutral', opacity: 0.5 });
   const tr = fieldFor(group, 'translucency', appearance, { enabled: true, value: 0.5 });
   const s = (typeof shadow === 'object' && shadow) || {};
@@ -64,7 +78,7 @@ export function groupEffects(group: IconGroup, appearance: Appearance): GroupEff
       (t as { enabled?: unknown }).enabled === true
         ? num((t as { value?: unknown }).value, 0.5)
         : null,
-    blend: blendCss(fieldFor(group, 'blend-mode', appearance, 'normal')),
+    blend: blendCss(fieldFor(group, 'blend-mode', appearance, 'normal'), nativePlusDarker),
   };
 }
 

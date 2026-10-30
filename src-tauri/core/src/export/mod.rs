@@ -20,7 +20,7 @@ pub const PNG_SIZES: [u32; 7] = [1024, 512, 256, 128, 64, 32, 16];
 pub const MAX_SVG_BYTES: usize = 64 << 20;
 
 /// Appearances the export knows (file name part).
-pub const APPEARANCES: [&str; 2] = ["light", "dark"];
+pub const APPEARANCES: [&str; 3] = ["light", "dark", "tinted"];
 
 /// One appearance of the icon as SVG text.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

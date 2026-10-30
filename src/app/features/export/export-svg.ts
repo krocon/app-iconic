@@ -8,7 +8,10 @@ import { Appearance } from '../canvas/appearance';
 import { assetPlacement } from '../canvas/asset-placement';
 import { shadowFilter } from '../canvas/effects';
 import { FillPreview, fillPreview } from '../canvas/fill-preview';
-import { SvgColor, svgColor } from '../canvas/icon-color';
+import { glassFilter } from '../canvas/glass';
+import { IconColor, SvgColor, svgColor } from '../canvas/icon-color';
+import { FILL_RECT, gradientElement } from '../canvas/layer-fill';
+import { DEFAULT_TINT, tintFilter } from '../canvas/tinted';
 import { StackGroup, StackLayer, stackOf } from '../canvas/layer-stack';
 import { MaskShape } from '../canvas/canvas-view.store';
 import { CANVAS_SIZE } from '../../shared/geometry/icon-guides';
@@ -25,8 +28,10 @@ import { squirclePath } from '../../shared/geometry/squircle';
 export interface ExportSvgOptions {
   /** Platform mask as `clipPath` (design 012 E5). */
   mask: MaskShape;
-  /** Shadow, translucency and blend modes as approximation (design 012 E6). */
+  /** Shadow, translucency, blend modes and glass as approximation (design 012 E6, 077 E6). */
   effects: boolean;
+  /** The tint of the `tinted` appearance (`#rrggbb`, prompt 077 E2); default white. */
+  tint?: string;
   /** Keep the dimensions (`data-dimension`, prompt 048); default: left out. */
   dimensions?: boolean;
 }
@@ -177,8 +182,59 @@ class Builder {
       this.defs.append(filter);
       el.setAttribute('filter', `url(#${ID}shadow-${n})`);
     }
-    el.append(l.asset.svg ? this.svgAsset(l.asset.svg.root, n) : this.image(l));
+    let inner = el;
+    if (l.glass) {
+      const id = `${ID}glass-${n}`;
+      const filter = glassFilter(this.d, id, l.glass);
+      filter.removeAttribute('data-kind');
+      this.defs.append(filter);
+      inner = this.el('g', { filter: `url(#${id})` });
+      el.append(inner);
+    }
+    const content = l.asset.svg ? this.svgAsset(l.asset.svg.root, n) : this.image(l);
+    inner.append(l.fill ? this.layerFill(l.fill, content, n) : content);
     return el;
+  }
+
+  /**
+   * Layer fill (prompt 077 E1): the content as an alpha mask, the fill as a big rect in layer
+   * space – plain SVG 1.1 for resvg and other tools.
+   */
+  private layerFill(fill: FillPreview<IconColor>, content: Element, n: number): Element {
+    const id = `${ID}layer-fill-${n}`;
+    const mask = this.el('mask', {
+      id: `${id}-mask`,
+      'mask-type': 'alpha',
+      maskUnits: 'userSpaceOnUse',
+      ...FILL_RECT,
+    });
+    mask.append(content);
+    const rect = this.el('rect', { ...FILL_RECT });
+    if (fill.kind === 'solid') {
+      const c = svgColor(fill.color);
+      rect.setAttribute('fill', c.hex);
+      if (c.opacity < 1) rect.setAttribute('fill-opacity', String(c.opacity));
+    } else if (fill.kind !== 'none') {
+      this.defs.append(
+        gradientElement(this.d, id, fill, (ic) => {
+          const c = svgColor(ic);
+          return { 'stop-color': c.hex, 'stop-opacity': c.opacity < 1 ? c.opacity : null };
+        }),
+      );
+      rect.setAttribute('fill', `url(#${id})`);
+    }
+    this.defs.append(mask);
+    const g = this.el('g', { mask: `url(#${id}-mask)` });
+    g.append(rect);
+    return g;
+  }
+
+  /** The tinted approximation (prompt 077 E2) around background and groups. */
+  tinted(target: Element): Element {
+    this.defs.append(tintFilter(this.d, `${ID}tint`, this.opts.tint ?? DEFAULT_TINT));
+    const g = this.el('g', { class: `${ID}tinted`, filter: `url(#${ID}tint)` });
+    target.append(g);
+    return g;
   }
 
   private svgAsset(root: Element, n: number): Element {
@@ -224,7 +280,8 @@ export function exportSvg(
     b.root.setAttribute(k, String(v));
   }
   b.root.append(b.defs);
-  const target = b.maskGroup();
+  const masked = b.maskGroup();
+  const target = appearance === 'tinted' ? b.tinted(masked) : masked;
   const bg = b.background(fillPreview(doc.iconJson, appearance, svgColor).preview);
   if (bg) target.append(bg);
   for (const g of stackOf(doc, appearance, opts.effects)) target.append(b.group(g));

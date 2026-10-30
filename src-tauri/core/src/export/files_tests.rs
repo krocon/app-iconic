@@ -206,3 +206,34 @@ fn svg_files_are_written_as_given() {
     assert_eq!(again.code, FsErrorCode::AlreadyExists);
     assert!(export_svg(&variants(), dir.path(), &opts("cam scanner", true)).is_ok());
 }
+
+/// Prompt 077 E7: the tinted variant is a third appearance with its own file names.
+#[test]
+fn tinted_is_a_third_appearance() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut all = variants();
+    all.push(Variant {
+        appearance: "tinted".into(),
+        svg: OPAQUE.into(),
+    });
+    let report = export_svg(&all, dir.path(), &opts("icon", false)).unwrap();
+    let names: Vec<_> = report.files.iter().map(|f| f.name.clone()).collect();
+    assert_eq!(
+        names,
+        ["icon-light.svg", "icon-dark.svg", "icon-tinted.svg"]
+    );
+    let report = export_png(
+        &all[2..],
+        &[16],
+        dir.path(),
+        &opts("icon", false),
+        fonts(),
+        &AtomicBool::new(false),
+        |_| {},
+    )
+    .unwrap();
+    assert_eq!(report.files[0].name, "icon-tinted-16.png");
+    let mut four = all.clone();
+    four.push(all[0].clone());
+    assert!(export_svg(&four, dir.path(), &opts("x", true)).is_err());
+}

@@ -284,4 +284,61 @@ describe('exportSvg', () => {
       expect(t).not.toContain('data-ai-');
     }
   });
+
+  it('layer fill: the asset as alpha mask under a coloured rect (prompt 077 E1)', () => {
+    const d = doc([{ layers: [L('a.svg', { fill: { solid: 'srgb:1,0,0,1' } })] }]);
+    for (const effects of [false, true]) {
+      const t = exportSvg(d, 'light', { mask: 'none', effects });
+      checkReferences(t);
+      const root = parse(t);
+      const rect = root.querySelector('g[mask] > rect')!;
+      expect(rect.getAttribute('fill')).toBe('#ff0000');
+      expect(rect.getAttribute('x')).toBe('-1024');
+      const id = /url\(#([^)]+)\)/.exec(rect.parentElement!.getAttribute('mask')!)![1];
+      const mask = root.querySelector(`mask[id="${id}"]`)!;
+      expect(mask.getAttribute('mask-type')).toBe('alpha');
+      // the asset only in the mask, with its ids prefixed
+      expect(mask.querySelector('svg linearGradient')?.getAttribute('id')).toBe('l1-g');
+    }
+    // a gradient fill in layer space (userSpaceOnUse)
+    const g = doc([{ layers: [L('a.svg', { fill: { 'automatic-gradient': 'srgb:0,0,1,1' } })] }]);
+    const root = parse(exportSvg(g, 'light', NO_FX));
+    const grad = root.querySelector('linearGradient[gradientUnits="userSpaceOnUse"]')!;
+    expect(grad.getAttribute('y2')).toBe('1024');
+    expect(root.querySelector('g[mask] > rect')!.getAttribute('fill')).toBe(
+      `url(#${grad.getAttribute('id')})`,
+    );
+  });
+
+  it('tinted: luminance × tint around background and groups (prompt 077 E2)', () => {
+    const d = doc([{ layers: [L('a.svg')] }], { fill: { solid: 'srgb:0,1,0,1' } });
+    const t = exportSvg(d, 'tinted', { mask: 'squircle', effects: false, tint: '#ff8000' });
+    checkReferences(t);
+    const root = parse(t);
+    const tinted = root.querySelector('g[clip-path] > g[filter]')!;
+    expect(tinted.getAttribute('class')).toBe('ai-export-tinted');
+    expect(tinted.firstElementChild!.getAttribute('class')).toBe('ai-export-background');
+    const m = root.querySelector('filter#ai-export-tint feColorMatrix')!;
+    expect(m.getAttribute('values')!.startsWith('0.2126 0.7152 0.0722 0 0')).toBe(true);
+    expect(exportSvg(d, 'light', NO_FX)).not.toContain('feColorMatrix');
+  });
+
+  it('glass only with effects; plus-darker as multiply (prompt 077 E4, E6)', () => {
+    const d = doc([{ 'blend-mode': 'plus-darker', layers: [L('a.svg')] }]);
+    expect(exportSvg(d, 'light', NO_FX)).not.toContain('ai-export-glass');
+    const t = exportSvg(d, 'light', { mask: 'none', effects: true });
+    checkReferences(t);
+    const root = parse(t);
+    expect(root.querySelector('g.ai-export-group')!.getAttribute('style')).toContain(
+      'mix-blend-mode:multiply',
+    );
+    expect(root.querySelector('g.ai-export-layer > g[filter]')!.getAttribute('filter')).toBe(
+      'url(#ai-export-glass-1)',
+    );
+    const ind = doc([
+      { lighting: 'individual', layers: [L('a.svg'), L('b.svg', { glass: false })] },
+    ]);
+    const it2 = parse(exportSvg(ind, 'light', { mask: 'none', effects: true }));
+    expect(it2.querySelectorAll('filter[id^="ai-export-glass-"]')).toHaveLength(1);
+  });
 });

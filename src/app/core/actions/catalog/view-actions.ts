@@ -42,6 +42,15 @@ export const VIEW_ACTIONS: readonly ActionDef[] = [
   }),
   VIEW('view.appearance.light', 'Appearance: Light'),
   VIEW('view.appearance.dark', 'Appearance: Dark'),
+  VIEW('view.appearance.tinted', 'Appearance: Tinted'),
+  VIEW('view.tint', 'Tint', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['color'],
+      properties: { color: { type: 'string' } },
+    },
+  }),
   VIEW('view.mask.squircle', 'Platform Mask: iOS / macOS'),
   VIEW('view.mask.circle', 'Platform Mask: watchOS'),
   VIEW('view.mask.none', 'Platform Mask: None'),

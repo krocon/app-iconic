@@ -145,13 +145,13 @@ describe('IconInspectorService (design 010 E5, E14)', () => {
     expect(icon.edit(g, def, 7)).toBe(false);
   });
 
-  it('the Dark appearance follows the canvas, Tinted is the inspector’s own', () => {
+  it('the appearance follows the canvas, Tinted too (prompt 077 E3)', () => {
     const canvas = TestBed.inject(CanvasViewStore);
     icon.setAppearance('dark');
     expect(canvas.options().appearance).toBe('dark');
     icon.setAppearance('tinted');
     expect(icon.appearance()).toBe('tinted');
-    expect(canvas.options().appearance).toBe('dark');
+    expect(canvas.options().appearance).toBe('tinted');
     icon.setAppearance('default');
     expect(canvas.options().appearance).toBe('light');
   });

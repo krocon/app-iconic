@@ -79,6 +79,13 @@
   background: var(--ai-checker-a);
 }
 
+.tint-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 .paper {
   position: absolute;
   inset: 0;

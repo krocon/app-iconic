@@ -24,6 +24,8 @@ type ColorOf<C> = (c: IconColor) => C;
 const SYSTEM: Record<Appearance, [IconColor, IconColor]> = {
   light: [rgb(1, 1, 1), rgb(0.898, 0.898, 0.918)],
   dark: [rgb(0.227, 0.227, 0.235), rgb(0.07843, 0.07843, 0.07843)],
+  // schema: "grey in monochrome" – values approximated (prompt 077 E2)
+  tinted: [rgb(0.3, 0.3, 0.3), rgb(0.16, 0.16, 0.16)],
 };
 const TOP: UnitPoint = { x: 0.5, y: 0 };
 const BOTTOM: UnitPoint = { x: 0.5, y: 1 };

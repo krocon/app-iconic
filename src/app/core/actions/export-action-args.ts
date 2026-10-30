@@ -7,8 +7,10 @@ import { ArgsSpec } from './action-args';
 export const EXPORT_ARGS: ArgsSpec = {
   type: 'object',
   properties: {
-    /** `["light", "dark"]` or one of them. */
+    /** A subset of `["light", "dark", "tinted"]`. */
     appearances: { type: 'json' },
+    /** Tint of `tinted` as `#rrggbb` (prompt 077 E2); default the canvas tint. */
+    tint: { type: 'string' },
     /** PNG: a subset of 1024, 512, 256, 128, 64, 32, 16. */
     sizes: { type: 'json' },
     mask: { type: 'string', enum: ['none', 'squircle', 'circle'] },

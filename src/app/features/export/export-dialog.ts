@@ -10,6 +10,8 @@ import {
 import { ExportAppearance, PNG_SIZES, PngSize } from '../../core/export/export.models';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { Modal } from '../../shared/dialog/modal';
+import { ColorButton } from '../../shared/controls/color-button';
+import { browserColor, toHex, toRgba } from '../../shared/controls/color-value';
 import { MaskShape } from '../canvas/canvas-view.store';
 import { APPEARANCES, choiceReady, ExportFormat, fileCount, MASKS } from './export-options';
 import { ExportOutcome, ExportService, noticeOf } from './export.service';
@@ -24,7 +26,7 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
  */
 @Component({
   selector: 'app-export-dialog',
-  imports: [Modal],
+  imports: [Modal, ColorButton],
   template: `
     <app-modal [heading]="t.title" width="32rem" (closed)="close()">
       <fieldset class="group" [disabled]="phase() === 'running'">
@@ -56,8 +58,21 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
                 [checked]="choice().appearances.includes(a)"
                 (change)="toggleAppearance(a)"
               />
-              {{ a === 'light' ? t.light : t.dark }}
+              {{ t.appearanceNames[a] }}
             </label>
+          }
+          @if (choice().appearances.includes('tinted')) {
+            <!-- tint of the tinted approximation (prompt 077 E2): not part of the document -->
+            <span class="check">
+              <app-color-button
+                testId="export-tint"
+                [value]="choice().tint"
+                [label]="t.tint"
+                [disabled]="phase() === 'running'"
+                (edited)="setTint($event)"
+              />
+              {{ t.tint }}
+            </span>
           }
         </div>
       </fieldset>
@@ -308,6 +323,11 @@ export class ExportDialog {
     const list = this.choice().appearances;
     const next = list.includes(a) ? list.filter((x) => x !== a) : [...list, a];
     this.service.update({ appearances: APPEARANCES.filter((x) => next.includes(x)) });
+  }
+
+  protected setTint(color: string): void {
+    const c = toRgba(color, browserColor);
+    if (c) this.service.update({ tint: toHex({ ...c, a: 1 }) });
   }
 
   protected toggleSize(s: PngSize): void {

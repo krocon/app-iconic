@@ -29,6 +29,8 @@ import { CanvasToolbar } from './canvas-toolbar';
 import { CanvasViewStore } from './canvas-view.store';
 import { fillPreview } from './fill-preview';
 import { LayerStack } from './layer-stack';
+import { supportsPlusDarker } from './effects';
+import { tintedMatrix } from './tinted';
 import { CanvasEditStore } from './canvas-edit.store';
 import { registerCanvasEditActions } from './canvas-edit-actions';
 import { CanvasInteraction } from './canvas-pointer';
@@ -170,6 +172,11 @@ export class CanvasView {
   private readonly layersEl = viewChild.required<ElementRef<HTMLElement>>('layers');
   private readonly hostEl = viewChild.required<ElementRef<SVGSVGElement>>('host');
   private stack: LayerStack | null = null;
+  /** The engine blends `plus-darker` itself (WebKit; prompt 077 E4). */
+  private readonly nativePlusDarker = supportsPlusDarker();
+  /** The tinted approximation over the artboard (prompt 077 E2): the matrix of the tint. */
+  protected readonly tintValues = computed(() => tintedMatrix(this.opt().tint));
+  protected readonly tinted = computed(() => this.opt().appearance === 'tinted');
   private pan: { id: number; x: number; y: number } | null = null;
   private lastClient: { clientX: number; clientY: number } | null = null;
   private readonly interaction: CanvasInteraction;
@@ -179,7 +186,12 @@ export class CanvasView {
       const box = this.layersEl().nativeElement;
       this.stack ??= new LayerStack(box);
       const o = this.opt();
-      this.stack.update(this.store()?.document() ?? null, o.appearance, o.effects);
+      this.stack.update(
+        this.store()?.document() ?? null,
+        o.appearance,
+        o.effects,
+        this.nativePlusDarker,
+      );
     });
     // the selection (frames, handles): measured after the layers are painted (needs layout)
     measureEachChange({

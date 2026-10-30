@@ -33,12 +33,20 @@ export interface FillModel {
 
 export const PRESETS: readonly FillPreset[] = ['automatic', 'system-light', 'system-dark', 'none'];
 
-/** Kinds offered in the editor (design 010 E7: `radial-gradient` is read only). */
+/**
+ * `radial-gradient` may be chosen in the editor (prompt 077 E5): not until an Icon Composer file
+ * shows it – the unofficial schema forbids it, no evidence file has it (question to Marc). The
+ * model can create, read and keep it already; the preview shows it.
+ */
+export const RADIAL_CREATABLE = false;
+
+/** Kinds offered in the editor (design 010 E7, 077 E5). */
 export const NEW_FILL_KINDS: readonly FillKind[] = [
   ...PRESETS,
   'solid',
   'automatic-gradient',
   'linear-gradient',
+  ...(RADIAL_CREATABLE ? (['radial-gradient'] as const) : []),
 ];
 
 /** Icon Composer's orientation of a new gradient (sample files: top centre → 70 % down). */
@@ -125,7 +133,11 @@ export function writeFill(m: FillModel): unknown {
   return out;
 }
 
-/** The model as another kind, colours carried over (design 010 E6). */
+/**
+ * The model as another kind, colours carried over (design 010 E6). Gradients get two colours and
+ * the orientation of the model or the evidence default – also `radial-gradient` (centre = start,
+ * radius = distance to stop, as `fill-preview.ts` reads it; prompt 077 E5).
+ */
 export function switchKind(m: FillModel, kind: FillKind): FillModel {
   if (kind === m.kind || kind === 'unknown') return m;
   if ((PRESETS as readonly string[]).includes(kind)) {

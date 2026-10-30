@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_ORIENTATION,
   isValidFill,
+  NEW_FILL_KINDS,
+  RADIAL_CREATABLE,
   readFill,
   switchKind,
   withColor,
@@ -88,5 +90,43 @@ describe('fill model (design 010 E6)', () => {
     });
     expect(writeFill(switchKind(linear, 'system-dark'))).toBe('system-dark');
     expect(isValidFill({ 'radial-gradient': [P3] })).toBe(true);
+  });
+});
+
+describe('radial gradient (prompt 077 E5)', () => {
+  it('is created by the model from a linear gradient or a colour', () => {
+    const linear = readFill({ 'linear-gradient': [P3, P3B] });
+    expect(writeFill(switchKind(linear, 'radial-gradient'))).toEqual({
+      'radial-gradient': [P3, P3B],
+      orientation: DEFAULT_ORIENTATION,
+    });
+    const solid = readFill({ solid: P3 });
+    const r = writeFill(switchKind(solid, 'radial-gradient')) as Record<string, unknown>;
+    expect((r['radial-gradient'] as string[])[0]).toBe(P3);
+    expect(r['orientation']).toEqual(DEFAULT_ORIENTATION);
+    // read back as a radial gradient
+    expect(readFill(r).kind).toBe('radial-gradient');
+  });
+
+  it('is read, edited in place, and keeps the key order of the file', () => {
+    const file = {
+      orientation: { start: { x: 0.5, y: 0.5 }, stop: { x: 0.5, y: 1 } },
+      'radial-gradient': [P3, P3B],
+    };
+    const m = readFill(file);
+    expect(m).toMatchObject({ kind: 'radial-gradient', colors: [P3, P3B] });
+    expect(writeFill(m)).toBe(file);
+    const changed = writeFill(withColor(m, 1, P3)) as Record<string, unknown>;
+    expect(Object.keys(changed)).toEqual(['orientation', 'radial-gradient']);
+    expect(changed['radial-gradient']).toEqual([P3, P3]);
+    // unknown fields: the whole value stays as it is (read only, kept)
+    const unknown = { 'radial-gradient': [P3], 'x-future': true };
+    expect(readFill(unknown).kind).toBe('unknown');
+    expect(writeFill(readFill(unknown))).toBe(unknown);
+  });
+
+  it('is not offered in the editor until an Icon Composer file shows it', () => {
+    expect(RADIAL_CREATABLE).toBe(false);
+    expect(NEW_FILL_KINDS).not.toContain('radial-gradient');
   });
 });

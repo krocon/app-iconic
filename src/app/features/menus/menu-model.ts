@@ -123,7 +123,11 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('view.zoomToFit'),
     a('view.centerCanvas'),
     sep,
-    sub(t.appearance, [a('view.appearance.light', t.light), a('view.appearance.dark', t.dark)]),
+    sub(t.appearance, [
+      a('view.appearance.light', t.light),
+      a('view.appearance.dark', t.dark),
+      a('view.appearance.tinted', t.tinted),
+    ]),
     sub(t.mask, [
       a('view.mask.squircle', t.maskSquircle),
       a('view.mask.circle', t.maskCircle),

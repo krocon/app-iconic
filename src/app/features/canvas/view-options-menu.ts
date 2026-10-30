@@ -39,6 +39,7 @@ const ROWS: Row[] = [
   { kind: 'group', label: 'appearance' },
   { kind: 'item', id: 'view.appearance.light', label: 'light' },
   { kind: 'item', id: 'view.appearance.dark', label: 'dark' },
+  { kind: 'item', id: 'view.appearance.tinted', label: 'tinted' },
   { kind: 'group', label: 'mask' },
   { kind: 'item', id: 'view.mask.squircle', label: 'maskSquircle' },
   { kind: 'item', id: 'view.mask.circle', label: 'maskCircle' },

@@ -38,7 +38,8 @@ export interface CanvasSettings {
 
 export interface ExportSettings {
   format: 'png' | 'svg';
-  appearances: ('light' | 'dark')[];
+  /** `tinted` since prompt 077. */
+  appearances: ('light' | 'dark' | 'tinted')[];
   sizes: number[];
   mask: 'none' | 'squircle' | 'circle';
   effects: boolean;

@@ -21,22 +21,22 @@
 
 ## 2. Befehle (Root, pnpm 10 via `packageManager`, Node ≥ 22.22.3, Rust stable ≥ 1.93)
 
-| Zweck | Befehl |
-|---|---|
-| Install | `pnpm install` |
-| App starten (Dev) | `pnpm tauri dev` (Angular-Dev-Server auf **Port 1450** + Fenster) |
-| Nur Frontend im Browser | `pnpm start` (Fakes mit `camscanner.icon` im Speicher, Test-Hook `window.__appIconic`) |
-| Frontend-Tests | `pnpm test` (Vitest + jsdom über `ng test`), `pnpm test:watch` |
-| E2E (Browser) | `pnpm e2e` (Playwright gegen den Dev-Server); einmalig `pnpm e2e:install` |
-| Lint / Format | `pnpm lint`, `pnpm format`, `pnpm format:check` |
-| Frontend-Build | `pnpm build` |
-| KI-Sidecar | `pnpm mcp:sidecar:dev` (Debug neben der Debug-App), Doku `docs/mcp.md` |
-| Rust | `pnpm rust:fmt`, `pnpm rust:lint` (clippy `-D warnings`), `pnpm rust:test` (ganzer Workspace inkl. `ai-core`) |
-| Fixture-Module | `pnpm fixtures` (neu erzeugen), `pnpm fixtures:check`, `pnpm scripts:test` |
-| Alles prüfen | `pnpm check` (+ `pnpm e2e`) |
-| Release | `pnpm version:set X.Y.Z`, `pnpm release:notes`, `pnpm notices` + `pnpm licenses:report` (nach Abhängigkeitsänderungen!); Pipeline testen: Workflow „Release“ Modus `dry-run` – Ablauf `docs/release.md` |
-| Debug-App ohne Bundle | `pnpm tauri build --debug --no-bundle` → `src-tauri/target/debug/app-iconic` |
-| Icons neu erzeugen | `pnpm tauri icon src-tauri/icons/source/app-icon.svg -o src-tauri/icons` (danach `android/`, `ios/` löschen; `public/icon.svg` = Quelle, `public/favicon.png` = `32x32.png`) |
+| Zweck                   | Befehl                                                                                                                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Install                 | `pnpm install`                                                                                                                                                                                          |
+| App starten (Dev)       | `pnpm tauri dev` (Angular-Dev-Server auf **Port 1450** + Fenster)                                                                                                                                       |
+| Nur Frontend im Browser | `pnpm start` (Fakes mit `camscanner.icon` im Speicher, Test-Hook `window.__appIconic`)                                                                                                                  |
+| Frontend-Tests          | `pnpm test` (Vitest + jsdom über `ng test`), `pnpm test:watch`                                                                                                                                          |
+| E2E (Browser)           | `pnpm e2e` (Playwright gegen den Dev-Server); einmalig `pnpm e2e:install`                                                                                                                               |
+| Lint / Format           | `pnpm lint`, `pnpm format`, `pnpm format:check`                                                                                                                                                         |
+| Frontend-Build          | `pnpm build`                                                                                                                                                                                            |
+| KI-Sidecar              | `pnpm mcp:sidecar:dev` (Debug neben der Debug-App), Doku `docs/mcp.md`                                                                                                                                  |
+| Rust                    | `pnpm rust:fmt`, `pnpm rust:lint` (clippy `-D warnings`), `pnpm rust:test` (ganzer Workspace inkl. `ai-core`)                                                                                           |
+| Fixture-Module          | `pnpm fixtures` (neu erzeugen), `pnpm fixtures:check`, `pnpm scripts:test`                                                                                                                              |
+| Alles prüfen            | `pnpm check` (+ `pnpm e2e`)                                                                                                                                                                             |
+| Release                 | `pnpm version:set X.Y.Z`, `pnpm release:notes`, `pnpm notices` + `pnpm licenses:report` (nach Abhängigkeitsänderungen!); Pipeline testen: Workflow „Release“ Modus `dry-run` – Ablauf `docs/release.md` |
+| Debug-App ohne Bundle   | `pnpm tauri build --debug --no-bundle` → `src-tauri/target/debug/app-iconic`                                                                                                                            |
+| Icons neu erzeugen      | `pnpm tauri icon src-tauri/icons/source/app-icon.svg -o src-tauri/icons` (danach `android/`, `ios/` löschen; `public/icon.svg` = Quelle, `public/favicon.png` = `32x32.png`)                            |
 
 ## 3. Layout
 
@@ -142,7 +142,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile) + canvas-measure (Auswahl
                               messen je Änderung, Viewport, 033), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
-                              icon-color, asset-placement (004), effects (Vorschau-Annäherung, 010),
+                              icon-color, asset-placement (004), effects (Vorschau-Annäherung, 010);
+                              layer-fill (Layer-Fill: Filter/Verlauf, 077), tinted (Luminanz × Tönung, 077),
+                              glass (Glas-Annäherung, 077),
                               canvas-actions, View-Options-Menü (005); CanvasTools (ein Werkzeug zur Zeit, Modi
                               wie Freehand) + selection-tools (`tool.select` V / `tool.direct` A, 061);
                               ContextBar + ToolContexts (Kontextleiste je Werkzeug, Provider in
@@ -335,7 +337,7 @@ THIRD-PARTY-NOTICES.txt       Lizenzen aller ausgelieferten Teile (`pnpm notices
 - Die Vorlage liegt auf dem Mac (`~/WebstormProjects/AppIconic/AppIconic`) – per `device_bash` lesen (nur lesen).
   Die Schwesterprojekte sind öffentlich: `git clone --depth 1 https://github.com/krocon/editlicious`.
 - Container einrichten: `apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev
-  librsvg2-dev librsvg2-bin xdotool imagemagick xvfb`, `pnpm install`,
+librsvg2-dev librsvg2-bin xdotool imagemagick xvfb`, `pnpm install`,
   `cd src-tauri && CARGO_INCREMENTAL=0 cargo build --workspace --tests`.
 - Playwright im Container: `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers pnpm e2e` (vorinstalliertes Chromium passt zu
   1.63; kein `playwright install`).

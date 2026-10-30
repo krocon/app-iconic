@@ -15,9 +15,13 @@ import {
   stackTransform,
   translucencyMask,
 } from './effects';
+import { GlassEffect, glassFilter, layerGlassEffect } from './glass';
+import { LayerFill, layerFillFilter, layerFillOf } from './layer-fill';
 
-/** Id of the shadow filter inside a layer's shadow root (own tree scope per layer). */
+/** Ids of the filters inside a layer's shadow root (own tree scope per layer). */
 const SHADOW_ID = 'ai-fx-shadow';
+const FILL_ID = 'ai-fx-fill';
+const GLASS_ID = 'ai-fx-glass';
 
 /** Styles inside every layer's shadow root (design 004 E2). */
 const LAYER_CSS =
@@ -39,6 +43,10 @@ export interface StackLayer {
   shadow: ShadowEffect | null;
   /** The scale of `transform` (group × layer) – for the composited shadow (prompt 033 E5). */
   scale: number;
+  /** Layer `fill` (prompt 077 E1): `null` = the asset's own colours; always, not an effect. */
+  fill: LayerFill;
+  /** Glass approximation of this layer (prompt 077 E6). */
+  glass: GlassEffect | null;
   /** This layer shows the live root; others of the same asset get a copy (design 004 E5). */
   live: boolean;
 }
@@ -71,12 +79,19 @@ export function layerAsset(
  * The paint order of the document (design 004 E3): first group / first layer of `icon.json` on
  * top, so the result is reversed (bottom first). Hidden groups and layers and layers without an
  * asset are left out. Values per appearance (design 010 E13); `effects` = the approximated group
- * effects (shadow, translucency, blend modes). Pure (reads the document).
+ * effects (shadow, translucency, blend modes, glass – 077 E6); the layer fill always (077 E1).
+ * `nativePlusDarker`: the canvas engine blends `plus-darker` itself (077 E4). Pure (reads the
+ * document).
  */
-export function stackOf(doc: IconDocument, appearance: Appearance, effects = true): StackGroup[] {
+export function stackOf(
+  doc: IconDocument,
+  appearance: Appearance,
+  effects = true,
+  nativePlusDarker = false,
+): StackGroup[] {
   const seen = new Set<AssetState>();
   const top = groups(doc.iconJson).map((g, gi): StackGroup => {
-    const fx = effects ? groupEffects(g, appearance) : null;
+    const fx = effects ? groupEffects(g, appearance, nativePlusDarker) : null;
     const ls = hiddenFor(g, appearance)
       ? []
       : layers(g).flatMap((l, li): StackLayer[] => {
@@ -91,9 +106,13 @@ export function stackOf(doc: IconDocument, appearance: Appearance, effects = tru
               asset,
               opacity: opacityOf(fieldFor(l, 'opacity', appearance, null)),
               transform: stackTransform(g, l, appearance),
-              blend: effects ? blendCss(fieldFor(l, 'blend-mode', appearance, 'normal')) : null,
+              blend: effects
+                ? blendCss(fieldFor(l, 'blend-mode', appearance, 'normal'), nativePlusDarker)
+                : null,
               shadow: fx?.shadow ?? null,
               scale: stackScale(g, l, appearance),
+              fill: layerFillOf(l, appearance),
+              glass: effects ? layerGlassEffect(g, l, appearance) : null,
               live,
             },
           ];
@@ -123,8 +142,13 @@ export class LayerStack {
 
   constructor(private readonly box: HTMLElement) {}
 
-  update(doc: IconDocument | null, appearance: Appearance, effects = true): void {
-    const stack = doc ? stackOf(doc, appearance, effects) : [];
+  update(
+    doc: IconDocument | null,
+    appearance: Appearance,
+    effects = true,
+    nativePlusDarker = false,
+  ): void {
+    const stack = doc ? stackOf(doc, appearance, effects, nativePlusDarker) : [];
     const signature = this.signatureOf(stack);
     if (signature === this.signature) {
       this.refreshCopies();
@@ -156,6 +180,9 @@ export class LayerStack {
           l.transform,
           l.blend,
           l.shadow,
+          l.fill,
+          l.glass,
+          l.scale,
           l.live,
         ]),
       ]),
@@ -210,13 +237,17 @@ export class LayerStack {
     const g = d.createElementNS(SVG_NS, 'g');
     if (l.opacity !== null) g.setAttribute('opacity', String(l.opacity));
     if (l.transform) g.setAttribute('transform', l.transform);
-    if (l.shadow) {
-      // composited (prompt 033 E5): a CSS filter on the layer's own compositor layer – a change
-      // re-rasters only the changed tiles, the shadow is applied when compositing. An SVG filter
-      // on the content re-rendered the whole layer on every drag step (~240 ms with 20 000 shapes).
-      svg.append(this.shadowFilter(l.shadow, l.scale));
+    // composited (prompt 033 E5): CSS filters on the layer's own compositor layer – a change
+    // re-rasters only the changed tiles, the filters are applied when compositing. An SVG filter
+    // on the content re-rendered the whole layer on every drag step (~240 ms with 20 000 shapes).
+    // Order: fill (077 E1) → glass (077 E6) → shadow.
+    const filters = this.layerFilters(l);
+    if (filters.length) {
+      const defs = d.createElementNS(SVG_NS, 'defs');
+      defs.append(...filters);
+      svg.append(defs);
       svg.classList.add('shadowed');
-      svg.style.filter = `url(#${SHADOW_ID})`;
+      svg.style.filter = filters.map((f) => `url(#${f.getAttribute('id')})`).join(' ');
     }
     g.append(l.asset.svg ? this.svgContent(l) : this.imageContent(l.asset.dataUrl ?? ''));
     svg.append(g);
@@ -224,12 +255,15 @@ export class LayerStack {
     return host;
   }
 
-  /** The group's shadow for one layer (design 010 E13) in the layer's own shadow root. */
-  private shadowFilter(s: ShadowEffect, scale: number): Element {
+  /** Fill, glass and the group's shadow (design 010 E13) for one layer, in its shadow root. */
+  private layerFilters(l: StackLayer): Element[] {
     const d = this.box.ownerDocument;
-    const defs = d.createElementNS(SVG_NS, 'defs');
-    defs.append(shadowFilter(d, SHADOW_ID, s, { scale }));
-    return defs;
+    const out: Element[] = [];
+    if (l.fill) out.push(layerFillFilter(d, FILL_ID, l.fill, l.transform));
+    if (l.glass) out.push(glassFilter(d, GLASS_ID, l.glass, { scale: l.scale }));
+    if (l.shadow)
+      out.push(shadowFilter(d, SHADOW_ID, l.shadow as ShadowEffect, { scale: l.scale }));
+    return out;
   }
 
   /** Placement `<svg>` (design 004 E4) with the live root or a copy of it. */

@@ -1,6 +1,7 @@
 import { translatable } from '../../core/i18n/i18n';
 import { MaskShape } from '../canvas/canvas-view.store';
 import { ExportFormat } from './export-options';
+import { ExportAppearance } from '../../core/export/export.models';
 
 /** Texts of the export (design 012). English is the source, German beside it (015). */
 const EN = {
@@ -10,6 +11,12 @@ const EN = {
   appearances: 'Appearances',
   light: 'Light',
   dark: 'Dark',
+  appearanceNames: {
+    light: 'Light',
+    dark: 'Dark',
+    tinted: 'Tinted (approximation)',
+  } satisfies Record<ExportAppearance, string>,
+  tint: 'Tint',
   sizes: 'Sizes (px)',
   mask: 'Platform mask',
   masks: {
@@ -17,7 +24,7 @@ const EN = {
     squircle: 'Squircle (iOS, macOS)',
     circle: 'Circle (watchOS)',
   } satisfies Record<MaskShape, string>,
-  effects: 'Shadow & effects (approximation)',
+  effects: 'Approximate effects (shadow, glass)',
   dimensions: 'Dimensions',
   target: 'Folder',
   noTarget: 'No folder chosen',
@@ -38,7 +45,7 @@ const EN = {
   revealFailed: (reason: string) => `The file could not be shown: ${reason}`,
   noDocument: 'There is no document to export.',
   busy: 'An export is already running.',
-  badArguments: 'unknown appearance or size',
+  badArguments: 'unknown appearance, size or tint',
   transparentWarning:
     'Some PNGs contain transparent pixels. Apple expects app icons without transparency – ' +
     'fill the background or export with a platform mask.',
@@ -52,6 +59,8 @@ export const EXPORT_TEXTS = translatable('export', EN, {
     appearances: 'Erscheinungsbilder',
     light: 'Hell',
     dark: 'Dunkel',
+    appearanceNames: { light: 'Hell', dark: 'Dunkel', tinted: 'Getönt (Annäherung)' },
+    tint: 'Tönung',
     sizes: 'Größen (px)',
     mask: 'Plattform-Maske',
     masks: {
@@ -59,7 +68,7 @@ export const EXPORT_TEXTS = translatable('export', EN, {
       squircle: 'Squircle (iOS, macOS)',
       circle: 'Kreis (watchOS)',
     },
-    effects: 'Schatten & Effekte (Annäherung)',
+    effects: 'Effekte annähern (Schatten, Glas)',
     dimensions: 'Bemaßungen',
     target: 'Ordner',
     noTarget: 'Kein Ordner gewählt',
@@ -80,7 +89,7 @@ export const EXPORT_TEXTS = translatable('export', EN, {
     revealFailed: (reason: string) => `Die Datei konnte nicht gezeigt werden: ${reason}`,
     noDocument: 'Es gibt kein Dokument zum Exportieren.',
     busy: 'Es läuft schon ein Export.',
-    badArguments: 'unbekanntes Erscheinungsbild oder unbekannte Größe',
+    badArguments: 'unbekanntes Erscheinungsbild, unbekannte Größe oder Tönung',
     transparentWarning:
       'Einige PNGs enthalten transparente Pixel. Apple erwartet App-Icons ohne Transparenz – ' +
       'fülle den Hintergrund oder exportiere mit einer Plattform-Maske.',

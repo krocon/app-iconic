@@ -293,10 +293,12 @@ impl<H: WindowHost> Router<H> {
                     .and_then(Value::as_str)
                     .unwrap_or("squircle")
                     .to_owned();
+                // the tint of the tinted approximation (prompt 077), checked by the window
+                let tint = a.get("tint").cloned().unwrap_or(Value::Null);
                 let out = self.host.call(
                     &label,
                     "preview_svg",
-                    json!({ "appearance": appearance, "mask": mask }),
+                    json!({ "appearance": appearance, "mask": mask, "tint": tint }),
                     CALL_TIMEOUT,
                 )?;
                 let svg = out["svg"]
@@ -595,11 +597,9 @@ mod tests {
             (p["size"].clone(), p["transparent"].clone()),
             (json!(32), json!(false))
         );
-        assert!(
-            r.host.log().contains(
-                &r#"main:preview_svg:{"appearance":"dark","mask":"squircle"}"#.to_string()
-            )
-        );
+        assert!(r.host.log().contains(
+            &r#"main:preview_svg:{"appearance":"dark","mask":"squircle","tint":null}"#.to_string()
+        ));
     }
 
     #[test]

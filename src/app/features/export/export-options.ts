@@ -1,5 +1,6 @@
 import { ExportAppearance, PNG_SIZES, PngSize } from '../../core/export/export.models';
 import { MaskShape } from '../canvas/canvas-view.store';
+import { DEFAULT_TINT, parseTint } from '../canvas/tinted';
 
 /**
  * What an export writes (design 012 E14–E16): the dialog edits it, the actions take it as
@@ -8,7 +9,8 @@ import { MaskShape } from '../canvas/canvas-view.store';
 
 export type ExportFormat = 'svg' | 'png';
 export const MASKS: readonly MaskShape[] = ['none', 'squircle', 'circle'];
-export const APPEARANCES: readonly ExportAppearance[] = ['light', 'dark'];
+/** In this order (file order, Rust `APPEARANCES`); `tinted` since prompt 077. */
+export const APPEARANCES: readonly ExportAppearance[] = ['light', 'dark', 'tinted'];
 
 export interface ExportChoice {
   format: ExportFormat;
@@ -19,6 +21,8 @@ export interface ExportChoice {
   effects: boolean;
   /** Keep the dimensions (prompt 048); not kept in the settings. */
   dimensions: boolean;
+  /** Tint of the `tinted` variant (`#rrggbb`, prompt 077 E2) – a view setting, not the document. */
+  tint: string;
   /** Opaque path of the target folder; `null` = not chosen yet. */
   targetDir: string | null;
 }
@@ -30,6 +34,7 @@ export const DEFAULT_CHOICE: ExportChoice = {
   mask: 'none',
   effects: false,
   dimensions: false,
+  tint: DEFAULT_TINT,
   targetDir: null,
 };
 
@@ -47,7 +52,7 @@ function list<T>(v: unknown, allowed: readonly T[]): T[] | null {
 
 /**
  * Action arguments (already checked against `EXPORT_ARGS`) on top of `base`; `null` if a list is
- * not valid (unknown appearance or size, empty).
+ * not valid (unknown appearance or size, empty) or the tint is not `#rrggbb`.
  */
 export function exportRequest(
   format: ExportFormat,
@@ -57,7 +62,8 @@ export function exportRequest(
   const appearances =
     args['appearances'] === undefined ? base.appearances : list(args['appearances'], APPEARANCES);
   const sizes = args['sizes'] === undefined ? base.sizes : list(args['sizes'], PNG_SIZES);
-  if (!appearances || !sizes) return null;
+  const tint = args['tint'] === undefined ? base.tint : parseTint(args['tint']);
+  if (!appearances || !sizes || !tint) return null;
   return {
     format,
     appearances,
@@ -65,6 +71,7 @@ export function exportRequest(
     mask: (args['mask'] as MaskShape | undefined) ?? base.mask,
     effects: (args['effects'] as boolean | undefined) ?? base.effects,
     dimensions: (args['dimensions'] as boolean | undefined) ?? base.dimensions,
+    tint,
     targetDir: (args['targetDir'] as string | undefined) ?? base.targetDir,
     overwrite: (args['overwrite'] as boolean | undefined) ?? false,
   };
@@ -84,4 +91,24 @@ export function fileBaseName(docName: string | null, untitled: string): string {
 /** Number of files an export writes. */
 export function fileCount(c: ExportChoice): number {
   return c.appearances.length * (c.format === 'png' ? c.sizes.length : 1);
+}
+
+/** One file set of an export: the appearance and the tint it is rendered with (prompt 077 E7). */
+export interface ExportVariantSpec {
+  appearance: ExportAppearance;
+  /** Only used by `tinted`; carried for every variant so callers (078, 079) need no second source. */
+  tint: string;
+}
+
+/** The variants an export renders, in file order (light, dark, tinted). */
+export function exportVariants(c: ExportChoice): ExportVariantSpec[] {
+  return APPEARANCES.filter((a) => c.appearances.includes(a)).map((appearance) => ({
+    appearance,
+    tint: parseTint(c.tint) ?? DEFAULT_TINT,
+  }));
+}
+
+/** File name as Rust writes it (`export/files.rs`): `<base>-<appearance>[-<size>].<ext>`. */
+export function exportFileName(base: string, appearance: ExportAppearance, size?: number): string {
+  return size === undefined ? `${base}-${appearance}.svg` : `${base}-${appearance}-${size}.png`;
 }

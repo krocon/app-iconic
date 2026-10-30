@@ -83,6 +83,8 @@ const FIXED: Record<string, string> = {
   'view.zoomTo': 'Zoomen auf',
   'view.appearance.light': 'Erscheinungsbild: Hell',
   'view.appearance.dark': 'Erscheinungsbild: Dunkel',
+  'view.appearance.tinted': 'Erscheinungsbild: Getönt',
+  'view.tint': 'Tönung',
   'view.mask.squircle': 'Plattform-Maske: iOS / macOS',
   'view.mask.circle': 'Plattform-Maske: watchOS',
   'view.mask.none': 'Plattform-Maske: Keine',

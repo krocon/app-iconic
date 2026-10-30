@@ -144,7 +144,6 @@
    (danach ändert jede Bearbeitung nur ihre Stelle) – akzeptabel, oder ein formerhaltender Serializer?
 3. Verlaufseditor (Prompt 032) und Review-Folgen (Prompt 033) – Reihenfolge/Umfang so recht?
 
-
 ## Prompt 071
 
 1. **Mac/Windows**: eine `.svg`, ein `.png` und ein `.icon` aus Finder/Explorer ins Fenster ziehen – erscheint der
@@ -181,3 +180,13 @@
    Sieht er in WKWebView bei Zoom 50/100/200 % genauso aus wie vorher?
 3. Pfadschutz: Pfade werden nach ihren Komponenten verglichen, Symlinks nicht aufgelöst. Ein Eintrag aus „Open Recent“
    gilt als vertraut, sobald die Liste gelesen wurde – so recht?
+
+## Prompt 077
+
+1. Kennt Icon Composer `radial-gradient`? Eine damit gespeicherte Datei würde die Freigabe im Fill-Editor belegen
+   (bis dahin nur lesen und anzeigen; das inoffizielle Schema verbietet ihn).
+2. Layer-Verläufe: im Raum der Icon-Fläche (so umgesetzt, wandern mit `position`) oder im Rahmen des Assets?
+3. Tinted ohne eigenen Eintrag: nimmt Icon Composer den Grundwert (wie hier) oder den Dark-Wert?
+4. **Mac**: Kann WKWebView `mix-blend-mode: plus-darker` (dann nativ in der Vorschau, Export bleibt `multiply`)?
+   Sehen Layer-Verlauf (`feImage` mit Data-URL) und Tinted-Filter in WKWebView wie in Chromium aus?
+5. Glas-Annäherung (Glanzkante oben, Milchglas-Aufhellung nur bei blur-material) brauchbar, oder lieber schwächer/kräftiger?

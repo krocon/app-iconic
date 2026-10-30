@@ -1,10 +1,15 @@
 import { AppearanceKey, resolveSpecialized } from '../document/model/specializations';
 
-/** Appearance of the preview (design 004 E7); "tinted" is edited but not previewed (010 E2). */
-export type Appearance = 'light' | 'dark';
+/**
+ * Appearance of the preview (design 004 E7); "tinted" since prompt 077 E2 – an approximation:
+ * the tinted specializations apply, then luminance × tint over the whole composition (`tinted.ts`).
+ */
+export type Appearance = 'light' | 'dark' | 'tinted';
+
+export const APPEARANCE_LIST: readonly Appearance[] = ['light', 'dark', 'tinted'];
 
 /** The inspector's appearance for a preview appearance (light = the base value). */
-export const appearanceKey = (a: Appearance): AppearanceKey => (a === 'dark' ? 'dark' : 'default');
+export const appearanceKey = (a: Appearance): AppearanceKey => (a === 'light' ? 'default' : a);
 
 /**
  * The value of an Icon Composer "specialization" list (`fill-specializations`,

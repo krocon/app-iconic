@@ -5,12 +5,14 @@ import { describeFsError, toFsError } from '../../core/errors/fs-error';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { IconDocument } from '../document/icon-document';
 import { FilesService } from '../files/files.service';
+import { CanvasViewStore } from '../canvas/canvas-view.store';
 import {
   DEFAULT_CHOICE,
   ExportChoice,
   ExportFormat,
   ExportRequest,
   exportRequest,
+  exportVariants,
   fileBaseName,
 } from './export-options';
 import { exportSvg, RasterSizes } from './export-svg';
@@ -53,6 +55,8 @@ export class ExportService {
   private readonly api = inject(ExportApi);
   private readonly files = inject(FilesService);
   private readonly dialogs = inject(DialogService);
+  /** The tint of the canvas is the default tint of a tinted export (prompt 077 E2). */
+  private readonly canvas = inject(CanvasViewStore);
 
   readonly choice = signal<ExportChoice>(DEFAULT_CHOICE);
   readonly running = signal(false);
@@ -64,7 +68,7 @@ export class ExportService {
   private stopRequested = false;
 
   openDialog(format: ExportFormat): void {
-    this.choice.update((c) => ({ ...c, format }));
+    this.choice.update((c) => ({ ...c, format, tint: this.canvas.options().tint }));
     this.dialogs.show('export');
   }
 
@@ -86,10 +90,14 @@ export class ExportService {
   /** Builds the SVG of every chosen appearance from the current document. */
   async variants(doc: IconDocument, req: ExportChoice): Promise<ExportVariant[]> {
     const raster = await rasterSizes(doc);
-    const opts = { mask: req.mask, effects: req.effects, dimensions: req.dimensions };
-    return req.appearances.map((appearance) => ({
+    return exportVariants(req).map(({ appearance, tint }) => ({
       appearance,
-      svg: exportSvg(doc, appearance, opts, raster),
+      svg: exportSvg(
+        doc,
+        appearance,
+        { mask: req.mask, effects: req.effects, dimensions: req.dimensions, tint },
+        raster,
+      ),
     }));
   }
 
@@ -152,7 +160,8 @@ export class ExportService {
    * notice in the status line.
    */
   async runAction(format: ExportFormat, args: Record<string, unknown>): Promise<ExportOutcome> {
-    const req = exportRequest(format, args, this.choice());
+    const base = { ...this.choice(), tint: this.canvas.options().tint };
+    const req = exportRequest(format, args, base);
     if (!req) {
       this.files.notice.set(T.failed(T.badArguments));
       return { kind: 'error', message: T.badArguments };

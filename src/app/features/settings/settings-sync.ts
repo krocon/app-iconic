@@ -175,7 +175,8 @@ export class SettingsSync {
       for (const k of CANVAS_KEYS) if (o[k] !== s.canvas[k]) canvas[k] = o[k];
       // the preview appearance becomes a choice once it differs from what the setting shows
       const shown = s.canvas.appearance === 'system' ? systemAppearance() : s.canvas.appearance;
-      if (o.appearance !== shown) canvas['appearance'] = o.appearance;
+      // tinted is not a start appearance (prompt 077 E2): it is not saved
+      if (o.appearance !== shown && o.appearance !== 'tinted') canvas['appearance'] = o.appearance;
       if (zoom !== s.canvas.zoom) canvas['zoom'] = zoom;
       if (Object.keys(canvas).length) patch.canvas = canvas;
       const e = s.export;

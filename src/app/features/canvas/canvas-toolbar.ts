@@ -6,6 +6,8 @@ import { CanvasViewStore } from './canvas-view.store';
 import { ViewOptionsMenu } from './view-options-menu';
 import { FreehandStore } from '../tools/freehand.store';
 import { ConstructionMode } from '../construction/construction-mode';
+import { ColorButton } from '../../shared/controls/color-button';
+import { browserColor, toHex, toRgba } from '../../shared/controls/color-value';
 
 /**
  * Toolbar of the canvas (design 004 E9/E14, 005 E10): zoom out / level / in, 100 %, Fit, Center –
@@ -14,7 +16,7 @@ import { ConstructionMode } from '../construction/construction-mode';
  */
 @Component({
   selector: 'app-canvas-toolbar',
-  imports: [ViewOptionsMenu],
+  imports: [ViewOptionsMenu, ColorButton],
   template: `
     <div class="bar" role="toolbar" [attr.aria-label]="t.toolbar">
       <div class="cluster">
@@ -108,6 +110,16 @@ import { ConstructionMode } from '../construction/construction-mode';
             </button>
           }
         </div>
+        @if (g.key === 'appearance' && view.options().appearance === 'tinted') {
+          <!-- the tint of the tinted approximation (prompt 077 E2): a view setting -->
+          <app-color-button
+            testId="canvas-tint"
+            [value]="view.options().tint"
+            [label]="t.tint"
+            [attr.title]="t.tint"
+            (edited)="tint($event)"
+          />
+        }
       }
       <span class="spacer"></span>
       <app-view-options-menu />
@@ -196,6 +208,7 @@ export class CanvasToolbar {
       items: [
         { id: 'view.appearance.light', label: this.t.light },
         { id: 'view.appearance.dark', label: this.t.dark },
+        { id: 'view.appearance.tinted', label: this.t.tintedShort },
       ],
     },
     {
@@ -208,6 +221,12 @@ export class CanvasToolbar {
       ],
     },
   ];
+
+  /** A colour from the tint chip → `view.tint` (the action checks it). */
+  protected tint(color: string): void {
+    const c = toRgba(color, browserColor);
+    if (c) this.actions.run('view.tint', { color: toHex({ ...c, a: 1 }) });
+  }
 
   /** APG radio group: ←/→ (↑/↓) choose the neighbour and move the focus with it. */
   protected segmentKey(e: KeyboardEvent, items: readonly { id: string }[]): void {

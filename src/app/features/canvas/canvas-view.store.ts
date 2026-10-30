@@ -11,6 +11,7 @@ import {
 import { clampZoom, fitZoom, nextZoomStep, prevZoomStep } from '../../shared/geometry/zoom-steps';
 import { GridOrigin } from '../../shared/geometry/snapping';
 import { Appearance } from './appearance';
+import { DEFAULT_TINT } from './tinted';
 import { SelectionMode } from './selection-measure';
 
 /** Platform mask of the preview (design 004 E8). */
@@ -44,6 +45,8 @@ export interface CanvasOptions {
   selectionMode: SelectionMode;
   mask: MaskShape;
   appearance: Appearance;
+  /** Tint of the tinted approximation (`#rrggbb`, prompt 077 E2) – a view setting, not the document. */
+  tint: string;
 }
 
 export type CanvasToggle =
@@ -90,6 +93,7 @@ export class CanvasViewStore {
     selectionMode: 'point',
     mask: 'squircle',
     appearance: systemAppearance(),
+    tint: DEFAULT_TINT,
   });
   readonly zoom = computed(() => this.view().zoom);
   /** The overlay `<svg>` of the canvas (set by `CanvasView`). */

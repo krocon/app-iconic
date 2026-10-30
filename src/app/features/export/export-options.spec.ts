@@ -3,7 +3,9 @@ import {
   choiceReady,
   DEFAULT_CHOICE,
   EXPORT_ARGS,
+  exportFileName,
   exportRequest,
+  exportVariants,
   fileBaseName,
   fileCount,
 } from './export-options';
@@ -42,7 +44,8 @@ describe('export options', () => {
       { sizes: [100] },
       { sizes: [] },
       { sizes: '1024' },
-      { appearances: ['tinted'] },
+      { appearances: ['clear'] },
+      { tint: 'orange' },
     ]) {
       expect(exportRequest('png', bad, DEFAULT_CHOICE)).toBeNull();
     }
@@ -59,5 +62,25 @@ describe('export options', () => {
     expect(choiceReady({ ...DEFAULT_CHOICE, appearances: [] })).toBe(false);
     expect(fileCount({ ...DEFAULT_CHOICE, sizes: [1024, 512, 16] })).toBe(6);
     expect(fileCount({ ...DEFAULT_CHOICE, format: 'svg' })).toBe(2);
+  });
+
+  it('tinted variants with their tint, file names as Rust writes them (prompt 077 E7)', () => {
+    const r = exportRequest(
+      'png',
+      { appearances: ['tinted', 'light'], tint: '#FF8000' },
+      DEFAULT_CHOICE,
+    )!;
+    expect(r.appearances).toEqual(['light', 'tinted']);
+    expect(r.tint).toBe('#ff8000');
+    expect(exportVariants(r)).toEqual([
+      { appearance: 'light', tint: '#ff8000' },
+      { appearance: 'tinted', tint: '#ff8000' },
+    ]);
+    expect(exportVariants({ ...DEFAULT_CHOICE, appearances: ['tinted'] })).toEqual([
+      { appearance: 'tinted', tint: '#ffffff' },
+    ]);
+    expect(exportFileName('icon', 'tinted', 1024)).toBe('icon-tinted-1024.png');
+    expect(exportFileName('icon', 'dark')).toBe('icon-dark.svg');
+    expect(checkArgs(EXPORT_ARGS, { tint: '#ffffff', appearances: ['tinted'] })).toBe(true);
   });
 });

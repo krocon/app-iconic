@@ -9,7 +9,8 @@ const EN = {
   layer: 'Layer',
   appearance: 'Appearance',
   appearances: { default: 'Default', dark: 'Dark', tinted: 'Tinted' },
-  notPreviewed: 'Tinted is not previewed on the canvas.',
+  notPreviewed:
+    'The tinted preview is an approximation: luminance × the tint of the canvas toolbar.',
   sections: {
     background: 'Background',
     platforms: 'Supported Platforms',
@@ -103,7 +104,8 @@ export const INSPECTOR_TEXTS = translatable('inspector', EN, {
     layer: 'Ebene',
     appearance: 'Erscheinungsbild',
     appearances: { default: 'Standard', dark: 'Dunkel', tinted: 'Getönt' },
-    notPreviewed: '„Getönt“ wird auf der Arbeitsfläche nicht gezeigt.',
+    notPreviewed:
+      'Die Vorschau „Getönt“ ist eine Annäherung: Luminanz × Tönung aus der Leiste der Arbeitsfläche.',
     sections: {
       background: 'Hintergrund',
       platforms: 'Unterstützte Plattformen',

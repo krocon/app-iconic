@@ -127,7 +127,9 @@ export function sanitizeSettings(s: Settings): Settings {
     visible: p.visible,
     width: clamp(p.width, PANEL_MIN, PANEL_MAX),
   });
-  const appearances = (['light', 'dark'] as const).filter((a) => e.appearances.includes(a));
+  const appearances = (['light', 'dark', 'tinted'] as const).filter((a) =>
+    e.appearances.includes(a),
+  );
   const sizes = PNG_SIZES.filter((n) => e.sizes.includes(n));
   const dir = e.targetDir;
   return {

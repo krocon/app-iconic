@@ -245,10 +245,13 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
     {
       name: 'export lists: allowed values in their order, no duplicates',
       input: {
-        export: { appearances: ['dark', 'tinted', 'dark'], sizes: [16, 1024, 1000, 16, 'x'] },
+        export: {
+          appearances: ['tinted', 'dark', 'clear', 'dark'],
+          sizes: [16, 1024, 1000, 16, 'x'],
+        },
       },
       expect: [
-        ['export.appearances', ['dark']],
+        ['export.appearances', ['dark', 'tinted']],
         ['export.sizes', [1024, 16]],
       ],
     },

@@ -550,6 +550,68 @@ mod tests {
         assert!(render(&tree, 0).is_err());
     }
 
+    /// Prompt 077 E1: a layer fill as the export writes it – the asset as an alpha mask, the
+    /// fill as a rect under it (`export-svg.ts` `layerFill`). Red inside the shape, nothing
+    /// outside, the asset's own colour gone.
+    #[test]
+    fn a_layer_fill_colours_the_shape_through_an_alpha_mask() {
+        let svg = icon(
+            r##"<defs><mask id="m" mask-type="alpha" maskUnits="userSpaceOnUse" x="-1024" y="-1024" width="3072" height="3072"><svg width="1024" height="1024" viewBox="0 0 1024 1024"><circle cx="512" cy="512" r="256" fill="#0000ff" fill-opacity="0.5"/></svg></mask></defs><g mask="url(#m)"><rect x="-1024" y="-1024" width="3072" height="3072" fill="#ff0000"/></g>"##,
+        );
+        let p = render_png(&svg, 64, empty_fonts()).unwrap();
+        assert!(
+            close(rgba(&p, 32, 32), [255, 0, 0, 128]),
+            "{:?}",
+            rgba(&p, 32, 32)
+        );
+        assert_eq!(rgba(&p, 2, 2)[3], 0);
+        // a gradient fill in the layer's space (userSpaceOnUse): top red, bottom blue
+        let svg = icon(
+            r##"<defs><linearGradient id="g" gradientUnits="userSpaceOnUse" x1="512" y1="0" x2="512" y2="1024"><stop offset="0" stop-color="#ff0000"/><stop offset="1" stop-color="#0000ff"/></linearGradient><mask id="m" mask-type="alpha" maskUnits="userSpaceOnUse" x="-1024" y="-1024" width="3072" height="3072"><rect width="1024" height="1024" fill="#000"/></mask></defs><g mask="url(#m)"><rect x="-1024" y="-1024" width="3072" height="3072" fill="url(#g)"/></g>"##,
+        );
+        let p = render_png(&svg, 64, empty_fonts()).unwrap();
+        assert!(rgba(&p, 32, 1)[0] > 240 && rgba(&p, 32, 62)[2] > 240);
+    }
+
+    /// Prompt 077 E2: the tinted approximation – luminance (Rec. 709 on sRGB values) × tint as
+    /// one `feColorMatrix` over the whole composition (`tinted.ts` `tintedMatrix`).
+    #[test]
+    fn the_tinted_matrix_maps_luminance_to_the_tint() {
+        // tint #ff8000: r = L, g = 0.50196·L, b = 0
+        let row = |t: f64| format!("{} {} {} 0 0", 0.2126 * t, 0.7152 * t, 0.0722 * t);
+        let values = format!("{} {} {} 0 0 0 1 0", row(1.0), row(0.50196), row(0.0));
+        let svg = icon(&format!(
+            r##"<defs><filter id="t" filterUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="{values}"/></filter></defs><g filter="url(#t)"><rect width="512" height="1024" fill="#ffffff"/><rect x="512" width="512" height="1024" fill="#00ff00"/></g>"##
+        ));
+        let p = render_png(&svg, 64, empty_fonts()).unwrap();
+        // white → the tint itself
+        assert!(
+            close(rgba(&p, 16, 32), [255, 128, 0, 255]),
+            "{:?}",
+            rgba(&p, 16, 32)
+        );
+        // green: L = 0.7152 → (182, 91, 0)
+        assert!(
+            close(rgba(&p, 48, 32), [182, 91, 0, 255]),
+            "{:?}",
+            rgba(&p, 48, 32)
+        );
+    }
+
+    /// Prompt 077 E4: resvg knows neither `plus-darker` nor `plus-lighter` (drawn as normal) –
+    /// the export therefore writes `multiply` for `plus-darker`.
+    #[test]
+    fn plus_darker_is_unknown_to_resvg_and_multiply_is_drawn() {
+        let draw = |mode: &str| {
+            let svg = icon(&format!(
+                r##"<rect width="1024" height="1024" fill="#808080"/><g style="mix-blend-mode:{mode}"><rect width="1024" height="1024" fill="#808080"/></g>"##
+            ));
+            rgba(&render_png(&svg, 16, empty_fonts()).unwrap(), 8, 8)
+        };
+        assert!(close(draw("plus-darker"), [128, 128, 128, 255]));
+        assert!(close(draw("multiply"), [64, 64, 64, 255]));
+    }
+
     #[test]
     fn png_bytes_decode_again() {
         let p = render_png(

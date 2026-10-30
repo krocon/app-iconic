@@ -351,11 +351,12 @@
       "additionalProperties": false,
       "properties": {
         "appearances": {
-          "description": "Default: light and dark",
+          "description": "Default: light and dark. tinted = approximation: luminance × tint",
           "items": {
             "enum": [
               "light",
-              "dark"
+              "dark",
+              "tinted"
             ],
             "type": "string"
           },
@@ -366,7 +367,7 @@
           "type": "string"
         },
         "effects": {
-          "description": "shadow/translucency approximation",
+          "description": "shadow/translucency/glass approximation",
           "type": "boolean"
         },
         "id": {
@@ -399,6 +400,11 @@
             "type": "integer"
           },
           "type": "array"
+        },
+        "tint": {
+          "description": "tinted only: the tint, default the canvas tint",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
         }
       },
       "required": [
@@ -414,11 +420,12 @@
       "additionalProperties": false,
       "properties": {
         "appearances": {
-          "description": "Default: light and dark",
+          "description": "Default: light and dark. tinted = approximation: luminance × tint",
           "items": {
             "enum": [
               "light",
-              "dark"
+              "dark",
+              "tinted"
             ],
             "type": "string"
           },
@@ -445,6 +452,11 @@
         },
         "overwrite": {
           "type": "boolean"
+        },
+        "tint": {
+          "description": "tinted only: the tint, default the canvas tint",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
         }
       },
       "required": [
@@ -455,14 +467,15 @@
     "name": "export_svg"
   },
   {
-    "description": "Renders the icon as a PNG image (the export path) so you can see the result: size 16…1024 (default 512), appearance light/dark, mask (default squircle).",
+    "description": "Renders the icon as a PNG image (the export path) so you can see the result: size 16…1024 (default 512), appearance light/dark/tinted, mask (default squircle).",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
         "appearance": {
           "enum": [
             "light",
-            "dark"
+            "dark",
+            "tinted"
           ],
           "type": "string"
         },
@@ -482,6 +495,11 @@
           "maximum": 1024,
           "minimum": 16,
           "type": "integer"
+        },
+        "tint": {
+          "description": "tinted only: the tint, default the canvas tint",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "type": "string"
         }
       },
       "required": [],

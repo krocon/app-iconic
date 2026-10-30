@@ -101,30 +101,30 @@
 - [x] Live Corners wie VectorCraft _(neu)_ (045): Ecken-Widgets an Rechteck/Polygon/geradem Pfad, rund/invers/Fase,
       Dialog „Ecken…“
 - [x] Pfade bearbeiten wie VectorCraft _(neu)_ (046): Ankerpunkt hinzufügen/löschen/umwandeln, Schere, Glätten,
-  Pfad-Radiergummi, Join (⌘J), Convert to Path, Auto Add/Delete des Zeichenstifts; Messer/Cuts mit 047.
+      Pfad-Radiergummi, Join (⌘J), Convert to Path, Auto Add/Delete des Zeichenstifts; Messer/Cuts mit 047.
 - [x] Pathfinder und Shape Builder _(neu)_ (047): Vereinigen, Vorderes abziehen, Schnittmenge, Ausschließen,
-  Unterteilen, Formerstellung (Ziehen vereinigt, Alt löscht), Messer, Linien- und Rechteckschnitt (paper.js).
+      Unterteilen, Formerstellung (Ziehen vereinigt, Alt löscht), Messer, Linien- und Rechteckschnitt (paper.js).
 - [x] Messen und Bemaßen _(neu)_ (048): Messwerkzeug (Abstand, Winkel, Δx/Δy), Bemaßung von Kante, Ecke (Winkel),
-  Kreis (Radius/Durchmesser) oder zwei Punkten; beim Export wählbar weggelassen.
+      Kreis (Radius/Durchmesser) oder zwei Punkten; beim Export wählbar weggelassen.
 - [x] Konstruktionslinien, Muster, Spiegeln, Klonen wie Fusion 360 _(neu)_ (049): Konstruktion (X, im SVG
-  transparent, im Canvas gestrichelt blau), kreisförmiges und rechteckiges Muster mit Live-Vorschau, Spiegeln an
-  zwei Punkten, verknüpfter Klon (`<use>`).
+      transparent, im Canvas gestrichelt blau), kreisförmiges und rechteckiges Muster mit Live-Vorschau, Spiegeln an
+      zwei Punkten, verknüpfter Klon (`<use>`).
 - [x] Trimmen und Verlängern wie Fusion 360 _(neu)_ (050): Stück zwischen Schnittpunkten wegschneiden (Klick oder
-  Ziehen), offenes Ende bis zur nächsten Kontur verlängern.
+      Ziehen), offenes Ende bis zur nächsten Kontur verlängern.
 - [x] Verrunden und Fasen zwischen Elementen _(neu)_ (051): Linie/Linie, Linie/Bogen, Kurven, Ecke eines Pfads; Radius
-  im Dialog mit Live-Vorschau.
+      im Dialog mit Live-Vorschau.
 - [x] Versatz und Kontur in Fläche _(neu)_ (052): Pfad verschieben (außen/innen, Ecken, Vorschau live), Konturlinie
-  (Strich wird Fläche).
+      (Strich wird Fläche).
 - [x] Transformieren mit Bezugspunkt _(neu)_ (053): Dreh-, Skalier-, Spiegelwerkzeug (Bezugspunkt per Klick, ⌥ Kopie),
-  Dialog Transformieren… mit Zahlen, 9er-Bezugspunkt, einzeln, Kopie.
+      Dialog Transformieren… mit Zahlen, 9er-Bezugspunkt, einzeln, Kopie.
 - [x] Verteilen und Ausrichten an Leinwand/Basisobjekt _(neu)_ (054): Mitten/Abstände verteilen, fester Abstand,
-  Ausrichten an Auswahl, Leinwand oder Basisobjekt; Abschnitt „Ausrichten“ im Properties-Panel.
+      Ausrichten an Auswahl, Leinwand oder Basisobjekt; Abschnitt „Ausrichten“ im Properties-Panel.
 - [x] Sperren und Isolieren _(neu)_ (055): Sperren (⌘L, Schloss im Baum, bleibt fangbar), Alle entsperren, Gruppe
-  isolieren (Rest gedimmt), Konstruktionslinien ausblenden.
+      isolieren (Rest gedimmt), Konstruktionslinien ausblenden.
 - [x] Hilfslinien aus dem Lineal und Icon-Raster _(neu)_ (056): Hilfslinien ziehen (gespeichert, fangbar, nicht im
-  Export), Raster Apple / Material-Keylines / gleichmäßig.
+      Export), Raster Apple / Material-Keylines / gleichmäßig.
 - [x] Vorschau in kleinen Größen und Pixelraster _(neu)_ (057): 16/32/64/128 px live im Canvas, Pixelraster mit
-  Fangen, Am Pixelraster ausrichten.
+      Fangen, Am Pixelraster ausrichten.
 - [x] Direkt als Konstruktion zeichnen _(neu)_ (058): Schalter Konstruktion (⇧X) in der Canvas-Werkzeugleiste.
 - [x] Abhängigkeiten und treibende Maße wie Fusion 360 (059): deckungsgleich, horizontal, vertikal, parallel,
       senkrecht, tangential, gleich, konzentrisch, Mittelpunkt, symmetrisch, fixiert; Abstand, Länge, Radius, Durchmesser,
@@ -174,6 +174,12 @@
 - [x] Supported Platforms (squares, circles) und Farbraum für SVG-Farben ohne Profil (010)
 - [x] icon.json Preview (read-only, kopierbar, letzte Änderung markiert); „Other properties (read-only)“ (010)
 - [x] Canvas-Vorschau: Fill je Appearance, Schatten/Transluzenz/Blend-Modes als Annäherung (Ansichtsoption) (010)
+- [x] Layer-Fill färbt den Layer in Vorschau und Export (Inhalt als Alpha-Maske; automatic/none = eigene Farben) (077)
+- [x] Tinted-Vorschau und -Export als Annäherung (Luminanz × Tönung, Tönung in der Canvas-Toolbar, nicht im Dokument;
+      tinted-Specializations wirken) (077)
+- [x] `plus-darker`: nativ, wo die WebView es kann, sonst und im Export `multiply` (077)
+- [x] Liquid Glass angenähert: Glanzkante (specular), Milchglas-Aufhellung (blur-material), combined/individual (077)
+- [ ] radial-gradient anlegen – im Modell fertig, im Fill-Editor erst mit Beleg aus Icon Composer (077 E5, Frage an Marc)
 
 ## 9. SVG-Quelltext
 
@@ -195,7 +201,7 @@
 
 ## 11. Export
 
-- [x] Export SVG je Appearance (Light/Dark) inkl. Hintergrund, Gruppen, Layer, Layer-Opacity (012)
+- [x] Export SVG je Appearance (Light/Dark, Tinted als Annäherung mit Tönung – 077) inkl. Hintergrund, Gruppen, Layer, Layer-Opacity, Layer-Fill (012, 077)
 - [x] Export PNG mit resvg, Größen-Set 1024/512/256/128/64/32/16 _(neu: Größen)_ (012; Fortschritt, Abbruch, Apple-Hinweis zur Transparenz)
 - [x] Optional mit Plattform-Maske _(neu)_ (012; dazu Schatten/Effekte als Annäherung, Schalter)
 - [x] Share Export → „Im Ordner zeigen“ nach dem Export (030 E6; Share-Sheet bewusst nicht)

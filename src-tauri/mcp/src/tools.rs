@@ -52,9 +52,14 @@ fn node_ref() -> Value {
 fn appearances() -> Value {
     json!({
         "type": "array",
-        "items": {"type": "string", "enum": ["light", "dark"]},
-        "description": "Default: light and dark"
+        "items": {"type": "string", "enum": ["light", "dark", "tinted"]},
+        "description": "Default: light and dark. tinted = approximation: luminance × tint"
     })
+}
+
+/// The tint of the tinted approximation (prompt 077 E2): a view setting, not in the document.
+fn tint() -> Value {
+    json!({"type": "string", "pattern": "^#[0-9a-fA-F]{6}$", "description": "tinted only: the tint, default the canvas tint"})
 }
 
 fn mask() -> Value {
@@ -206,7 +211,8 @@ pub fn list() -> Vec<Value> {
                 "sizes": {"type": "array", "items": {"type": "integer", "enum": PNG_SIZES}, "description": "Default: [1024]"},
                 "appearances": appearances(),
                 "mask": mask(),
-                "effects": {"type": "boolean", "description": "shadow/translucency approximation"},
+                "effects": {"type": "boolean", "description": "shadow/translucency/glass approximation"},
+                "tint": tint(),
                 "overwrite": {"type": "boolean"}
             }),
             &["dir"],
@@ -220,17 +226,19 @@ pub fn list() -> Vec<Value> {
                 "appearances": appearances(),
                 "mask": mask(),
                 "effects": {"type": "boolean"},
+                "tint": tint(),
                 "overwrite": {"type": "boolean"}
             }),
             &["dir"],
         ),
         tool(
             "render_preview",
-            "Renders the icon as a PNG image (the export path) so you can see the result: size 16…1024 (default 512), appearance light/dark, mask (default squircle).",
+            "Renders the icon as a PNG image (the export path) so you can see the result: size 16…1024 (default 512), appearance light/dark/tinted, mask (default squircle).",
             json!({
                 "id": id(),
                 "size": {"type": "integer", "minimum": PREVIEW_MIN, "maximum": PREVIEW_MAX},
-                "appearance": {"type": "string", "enum": ["light", "dark"]},
+                "appearance": {"type": "string", "enum": ["light", "dark", "tinted"]},
+                "tint": tint(),
                 "mask": mask()
             }),
             &[],

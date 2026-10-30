@@ -65,6 +65,13 @@ for (const scale of [1, 0.6]) {
     page,
   }) => {
     await openIcon(page);
+    // only the shadow: the glass approximation (prompt 077 E6) chains a filter of its own
+    for (const group of [0, 1]) {
+      await page.evaluate(
+        (g) => window.__appIconic!.run('icon.set', { group: g, field: 'specular', value: false }),
+        group,
+      );
+    }
     if (scale !== 1) {
       const ok = await page.evaluate(
         (s) =>

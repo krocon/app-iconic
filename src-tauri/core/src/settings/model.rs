@@ -12,7 +12,7 @@ pub const PANEL_MAX: u32 = 480;
 pub(super) const MAX_BYTES: u64 = 64 * 1024;
 /// The PNG sizes of the export (largest first, = `PNG_SIZES` of `export::png` / TS).
 pub(super) const PNG_SIZES: [u32; 7] = [1024, 512, 256, 128, 64, 32, 16];
-pub(super) const APPEARANCES: [&str; 2] = ["light", "dark"];
+pub(super) const APPEARANCES: [&str; 3] = ["light", "dark", "tinted"];
 pub(super) const MASKS: [&str; 3] = ["none", "squircle", "circle"];
 pub(super) const MAX_PATH: usize = 4096;
 

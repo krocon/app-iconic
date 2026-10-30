@@ -93,7 +93,8 @@ describe('LayerStack', () => {
   });
 
   it('puts the group shadow as composited CSS filter on the layer box (prompt 033 E5)', () => {
-    const d = doc([{ layers: [L('a.svg', { position: { scale: 2 } })] }]);
+    // without the glass approximation (prompt 077 E6), which chains its own filter
+    const d = doc([{ specular: false, layers: [L('a.svg', { position: { scale: 2 } })] }]);
     new LayerStack(box).update(d, 'light');
     const host = box
       .querySelector('.layer')!
@@ -159,5 +160,50 @@ describe('LayerStack', () => {
     new LayerStack(box).update(d, 'light');
     const img = box.querySelector('.layer')!.shadowRoot!.querySelector('image')!;
     expect(img.getAttribute('href')).toBe('data:image/png;base64,AAAA');
+  });
+
+  it('layer fill, glass and shadow as one filter chain on the layer box (prompt 077)', () => {
+    const d = doc([
+      {
+        lighting: 'individual',
+        layers: [L('a.svg', { fill: { solid: 'srgb:1,0,0,1' } }), L('b.svg', { glass: false })],
+      },
+    ]);
+    new LayerStack(box).update(d, 'light');
+    const [b, a] = [...box.querySelectorAll('.layer')].map((l) =>
+      l.shadowRoot!.querySelector<SVGSVGElement>('svg.layer-host')!,
+    );
+    expect(a.style.filter.replace(/"/g, '')).toBe(
+      'url(#ai-fx-fill) url(#ai-fx-glass) url(#ai-fx-shadow)',
+    );
+    expect(b.style.filter).toBe('url("#ai-fx-shadow")');
+    // the fill is not an effect: it stays with the effects preview off
+    new LayerStack(box).update(d, 'light', false);
+    const host = box.querySelectorAll('.layer')[1].shadowRoot!.querySelector<SVGSVGElement>('svg')!;
+    expect(host.style.filter).toBe('url("#ai-fx-fill")');
+  });
+
+  it('combined lighting: glass on every layer, composited per layer (prompt 077 E6)', () => {
+    const d = doc([{ layers: [L('a.svg', { glass: false })] }]);
+    new LayerStack(box).update(d, 'light');
+    const host = box.querySelector('.layer')!.shadowRoot!.querySelector<SVGSVGElement>('svg')!;
+    expect(host.style.filter.replace(/"/g, '')).toBe('url(#ai-fx-glass) url(#ai-fx-shadow)');
+    expect(box.querySelector<HTMLElement>('.group')!.style.filter).toBe('');
+  });
+
+  it('tinted specializations apply in the tinted appearance (prompt 077 E2)', () => {
+    const d = doc([
+      {
+        layers: [
+          L('a.svg', {
+            'fill-specializations': [
+              { appearance: 'tinted', value: { solid: 'srgb:0.5,0.5,0.5,1' } },
+            ],
+          }),
+        ],
+      },
+    ]);
+    expect(stackOf(d, 'light')[0].layers[0].fill).toBeNull();
+    expect(stackOf(d, 'tinted')[0].layers[0].fill).toMatchObject({ kind: 'solid' });
   });
 });

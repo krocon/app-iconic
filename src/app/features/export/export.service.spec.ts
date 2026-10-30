@@ -138,7 +138,7 @@ describe('ExportService (design 012)', () => {
     await vi.waitFor(() => expect(files.notice()).toContain('already exist'));
     expect(actions.run('file.exportPng', { mask: 'star' })).toBe(false);
     actions.run('file.exportPng', { sizes: [100] });
-    await vi.waitFor(() => expect(files.notice()).toContain('unknown appearance or size'));
+    await vi.waitFor(() => expect(files.notice()).toContain('unknown appearance, size or tint'));
   });
 
   it('shows the last export in the file manager (design 030 E6)', async () => {

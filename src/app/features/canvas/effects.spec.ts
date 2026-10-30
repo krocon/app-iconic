@@ -38,9 +38,10 @@ describe('effects preview (design 010 E13)', () => {
     ).toBeNull();
   });
 
-  it('CSS blend modes; plus-darker has none', () => {
+  it('CSS blend modes; plus-darker natively or as multiply (prompt 077 E4)', () => {
     expect(blendCss('soft-light')).toBe('soft-light');
-    expect(blendCss('plus-darker')).toBeNull();
+    expect(blendCss('plus-darker')).toBe('multiply');
+    expect(blendCss('plus-darker', true)).toBe('plus-darker');
     expect(blendCss('normal')).toBeNull();
     expect(blendCss('weird')).toBeNull();
   });

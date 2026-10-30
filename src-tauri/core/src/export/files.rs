@@ -43,7 +43,7 @@ pub fn file_base_name(name: &str) -> Result<String, FsError> {
 
 fn check_variants(variants: &[Variant]) -> Result<(), FsError> {
     if variants.is_empty() || variants.len() > APPEARANCES.len() {
-        return Err(invalid("one or two appearances"));
+        return Err(invalid("one to three appearances"));
     }
     for (i, v) in variants.iter().enumerate() {
         if !APPEARANCES.contains(&v.appearance.as_str()) {

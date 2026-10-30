@@ -1,5 +1,6 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { ClipboardApi } from '../../core/clipboard/clipboard-api';
+import { appearanceKey } from '../canvas/appearance';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { DocCommand } from '../document/commands';
 import { DocumentStore } from '../document/document.store';
@@ -39,12 +40,9 @@ export class IconInspectorService {
   private readonly canvas = inject(CanvasViewStore);
   private readonly clipboard = inject(ClipboardApi);
   private session: { store: DocumentStore; key: string } | null = null;
-  /** Tinted is only edited, never previewed – the canvas keeps light/dark. */
-  private readonly tinted = signal(false);
-
-  /** Default / Dark follow the canvas preview, Tinted is the inspector's own (design 010 E2). */
+  /** Default / Dark / Tinted follow the canvas preview (design 010 E2; Tinted since 077 E3). */
   readonly appearance = computed<AppearanceKey>(() =>
-    this.tinted() ? 'tinted' : this.canvas.options().appearance === 'dark' ? 'dark' : 'default',
+    appearanceKey(this.canvas.options().appearance),
   );
 
   get store(): DocumentStore | null {
@@ -53,8 +51,7 @@ export class IconInspectorService {
 
   setAppearance(a: AppearanceKey): void {
     this.commit();
-    this.tinted.set(a === 'tinted');
-    if (a !== 'tinted') this.canvas.set('appearance', a === 'dark' ? 'dark' : 'light');
+    this.canvas.set('appearance', a === 'default' ? 'light' : a);
   }
 
   /** The one selected root / group / layer, `null` otherwise. */

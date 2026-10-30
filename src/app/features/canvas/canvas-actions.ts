@@ -3,6 +3,7 @@ import { CanvasToggle, CanvasViewStore, GuideTemplate, MaskShape } from './canva
 import { GridOrigin } from '../../shared/geometry/snapping';
 import { Appearance } from './appearance';
 import { SelectionMode } from './selection-measure';
+import { parseTint } from './tinted';
 
 /**
  * The view actions of the canvas (design 005 E17): zoom, centre, the View options, appearance and
@@ -64,6 +65,16 @@ export function canvasActions(view: CanvasViewStore): Record<string, ActionHandl
     'view.smartGuides': toggle('smartGuides'),
     'view.appearance.light': appearance('light'),
     'view.appearance.dark': appearance('dark'),
+    'view.appearance.tinted': appearance('tinted'),
+    // the tint of the tinted approximation (prompt 077 E2): `{ color: "#rrggbb" }`
+    'view.tint': {
+      run: (a) => {
+        const tint = parseTint((a as { color?: unknown } | undefined)?.color);
+        if (!tint) return false;
+        view.set('tint', tint);
+        return true;
+      },
+    },
     'view.mask.squircle': mask('squircle'),
     'view.mask.circle': mask('circle'),
     'view.mask.none': mask('none'),

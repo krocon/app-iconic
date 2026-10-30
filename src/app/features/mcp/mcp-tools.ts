@@ -5,6 +5,7 @@ import { isFsError } from '../../core/errors/fs-error';
 import { IconFormat } from '../../core/icon-file/icon-file.models';
 import { AskService } from '../../shared/ask/ask.service';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
+import { parseTint } from '../canvas/tinted';
 import { AddService } from '../commands/add.service';
 import { CommandError } from '../document/commands/command';
 import { DocumentStore } from '../document/document.store';
@@ -256,7 +257,7 @@ export class McpTools {
       throw mcpError('denied', 'the user did not allow the export');
     }
     const args: Args = { targetDir: dir };
-    for (const k of ['appearances', 'sizes', 'mask', 'effects', 'overwrite']) {
+    for (const k of ['appearances', 'sizes', 'mask', 'effects', 'tint', 'overwrite']) {
       if (a[k] !== undefined) args[k] = a[k];
     }
     const o = await this.exporter.runAction(format, args);
@@ -279,7 +280,9 @@ export class McpTools {
   /** The export SVG of one appearance for `render_preview` (Rust renders it, design 018 E8). */
   private async previewSvg(a: Args): Promise<unknown> {
     const s = this.store();
-    const appearance = a['appearance'] === 'dark' ? 'dark' : 'light';
+    const appearance = (['dark', 'tinted'] as const).find((x) => x === a['appearance']) ?? 'light';
+    // the tint of the tinted approximation (prompt 077 E2): the argument, else the canvas tint
+    const tint = parseTint(a['tint']) ?? this.canvas.options().tint;
     const mask =
       (['none', 'squircle', 'circle'] as const).find((m) => m === a['mask']) ?? 'squircle';
     const [v] = await this.exporter.variants(s.document(), {
@@ -287,6 +290,7 @@ export class McpTools {
       appearances: [appearance],
       mask,
       effects: false,
+      tint,
     });
     return { svg: v.svg, revision: s.revision() };
   }

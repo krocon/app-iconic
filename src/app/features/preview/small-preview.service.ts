@@ -1,4 +1,5 @@
 import { effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { Appearance } from '../canvas/appearance';
 import { CANVAS_SIZE } from '../../shared/geometry/icon-guides';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { exportSvg } from '../export/export-svg';
@@ -40,21 +41,25 @@ export class SmallPreviewService {
       const o = this.view.options();
       untracked(() => {
         if (this.timer) clearTimeout(this.timer);
-        this.timer = setTimeout(() => void this.draw(o.appearance, o.mask, o.effects), DEBOUNCE);
+        this.timer = setTimeout(
+          () => void this.draw(o.appearance, o.mask, o.effects, o.tint),
+          DEBOUNCE,
+        );
       });
     });
   }
 
   private async draw(
-    appearance: 'light' | 'dark',
+    appearance: Appearance,
     mask: 'none' | 'squircle' | 'circle',
     effects: boolean,
+    tint: string,
   ) {
     const store = this.files.store();
     if (!store) return;
     const seq = ++this.seq;
     const doc = store.document();
-    const svg = exportSvg(doc, appearance, { mask, effects }, await rasterSizes(doc));
+    const svg = exportSvg(doc, appearance, { mask, effects, tint }, await rasterSizes(doc));
     if (seq !== this.seq) return;
     this.url.set(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`);
   }

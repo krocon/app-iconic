@@ -105,7 +105,9 @@ test('layer opacity, shadow approximation, Other properties, rename file', async
   const filterKind = () =>
     page.evaluate(() => {
       const host = document.querySelector('.layer[data-group="0"][data-layer="0"]');
-      return host?.shadowRoot?.querySelector('filter')?.getAttribute('data-kind') ?? null;
+      return (
+        host?.shadowRoot?.querySelector('filter#ai-fx-shadow')?.getAttribute('data-kind') ?? null
+      );
     });
   expect(await filterKind()).toBe('neutral');
   await selectItem(page, { kind: 'group', group: 0 });
