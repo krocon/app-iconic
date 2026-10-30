@@ -76,7 +76,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster/Quit), Recent,
                               file-actions (Aktionen der Datei-Funktionen), Texte (003, 005)
   app/features/menus/         Menümodell (rein), MenuService (nativ/HTML), MenuBar (Windows/Linux), Befehlspalette,
-                              Kürzel-Dialog, app-actions (005)
+                              Kürzel-Dialog, app-actions (005); context-menu-model (Kontextmenüs Baum + Canvas, 070)
   app/features/hierarchy/     Ebenenbaum (006): hierarchy-model (Baum rein aus dem Dokument, vorderste oben +
                               domPosition, 063), HierarchyTree (APG
                               Tree, virtualisiert), tree-navigation/-selection/-drag, context-menu, swatch,
@@ -127,7 +127,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               canvas-actions, View-Options-Menü (005); CanvasTools (ein Werkzeug zur Zeit, Modi
                               wie Freehand) + selection-tools (`tool.select` V / `tool.direct` A, 061);
                               ContextBar + ToolContexts (Kontextleiste je Werkzeug, Provider in
-                              tools/tool-context-providers, 067);
+                              tools/tool-context-providers, 067); CanvasContextMenu (Rechtsklick, `canvas.menu`, 070);
                               Auswahl/Handles (007): CanvasEditStore (Kontext, Punkt, Rahmen, Snap), canvas-pointer
                               (Klick/Rahmen/Ziehen), canvas-gesture (Geste je Ziehen), hit-test, selection-measure
                               (Rahmen + Handle-Sets über CTM), selection-overlay, magic-points, edit-ops (rein),

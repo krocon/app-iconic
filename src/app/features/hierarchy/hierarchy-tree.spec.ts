@@ -144,20 +144,16 @@ describe('HierarchyTree', () => {
     );
     await fixture.whenStable();
     expect(sel().nodes).toEqual(['n9']);
-    const items = [...el.querySelectorAll<HTMLElement>('[role="menuitem"]')];
-    expect(items.map((i) => i.querySelector('.label')!.textContent!.trim())).toEqual([
-      'Duplicate',
-      'Group <g>',
-      'Bring to Front',
-      'Send to Back',
-      'Edit SVG…',
-      'Optimize Path…',
-      'Copy XML',
-      'Delete…',
-    ]);
+    const items = [...el.querySelectorAll<HTMLElement>('ul.menu:not(.sub) > [role="menuitem"]')];
+    const labels = items.map((i) => i.querySelector('.label')!.textContent!.trim());
+    // the shared model (prompt 070)
+    expect(labels.slice(0, 5)).toEqual(['Cut', 'Copy', 'Paste', 'Duplicate', 'Delete…']);
+    expect(labels).toContain('Arrange');
+    expect(labels).toContain('Edit SVG…');
     // registered by the window (svg-source-actions, 011) – not in this test
-    expect(items[4].getAttribute('aria-disabled')).toBe('true');
-    items[7].click();
+    const editSvg = items.find((i) => i.textContent!.includes('Edit SVG…'))!;
+    expect(editSvg.getAttribute('aria-disabled')).toBe('true');
+    items.find((i) => i.textContent!.includes('Delete…'))!.click();
     await fixture.whenStable();
     const ask = TestBed.inject(AskService);
     await new Promise((r) => setTimeout(r));

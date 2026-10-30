@@ -135,5 +135,10 @@
   </div>
 </div>
 @if (menu(); as m) {
-  <app-context-menu [at]="m" (chosen)="chooseMenu($event)" (closed)="closeMenu()" />
+  <app-context-menu
+    [entries]="menuEntries()"
+    [at]="m"
+    (chosen)="chooseMenu($event)"
+    (closed)="closeMenu()"
+  />
 }

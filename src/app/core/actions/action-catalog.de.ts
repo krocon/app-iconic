@@ -42,6 +42,7 @@ const FIXED: Record<string, string> = {
   'tool.direct': 'Direktauswahl-Werkzeug',
   'tool.option': 'Werkzeugoption setzen',
   'tool.done': 'Werkzeug beenden',
+  'canvas.menu': 'Kontextmenü',
   'tool.focusOptions': 'Zu den Werkzeugoptionen',
   'edit.select': 'Auswählen',
   'edit.runCommand': 'Dokument-Befehl ausführen',

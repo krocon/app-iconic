@@ -76,6 +76,8 @@
   "canvas": {
     "Space": "canvas.panHold",
     "Escape": "canvas.escape",
+    "Shift+F10": "canvas.menu",
+    "ContextMenu": "canvas.menu",
     "Enter": "pattern.centerHere",
     "Delete": "canvas.deletePoint",
     "Backspace": "canvas.deletePoint",

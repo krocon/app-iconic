@@ -44,6 +44,7 @@ const EN = {
   // the context bar of the active tool (prompt 067)
   context: {
     bar: 'Tool options',
+    menu: 'Canvas actions',
     done: 'Done',
     doneHint: 'End the tool (Esc)',
     fill: 'Fill',
@@ -112,6 +113,7 @@ export const CANVAS_TEXTS = translatable('canvas', EN, {
     },
     context: {
       bar: 'Werkzeugoptionen',
+      menu: 'Aktionen der Zeichenfläche',
       done: 'Fertig',
       doneHint: 'Werkzeug beenden (Esc)',
       fill: 'Füllung',

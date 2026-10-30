@@ -53,6 +53,7 @@ import { ConstraintOverlay } from '../constraints/constraint-overlay';
 import { LiveFillOverlay } from '../live-fill/live-fill-overlay';
 import { selectionToolActions } from './selection-tools';
 import { ContextBar } from './context-bar';
+import { CanvasContextMenu } from './canvas-context-menu';
 import { activeToolId } from '../commands/add-layout';
 import { CanvasTools } from './canvas-tools';
 import { followSelection } from './follow-selection';
@@ -83,6 +84,7 @@ const WHEEL_ZOOM = 0.01;
     ConstraintOverlay,
     LiveFillOverlay,
     ContextBar,
+    CanvasContextMenu,
   ],
   templateUrl: './canvas-view.html',
   styleUrl: './canvas-view.css',

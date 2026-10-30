@@ -18,6 +18,7 @@ import { DocumentStore } from '../document/document.store';
 import { checkReorder } from '../document/model/reorder-rules';
 import { TreeTarget } from '../document/model/selection';
 import { ContextEntry, ContextMenu } from './context-menu';
+import { contextMenuFor } from '../menus/context-menu-model';
 import { EditService } from './edit.service';
 import {
   ancestorsOfSelection,
@@ -72,6 +73,10 @@ export class HierarchyTree {
   readonly focusedId = signal<string | null>(null);
   readonly anchor = signal<string | null>(null);
   protected readonly menu = signal<{ x: number; y: number } | null>(null);
+  /** The shared context menu (prompt 070): SVG nodes or groups / layers. */
+  protected readonly menuEntries = computed(() =>
+    contextMenuFor(this.store().selection().length ? 'nodes' : 'items'),
+  );
   protected readonly scrollTop = signal(0);
   protected readonly viewHeight = signal(400);
   readonly rowHeight = signal(ROW_HEIGHT);

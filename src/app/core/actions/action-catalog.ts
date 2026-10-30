@@ -202,6 +202,8 @@ export const ACTIONS: readonly ActionDef[] = [
     },
   }),
   EDIT('tool.done', 'End Tool'),
+  // the canvas's context menu at the selection (prompt 070, ⇧F10 / context menu key)
+  { id: 'canvas.menu', label: 'Context Menu', context: 'canvas', group: 'edit', palette: false },
   EDIT('tool.focusOptions', 'Go to Tool Options'),
   // selection as JSON (AI, tests; design 006 E16): `{ nodes?: NodeRef[], items?: IconItem[] }`
   EDIT('edit.select', 'Select', {

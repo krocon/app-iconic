@@ -35,6 +35,7 @@
 ## 3. Canvas
 
 - [x] Hell/Dunkel und Maske als Umschalter in der Canvas-Toolbar; Speichern und Export… in der App-Toolbar; Undo/Redo nur dort _(neu)_ (069)
+- [x] Kontextmenü auf der Zeichenfläche (Rechtsklick wählt, leere Fläche, Werkzeug), dasselbe Modell im Baum, Untermenüs Anordnen/Pathfinder, `Shift+F10` _(neu)_ (070)
 - [x] Zoom 25/33/50/66/75/100/125/150/200 %, Anzeige, Pinch, ⌘+/⌘−/⌘0, Center Canvas (004, dazu „Fit“; Kürzel als Aktionen 005)
 - [x] Pan (Scroll / Space+Drag / mittlere Maustaste) (004)
 - [x] Lineale mit Haupt-/Nebenteilung, zoomabhängig (004)

@@ -35,6 +35,7 @@
     (dblclick)="onDblClick($event)"
     (pointerleave)="onPointerLeave()"
     (auxclick)="$event.preventDefault()"
+    (contextmenu)="ctx.open($event)"
   >
     <div
       class="artboard"
@@ -115,6 +116,7 @@
     <app-live-fill-overlay [toView]="toView()" />
     <!-- one bar for every active tool (prompt 067) -->
     <app-context-bar />
+    <app-canvas-context-menu #ctx />
     @if (opt().crossCursor && pointerView(); as p) {
       <div class="cross-h" [style.top.px]="p.y"></div>
       <div class="cross-v" [style.left.px]="p.x"></div>
