@@ -5,11 +5,13 @@ use crate::commands::{allowed, blocking, grant, to_string};
 use crate::error::FsError;
 use crate::reveal::Exported;
 use ai_core::export::package::{self, PackageKind, PackageSource};
+use ai_core::export::scene;
 use ai_core::export::{
     ExportOptions, ExportProgress, ExportReport, Variant, files, fonts::system_fonts,
 };
 use ai_core::user_paths::UserPaths;
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use tauri::ipc::Channel;
@@ -165,6 +167,35 @@ pub async fn pick_color(svg: String, x: f64, y: f64) -> Result<String, FsError> 
     blocking(move || ai_core::export::png::pick_pixel(&svg, x, y, system_fonts())).await
 }
 
+/// "Save scene as PNG" (prompt 081): the native save dialog (in Rust – no path from the WebView),
+/// then the scene rendered at `scale` and written atomically; `None` = cancelled. The file can be
+/// revealed like an export.
+#[tauri::command]
+pub async fn save_scene_png(
+    app: AppHandle,
+    exported: State<'_, Exported>,
+    svg: String,
+    scale: u32,
+    suggested_name: String,
+) -> Result<Option<String>, FsError> {
+    let name = scene::scene_file_name(&suggested_name);
+    let picked = blocking(move || {
+        Ok(app
+            .dialog()
+            .file()
+            .set_file_name(name)
+            .add_filter("PNG", &["png"])
+            .blocking_save_file()
+            .and_then(to_string))
+    })
+    .await?;
+    let Some(path) = picked else { return Ok(None) };
+    let target = PathBuf::from(&path);
+    blocking(move || scene::write_scene(&svg, scale, &target, system_fonts())).await?;
+    exported.remember([path.clone()]);
+    Ok(Some(path))
+}
+
 /// Stops the PNG export of the calling window after the current file.
 #[tauri::command]
 pub async fn cancel_export(
@@ -215,6 +246,6 @@ mod tests {
                 count += 1;
             }
         }
-        assert_eq!(count, 6);
+        assert_eq!(count, 7);
     }
 }

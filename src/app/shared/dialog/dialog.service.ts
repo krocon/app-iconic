@@ -18,7 +18,8 @@ export type DialogKind =
   | 'pattern'
   | 'fillet'
   | 'offset'
-  | 'transform';
+  | 'transform'
+  | 'mockups';
 
 /**
  * Geometric fine tuning with a live preview (prompt 073 E3): a non-modal popover beside what opened
@@ -31,6 +32,8 @@ export const POPOVER_KINDS: ReadonlySet<DialogKind> = new Set([
   'offset',
   'transform',
   'optimizePath',
+  // "In Context" (prompt 081): the scenes follow the canvas while it is edited
+  'mockups',
 ]);
 
 /** Where a popover is anchored (client pixels of the opener). */

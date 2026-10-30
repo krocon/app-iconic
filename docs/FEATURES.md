@@ -129,6 +129,9 @@
       Export), Raster Apple / Material-Keylines / gleichmäßig.
 - [x] Vorschau in kleinen Größen und Pixelraster _(neu)_ (057): 16/32/64/128 px live im Canvas, Pixelraster mit
       Fangen, Am Pixelraster ausrichten.
+- [x] Icon im Kontext _(neu)_ (081): Popover „Im Kontext“ mit macOS-Dock, iOS-Home-Bildschirm hell/dunkel,
+      Spotlight/Mitteilung und Windows-Taskleiste in echten Größen, Erscheinungsbild je Szene, eigene neutrale Grafik,
+      optional eigenes Hintergrundbild; Szene als PNG kopieren/sichern (1×–3×)
 - [x] Direkt als Konstruktion zeichnen _(neu)_ (058): Schalter Konstruktion (⇧X) in der Canvas-Werkzeugleiste.
 - [x] Abhängigkeiten und treibende Maße wie Fusion 360 (059): deckungsgleich, horizontal, vertikal, parallel,
       senkrecht, tangential, gleich, konzentrisch, Mittelpunkt, symmetrisch, fixiert; Abstand, Länge, Radius, Durchmesser,

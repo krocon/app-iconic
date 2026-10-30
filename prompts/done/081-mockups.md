@@ -1,7 +1,12 @@
 # Prompt 081: Icon im Kontext – Mockup-Vorschau
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 057, 077 · Quelle:
-> [Analyse 30.10.2026](2026.10.30%20-%20analyse.md) §1.4 (P3)
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 057, 077 · Quelle:
+> [Analyse 30.10.2026](../2026.10.30%20-%20analyse.md) §1.4 (P3)
+
+## Stand
+
+- ✅ 30.10.2026: Popover **Im Kontext** (View › In Context, `view.mockups`) mit macOS-Dock, iOS-Home-Bildschirm
+  hell/dunkel, Spotlight/Mitteilung und Windows-Taskleiste; Design [081-mockups.design.md](081-mockups.design.md).
 
 ## Ziel
 

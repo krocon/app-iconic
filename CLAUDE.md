@@ -62,7 +62,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               readImage über Rust/arboard, imageFromBlob, 071)
   app/core/drop/              DropApi (`file-drop`: Dateien aus Finder/Explorer, 071), DTOs
   app/core/export/            ExportApi (Ordner-Dialog, export_svg, export_png mit Channel, cancel), DTOs (012);
-                              exportPackage, copyPng, PackageKind (078)
+                              exportPackage, copyPng, PackageKind (078); copyScenePng, saveScenePng (081)
   app/core/fonts/             FontApi (list_fonts, text_to_path), DTOs + Grenzen (013)
   app/core/i18n/              translatable() (tiefer Proxy), phrasebook(), Sprach-Signal, systemLanguage,
                               catalogs.spec (Vollständigkeit aller Kataloge + Aktionsnamen, 015)
@@ -151,6 +151,10 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               Matrix, verschieben, um die Mitte skalieren), layer-frame (rein: Platzierung G·L,
                               positionCommand je Erscheinungsbild), LayerTransformService (Rahmen messen, Drag-Ops),
                               LayerHandlesOverlay (Rahmen + Eckgriffe)
+  app/features/mockups/       Im Kontext (081): mockup-scenes (rein: Szenen, Größen mit Quelle, Layouts), mockup-svg
+                              (rein: Szene als SVG aus eigener Grafik + Icon als Data-URL), MockupsService (gedrosselt,
+                              Erscheinungsbild je Szene, PNG kopieren/sichern, Hintergrundbild), MockupsDialog (Popover),
+                              mockups-actions (`view.mockups`, `mockups.*`), Texte; mockup-assets.spec (keine fremden Assets)
   app/features/about/         About-Dialog + Texte
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile) + canvas-measure (Auswahl
                               messen je Änderung, Viewport, 033), CanvasViewStore (Zoom/Pan/
@@ -215,7 +219,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               `pnpm fixtures`)
 e2e/                          Playwright-Tests gegen den Dev-Server (hardening: großes/tiefes SVG, a11y: Tab-Weg,
                               Fokus, Dialoge – 031; composited-shadow: Schatten pixelgleich – 033; export-packages – 078;
-                              export-android-web: Favicon hell/dunkel, sichere Zone – 079; png-layer – 080)
+                              export-android-web: Favicon hell/dunkel, sichere Zone – 079; png-layer – 080;
+                              mockups: Szenen folgen dem Dokument, Dark-Szene – 081)
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
@@ -226,7 +231,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/windows.rs              DocWindows: Labels doc-<n>, Startpfade/-aktionen, Pfad je Fenster, Schließen-Übernahme
                               (003), QuitQueue (005)
   src/app_menu.rs             natives macOS-Menü: Spec je Fenster, fokussiertes zeigt seins, Klicks routen (005)
-  src/export_commands.rs      Export-Commands (pick_export_dir, export_svg, export_png, export_package 078, cancel_export),
+  src/export_commands.rs      Export-Commands (pick_export_dir, export_svg, export_png, export_package 078, cancel_export,
+                              save_scene_png 081),
                               ExportJobs (012)
   src/font_commands.rs        list_fonts, text_to_path, Vorladen der Schriften beim Start (013)
   src/settings_commands.rs    load_settings, save_settings(patch), reset_settings, set_window_theme; SettingsState,
@@ -237,7 +243,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/open_files.rs           `.icon` aus argv, Zweitstart (single-instance) und Finder (`RunEvent::Opened`) → Fenster (030)
   src/reveal.rs               „Im Ordner zeigen“ nur für exportierte Dateien (030)
   src/drop_files.rs           DragDrop → `file-drop` ans Fenster, Drop-Pfade in UserPaths, `read_clipboard_image` (071),
-                              `copy_png` (078)
+                              `copy_png` (078), `copy_scene_png` (081)
   Info.plist, entitlements.plist  macOS: `.icon` als Package-Dokument (Alternate), Hardened-Runtime-Rechte (030)
   tauri.linux.conf.json, tauri.windows.conf.json, linux/  Dateizuordnung je OS, Mime-XML + postinst/postrm (030)
   src/about.rs, model.rs      AppInfo, DTOs (serde camelCase)
@@ -260,7 +266,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
                               (PackageKind → PackagePlan, ein Writer: Ordner tauschen, Fortschritt, Abbruch, RGB ohne
                               Alpha), appiconset (Contents.json im Xcode-Stil), containers (.icns/.ico schreiben/lesen);
                               079: android (Adaptive Icon, Legacy, Play), web (Favicons, PWA, Manifest), package_render
-                              (Renderer der Pakete)
+                              (Renderer der Pakete); 081: scene (Mockup-Szene als PNG im eigenen Seitenverhältnis)
     src/fonts/                Schriften (012, 013): system (fontdb einmal je Prozess, generische Familien), FontCatalog
                               (Familien/Stile/Ids), outline (Text → Pfad: harfrust-Shaping, skrifa-Umrisse, BBox)
   mcp/                        Crate `ai-mcp` + Binary `app-iconic-mcp` (018, aus editlicious ed-mcp): server (MCP über

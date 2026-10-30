@@ -161,6 +161,34 @@ export class FakeExportApi extends ExportApi {
     return Promise.resolve();
   }
 
+  /** Scenes put into the "clipboard" or saved (prompt 081). */
+  readonly scenes: { svg: string; scale: number; path: string | null }[] = [];
+  /** Answers of the next scene save dialogs (`null` = cancelled); empty → `/export/<name>`. */
+  readonly scenePicks: (string | null)[] = [];
+
+  copyScenePng(svg: string, scale: number): Promise<void> {
+    if (this.failNext) {
+      const e = this.failNext;
+      this.failNext = null;
+      return Promise.reject(e);
+    }
+    this.scenes.push({ svg, scale, path: null });
+    return Promise.resolve();
+  }
+
+  saveScenePng(svg: string, scale: number, suggestedName: string): Promise<string | null> {
+    if (this.failNext) {
+      const e = this.failNext;
+      this.failNext = null;
+      return Promise.reject(e);
+    }
+    const path = this.scenePicks.length ? this.scenePicks.shift()! : `/export/${suggestedName}.png`;
+    if (path === null) return Promise.resolve(null);
+    this.scenes.push({ svg, scale, path });
+    this.files.set(path, `png:scene@${scale}x`);
+    return Promise.resolve(path);
+  }
+
   cancelExport(): Promise<void> {
     this.cancelled = true;
     return Promise.resolve();

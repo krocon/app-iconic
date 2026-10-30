@@ -101,6 +101,7 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('guides.clear'),
     a('view.constraints'),
     a('view.smallPreview'),
+    a('view.mockups'),
     sub(t.pixelGrid, [
       a('view.pixelGrid.off'),
       a('view.pixelGrid.16'),

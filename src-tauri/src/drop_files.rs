@@ -153,6 +153,23 @@ pub async fn copy_png(svg: String, size: u32) -> Result<(), FsError> {
     .await
 }
 
+/// A mockup scene (prompt 081) rendered at `scale` into the system clipboard – the same writer as
+/// `copy_png`.
+#[tauri::command]
+pub async fn copy_scene_png(svg: String, scale: u32) -> Result<(), FsError> {
+    blocking(move || {
+        let mut keeper = WRITER.lock().unwrap_or_else(|e| e.into_inner());
+        if keeper.is_none() {
+            *keeper = Some(SystemClipboard(
+                arboard::Clipboard::new().map_err(unavailable)?,
+            ));
+        }
+        let cb = keeper.as_mut().expect("set above");
+        ai_core::export::scene::copy_scene(&svg, scale, system_fonts(), cb)
+    })
+    .await
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

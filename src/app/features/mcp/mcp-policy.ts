@@ -18,6 +18,10 @@ const DENIED = new Set([
   'icon.copyJson',
   'canvas.panHold',
   'sketch.moveHold',
+  // In Context (prompt 081): clipboard and file dialogs
+  'mockups.copyPng',
+  'mockups.savePng',
+  'mockups.background',
 ]);
 
 /** `null` = allowed, else why not (for the AI's error message). */
@@ -27,7 +31,7 @@ export function deniedReason(id: string, args?: unknown): string | null {
     if (id.startsWith('file.export')) return 'use export_png / export_svg / export_package';
     if (id === 'file.new' || id === 'file.newWindow') return 'use new_document';
     if (id === 'file.open' || id.startsWith('file.recent')) return 'use open_document';
-    if (id.startsWith('edit.') || id === 'icon.copyJson')
+    if (id.startsWith('edit.') || id === 'icon.copyJson' || id === 'mockups.copyPng')
       return 'the system clipboard is not for the AI';
     return 'not available to the AI';
   }

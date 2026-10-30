@@ -17,6 +17,7 @@ import { PatternDialog } from '../../features/pattern/pattern-dialog';
 import { CornersDialog } from '../../features/corners/corners-dialog';
 import { ShapeSizeDialog } from '../../features/sketch/shape-size-dialog';
 import { SettingsDialog } from '../../features/settings/settings-dialog';
+import { MockupsDialog } from '../../features/mockups/mockups-dialog';
 
 /** The modal dialogs of the window, one at a time (`DialogService.open`). */
 @Component({
@@ -39,6 +40,7 @@ import { SettingsDialog } from '../../features/settings/settings-dialog';
     CornersDialog,
     ShapeSizeDialog,
     SettingsDialog,
+    MockupsDialog,
   ],
   template: `
     @switch (dialogs.open()) {
@@ -92,6 +94,9 @@ import { SettingsDialog } from '../../features/settings/settings-dialog';
       }
       @case ('settings') {
         <app-settings-dialog />
+      }
+      @case ('mockups') {
+        <app-mockups-dialog />
       }
     }
   `,

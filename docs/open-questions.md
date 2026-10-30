@@ -223,3 +223,11 @@
 4. **Mac**: Layer-Handles in WKWebView (Rahmen deckungsgleich mit dem Bild, Ziehen flüssig bei großen SVGs)?
    Zu 004/2: echte Icon-Composer-Dateien (Spacedrive, Turntable) stützen „y nach unten, Skalierung um die Mitte“ –
    ein Blick in Icon Composer bestätigt es endgültig.
+
+## Prompt 081
+
+1. Mitteilungen: das Icon mit 20 pt aus Apples Archiv-Referenz (`AppIconType`) – neuere iOS-Banner zeigen es sichtbar
+   größer (≈ 38 pt?). Größer zeichnen, sobald es eine offizielle Quelle gibt?
+2. **Mac**: Dock-Standardgröße 64 pt (Dock-Payload `tilesize`) – auf einem frischen Mac mit
+   `defaults read com.apple.dock tilesize` bestätigen.
+3. **Mac**: „Szene als PNG kopieren“ (2×) in Keynote/Vorschau einfügen – kommt das Bild in Szenengröße an?

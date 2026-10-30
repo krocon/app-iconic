@@ -1,4 +1,17 @@
+import { ArgsSpec } from '../action-args';
 import { ActionDef, EDIT, VIEW, ADD, ARRANGE } from './action-def';
+
+/** Scenes of "In Context" (prompt 081, `features/mockups/mockup-scenes.ts`). */
+const MOCKUP_SCENES = ['dock', 'homeLight', 'homeDark', 'spotlight', 'taskbar'] as const;
+
+/** `mockups.copyPng` / `mockups.savePng`: scene (default the last used), scale 1–3 (default 2). */
+const MOCKUP_PNG_ARGS: ArgsSpec = {
+  type: 'object',
+  properties: {
+    scene: { type: 'string', enum: MOCKUP_SCENES },
+    scale: { type: 'integer', minimum: 1, maximum: 3 },
+  },
+};
 
 /** The actions of view, selection and snapping options, canvas keys (split from `action-catalog.ts` in prompt 033). */
 export const VIEW_ACTIONS: readonly ActionDef[] = [
@@ -80,6 +93,31 @@ export const VIEW_ACTIONS: readonly ActionDef[] = [
   VIEW('view.pixelGrid.64', 'Pixel Grid: 64 px'),
   VIEW('view.pixelGrid.128', 'Pixel Grid: 128 px'),
   ARRANGE('arrange.alignToPixels', 'Align to Pixel Grid'),
+  // the icon in context (prompt 081): scenes with real sizes, PNG of a scene
+  VIEW('view.mockups', 'In Context'),
+  VIEW('mockups.appearance', 'In Context: Appearance of a Scene', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['scene', 'appearance'],
+      properties: {
+        scene: { type: 'string', enum: MOCKUP_SCENES },
+        appearance: { type: 'string', enum: ['light', 'dark', 'tinted'] },
+      },
+    },
+  }),
+  VIEW('mockups.scale', 'In Context: PNG Scale', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['scale'],
+      properties: { scale: { type: 'integer', minimum: 1, maximum: 3 } },
+    },
+  }),
+  VIEW('mockups.copyPng', 'In Context: Copy Scene as PNG', { args: MOCKUP_PNG_ARGS }),
+  VIEW('mockups.savePng', 'In Context: Save Scene as PNG…', { args: MOCKUP_PNG_ARGS }),
+  VIEW('mockups.background', 'In Context: Background Image…'),
+  VIEW('mockups.clearBackground', 'In Context: Remove Background Image'),
   VIEW('view.guideTemplate.apple', 'Icon Grid: Apple'),
   VIEW('view.guideTemplate.material', 'Icon Grid: Material Keylines'),
   VIEW('view.guideTemplate.grid', 'Icon Grid: Even Grid'),

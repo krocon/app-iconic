@@ -46,6 +46,13 @@ export abstract class ExportApi {
   abstract cancelExport(): Promise<void>;
   /** Renders `svg` in `size` px into the system clipboard (prompt 078, `file.copyPng`). */
   abstract copyPng(svg: string, size: PngSize): Promise<void>;
+  /** A mockup scene (prompt 081, its own size in points) rendered at `scale` into the clipboard. */
+  abstract copyScenePng(svg: string, scale: number): Promise<void>;
+  /**
+   * Save dialog (Rust) and the scene rendered at `scale` as PNG; the saved path or `null` when the
+   * dialog was cancelled (prompt 081).
+   */
+  abstract saveScenePng(svg: string, scale: number, suggestedName: string): Promise<string | null>;
   /** Shows a file this app exported in the file manager (design 030 E6). */
   abstract revealExport(path: string): Promise<void>;
   /** The colour of `svg` at a point as `#RRGGBBAA` (resvg, the eyedropper – prompt 074 E3). */
@@ -111,6 +118,14 @@ export class TauriExportApi extends ExportApi {
 
   copyPng(svg: string, size: PngSize): Promise<void> {
     return call<void>('copy_png', { svg, size });
+  }
+
+  copyScenePng(svg: string, scale: number): Promise<void> {
+    return call<void>('copy_scene_png', { svg, scale });
+  }
+
+  saveScenePng(svg: string, scale: number, suggestedName: string): Promise<string | null> {
+    return call<string | null>('save_scene_png', { svg, scale, suggestedName });
   }
 
   revealExport(path: string): Promise<void> {

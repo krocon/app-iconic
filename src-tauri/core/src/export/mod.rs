@@ -8,7 +8,7 @@
 //! - [`files`]  file names, overwrite check, atomic writes, progress and cancelling (E10–E13)
 //! - [`package`] package exports (prompt 078): plan + one writer for folders and containers;
 //!   [`appiconset`] Xcode icon set, [`containers`] `.icns`/`.ico`; 079: [`android`] adaptive
-//!   icon, [`web`] favicons and PWA icons
+//!   icon, [`web`] favicons and PWA icons; 081: [`scene`] mockup scenes as PNG (own aspect ratio)
 
 pub mod android;
 pub mod appiconset;
@@ -19,6 +19,7 @@ mod package_render;
 pub mod web;
 pub use crate::fonts::system as fonts;
 pub mod png;
+pub mod scene;
 
 use serde::{Deserialize, Serialize};
 

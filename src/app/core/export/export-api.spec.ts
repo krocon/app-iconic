@@ -11,6 +11,8 @@ describe('TauriExportApi without Tauri', () => {
       api.exportPackage({ kind: 'ico' }, [], '/d', opts, () => undefined),
       api.cancelExport(),
       api.copyPng('<svg/>', 1024),
+      api.copyScenePng('<svg/>', 2),
+      api.saveScenePng('<svg/>', 2, 'Dock'),
     ]) {
       await expect(p).rejects.toMatchObject({ code: 'backend_unavailable' });
     }

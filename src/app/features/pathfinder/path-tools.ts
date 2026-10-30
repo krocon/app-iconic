@@ -33,6 +33,8 @@ import { GuideService } from '../guides/guide.service';
 import { ConstructionMode } from '../construction/construction-mode';
 import { registerPreviewActions } from '../preview/preview-actions';
 import { SmallPreviewService } from '../preview/small-preview.service';
+import { registerMockupsActions } from '../mockups/mockups-actions';
+import { MockupsService } from '../mockups/mockups.service';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { registerFilletActions } from '../fillet/fillet-actions';
 import { FilletService } from '../fillet/fillet.service';
@@ -110,6 +112,7 @@ export function registerPathTools(
     inject(CanvasViewStore),
     destroyRef,
   );
+  registerMockupsActions(actions, inject(MockupsService), destroyRef);
   registerLockActions(
     actions,
     inject(FilesService),
