@@ -29,11 +29,16 @@ export interface AssetState {
   text?: string;
   /** PNG as data URL. */
   dataUrl?: string;
-  /** Serialisation at the last open/save (`''` for non-SVG); missing = the backend has never
-   * seen this asset. */
+  /** Serialisation at the last open/save (a PNG: its data URL, prompt 080 E6; `''` for other
+   * kinds); missing = the backend has never seen this asset. */
   saved?: string;
   /** Its name in the backend session when it was renamed since (design 010 E9). */
   source?: string;
+}
+
+/** The content of an asset that is not an editable SVG (what `saved` remembers, 080 E6). */
+function contentOf(a: AssetState): string {
+  return a.dataUrl ?? a.text ?? '';
 }
 
 /** What the user should know about an opened or imported file. */
@@ -80,7 +85,8 @@ export class IconDocument {
   ): AssetState {
     // `saved` = the backend has it; for assets we cannot edit only that matters
     if (kind !== 'svg' || content.text === undefined) {
-      return { name, kind, dataUrl: content.dataUrl, text: content.text, saved: '' };
+      const saved = content.dataUrl ?? '';
+      return { name, kind, dataUrl: content.dataUrl, text: content.text, saved };
     }
     const svg = parseSvg(content.text);
     if (!svg) {
@@ -171,7 +177,7 @@ export class IconDocument {
   /** Unchanged since the last open/save, and the backend still has it (design 003 E3). */
   private isUnchanged(a: AssetState): boolean {
     if (!this.session || a.saved === undefined) return false;
-    return !a.svg || serializeAsset(a.svg) === a.saved;
+    return a.svg ? serializeAsset(a.svg) === a.saved : contentOf(a) === a.saved;
   }
 
   /**
@@ -182,7 +188,9 @@ export class IconDocument {
     const assets: SaveAsset[] = [...this.assets.values()].map((a) =>
       this.isUnchanged(a)
         ? { name: a.name, unchanged: true, ...(a.source ? { source: a.source } : {}) }
-        : { name: a.name, unchanged: false, text: a.svg ? serializeAsset(a.svg) : a.text },
+        : a.dataUrl !== undefined && !a.svg
+          ? { name: a.name, unchanged: false, dataUrl: a.dataUrl }
+          : { name: a.name, unchanged: false, text: a.svg ? serializeAsset(a.svg) : a.text },
     );
     const from = this.session && this.path !== null && this.path !== path ? this.path : null;
     return { path, format, iconJson: this.iconJson, assets, from };
@@ -195,7 +203,7 @@ export class IconDocument {
     this.format = result.format;
     this.session = true;
     for (const a of this.assets.values()) {
-      a.saved = a.svg ? serializeAsset(a.svg) : (a.text ?? '');
+      a.saved = a.svg ? serializeAsset(a.svg) : contentOf(a);
       delete a.source;
     }
   }

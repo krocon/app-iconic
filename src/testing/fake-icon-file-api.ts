@@ -185,6 +185,13 @@ export class FakeIconFileApi extends IconFileApi {
         if (!old) throw error('missing_asset', `unknown asset ${from}`, r.path);
         return { ...old, name: a.name };
       }
+      // a new / replaced PNG (prompt 080 E6): like Rust, only PNG data URLs for `.png` assets
+      if (a.text === undefined && a.dataUrl !== undefined) {
+        if (!/\.png$/i.test(a.name) || !a.dataUrl.startsWith('data:image/png;base64,')) {
+          throw error('invalid_icon', `no content for ${a.name}`, r.path);
+        }
+        return { name: a.name, kind: 'png', dataUrl: a.dataUrl };
+      }
       if (a.text === undefined) throw error('invalid_icon', `no content for ${a.name}`, r.path);
       return {
         name: a.name,

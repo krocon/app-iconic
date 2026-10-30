@@ -93,6 +93,7 @@ pub async fn save_icon(
         .map(|a| AssetInput {
             name: a.name,
             text: a.text,
+            data_url: a.data_url,
             unchanged: a.unchanged,
             source: a.source,
         })

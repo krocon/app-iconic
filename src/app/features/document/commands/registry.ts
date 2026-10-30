@@ -1,7 +1,15 @@
 import { IconGroup, IconLayer } from '../../../core/icon-file/icon-file.models';
 import { NodeRef } from '../icon-document';
 import { isUndoLabel, UndoLabel } from '../undo/undo-texts';
-import { AddAsset, RemoveAsset, RenameAsset, ReplaceAssetMarkup } from './asset-commands';
+import {
+  AddAsset,
+  AddRasterAsset,
+  isPngDataUrl,
+  RemoveAsset,
+  RenameAsset,
+  ReplaceAssetMarkup,
+  ReplaceRasterAsset,
+} from './asset-commands';
 import { AssignClip, InsertDefinition, RemoveClipPath, SetLayerClip } from './clip-commands';
 import { CommandError, CompositeCommand, DocCommand } from './command';
 import { CommandType } from './command-json';
@@ -35,6 +43,8 @@ export const MAX_MARKUP = 16 << 20;
 export const MAX_NODE_MARKUP = 32 << 20;
 /** Longest JSON value for `setIconJsonValue` / groups / layers (serialised). */
 export const MAX_JSON_VALUE = 1 << 20;
+/** Longest PNG data URL of a raster asset (prompt 080 E5): a 48 MiB file in Base64. */
+export const MAX_DATA_URL = 64 << 20;
 export const MAX_COMPOSITE_DEPTH = 8;
 export const MAX_COMMANDS = 10_000;
 const MAX_NAME = 255;
@@ -67,6 +77,13 @@ function str(v: unknown, what: string, max = MAX_NAME): string {
 function name(v: unknown, what: string): string {
   const s = str(v, what);
   if (!s) fail(what);
+  return s;
+}
+
+/** A PNG as Base64 data URL (prompt 080 E5). */
+function pngUrl(v: unknown): string {
+  const s = str(v, 'dataUrl', MAX_DATA_URL);
+  if (!isPngDataUrl(s)) fail('dataUrl');
   return s;
 }
 
@@ -280,6 +297,14 @@ const PARSERS: Record<CommandType, Parser> = {
   addAsset: (o) => {
     keys(o, ['name', 'markup']);
     return new AddAsset(name(o['name'], 'name'), str(o['markup'], 'markup', MAX_MARKUP));
+  },
+  addRasterAsset: (o) => {
+    keys(o, ['name', 'dataUrl']);
+    return new AddRasterAsset(name(o['name'], 'name'), pngUrl(o['dataUrl']));
+  },
+  replaceRasterAsset: (o) => {
+    keys(o, ['name', 'dataUrl']);
+    return new ReplaceRasterAsset(name(o['name'], 'name'), pngUrl(o['dataUrl']));
   },
   removeAsset: (o) => {
     keys(o, ['name']);

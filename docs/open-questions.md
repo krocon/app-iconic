@@ -211,3 +211,15 @@
    Themed Icon (Android 13+) und auf API < 26 die Legacy-Icons wie erwartet?
 3. `favicon.ico` im Snippet mit `sizes="32x32"` (Praxis gegen Chromiums ICO-Vorliebe) – oder `sizes="any"`?
 4. Monochrom = Form der Vordergrund-Gruppen aus der Tinted-Rechnung – oder lieber Luminanz → Alpha?
+
+## Prompt 080
+
+1. JPEG/WebP werden beim Import in PNG umgerechnet (Icon Composer kennt laut Schema nur PNG/SVG) – ok, oder lieber
+   ablehnen?
+2. Bilder größer als 1024 pt werden beim Import auf die Fläche eingepasst (`position.scale`) – oder natürliche Größe
+   wie in Icon Composer?
+3. „Bild ersetzen“ ändert die Datei (alle Layer, die sie zeigen) – oder soll nur dieser Layer ein neues Asset
+   bekommen?
+4. **Mac**: Layer-Handles in WKWebView (Rahmen deckungsgleich mit dem Bild, Ziehen flüssig bei großen SVGs)?
+   Zu 004/2: echte Icon-Composer-Dateien (Spacedrive, Turntable) stützen „y nach unten, Skalierung um die Mitte“ –
+   ein Blick in Icon Composer bestätigt es endgültig.

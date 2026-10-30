@@ -28,6 +28,7 @@ import {
 } from './export-options';
 import { isPackage, packageKind, packageSources } from './export-packages';
 import { exportSvg, RasterSizes } from './export-svg';
+import { loadRasterSize } from '../canvas/raster-size';
 import { colorSchemeSvg } from './favicon-svg';
 import { groups } from '../document/model/icon-json';
 import { groupLabel } from '../hierarchy/node-label';
@@ -42,20 +43,14 @@ export type ExportOutcome =
   | { kind: 'noTarget' }
   | { kind: 'noDocument' };
 
-/** Natural sizes of the raster assets (design 012 E7); unknown ones are left out. */
+/** Natural sizes of the raster assets (design 012 E7, cached since 080 E7); unknown ones are left out. */
 export async function rasterSizes(doc: IconDocument): Promise<RasterSizes> {
   const out = new Map<string, { width: number; height: number }>();
   for (const a of doc.assets.values()) {
     if (a.svg || !a.dataUrl) continue;
-    try {
-      const img = new Image();
-      img.src = a.dataUrl;
-      await img.decode();
-      if (img.naturalWidth > 0)
-        out.set(a.name, { width: img.naturalWidth, height: img.naturalHeight });
-    } catch {
-      // not decodable here (or no layout engine) – full canvas, like the canvas before decoding
-    }
+    // not decodable here (or no layout engine) – full canvas, like the canvas before decoding
+    const size = await loadRasterSize(a.dataUrl);
+    if (size) out.set(a.name, size);
   }
   return out;
 }

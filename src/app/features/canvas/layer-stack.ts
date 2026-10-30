@@ -17,6 +17,7 @@ import {
 } from './effects';
 import { GlassEffect, glassFilter, layerGlassEffect } from './glass';
 import { LayerFill, layerFillFilter, layerFillOf } from './layer-fill';
+import { knownRasterSize, loadRasterSize } from './raster-size';
 
 /** Ids of the filters inside a layer's shadow root (own tree scope per layer). */
 const SHADOW_ID = 'ai-fx-shadow';
@@ -283,7 +284,10 @@ export class LayerStack {
     return place;
   }
 
-  /** PNG: natural size, centred (full canvas until decoded). */
+  /**
+   * PNG: natural size, centred – from the size cache (prompt 080 E7) at once, else the full canvas
+   * until decoded.
+   */
   private imageContent(url: string): Element {
     const d = this.box.ownerDocument;
     const img = d.createElementNS(SVG_NS, 'image');
@@ -293,11 +297,10 @@ export class LayerStack {
       img.setAttribute('width', String(w));
       img.setAttribute('height', String(h));
     };
-    place(CANVAS_SIZE, CANVAS_SIZE);
+    const known = knownRasterSize(url);
+    place(known?.width ?? CANVAS_SIZE, known?.height ?? CANVAS_SIZE);
     img.setAttribute('href', url);
-    const probe = new Image();
-    probe.onload = () => place(probe.naturalWidth, probe.naturalHeight);
-    probe.src = url;
+    if (!known) void loadRasterSize(url).then((s) => s && place(s.width, s.height));
     return img;
   }
 }

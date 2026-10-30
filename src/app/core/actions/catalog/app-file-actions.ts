@@ -34,6 +34,9 @@ export const APP_FILE_ACTIONS: readonly ActionDef[] = [
   FILE('file.noRecent', 'No Recent Items', { palette: false }),
   FILE('file.clearRecent', 'Clear Recent Menu'),
   FILE('file.importSvg', 'Import SVG…'),
+  // prompt 080: a PNG (JPEG/WebP converted, SVG cleaned) as a new layer; new PNG for a layer
+  FILE('file.importImageLayer', 'Import Image as Layer…'),
+  FILE('file.replaceLayerImage', 'Replace Layer Image…'),
   // without arguments the export dialog; with them straight to the files (design 012 E14)
   FILE('file.exportSvg', 'Export SVG…', { args: EXPORT_ARGS }),
   FILE('file.exportPng', 'Export PNG…', { args: EXPORT_ARGS }),

@@ -24,7 +24,7 @@ import { UndoLabel } from '../document/undo/undo-texts';
 import { paintedNodes } from '../hierarchy/arrange-operations';
 import { isClipGroup } from '../document/model/clip-model';
 import { CanvasEditStore, shownSnap } from './canvas-edit.store';
-import { DragOp, Modifiers } from './canvas-gesture';
+import { DragOp, LayerDrag, Modifiers } from './canvas-gesture';
 import { CanvasViewStore } from './canvas-view.store';
 import {
   boxKeyPoints,
@@ -75,6 +75,8 @@ export class CanvasInteraction {
     private readonly mac: boolean,
     /** The clip path being edited (design 014 E7), `null` outside the mode. */
     private readonly clip: () => NodeRef | null = () => null,
+    /** The selected layer's frame and handles (prompt 080), `null` = none. */
+    private readonly layer: LayerDrag | null = null,
   ) {}
 
   /** The live `<clipPath>` being edited. */
@@ -114,9 +116,16 @@ export class CanvasInteraction {
   down(e: PointerLike, target: Element | null): boolean {
     const store = this.store();
     if (!store || this.view.options().selectionMode === 'none') return false;
+    const corner = target?.closest('[data-layer-handle]')?.getAttribute('data-layer-handle');
+    if (corner && this.layer) return this.startOp(store, this.layer.scaleOp(store, +corner), e);
     const handle = target?.closest('[data-handle]')?.getAttribute('data-handle');
     if (handle) return this.startHandle(store, handle, e);
     const sel = this.selectable(store, e);
+    // inside the frame of the selected layer where no node is hit: move the layer (prompt 080)
+    if (!sel && this.layer && selectModeOf(e, this.mac) === 'replace') {
+      const p = this.toDoc(e);
+      if (this.layer.contains(p)) return this.startOp(store, this.layer.moveOp(store, p), e);
+    }
     if (!sel?.inContext && this.edit.context()) this.edit.context.set(null);
     const mode = selectModeOf(e, this.mac);
     if (!sel && mode === 'replace' && this.insideSelection(this.toDoc(e))) {
@@ -137,6 +146,12 @@ export class CanvasInteraction {
     const op = this.moveOp(store, store.selection(), e);
     // a plain click on a node of a larger selection selects just that node
     if (mode === 'replace' && was) op.click = () => store.select([sel.ref]);
+    this.edit.gesture.start(op, store, e, this.toDoc);
+    return true;
+  }
+
+  private startOp(store: DocumentStore, op: DragOp | null, e: PointerLike): boolean {
+    if (!op) return false;
     this.edit.gesture.start(op, store, e, this.toDoc);
     return true;
   }

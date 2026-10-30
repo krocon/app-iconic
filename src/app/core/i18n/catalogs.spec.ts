@@ -26,6 +26,7 @@ import '../../features/corners/corners-texts';
 import '../../features/shell/shell-texts';
 import '../../features/svg-source/svg-source-texts';
 import '../../features/tools/tools-texts';
+import '../../features/image-layer/image-layer-texts';
 
 /** Shape of a catalog: keys and value kinds (functions by arity). */
 function shape(v: unknown): unknown {
@@ -52,6 +53,7 @@ const NAMES = [
   'export',
   'files',
   'hierarchy',
+  'imageLayer',
   'inspector',
   'menus',
   'properties',

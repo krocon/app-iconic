@@ -1,9 +1,10 @@
 //! Puts the document to save together (design 002 E3, E5): `icon.json` from the frontend,
-//! changed assets as text, unchanged assets and all extra files from the session (the version
-//! last opened or saved). The asset list is complete – an asset left out is deleted.
+//! changed assets as text (SVG) or as a PNG data URL (prompt 080 E6), unchanged assets and all
+//! extra files from the session (the version last opened or saved). The asset list is complete –
+//! an asset left out is deleted.
 
 use super::names::{is_valid_asset_name, name_key};
-use super::{IconAsset, IconFile, IconFormat, IconJson, format_icon_json};
+use super::{AssetKind, IconAsset, IconFile, IconFormat, IconJson, Limits, format_icon_json};
 use crate::error::{FsError, FsErrorCode};
 use serde_json::Value;
 use std::path::Path;
@@ -14,11 +15,27 @@ pub struct AssetInput {
     pub name: String,
     /// New content (SVG text) when the asset was changed or added.
     pub text: Option<String>,
+    /// New content of a PNG asset as `data:image/png;base64,…` (prompt 080 E6).
+    pub data_url: Option<String>,
     /// Take the bytes from the session; `text` is ignored.
     pub unchanged: bool,
     /// With `unchanged`: the name of the asset in the session when it was renamed (design 010 E9).
     pub source: Option<String>,
 }
+
+/// The bytes of a `data:image/png;base64,…` URL (prompt 080 E6): standard Base64, the PNG
+/// signature at the start, at most [`Limits::max_file`] bytes – the size a `.icon` may hold per file.
+pub fn decode_png_data_url(url: &str) -> Option<Vec<u8>> {
+    use base64::Engine;
+    let b64 = url.strip_prefix("data:image/png;base64,")?;
+    if b64.len() as u64 / 4 * 3 > Limits::default().max_file {
+        return None;
+    }
+    let bytes = base64::engine::general_purpose::STANDARD.decode(b64).ok()?;
+    bytes.starts_with(PNG_SIGNATURE).then_some(bytes)
+}
+
+const PNG_SIGNATURE: &[u8] = b"\x89PNG\r\n\x1a\n";
 
 /// The file to write. `base` is the session of the document (`None` for a new one).
 pub fn assemble(
@@ -56,17 +73,21 @@ pub fn assemble(
                         Some(path),
                     )
                 })?
+        } else if let Some(text) = input.text {
+            text.into_bytes()
         } else {
-            input
-                .text
-                .ok_or_else(|| {
-                    FsError::new(
-                        FsErrorCode::InvalidIcon,
-                        format!("no content for asset {:?}", input.name),
-                        Some(path),
-                    )
-                })?
-                .into_bytes()
+            let bytes = input
+                .data_url
+                .as_deref()
+                .filter(|_| AssetKind::of(&input.name) == AssetKind::Png)
+                .and_then(decode_png_data_url);
+            bytes.ok_or_else(|| {
+                FsError::new(
+                    FsErrorCode::InvalidIcon,
+                    format!("no content for asset {:?}", input.name),
+                    Some(path),
+                )
+            })?
         };
         assets.push(IconAsset::new(input.name, bytes));
     }
@@ -93,6 +114,10 @@ pub fn assemble(
 }
 
 #[cfg(test)]
+#[path = "save_png_tests.rs"]
+mod png_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::icon::testdata::{camscanner, copy_tree, tree};
@@ -106,6 +131,7 @@ mod tests {
             .map(|a| AssetInput {
                 name: a.name.clone(),
                 text: None,
+                data_url: None,
                 unchanged: true,
                 source: None,
             })
@@ -268,6 +294,7 @@ mod tests {
         let input = |name: &str, unchanged: bool| AssetInput {
             name: name.into(),
             text: None,
+            data_url: None,
             unchanged,
             source: None,
         };
@@ -313,6 +340,7 @@ mod tests {
         let inputs = vec![AssetInput {
             name: "layer.svg".into(),
             text: Some(crate::icon::EMPTY_SVG.into()),
+            data_url: None,
             unchanged: false,
             source: None,
         }];

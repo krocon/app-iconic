@@ -7,6 +7,8 @@ import {
   RemoveClipPath,
   SetLayerClip,
   AddAsset,
+  AddRasterAsset,
+  ReplaceRasterAsset,
   AddGroup,
   AddLayer,
   CompositeCommand,
@@ -39,6 +41,9 @@ import { smallDocument } from './documents';
  * `registry.spec` the JSON round trip (design 005 E15) – every registered type needs a case.
  */
 export const a = (id: string) => ({ asset: 'a.svg', id });
+/** Two tiny "PNGs" as data URLs (the commands check the form, not the pixels). */
+export const PNG_A = 'data:image/png;base64,iVBORw0KGgo=';
+export const PNG_B = 'data:image/png;base64,iVBORw0KGgoAAAA=';
 export const SVG = '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0" onclick="x()"/></svg>';
 
 function freshSvg(
@@ -135,6 +140,9 @@ export const CASES: [string, (doc: IconDocument) => DocCommand][] = [
   ['AddAsset', () => new AddAsset('c.svg', SVG)],
   ['RemoveAsset', () => new RemoveAsset('a.svg')],
   ['RenameAsset', () => new RenameAsset('a.svg', 'renamed.svg')],
+  // prompt 080 E5: PNG assets (`smallDocument` has p.png)
+  ['AddRasterAsset', () => new AddRasterAsset('photo.png', PNG_B)],
+  ['ReplaceRasterAsset', () => new ReplaceRasterAsset('p.png', PNG_B)],
   // clip paths (design 014 E5); `commandDocument` has `<clipPath id="c">` (n8) in a.svg
   [
     'InsertDefinition',

@@ -123,3 +123,69 @@ export class RenameAsset implements DocCommand {
     return { type: 'renameAsset', from: this.from, to: this.to };
   }
 }
+
+/** Data URLs a raster command carries: a PNG, Base64 (prompt 080 E5 – the only raster kind `.icon` knows). */
+export function isPngDataUrl(v: string): boolean {
+  return /^data:image\/png;base64,[A-Za-z0-9+/]*={0,2}$/.test(v);
+}
+
+/**
+ * A new PNG asset (prompt 080 E5, "Import Image as Layer"): the bytes as data URL, kept as they
+ * are – saving writes them unchanged. Serialisable.
+ */
+export class AddRasterAsset implements DocCommand {
+  readonly label = 'addAsset';
+
+  constructor(
+    readonly name: string,
+    readonly dataUrl: string,
+  ) {
+    if (!/\.png$/i.test(name)) throw new CommandError(`not a PNG asset name: ${name}`);
+    if (!isPngDataUrl(dataUrl)) throw new CommandError('not a PNG data URL');
+  }
+
+  do(doc: IconDocument): void {
+    if (doc.asset(this.name)) throw new CommandError(`asset ${this.name} exists`);
+    doc.insertAsset({ name: this.name, kind: 'png', dataUrl: this.dataUrl });
+  }
+
+  undo(doc: IconDocument): void {
+    doc.removeAsset(this.name);
+  }
+
+  toJSON(): CommandJson {
+    return { type: 'addRasterAsset', name: this.name, dataUrl: this.dataUrl };
+  }
+}
+
+/**
+ * New bytes for a PNG asset under the same name (prompt 080 E4, "Replace Image"): every layer that
+ * shows the file keeps its fields. Undo puts the old state back (its `saved` included).
+ */
+export class ReplaceRasterAsset implements DocCommand {
+  readonly label = 'replaceLayerImage';
+  private old: { state: AssetState; index: number } | null = null;
+
+  constructor(
+    readonly name: string,
+    readonly dataUrl: string,
+  ) {
+    if (!isPngDataUrl(dataUrl)) throw new CommandError('not a PNG data URL');
+  }
+
+  do(doc: IconDocument): void {
+    const a = doc.asset(this.name);
+    if (!a || a.kind !== 'png') throw new CommandError(`no PNG asset ${this.name}`);
+    const index = [...doc.assets.keys()].indexOf(a.name);
+    this.old = { state: a, index };
+    doc.insertAsset({ ...a, dataUrl: this.dataUrl }, index);
+  }
+
+  undo(doc: IconDocument): void {
+    if (this.old) doc.insertAsset(this.old.state, this.old.index);
+  }
+
+  toJSON(): CommandJson {
+    return { type: 'replaceRasterAsset', name: this.name, dataUrl: this.dataUrl };
+  }
+}

@@ -55,6 +55,8 @@ export function contextMenuFor(target: ContextTarget): ContextEntry[] {
         a('arrange.moveInto'),
         sep(a('add.iconGroup')),
         a('add.layer'),
+        a('file.importImageLayer'),
+        a('file.replaceLayerImage'),
         sep(a('hierarchy.expandAll')),
         a('hierarchy.collapseAll'),
       ];

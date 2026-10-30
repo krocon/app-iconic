@@ -1,24 +1,28 @@
 import { parseSvg } from '../document/svg/node-ids';
 
+/** The text of an SVG data URL (Base64 or URL-encoded, UTF-8); `null` for anything else. */
+export function svgDataUrlText(dataUrl: string): string | null {
+  const m = /^data:image\/svg\+xml(;[^,]*)?,(.*)$/is.exec(dataUrl);
+  if (!m) return null;
+  try {
+    if (/;base64/i.test(m[1] ?? '')) {
+      const bin = atob(m[2]);
+      return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
+    }
+    return decodeURIComponent(m[2]);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Natural size of an SVG image from its data URL (design 008 E8): `width`/`height` in user units
  * (px or no unit), else the `viewBox`. The browser parses (DOMParser) – Rust only knows raster
  * headers. `null` if the size is not given.
  */
 export function svgDataUrlSize(dataUrl: string): { width: number; height: number } | null {
-  const m = /^data:image\/svg\+xml(;[^,]*)?,(.*)$/is.exec(dataUrl);
-  if (!m) return null;
-  let text: string;
-  try {
-    if (/;base64/i.test(m[1] ?? '')) {
-      const bin = atob(m[2]);
-      text = new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
-    } else {
-      text = decodeURIComponent(m[2]);
-    }
-  } catch {
-    return null;
-  }
+  const text = svgDataUrlText(dataUrl);
+  if (text === null) return null;
   const svg = parseSvg(text);
   if (!svg) return null;
   const len = (name: string) => {

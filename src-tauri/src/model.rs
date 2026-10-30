@@ -76,6 +76,9 @@ pub struct SaveAssetDto {
     pub name: String,
     #[serde(default)]
     pub text: Option<String>,
+    /// A new or replaced PNG asset as `data:image/png;base64,…` (prompt 080 E6).
+    #[serde(default)]
+    pub data_url: Option<String>,
     #[serde(default)]
     pub unchanged: bool,
     /// With `unchanged`: the asset's name in the session before it was renamed (design 010 E9).
@@ -141,6 +144,12 @@ mod tests {
     fn save_asset_defaults() {
         let a: SaveAssetDto = serde_json::from_value(json!({ "name": "a.svg" })).unwrap();
         assert_eq!((a.text, a.unchanged, a.source), (None, false, None));
+        assert_eq!(a.data_url, None);
+        let a: SaveAssetDto = serde_json::from_value(
+            json!({ "name": "a.png", "dataUrl": "data:image/png;base64,AA==" }),
+        )
+        .unwrap();
+        assert_eq!(a.data_url.as_deref(), Some("data:image/png;base64,AA=="));
         let a: SaveAssetDto = serde_json::from_value(
             json!({ "name": "b.svg", "unchanged": true, "source": "a.svg" }),
         )

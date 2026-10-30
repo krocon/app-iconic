@@ -67,6 +67,8 @@ import { AskService } from './shared/ask/ask.service';
 import { DialogService } from './shared/dialog/dialog.service';
 import { registerSvgSourceActions } from './features/svg-source/svg-source-actions';
 import { registerExportActions } from './features/export/export-actions';
+import { registerImageLayerActions } from './features/image-layer/image-layer-actions';
+import { ImageLayerService } from './features/image-layer/image-layer.service';
 import { ExportService } from './features/export/export.service';
 import { SvgSourceService } from './features/svg-source/svg-source.service';
 import { McpStore } from './features/mcp/mcp.store';
@@ -367,6 +369,8 @@ export class App implements OnInit {
     registerIconActions(this.actions, inject(IconInspectorService), this.destroyRef);
     registerSvgSourceActions(this.actions, inject(SvgSourceService), this.destroyRef);
     registerExportActions(this.actions, inject(ExportService), this.destroyRef);
+    // prompt 080: images as layers
+    registerImageLayerActions(this.actions, inject(ImageLayerService), this.destroyRef);
     registerClipActions(this.actions, inject(ClipService), this.destroyRef);
     registerSettingsActions(
       this.actions,

@@ -144,13 +144,20 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/text/          Live-Typografie (075): text-lines (rein: Zeilen, tspans, textSetCommand), TextEdit +
                               TextEditOverlay (Bearbeiten auf der Zeichenfläche), TextTool (⇧T), text-to-path (rein) +
                               TextToPathService (`text.toPath`), text-actions (`text.*`), Texte
+  app/features/image-layer/   Bild als Ebene (080): image-layer (rein: Plan Import/Ersetzen, Asset-Namen), ImageLayerService
+                              (Dialog, PNG/JPEG/WebP/SVG), RasterConverter (JPEG/WebP → PNG im Browser),
+                              image-layer-actions (`file.importImageLayer`, `file.replaceLayerImage`), Texte
+  app/features/layer-transform/  Layer auf dem Canvas (080): layer-position (rein: `position` lesen/schreiben,
+                              Matrix, verschieben, um die Mitte skalieren), layer-frame (rein: Platzierung G·L,
+                              positionCommand je Erscheinungsbild), LayerTransformService (Rahmen messen, Drag-Ops),
+                              LayerHandlesOverlay (Rahmen + Eckgriffe)
   app/features/about/         About-Dialog + Texte
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile) + canvas-measure (Auswahl
                               messen je Änderung, Viewport, 033), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
                               icon-color, asset-placement (004), effects (Vorschau-Annäherung, 010);
                               layer-fill (Layer-Fill: Filter/Verlauf, 077), tinted (Luminanz × Tönung, 077),
-                              glass (Glas-Annäherung, 077),
+                              glass (Glas-Annäherung, 077), raster-size (natürliche Größe der PNGs, Cache, 080),
                               canvas-actions, View-Options-Menü (005); CanvasTools (ein Werkzeug zur Zeit, Modi
                               wie Freehand) + selection-tools (`tool.select` V / `tool.direct` A, 061);
                               ContextBar + ToolContexts (Kontextleiste je Werkzeug, Provider in
@@ -208,7 +215,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               `pnpm fixtures`)
 e2e/                          Playwright-Tests gegen den Dev-Server (hardening: großes/tiefes SVG, a11y: Tab-Weg,
                               Fokus, Dialoge – 031; composited-shadow: Schatten pixelgleich – 033; export-packages – 078;
-                              export-android-web: Favicon hell/dunkel, sichere Zone – 079)
+                              export-android-web: Favicon hell/dunkel, sichere Zone – 079; png-layer – 080)
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
@@ -237,7 +244,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   core/                       Crate `ai-core` (Workspace-Mitglied): Engine ohne Tauri
     src/error.rs              FsError { code, message, path }
     src/fs_atomic.rs, config_file.rs  atomar schreiben / Konfig laden (aus files-and-folders)
-    src/icon/                 .icon: model (Sicht), json_format, names, bundle, zip_io, save, svg_file (002),
+    src/icon/                 .icon: model (Sicht), json_format, names, bundle, zip_io, save (+ PNG-Data-URLs, 080),
+                              svg_file (002),
                               image_file (Bild als Data-URL, Magic Bytes, Größe aus dem Kopf, 008)
     src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
     src/clipboard_image.rs    Bild der Zwischenablage prüfen + als PNG-Data-URL (071), copy_svg (078); src/user_paths.rs: vertraute

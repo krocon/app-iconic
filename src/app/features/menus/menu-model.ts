@@ -47,6 +47,8 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     ]),
     sep,
     a('file.importSvg'),
+    a('file.importImageLayer'),
+    a('file.replaceLayerImage'),
     a('file.exportSvg'),
     a('file.exportPng'),
     a('file.exportAppIconSet'),

@@ -34,6 +34,8 @@ import { tintedMatrix } from './tinted';
 import { CanvasEditStore } from './canvas-edit.store';
 import { registerCanvasEditActions } from './canvas-edit-actions';
 import { CanvasInteraction } from './canvas-pointer';
+import { LayerTransformService } from '../layer-transform/layer-transform.service';
+import { LayerHandlesOverlay } from '../layer-transform/layer-handles-overlay';
 import { connectCanvas, measureEachChange } from './canvas-measure';
 import { SelectionOverlay } from './selection-overlay';
 import { GridHintInput, GridHintOverlay } from './grid-hint-overlay';
@@ -86,6 +88,7 @@ const WHEEL_ZOOM = 0.01;
     GradientOverlay,
     ConstraintOverlay,
     LiveFillOverlay,
+    LayerHandlesOverlay,
     ContextBar,
     CanvasContextMenu,
   ],
@@ -240,6 +243,7 @@ export class CanvasView {
       () => this.layersEl().nativeElement,
       actions.os === 'mac',
       () => this.clipEdit.target(),
+      inject(LayerTransformService),
     );
     destroy.onDestroy(() => {
       this.edit.gesture.cancel();

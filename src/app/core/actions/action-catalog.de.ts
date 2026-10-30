@@ -17,6 +17,8 @@ const FIXED: Record<string, string> = {
   'file.noRecent': 'Keine zuletzt benutzten Dateien',
   'file.clearRecent': 'Menü „Zuletzt benutzt“ leeren',
   'file.importSvg': 'SVG importieren …',
+  'file.importImageLayer': 'Bild als Ebene importieren …',
+  'file.replaceLayerImage': 'Bild der Ebene ersetzen …',
   'file.exportSvg': 'SVG exportieren …',
   'file.exportPng': 'PNG exportieren …',
   'file.exportAppIconSet': 'Xcode-Icon-Satz exportieren …',

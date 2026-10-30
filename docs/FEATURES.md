@@ -9,6 +9,8 @@
 - [x] Open… ⌘O für `.icon` (Bundle und ZIP) (002, 003)
 - [x] Open Recent mit Validierung und „Clear Menu“ (003, Menü 005; natives macOS-Menü auf dem Mac prüfen)
 - [x] Import SVG… ⇧⌘I als neue Gruppe/Layer/Asset (003)
+- [x] Bild als Ebene importieren (PNG verlustfrei, JPEG/WebP → PNG, SVG bereinigt) in die aktive Gruppe, Bild einer
+      PNG-Ebene ersetzen (Position bleibt); neue PNG-Assets byte-gleich in Bundle und ZIP _(neu)_ (080)
 - [x] Dateien ins Fenster ziehen: `.icon` öffnen, SVG am Ablagepunkt (über dem Baum als neue Ebene), PNG/JPEG/WebP als Bild; Hinweis am Zeiger; Bilder/Screenshots mit ⌘V einfügen _(neu)_ (071)
 - [x] Save ⌘S (nur wenn dirty), Save As… ⇧⌘S (Format Bundle/ZIP), Close ⌘W mit Dirty-Abfrage (003)
 - [x] Dateizugriff nur auf Pfade aus vertrauten Quellen (Dialoge, Open Recent, System, Ablegen, KI-Brücke), sonst Fehler `not_allowed` _(neu)_ (033)
@@ -70,6 +72,8 @@
 - [x] Raster-Hinweis _(neu)_: bei aktivem Snap to Grid Rasterpunkte um den Zeiger (Radius ≥ 72 Bildschirm-px,
       ausblendend, nächster Kreuzungspunkt größer; keiner bei Zellen < 6 Bildschirm-px)
 - [x] Gesten = eine Undo-Gruppe (ein Command `setAttributes`), Esc bricht ab (007)
+- [x] Layer-Handles _(neu)_ (080): gewählte Ebene (SVG oder PNG) im Rahmen ziehen = `position` verschieben, Eckgriffe
+      skalieren gleichmäßig um die Mitte; Snap wie 007, ein Undo-Schritt, je Erscheinungsbild
 - [x] Handles korrekt bei verschachtelten, transformierten Gruppen und Zoom 50/100/150 % (007, Playwright ± 0,5 px)
 - [x] Gesperrte Elemente sind für Trim/Extend/Fillet/Chamfer, Pfad-Werkzeuge, Pathfinder, Offset, Corners und Transform nur Begrenzung, nie Ziel _(neu)_ (064)
 - [x] Hilfslinien gesperrt (Standard), „Hilfslinien sperren“/„Alle Hilfslinien entfernen“; Alles auswählen ohne gesperrte Elemente _(neu)_ (066)

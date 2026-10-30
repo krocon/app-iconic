@@ -25,6 +25,13 @@ export interface DragOp {
   end?(committed: boolean): void;
 }
 
+/** Moving and scaling a selected layer (prompt 080 E8) – the `LayerTransformService`. */
+export interface LayerDrag {
+  contains(p: Point): boolean;
+  moveOp(store: DocumentStore, p0: Point): DragOp | null;
+  scaleOp(store: DocumentStore, corner: number): DragOp | null;
+}
+
 interface Running {
   op: DragOp;
   store: DocumentStore;

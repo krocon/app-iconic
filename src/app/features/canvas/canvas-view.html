@@ -130,6 +130,8 @@
       [snap]="edit.snap()"
       [active]="edit.activePoint()"
     />
+    <!-- the selected layer's frame and scale handles (prompt 080) -->
+    <app-layer-handles-overlay [toView]="toView()" />
     <!-- above the selection handles: a gradient's start / end often sits on a corner (prompt 032) -->
     <app-gradient-overlay [toView]="toView()" />
     <app-constraint-overlay [toView]="toView()" />
