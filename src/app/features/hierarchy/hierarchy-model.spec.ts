@@ -1,19 +1,36 @@
 import { treeDocument } from '../../../testing/tree-documents';
 import { IconDocument } from '../document/icon-document';
 import { followUpSelection } from './follow-up';
-import { ancestorsOfSelection, allNodes, buildTree, flatten, TreeNode } from './hierarchy-model';
+import {
+  ancestorsOfSelection,
+  allNodes,
+  buildTree,
+  domPosition,
+  flatten,
+  TreeNode,
+} from './hierarchy-model';
 import { nodeLabel } from './node-label';
 import { swatchOf } from './swatch';
 
 const labels = (n: TreeNode): unknown => [n.label, ...n.children.map(labels)];
+// front-most first (prompt 063): text, path, group – the group's children reversed too
 const A = [
   ['Definitions', ['defs · 1', ['lg', ['stop'], ['stop']]]],
-  ['grp', ['rect 10 × 20'], ['circle r 5']],
-  ['path'],
   ['text “Hello”'],
+  ['path'],
+  ['grp', ['circle r 5'], ['rect 10 × 20']],
 ];
 
 describe('hierarchy model (design 006 E1–E3)', () => {
+  it('drop positions on node rows mean the opposite in the DOM (prompt 063)', () => {
+    const node = { kind: 'node' as const, ref: { asset: 'a.svg', id: 'n9' } };
+    expect(domPosition(node, 'before')).toBe('after');
+    expect(domPosition(node, 'after')).toBe('before');
+    expect(domPosition(node, 'into')).toBe('into');
+    const layer = { kind: 'layer' as const, group: 0, layer: 0 };
+    expect(domPosition(layer, 'before')).toBe('before');
+  });
+
   it('builds root → groups → layers → nodes, definitions in their own node', () => {
     const tree = buildTree(treeDocument());
     expect(labels(tree)).toEqual([
@@ -25,15 +42,17 @@ describe('hierarchy model (design 006 E1–E3)', () => {
     expect(a.id).toBe('g0/l0');
     expect(a.children.map((c) => c.id)).toEqual([
       'g0/l0/defs',
-      'g0/l0/n6',
-      'g0/l0/n9',
       'g0/l0/n10',
+      'g0/l0/n9',
+      'g0/l0/n6',
     ]);
-    expect(a.children[1].children[0].id).toBe('g0/l0/n6/n7');
+    // paint order for the AI: 0 = back (the defs come first in the DOM)
+    expect(a.children.slice(1).map((c) => c.z)).toEqual([3, 2, 1]);
+    expect(a.children[3].children[0].id).toBe('g0/l0/n6/n8');
     expect(a.children[0].children[0].definition).toBe(true);
     expect(a.children[1].definition).toBe(false);
     // the same asset in two layers: two rows, one ref
-    expect(tree.children[0].children[1].children[1].ref).toEqual({ asset: 'a.svg', id: 'n6' });
+    expect(tree.children[0].children[1].children[3].ref).toEqual({ asset: 'a.svg', id: 'n6' });
     expect([a.container, tree.children[1].children[1].container]).toEqual([true, false]);
   });
 
@@ -53,23 +72,23 @@ describe('hierarchy model (design 006 E1–E3)', () => {
       'g0',
       'g0/l0',
       'g0/l0/defs',
-      'g0/l0/n6',
-      'g0/l0/n9',
       'g0/l0/n10',
+      'g0/l0/n9',
+      'g0/l0/n6',
       'g0/l1',
       'g0/l1/defs',
-      'g0/l1/n6',
-      'g0/l1/n9',
       'g0/l1/n10',
+      'g0/l1/n9',
+      'g0/l1/n6',
       'g1',
       'g1/l0',
       'g1/l0/n12',
       'g1/l1',
     ]);
-    const grp = rows[4];
+    const grp = rows[6];
     expect([grp.level, grp.posinset, grp.setsize, grp.expanded, grp.node.hidden]).toEqual([
       4,
-      2,
+      4,
       4,
       false,
       true,

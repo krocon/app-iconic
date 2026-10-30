@@ -137,7 +137,7 @@ pub fn list() -> Vec<Value> {
         ),
         tool(
             "get_tree",
-            "The hierarchy: root, groups, layers and their SVG nodes (kind, label, tag, node ref, fill/stroke swatch, hidden), depth-first, at most max_nodes (default 500, at most 5000).",
+            "The hierarchy: root, groups, layers and their SVG nodes (kind, label, tag, node ref, fill/stroke swatch, hidden, z), depth-first, at most max_nodes (default 500, at most 5000). Like the panel, the front-most comes first on every level; z of a node = its paint order among its siblings (0 = back).",
             json!({
                 "id": id(),
                 "max_nodes": {"type": "integer", "minimum": 1, "maximum": TREE_NODES_MAX}

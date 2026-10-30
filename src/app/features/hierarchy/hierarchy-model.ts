@@ -6,7 +6,7 @@ import {
   isDefinitionElement,
   isDefinitionTag,
 } from '../document/model/reorder-rules';
-import { IconItem, sameItem, sameRef, TreeTarget } from '../document/model/selection';
+import { DropPosition, IconItem, sameItem, sameRef, TreeTarget } from '../document/model/selection';
 import { ID_ATTR } from '../document/svg/node-ids';
 import { clipIdOf, isClipGroup } from '../document/model/clip-model';
 import { CLIP_TEXTS as CT } from '../clip/clip-texts';
@@ -18,6 +18,11 @@ import { fillSwatch, Swatch, swatchOf } from './swatch';
  * The document as a tree (design 006 E1): root (icon, background fill) → groups → layers → SVG
  * nodes, the non-rendering children of an asset root in a "Definitions" node per layer. Derived
  * from the document only (a `computed` in the tree component). Pure – reads the DOM.
+ *
+ * On every level the front-most comes first (prompt 063, like Icon Composer, Figma, Photoshop):
+ * groups and layers are stored that way, SVG children are shown in reverse DOM order (the last
+ * child paints on top). The DOM is never reordered for this; moves translate with
+ * {@link domPosition}.
  */
 export type TreeKind = 'root' | 'group' | 'layer' | 'defs' | 'node';
 
@@ -44,6 +49,8 @@ export interface TreeNode {
   warning?: string;
   /** The clip the node itself refers to (design 014 E12). */
   clip?: string;
+  /** A node's paint order among its DOM siblings (0 = back, prompt 063). */
+  z?: number;
   children: TreeNode[];
 }
 
@@ -82,13 +89,17 @@ function nodeOf(el: Element, asset: string, parentId: string, root: Element): Tr
     ...(clip ? { clip } : {}),
     tag: el.localName,
     ref: { asset, id },
+    z: el.parentElement ? Array.prototype.indexOf.call(el.parentElement.children, el) : 0,
     fill: swatchOf(el, 'fill', root),
     stroke: swatchOf(el, 'stroke', root),
     hidden: isHiddenElement(el),
     ...(el.hasAttribute('data-locked') ? { locked: true } : {}),
     definition: isDefinitionElement(el),
     container: isContainerElement(el),
-    children: Array.from(el.children).map((c) => nodeOf(c, asset, rowId, root)),
+    // front-most first (prompt 063)
+    children: Array.from(el.children)
+      .reverse()
+      .map((c) => nodeOf(c, asset, rowId, root)),
   };
 }
 
@@ -116,8 +127,12 @@ function layerNode(doc: IconDocument, g: number, l: number): TreeNode {
         children: defs.map((d) => nodeOf(d, asset.name, defsId, root)),
       });
     }
+    // front-most first (prompt 063); the definitions keep their order
     children.push(
-      ...kids.filter((k) => !isDefinitionTag(k)).map((k) => nodeOf(k, asset.name, id, root)),
+      ...kids
+        .filter((k) => !isDefinitionTag(k))
+        .reverse()
+        .map((k) => nodeOf(k, asset.name, id, root)),
     );
   }
   return {
@@ -234,6 +249,17 @@ export function ancestorsOfSelection(
   };
   walk(tree, []);
   return [...out];
+}
+
+/**
+ * A drop position of the tree as the reorder commands mean it (prompt 063): SVG nodes are shown
+ * front-most first, so "before" a node row is after it in the DOM (in front) and vice versa;
+ * "into" appends (in front of the other children, at the top of the list). Groups and layers are
+ * stored as shown.
+ */
+export function domPosition(target: TreeTarget, position: DropPosition): DropPosition {
+  if (target.kind !== 'node' || position === 'into') return position;
+  return position === 'before' ? 'after' : 'before';
 }
 
 /** The move target a row stands for (`null`: root, "Definitions"). */

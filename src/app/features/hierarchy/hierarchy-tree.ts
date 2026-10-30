@@ -22,6 +22,7 @@ import { EditService } from './edit.service';
 import {
   ancestorsOfSelection,
   buildTree,
+  domPosition,
   flatten,
   indexTree,
   isExpanded,
@@ -132,8 +133,9 @@ export class HierarchyTree {
       rowHeight: () => this.rowHeight(),
       list: () => this.listEl()?.nativeElement ?? null,
       sourcesFor: (row) => this.sourcesFor(row),
-      allowed: (s, t, p) => checkReorder(this.store().document(), s, t, p) === null,
-      drop: (s, t, p) => this.edit.reorder(s, t, p),
+      // the rows show SVG nodes front-most first (prompt 063)
+      allowed: (s, t, p) => checkReorder(this.store().document(), s, t, domPosition(t, p)) === null,
+      drop: (s, t, p) => this.edit.reorder(s, t, domPosition(t, p)),
     },
     this.actions,
   );

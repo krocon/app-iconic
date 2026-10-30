@@ -127,6 +127,7 @@
 
 ## 6. Hierarchie
 
+- [x] Einheitliche Reihenfolge „oben = vorn“ auch für SVG-Knoten _(neu)_ (063): Ziehen, Move Up/Down/Into/Out, Bring to Front folgen der Anzeige; das DOM bleibt unverändert
 - [x] Baum Root → Gruppen → Layer → Nodes, Typ-Icon, Name, Swatches, Sichtbarkeit (006; „Definitions“-Knoten, ab 500 Zeilen virtualisiert)
 - [x] Auswahl synchron mit Canvas, Mehrfachauswahl (006; APG-Tree-Tastatur, Auswahlrahmen im Canvas; Auswahl per Klick im Canvas: 007)
 - [x] Drag & Drop mit Einfügelinie vor/nach/hinein, Nachfahren-Schutz, über Assets (006; Command „Reorder Node“, Move Up/Down/Into/Out per Tastatur)

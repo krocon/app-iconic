@@ -1,8 +1,14 @@
 # Prompt 063: Einheitliche Z-Reihenfolge im Ebenenbaum („oben = vorn“)
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 006 · Quelle:
-> [Analyse 30.10.2026](2026.10.30%20-%20analyse.md) §2.2 (P0, Aufwand S–M) · Offene Frage 006/1
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 006 · Quelle:
+> [Analyse 30.10.2026](../2026.10.30%20-%20analyse.md) §2.2 (P0, Aufwand S–M) · Offene Frage 006/1
 > („SVG-Nodes umgekehrt sortieren?“) – hiermit mit „ja“ entschieden, sofern Marc nicht widerspricht.
+
+## Stand
+
+- ✅ 30.10.2026: SVG-Knoten im Baum vorderste zuerst (DOM unverändert), `domPosition` für Ziehen, Move Up/Down/Into
+  im Sinn der Anzeige, `get_tree` mit `z`; Frage 006/1 entschieden. Design:
+  [063-z-reihenfolge-baum.design.md](063-z-reihenfolge-baum.design.md).
 
 ## Ziel
 

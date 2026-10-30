@@ -143,11 +143,12 @@ function nodeMove(
   const after = all.slice(last + 1).find((k) => sibs.includes(k));
   const target = (el: Element | undefined, pos: DropPosition) =>
     el ? { t: { kind: 'node', ref: doc.refOf(el)! } as TreeTarget, pos } : null;
+  // the tree shows nodes front-most first (prompt 063): up = forward = after the next DOM sibling;
+  // "into" the container just above in the tree = the next sibling in the DOM
   let plan: { t: TreeTarget; pos: DropPosition } | null;
-  if (dir === 'up') plan = target(before, 'before');
-  else if (dir === 'down') plan = target(after, 'after');
-  else if (dir === 'into')
-    plan = before && isContainerElement(before) ? target(before, 'into') : null;
+  if (dir === 'up') plan = target(after, 'after');
+  else if (dir === 'down') plan = target(before, 'before');
+  else if (dir === 'into') plan = after && isContainerElement(after) ? target(after, 'into') : null;
   else {
     const parent = els[0].parentElement!;
     plan = parent.parentElement ? target(parent, 'after') : null;

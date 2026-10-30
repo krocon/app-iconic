@@ -40,7 +40,7 @@
 
 ## Prompt 006 (066830f)
 
-1. SVG-Nodes umgekehrt sortieren (vorderste oben)?
+1. ~~SVG-Nodes umgekehrt sortieren (vorderste oben)?~~ Entschieden mit Prompt 063 (30.10.2026): ja, oben = vorn.
 2. Schreibt Icon Composer `hidden` für Gruppen/Layer?
 3. Ungenutzte Assets beim Löschen von Layern/Gruppen mit entfernen ok?
 4. Ungroup nur bei schlichten <g> – Attribute auf Kinder verteilen?

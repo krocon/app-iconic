@@ -190,8 +190,7 @@ test('keyboard: arrows, expand/collapse, range, context menu and Delete… with 
   expect((await sel()).items).toEqual([{ kind: 'layer', group: 0, layer: 0 }]);
   await page.keyboard.press('ArrowDown');
   const [rect, g1] = await ids(page, NESTED, ':scope > rect, :scope > g');
-  expect((await sel()).nodes).toEqual([rect]);
-  await page.keyboard.press('ArrowDown');
+  // front-most first (prompt 063): the group (last in the DOM) comes before the rect
   expect((await sel()).nodes).toEqual([g1]);
   await expect(row(page, `g0/l0/${g1}`)).toHaveAttribute('aria-expanded', 'false');
   await page.keyboard.press('ArrowRight');
@@ -206,9 +205,11 @@ test('keyboard: arrows, expand/collapse, range, context menu and Delete… with 
   await page.keyboard.press('Home');
   expect((await sel()).items).toEqual([{ kind: 'root' }]);
   await page.keyboard.press('End');
+  expect((await sel()).nodes).toEqual([rect]);
+  await page.keyboard.press('ArrowUp');
   expect((await sel()).nodes).toEqual([g1]);
 
-  // context menu (Shift+F10) → Delete… asks → the previous sibling is selected
+  // context menu (Shift+F10) → Delete… asks → the next row (the rect) is selected
   await page.keyboard.press('Shift+F10');
   const cm = page.getByRole('menu', { name: 'Node actions' });
   await expect(cm.getByRole('menuitem').first()).toBeFocused();
@@ -223,11 +224,19 @@ test('keyboard: arrows, expand/collapse, range, context menu and Delete… with 
   await ask.getByRole('button', { name: 'Delete' }).click();
   await expect.poll(() => ids(page, NESTED, ':scope > g')).toEqual([]);
   expect((await sel()).nodes).toEqual([rect]);
-  // Move Up / Down by keyboard (Alt+arrows) – undo brings the group back first
+  // Move Up / Down by keyboard (Alt+arrows) – undo brings the group back first; up = forward
   await page.evaluate(() => window.__appIconic!.run('edit.undo'));
   await row(page, `g0/l0/${rect}`).click();
-  await page.keyboard.press('Alt+ArrowDown');
+  await page.keyboard.press('Alt+ArrowDown'); // already at the back: nothing
+  expect(await ids(page, NESTED, ':scope > *')).toEqual([rect, g1]);
+  await page.keyboard.press('Alt+ArrowUp');
   expect(await ids(page, NESTED, ':scope > *')).toEqual([g1, rect]);
+  // and the tree shows it above the group now
+  const index = (id: string) =>
+    row(page, `g0/l0/${id}`)
+      .getAttribute('data-index')
+      .then((v) => Number(v));
+  expect(await index(rect)).toBeLessThan(await index(g1));
 });
 
 test('visibility: eye buttons hide nodes and groups in the canvas at once; Alt = recursive', async ({
@@ -301,4 +310,48 @@ test('copy and paste SVG markup between two documents (clipboard)', async ({ pag
   expect(pasted).not.toContain('onclick');
   await menu(other, 'Edit', 'Undo Paste');
   await expect(row(other, 'g0/l0')).not.toContainText('Pasted');
+});
+
+test('front-most first (prompt 063): Bring to Front puts the node on top of the list', async ({
+  page,
+}) => {
+  await openIcon(page, '/fixtures/svg/nested_g.icon');
+  const [rect, g1] = await ids(page, NESTED, ':scope > rect, :scope > g');
+  const index = async (id: string) =>
+    Number(await row(page, `g0/l0/${id}`).getAttribute('data-index'));
+  expect(await index(g1)).toBeLessThan(await index(rect));
+  await row(page, `g0/l0/${rect}`).click();
+  await page.evaluate(() => window.__appIconic!.run('arrange.bringToFront'));
+  expect(await ids(page, NESTED, ':scope > *')).toEqual([g1, rect]);
+  await expect.poll(() => index(rect)).toBeLessThan(await index(g1));
+  // the AI's tree lists the same order, with the paint order
+  const tree = (await page.evaluate(() => window.__appIconic!.mcp('get_tree'))) as {
+    nodes: { ref?: { id: string }; z?: number }[];
+  };
+  const zs = tree.nodes.filter((n) => n.ref && [rect, g1].includes(n.ref.id)).slice(0, 2);
+  expect(zs.map((n) => [n.ref!.id, n.z])).toEqual([
+    [rect, 1],
+    [g1, 0],
+  ]);
+  await page.evaluate(() => window.__appIconic!.run('edit.undo'));
+  expect(await ids(page, NESTED, ':scope > *')).toEqual([rect, g1]);
+});
+
+test('dragging a node above another in the tree puts it in front (prompt 063)', async ({
+  page,
+}) => {
+  await openIcon(page);
+  await importSvg(
+    page,
+    'z.svg',
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><rect id="a" width="10" height="10"/>' +
+      '<rect id="b" width="10" height="10"/><rect id="c" width="10" height="10"/></svg>',
+  );
+  const [a, b, c] = await ids(page, 'z.svg', '#a, #b, #c');
+  // the tree: c, b, a (front-most first); drag a above c → a paints on top
+  await dragRow(page, `g0/l0/${a}`, `g0/l0/${c}`, 0.1);
+  await expect.poll(() => ids(page, 'z.svg', ':scope > *')).toEqual([b, c, a]);
+  // and below b → between the back (nothing) and b: behind b
+  await dragRow(page, `g0/l0/${c}`, `g0/l0/${b}`, 0.9);
+  await expect.poll(() => ids(page, 'z.svg', ':scope > *')).toEqual([c, b, a]);
 });

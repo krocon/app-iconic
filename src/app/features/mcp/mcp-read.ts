@@ -118,6 +118,8 @@ export interface TreeEntry {
   hidden: boolean;
   definition?: boolean;
   clip?: string;
+  /** Paint order among the DOM siblings (0 = back); rows list the front-most first (063). */
+  z?: number;
 }
 
 /** `get_tree`: the hierarchy depth-first (as the panel shows it, all expanded), at most `max`. */
@@ -142,6 +144,7 @@ export function treeEntries(
         hidden: n.hidden,
         ...(n.definition ? { definition: true } : {}),
         ...(n.clip ? { clip: n.clip } : {}),
+        ...(n.z !== undefined ? { z: n.z } : {}),
       });
     }
     for (const c of n.children) walk(c, depth + 1);

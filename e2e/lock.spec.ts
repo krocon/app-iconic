@@ -51,7 +51,7 @@ test('a locked background is neither hit nor caught by the marquee; unlock all',
   await page.locator('.viewport').focus();
   await page.keyboard.press('Control+l');
   expect(await selectedIds(page)).toEqual([]);
-  await expect(page.getByTestId('tree-lock').first()).toHaveClass(/on/);
+  await expect(page.locator('[data-testid="tree-lock"].on')).toHaveCount(1);
   await click(page, 500, 500);
   expect(await selectedIds(page)).toEqual([]);
   await click(page, 300, 300);

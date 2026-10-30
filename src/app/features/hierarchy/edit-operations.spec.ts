@@ -193,33 +193,40 @@ describe('arrange (design 006 E2, E6, E11)', () => {
     );
   });
 
-  it('Move Up / Down / Into / Out', () => {
+  it('Move Up / Down / Into / Out (the tree shows the front-most first, prompt 063)', () => {
     const doc = treeDocument();
-    // the definitions folder is not a sibling in the tree: n6 cannot move up
-    expect(moveCommand(doc, nodes('n6'), 'up')).toBeNull();
+    // tree order of a.svg: n10 text, n9 path, n6 g (DOM reversed); n6 is at the back
+    expect(moveCommand(doc, nodes('n6'), 'down')).toBeNull();
+    expect(moveCommand(doc, nodes('n10'), 'up')).toBeNull();
+    // up = forward: after the next DOM sibling
     roundTrip(
       doc,
-      (s) => s.execute(moveCommand(doc, nodes('n9'), 'up')!),
+      (s) => s.execute(moveCommand(doc, nodes('n6'), 'up')!),
       () => expect(kids(doc, 'n1')).toEqual(['n2', 'n9', 'n6', 'n10']),
     );
+    // down = backward: before the previous DOM sibling (the definitions are not a tree sibling)
     roundTrip(
       doc,
-      (s) => s.execute(moveCommand(doc, nodes('n6'), 'down')!),
+      (s) => s.execute(moveCommand(doc, nodes('n9'), 'down')!),
       () => expect(kids(doc, 'n1')).toEqual(['n2', 'n9', 'n6', 'n10']),
     );
-    roundTrip(
-      doc,
-      (s) => s.execute(moveCommand(doc, nodes('n9'), 'into')!),
-      () => expect(kids(doc, 'n6')).toEqual(['n7', 'n8', 'n9']),
-    );
+    // into the container just above in the tree (= the next DOM sibling), in front of its children
+    const store = new DocumentStore(doc);
+    const before = doc.snapshot();
+    store.execute(moveCommand(doc, nodes('n9'), 'down')!);
+    store.execute(moveCommand(doc, nodes('n9'), 'into')!);
+    expect(kids(doc, 'n6')).toEqual(['n7', 'n8', 'n9']);
+    store.undo();
+    store.undo();
+    expect(doc.snapshot()).toBe(before);
     roundTrip(
       doc,
       (s) => s.execute(moveCommand(doc, nodes('n7'), 'out')!),
       () => expect(kids(doc, 'n1')).toEqual(['n2', 'n6', 'n7', 'n9', 'n10']),
     );
     expect(moveCommand(doc, nodes('n6'), 'out')).toBeNull();
-    expect(moveCommand(doc, nodes('n10'), 'down')).toBeNull();
-    expect(moveCommand(doc, nodes('n10'), 'into')).toBeNull(); // path is no container
+    expect(moveCommand(doc, nodes('n10'), 'into')).toBeNull(); // nothing above it
+    expect(moveCommand(doc, nodes('n6'), 'into')).toBeNull(); // n9 (above) is no container
     const layer = (group: number, l: number) => ({
       nodes: [],
       items: [{ kind: 'layer' as const, group, layer: l }],

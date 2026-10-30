@@ -66,7 +66,7 @@ describe('HierarchyTree', () => {
       g.getAttribute('aria-posinset'),
       g.getAttribute('aria-setsize'),
       g.getAttribute('aria-expanded'),
-    ]).toEqual(['4', '2', '4', 'false']);
+    ]).toEqual(['4', '4', '4', 'false']); // front-most first: n10, n9, n6 (prompt 063)
     expect(row('g0/l0/defs').getAttribute('aria-selected')).toBeNull();
     expect(row('g0/l0/n9').querySelector('.swatch[data-kind="gradient"]')).not.toBeNull();
     expect(row('root').querySelector('.eye')).toBeNull();
@@ -77,12 +77,12 @@ describe('HierarchyTree', () => {
 
   it('click, Shift-click (range of one kind) and Ctrl-click (toggle) select', async () => {
     const { fixture, row, sel } = await render();
-    row('g0/l0/n6').click();
-    expect(sel().nodes).toEqual(['n6']);
-    row('g0/l0/n10').dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true }));
-    expect(sel().nodes).toEqual(['n6', 'n9', 'n10']);
+    row('g0/l0/n10').click();
+    expect(sel().nodes).toEqual(['n10']);
+    row('g0/l0/n6').dispatchEvent(new MouseEvent('click', { bubbles: true, shiftKey: true }));
+    expect(sel().nodes.sort()).toEqual(['n10', 'n6', 'n9']);
     row('g0/l0/n9').dispatchEvent(new MouseEvent('click', { bubbles: true, ctrlKey: true }));
-    expect(sel().nodes).toEqual(['n6', 'n10']);
+    expect(sel().nodes.sort()).toEqual(['n10', 'n6']);
     row('g1/l0').click();
     expect(sel()).toEqual({ nodes: [], items: [{ kind: 'layer', group: 1, layer: 0 }] });
     await fixture.whenStable();
@@ -96,18 +96,24 @@ describe('HierarchyTree', () => {
     row('g0/l0').focus();
     await key('ArrowDown');
     expect(document.activeElement).toBe(row('g0/l0/defs'));
+    // front-most first (prompt 063): text n10, path n9, group n6
+    await key('ArrowDown');
+    expect(sel().nodes).toEqual(['n10']);
+    await key('ArrowDown');
     await key('ArrowDown');
     expect(sel().nodes).toEqual(['n6']);
     await key('ArrowRight');
     expect(row('g0/l0/n6').getAttribute('aria-expanded')).toBe('true');
     await key('ArrowRight');
-    expect(sel().nodes).toEqual(['n7']);
+    expect(sel().nodes).toEqual(['n8']);
     await key('ArrowDown', { shiftKey: true });
-    expect(sel().nodes).toEqual(['n7', 'n8']);
-    await key('ArrowDown', { ctrlKey: true });
-    expect(sel().nodes).toEqual(['n7', 'n8']);
+    expect(sel().nodes.sort()).toEqual(['n7', 'n8']);
+    await key('ArrowUp', { ctrlKey: true });
+    await key('ArrowUp', { ctrlKey: true });
+    await key('ArrowUp', { ctrlKey: true });
+    expect(sel().nodes.sort()).toEqual(['n7', 'n8']);
     await key(' ', { ctrlKey: true });
-    expect(sel().nodes).toEqual(['n7', 'n8', 'n9']);
+    expect(sel().nodes.sort()).toEqual(['n7', 'n8', 'n9']);
     // the focus is on n9 now (Mod+↓ moved it): ← goes to its parent, the layer
     await key('ArrowLeft');
     expect(sel().items).toEqual([{ kind: 'layer', group: 0, layer: 0 }]);
@@ -158,7 +164,8 @@ describe('HierarchyTree', () => {
     expect(ask.current()!.message).toContain('removes the node and its children');
     ask.answer('delete');
     await new Promise((r) => setTimeout(r));
-    expect(sel().nodes).toEqual(['n10']);
+    // the next row below (front-most first, prompt 063)
+    expect(sel().nodes).toEqual(['n6']);
     expect(el.querySelector('[role="menu"]')).toBeNull();
   });
 

@@ -77,7 +77,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               file-actions (Aktionen der Datei-Funktionen), Texte (003, 005)
   app/features/menus/         Menümodell (rein), MenuService (nativ/HTML), MenuBar (Windows/Linux), Befehlspalette,
                               Kürzel-Dialog, app-actions (005)
-  app/features/hierarchy/     Ebenenbaum (006): hierarchy-model (Baum rein aus dem Dokument), HierarchyTree (APG
+  app/features/hierarchy/     Ebenenbaum (006): hierarchy-model (Baum rein aus dem Dokument, vorderste oben +
+                              domPosition, 063), HierarchyTree (APG
                               Tree, virtualisiert), tree-navigation/-selection/-drag, context-menu, swatch,
                               node-label, tree-icons; EditService + edit-actions (Cut/Copy/Paste/Duplicate/
                               Delete/Sichtbarkeit/Arrange/Align), edit-/arrange-operations, paste, align, visibility,
