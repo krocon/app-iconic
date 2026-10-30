@@ -3,18 +3,19 @@ import { SymbolInfo } from './symbol-provider';
 /**
  * Search of a symbol set (design 013 E18), pure: every word must occur (without case, `-` = space)
  * in the name or a tag; name matches before tag matches, then by name. Empty = all by name.
+ * Generic so that the search over all sets keeps the set of each match (prompt 084).
  */
 
 const norm = (s: string) => s.toLowerCase().replace(/[-_]+/g, ' ').trim();
 
-export function searchSymbols(
-  all: readonly SymbolInfo[],
+export function searchSymbols<T extends SymbolInfo>(
+  all: readonly T[],
   q: string,
   limit: number,
-): { items: SymbolInfo[]; total: number } {
+): { items: T[]; total: number } {
   const words = norm(q).split(/\s+/).filter(Boolean);
   if (!words.length) return { items: all.slice(0, limit), total: all.length };
-  const scored: { s: SymbolInfo; rank: number }[] = [];
+  const scored: { s: T; rank: number }[] = [];
   for (const s of all) {
     const name = norm(s.name);
     const tags = s.tags.map(norm);

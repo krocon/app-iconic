@@ -13,6 +13,8 @@ import { McpApi, TauriMcpApi } from './core/mcp/mcp-api';
 import { DropApi, TauriDropApi } from './core/drop/drop-api';
 import { RecoveryApi, TauriRecoveryApi } from './core/recovery/recovery-api';
 import { FakeRecoveryApi } from '../testing/fake-recovery-api';
+import { SymbolLibraryApi, TauriSymbolLibraryApi } from './core/symbols/symbol-library-api';
+import { FakeSymbolLibraryApi } from '../testing/fake-symbol-library-api';
 import { FakeDropApi } from '../testing/fake-drop-api';
 import { FakeMcpApi } from '../testing/fake-mcp-api';
 import { FakeKeymapApi, FakeMenuApi } from '../testing/fake-menu-api';
@@ -70,6 +72,7 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
       { provide: McpApi, useClass: TauriMcpApi },
       { provide: DropApi, useClass: TauriDropApi },
       { provide: RecoveryApi, useClass: TauriRecoveryApi },
+      { provide: SymbolLibraryApi, useClass: TauriSymbolLibraryApi },
     ]
   : [
       // About keeps the real facade: it shows "desktop backend not available" (e2e/shell)
@@ -100,5 +103,7 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
         useFactory: () =>
           new FakeRecoveryApi(inject(IconFileApi) as FakeIconFileApi, browserStorage()),
       },
+      // the own symbols in memory (prompt 084)
+      { provide: SymbolLibraryApi, useFactory: () => new FakeSymbolLibraryApi() },
       provideAppInitializer(installTestHook),
     ];

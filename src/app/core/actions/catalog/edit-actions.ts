@@ -1,4 +1,5 @@
 import { ActionDef, EDIT, TEXT, APPEARANCE_ARG, INDEX, TARGET_ARGS } from './action-def';
+import { SYMBOL_DELETE_ARGS, SYMBOL_RENAME_ARGS, SYMBOL_SAVE_ARGS } from '../tool-action-args';
 
 /** The actions of edit, selection tools, properties panel, box head and icon inspector (split from `action-catalog.ts` in prompt 033). */
 export const EDIT_ACTIONS: readonly ActionDef[] = [
@@ -13,6 +14,12 @@ export const EDIT_ACTIONS: readonly ActionDef[] = [
     args: { type: 'object', properties: { text: { type: 'string', maxLength: 16 << 20 } } },
   }),
   EDIT('edit.copyXml', 'Copy XML'),
+  // the own symbol library (prompt 084): save the selection, manage, folders
+  EDIT('symbols.save', 'Save as Symbol…', { args: SYMBOL_SAVE_ARGS }),
+  EDIT('symbols.rename', 'Rename Own Symbol', { args: SYMBOL_RENAME_ARGS }),
+  EDIT('symbols.delete', 'Delete Own Symbol', { args: SYMBOL_DELETE_ARGS }),
+  EDIT('symbols.import', 'Import Symbols from Folder…'),
+  EDIT('symbols.export', 'Export My Symbols to Folder…'),
   EDIT('edit.duplicate', 'Duplicate'),
   EDIT('edit.delete', 'Delete', {
     ...TEXT,

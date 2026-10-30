@@ -18,7 +18,7 @@ import { searchSymbols } from './symbol-search';
  * (design 013 E17). The weight is the stroke width in icon units (Lucide default 2).
  */
 
-type LucideNode = [string, Record<string, string>];
+export type LucideNode = [string, Record<string, string>];
 export interface LucideData {
   nodes: Record<string, LucideNode[]>;
   tags: Record<string, string[]>;
@@ -65,8 +65,11 @@ export const LUCIDE_WEIGHT: SymbolVariant = {
   default: 2,
 };
 
-/** One element of a Lucide icon as `<path>` (its other attributes kept, `currentColor` black). */
-function asPath([tag, attrs]: LucideNode): ElementSpec | null {
+/**
+ * One element of a set's icon as `<path>` (its other attributes kept, `currentColor` black) – also
+ * for Tabler and Phosphor (`node-set-provider.ts`).
+ */
+export function asPath([tag, attrs]: LucideNode): ElementSpec | null {
   const d = shapeToPath(tag, attrs);
   if (!d) return null;
   const rest: Record<string, string> = { d };
@@ -84,6 +87,7 @@ export class LucideProvider implements SymbolProvider {
     name: 'ISC License',
     spdx: 'ISC',
     url: 'https://lucide.dev/license',
+    package: 'lucide-static',
   };
   readonly variants = [LUCIDE_WEIGHT];
   private data: LucideData | null = null;
@@ -114,6 +118,10 @@ export class LucideProvider implements SymbolProvider {
 
   search(q: string, limit: number): { items: SymbolInfo[]; total: number } {
     return searchSymbols(this.list, q, limit);
+  }
+
+  all(): readonly SymbolInfo[] {
+    return this.list;
   }
 
   toSvg(id: string, opts: SymbolOptions = {}): SymbolSvg | null {

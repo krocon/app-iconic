@@ -249,3 +249,12 @@
 3. Schnappschüsse bleiben, bis man sie verwirft – sollen sie nach einer Frist (z. B. 30 Tage) von selbst gehen?
 4. **Mac/Windows**: Absturz mit „Sofort beenden“ (Aktivitätsanzeige/Task-Manager) testen – Angebot beim Neustart, Ordner
    `~/Library/Application Support/io.github.krocon.appiconic/recovery` bzw. `%APPDATA%\…\recovery`.
+
+## Prompt 084
+
+1. Phosphor kommt nur im Gewicht „regular“ (gefüllte Konturen). Weitere Gewichte (z. B. „bold“, „fill“) als Variante?
+   Kostet je Gewicht ≈ 0,8 MB Lazy-Chunk.
+2. Eigene Symbole übernehmen Formen und Pfade mit Farben – Text, Bilder, Verläufe, Filter und Clips nicht. Reicht das,
+   oder sollen Verläufe (mit eigenen `defs`) mit?
+3. **Mac/Windows**: Bibliothek unter `~/Library/Application Support/io.github.krocon.appiconic/symbols` bzw.
+   `%APPDATA%\…\symbols` – Import/Export eines Ordners mit dem nativen Dialog prüfen.

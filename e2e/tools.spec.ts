@@ -172,5 +172,5 @@ test('text to path: the fake font adds one filled path centred', async ({ page }
 test('About names the symbol set and its licence', async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => window.__appIconic!.run('app.about'));
-  await expect(page.getByTestId('about-symbols')).toContainText('Lucide (ISC License)');
+  await expect(page.getByTestId('about-symbols').first()).toContainText('Lucide (ISC License)');
 });

@@ -50,6 +50,37 @@ const EN = {
     more: (shown: number, total: number) => `${shown} of ${total} shown – refine the search.`,
     license: (set: string, license: string) => `${set} · ${license}`,
     unknown: 'There is no such symbol.',
+    // prompt 084: several sets, recent, own symbols
+    allSets: 'All sets',
+    recent: 'Recently used',
+    noRecent: 'No symbol used yet.',
+    mine: 'My Symbols',
+    noMine: 'No own symbols yet – select shapes and choose Save as Symbol….',
+    ownLicense: 'Your own symbols',
+    rename: 'Rename…',
+    delete: 'Delete',
+    confirmDelete: (name: string) => `Delete “${name}” for good?`,
+    yesDelete: 'Delete',
+    importFolder: 'Import Folder…',
+    exportFolder: 'Export Folder…',
+    saveTitle: 'Save as Symbol',
+    renameTitle: 'Rename Symbol',
+    name: 'Name',
+    tags: 'Tags',
+    tagsHint: 'Separated by commas',
+    save: 'Save',
+    nothingToSave: 'Select shapes to save them as a symbol.',
+    saveHint:
+      'Shapes and paths are kept with their colours; text, images, gradients and filters are not.',
+    saved: (name: string) => `Saved “${name}” in My Symbols.`,
+    imported: (n: number, skipped: number, full: boolean) =>
+      `${n} symbol${n === 1 ? '' : 's'} imported` +
+      (skipped ? `, ${skipped} file${skipped === 1 ? '' : 's'} skipped` : '') +
+      (full ? ' – the library is full.' : '.'),
+    exported: (n: number, folder: string) =>
+      `${n} symbol${n === 1 ? '' : 's'} exported to ${folder}.`,
+    libraryFailed: (why: string) => `My Symbols: ${why}`,
+    setOf: (set: string) => `Set: ${set}`,
   },
 } as const;
 
@@ -100,6 +131,36 @@ export const TOOLS_TEXTS = translatable('tools', EN, {
       more: (shown: number, total: number) => `${shown} von ${total} gezeigt – Suche verfeinern.`,
       license: (set: string, license: string) => `${set} · ${license}`,
       unknown: 'Dieses Symbol gibt es nicht.',
+      allSets: 'Alle Sätze',
+      recent: 'Zuletzt benutzt',
+      noRecent: 'Noch kein Symbol benutzt.',
+      mine: 'Meine Symbole',
+      noMine: 'Noch keine eigenen Symbole – Formen auswählen und „Als Symbol speichern …“ wählen.',
+      ownLicense: 'Ihre eigenen Symbole',
+      rename: 'Umbenennen …',
+      delete: 'Löschen',
+      confirmDelete: (name: string) => `„${name}“ endgültig löschen?`,
+      yesDelete: 'Löschen',
+      importFolder: 'Ordner importieren …',
+      exportFolder: 'Ordner exportieren …',
+      saveTitle: 'Als Symbol speichern',
+      renameTitle: 'Symbol umbenennen',
+      name: 'Name',
+      tags: 'Schlagwörter',
+      tagsHint: 'Durch Kommas getrennt',
+      save: 'Speichern',
+      nothingToSave: 'Formen auswählen, um sie als Symbol zu speichern.',
+      saveHint:
+        'Formen und Pfade bleiben mit ihren Farben erhalten; Text, Bilder, Verläufe und Filter nicht.',
+      saved: (name: string) => `„${name}“ in „Meine Symbole“ gespeichert.`,
+      imported: (n: number, skipped: number, full: boolean) =>
+        `${n} Symbol${n === 1 ? '' : 'e'} importiert` +
+        (skipped ? `, ${skipped} Datei${skipped === 1 ? '' : 'en'} übersprungen` : '') +
+        (full ? ' – die Bibliothek ist voll.' : '.'),
+      exported: (n: number, folder: string) =>
+        `${n} Symbol${n === 1 ? '' : 'e'} nach ${folder} exportiert.`,
+      libraryFailed: (why: string) => `Meine Symbole: ${why}`,
+      setOf: (set: string) => `Satz: ${set}`,
     },
   },
 });

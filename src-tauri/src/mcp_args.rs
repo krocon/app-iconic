@@ -111,6 +111,18 @@ pub fn bound(tool: &str, a: &mut Map<String, Value>) -> Result<(), BridgeError> 
         "get_tree" if !a.contains_key("max_nodes") => {
             a.insert("max_nodes".into(), json!(tools::TREE_NODES_DEFAULT));
         }
+        "find_symbols" => {
+            // prompt 084: a short search text, a bounded number of matches
+            if a.get("query")
+                .and_then(Value::as_str)
+                .is_some_and(|q| q.chars().count() > 200)
+            {
+                return Err(bad("query is longer than 200 characters"));
+            }
+            if !a.contains_key("limit") {
+                a.insert("limit".into(), json!(tools::SYMBOLS_DEFAULT));
+            }
+        }
         "insert_svg" => {
             let n = a["markup"].as_str().map_or(0, str::len);
             if n > tools::MARKUP_MAX {
@@ -188,5 +200,17 @@ mod tests {
             vec!["/out"]
         );
         assert!(file_paths("get_tree", &a(json!({"path": "/x"}))).is_empty());
+    }
+
+    #[test]
+    fn find_symbols_is_bounded() {
+        let mut a = check_args("find_symbols", &json!({"query": "heart"})).unwrap();
+        bound("find_symbols", &mut a).unwrap();
+        assert_eq!(a["limit"], json!(tools::SYMBOLS_DEFAULT));
+        assert!(check_args("find_symbols", &json!({"set": "sf-symbols"})).is_err());
+        assert!(check_args("find_symbols", &json!({"limit": 1000})).is_err());
+        let mut long = check_args("find_symbols", &json!({"query": "x".repeat(201)})).unwrap();
+        assert!(bound("find_symbols", &mut long).is_err());
+        assert!(file_paths("find_symbols", &long).is_empty());
     }
 }

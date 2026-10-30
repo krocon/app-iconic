@@ -6,6 +6,7 @@
 //! - [`config_file`]   loader of small config files (from files-and-folders)
 //! - [`recent`]        recently used `.icon` files, `recent.json` (prompt 003)
 //! - [`recovery`]      recovery snapshots of unsaved documents, owner locks per process (prompt 083)
+//! - [`symbols`]       the own symbol library (cleaned SVGs) and the recently used symbols (prompt 084)
 //! - [`thumbnails`]    preview images of the recent files in the config directory (prompt 082)
 //! - [`icon`]          `.icon` files: icon.json with lossless round trip, bundle + ZIP I/O (prompt 002)
 //! - [`settings`]      workspace settings `settings.json`: lenient per field, migration, patches (prompt 015)
@@ -28,5 +29,6 @@ pub mod menu_spec;
 pub mod recent;
 pub mod recovery;
 pub mod settings;
+pub mod symbols;
 pub mod thumbnails;
 pub mod user_paths;

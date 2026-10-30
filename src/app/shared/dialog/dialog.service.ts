@@ -12,6 +12,7 @@ export type DialogKind =
   | 'export'
   | 'textPath'
   | 'symbolPicker'
+  | 'saveSymbol'
   | 'settings'
   | 'shapeSize'
   | 'corners'

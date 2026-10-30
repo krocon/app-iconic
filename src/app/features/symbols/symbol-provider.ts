@@ -3,7 +3,8 @@ import { ElementSpec } from '../commands/element-defaults';
 /**
  * The plug-in interface of the symbol picker (design 013 E16): one provider per symbol set –
  * further sets only need another provider in `SYMBOL_PROVIDERS` (`symbol-providers.ts`). No SF
- * Symbols (their licence forbids app icons, legacy §8).
+ * Symbols (their licence forbids app icons, legacy §8). Sets of prompt 084: Tabler, Phosphor, and the
+ * user's own symbols ("mine").
  */
 
 export interface SymbolInfo {
@@ -28,6 +29,8 @@ export interface SymbolLicense {
   name: string;
   spdx: string;
   url: string;
+  /** The npm package the data comes from – its licence text is in THIRD-PARTY-NOTICES.txt (084). */
+  package: string;
 }
 
 export interface SymbolOptions {
@@ -48,12 +51,17 @@ export interface SymbolSvg {
 export interface SymbolProvider {
   readonly id: string;
   readonly name: string;
-  readonly license: SymbolLicense;
+  /** `null` = the user's own symbols (prompt 084). */
+  readonly license: SymbolLicense | null;
   readonly variants: readonly SymbolVariant[];
+  /** The preview shows the symbol's own colours (own symbols); else the text colour. */
+  readonly colored?: boolean;
   /** Loads the data (lazy chunk); resolves at once when loaded. */
   load(): Promise<void>;
   readonly loaded: boolean;
   /** Matches of `q` (design 013 E18), at most `limit`; `total` = all matches. */
   search(q: string, limit: number): { items: SymbolInfo[]; total: number };
+  /** Every symbol of the loaded set, by name (the search over all sets, prompt 084). */
+  all(): readonly SymbolInfo[];
   toSvg(id: string, opts?: SymbolOptions): SymbolSvg | null;
 }

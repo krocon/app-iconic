@@ -2,34 +2,46 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { Modal } from '../../shared/dialog/modal';
 import { TOOLS_TEXTS } from '../tools/tools-texts';
+import { MINE } from './my-symbols-provider';
+import { MySymbolsBar } from './my-symbols-bar';
 import { GRID_COLUMNS, gridMove } from './symbol-grid';
-import { SymbolProvider } from './symbol-provider';
+import {
+  ALL_SETS,
+  itemKey,
+  PickerItem,
+  pickerItems,
+  RECENT_SETS,
+  setsFor,
+} from './symbol-picker-model';
+import { SymbolSvg } from './symbol-provider';
+import { SymbolTile } from './symbol-tile';
 import { SymbolService } from './symbol.service';
 
 /** At most this many tiles at once (design 013 E18). */
 export const MAX_TILES = 240;
 
 /**
- * "Add › Symbol…" (design 013 E20): set, search, a grid of previews (APG listbox driven from the
- * search field with `aria-activedescendant`: arrows, Home/End, PageUp/PageDown, Enter adds),
- * weight and size, the set's licence. The data is loaded when the picker opens (lazy chunk).
+ * "Add › Symbol…" (design 013 E20, 084 E13): set (one set, all sets, recently used), search, a
+ * grid of previews (APG listbox driven from the search field with `aria-activedescendant`: arrows,
+ * Home/End, PageUp/PageDown, Enter adds), weight and size, the set's licence; for "My Symbols"
+ * rename, delete, import and export. Data is loaded when a set is first shown (lazy chunks).
  */
 @Component({
   selector: 'app-symbol-picker-dialog',
-  imports: [Modal],
+  imports: [Modal, SymbolTile, MySymbolsBar],
   template: `
     <app-modal [heading]="t.title" width="45rem" (closed)="dialogs.close()">
       <div class="top">
-        @if (service.providers.length > 1) {
-          <label class="field">
-            <span>{{ t.set }}</span>
-            <select class="input" [value]="provider().id" (change)="onSet($event)">
-              @for (p of service.providers; track p.id) {
-                <option [value]="p.id">{{ p.name }}</option>
-              }
-            </select>
-          </label>
-        }
+        <label class="field">
+          <span>{{ t.set }}</span>
+          <select class="input" data-testid="symbol-set" [value]="mode()" (change)="onSet($event)">
+            <option [value]="allSets">{{ t.allSets }}</option>
+            <option [value]="recentSets">{{ t.recent }}</option>
+            @for (p of service.providers; track p.id) {
+              <option [value]="p.id">{{ p.name }}</option>
+            }
+          </select>
+        </label>
         <input
           class="input query"
           type="search"
@@ -62,7 +74,7 @@ export const MAX_TILES = 240;
         } @else if (state() === 'failed') {
           <p class="note error" role="alert">{{ t.loadFailed }}</p>
         } @else {
-          @for (s of items(); track s.id; let i = $index) {
+          @for (s of items(); track key(s); let i = $index) {
             <!-- options of a combobox: the field keeps the focus (aria-activedescendant) -->
             <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
             <div
@@ -70,33 +82,19 @@ export const MAX_TILES = 240;
               role="option"
               [id]="'symbol-' + i"
               [attr.data-symbol]="s.id"
+              [attr.data-set]="s.set"
               [attr.aria-selected]="i === active()"
-              [attr.aria-label]="s.name"
-              [title]="s.name"
+              [attr.aria-label]="label(s)"
+              [title]="label(s)"
               (click)="active.set(i)"
               (dblclick)="addActive()"
             >
-              @if (svgOf(s.id); as svg) {
-                <svg aria-hidden="true" [attr.viewBox]="'0 0 ' + svg.width + ' ' + svg.height">
-                  <g
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    [attr.stroke-width]="weight()"
-                  >
-                    @for (c of svg.group.children; track $index) {
-                      <path
-                        [attr.d]="c.attrs['d']"
-                        [attr.fill]="c.attrs['fill'] ? 'currentColor' : null"
-                      />
-                    }
-                  </g>
-                </svg>
+              @if (previews()[i]; as svg) {
+                <app-symbol-tile [svg]="svg" [colored]="s.set === mine" />
               }
             </div>
           } @empty {
-            <p class="note">{{ t.none }}</p>
+            <p class="note">{{ empty() }}</p>
           }
         }
       </div>
@@ -105,8 +103,11 @@ export const MAX_TILES = 240;
           {{ t.more(items().length, total()) }}
         }
       </p>
+      @if (mode() === mine) {
+        <app-my-symbols-bar [item]="items()[active()] ?? null" (changed)="onLibraryChanged()" />
+      }
       <div class="options">
-        @for (v of provider().variants; track v.key) {
+        @if (weightVariant(); as v) {
           <label class="field">
             <span>{{ t.weight }}</span>
             <input
@@ -135,9 +136,15 @@ export const MAX_TILES = 240;
           />
         </label>
         <span class="license">
-          <a [href]="provider().license.url" target="_blank" rel="noopener noreferrer">{{
-            t.license(provider().name, provider().license.name)
-          }}</a>
+          @if (licenseOf(); as p) {
+            @if (p.license; as l) {
+              <a [href]="l.url" target="_blank" rel="noopener noreferrer">{{
+                t.license(p.name, l.name)
+              }}</a>
+            } @else {
+              {{ t.ownLicense }}
+            }
+          }
         </span>
       </div>
       <div class="actions">
@@ -162,47 +169,94 @@ export class SymbolPickerDialog {
   protected readonly service = inject(SymbolService);
   protected readonly t = TOOLS_TEXTS.symbol;
   protected readonly cols = GRID_COLUMNS;
+  protected readonly allSets = ALL_SETS;
+  protected readonly recentSets = RECENT_SETS;
+  protected readonly mine = MINE;
   private readonly last = this.service.last();
-  protected readonly provider = signal<SymbolProvider>(
-    this.service.provider(this.last.set) ?? this.service.providers[0],
-  );
+  protected readonly mode = signal(this.validMode(this.last.set));
   protected readonly query = signal(this.last.query);
   protected readonly weight = signal(this.last.weight);
   protected readonly size = signal(this.last.size);
   protected readonly active = signal(0);
   protected readonly state = signal<'loading' | 'ready' | 'failed'>('loading');
+  /** Bumped when data arrived or the library changed. */
+  private readonly loadedVersion = signal(0);
 
-  private readonly found = computed(() =>
-    this.state() === 'ready'
-      ? this.provider().search(this.query(), MAX_TILES)
-      : { items: [], total: 0 },
-  );
+  private readonly found = computed(() => {
+    this.loadedVersion();
+    this.service.library.version();
+    if (this.state() !== 'ready') return { items: [], total: 0 };
+    return pickerItems(
+      this.mode(),
+      this.service.providers,
+      this.service.library.recent(),
+      this.query(),
+      MAX_TILES,
+    );
+  });
   protected readonly items = computed(() => this.found().items);
   protected readonly total = computed(() => this.found().total);
+  protected readonly previews = computed<(SymbolSvg | null)[]>(() => {
+    const weight = this.weight();
+    return this.items().map((s) => this.service.provider(s.set)?.toSvg(s.id, { weight }) ?? null);
+  });
+  /** The weight field: for a stroke set, or when the list may hold one. */
+  protected readonly weightVariant = computed(() => {
+    const m = this.mode();
+    const sets = m === ALL_SETS || m === RECENT_SETS ? this.service.providers : [this.provider(m)];
+    return sets.flatMap((p) => p?.variants ?? [])[0] ?? null;
+  });
+  /** Whose licence the line shows: the set, or the active symbol's set. */
+  protected readonly licenseOf = computed(() => {
+    const m = this.mode();
+    if (m !== ALL_SETS && m !== RECENT_SETS) return this.provider(m);
+    const s = this.items()[this.active()];
+    return s ? this.provider(s.set) : null;
+  });
 
   constructor() {
     void this.load();
   }
 
-  private async load(): Promise<void> {
-    const p = this.provider();
-    this.state.set(p.loaded ? 'ready' : 'loading');
-    try {
-      await p.load();
-      if (this.provider() === p) this.state.set('ready');
-    } catch {
-      if (this.provider() === p) this.state.set('failed');
-    }
+  private validMode(m: string): string {
+    return m === ALL_SETS || m === RECENT_SETS || this.service.provider(m) ? m : ALL_SETS;
   }
 
-  protected svgOf(id: string) {
-    return this.provider().toSvg(id);
+  private provider(id: string) {
+    return this.service.provider(id);
+  }
+
+  private async load(): Promise<void> {
+    const mode = this.mode();
+    await this.service.library.refresh();
+    const sets = setsFor(mode, this.service.providers, this.service.library.recent());
+    this.state.set(sets.every((p) => p.loaded) ? 'ready' : 'loading');
+    const results = await Promise.allSettled(sets.map((p) => p.load()));
+    if (this.mode() !== mode) return;
+    const failed = results.some((r) => r.status === 'rejected');
+    this.state.set(failed && results.every((r) => r.status === 'rejected') ? 'failed' : 'ready');
+    this.loadedVersion.update((v) => v + 1);
+  }
+
+  protected key(s: PickerItem): string {
+    return itemKey(s);
+  }
+
+  protected label(s: PickerItem): string {
+    const m = this.mode();
+    if (m !== ALL_SETS && m !== RECENT_SETS) return s.name;
+    return `${s.name} · ${this.provider(s.set)?.name ?? s.set}`;
+  }
+
+  protected empty(): string {
+    if (this.query().trim()) return this.t.none;
+    if (this.mode() === RECENT_SETS) return this.t.noRecent;
+    if (this.mode() === MINE) return this.t.noMine;
+    return this.t.none;
   }
 
   protected onSet(e: Event): void {
-    const p = this.service.provider((e.target as HTMLSelectElement).value);
-    if (!p) return;
-    this.provider.set(p);
+    this.mode.set(this.validMode((e.target as HTMLSelectElement).value));
     this.active.set(0);
     void this.load();
   }
@@ -210,6 +264,10 @@ export class SymbolPickerDialog {
   protected onQuery(e: Event): void {
     this.query.set((e.target as HTMLInputElement).value);
     this.active.set(0);
+  }
+
+  protected onLibraryChanged(): void {
+    this.active.update((i) => Math.min(i, Math.max(0, this.items().length - 1)));
   }
 
   protected onKey(e: KeyboardEvent): void {
@@ -240,10 +298,10 @@ export class SymbolPickerDialog {
 
   protected async addActive(): Promise<void> {
     const s = this.items()[this.active()];
-    if (!s) return;
-    const p = this.provider();
+    const p = s ? this.provider(s.set) : null;
+    if (!s || !p) return;
     this.service.last.set({
-      set: p.id,
+      set: this.mode(),
       query: this.query(),
       size: this.size(),
       weight: this.weight(),

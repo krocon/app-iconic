@@ -15,6 +15,7 @@ import { isPackage } from '../export/export-packages';
 import { FILES_TEXTS } from '../files/files-texts';
 import { FilesService } from '../files/files.service';
 import { SettingsStore } from '../settings/settings.store';
+import { SymbolService } from '../symbols/symbol.service';
 import { deniedReason } from './mcp-policy';
 import {
   assetSvg,
@@ -55,6 +56,7 @@ export class McpTools {
   private readonly canvas = inject(CanvasViewStore);
   private readonly settings = inject(SettingsStore);
   private readonly ask = inject(AskService);
+  private readonly symbols = inject(SymbolService);
 
   async run(tool: string, args: Args): Promise<unknown> {
     try {
@@ -129,6 +131,13 @@ export class McpTools {
           const error = await this.add.addSnippet(String(a['markup']), place);
           if (error) throw mcpError('invalid_request', `the markup was not inserted: ${error}`);
         });
+      case 'find_symbols': {
+        // prompt 084: ids for add.symbol; no document needed
+        const set = typeof a['set'] === 'string' ? a['set'] : undefined;
+        const query = typeof a['query'] === 'string' ? a['query'] : '';
+        const found = await this.symbols.find(query, set, Math.min(200, num(a, 'limit', 40)));
+        return { symbols: found.map((s) => ({ set: s.set, id: s.id, name: s.name })) };
+      }
       case 'list_actions':
         return {
           actions: this.actions

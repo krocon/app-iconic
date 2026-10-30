@@ -34,6 +34,8 @@ import { ConstructionMode } from '../construction/construction-mode';
 import { registerPreviewActions } from '../preview/preview-actions';
 import { SmallPreviewService } from '../preview/small-preview.service';
 import { registerMockupsActions } from '../mockups/mockups-actions';
+import { registerSymbolActions } from '../symbols/symbol-actions';
+import { SymbolLibraryService } from '../symbols/symbol-library.service';
 import { MockupsService } from '../mockups/mockups.service';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { registerFilletActions } from '../fillet/fillet-actions';
@@ -113,6 +115,7 @@ export function registerPathTools(
     destroyRef,
   );
   registerMockupsActions(actions, inject(MockupsService), destroyRef);
+  registerSymbolActions(actions, inject(SymbolLibraryService), inject(FilesService), destroyRef);
   registerLockActions(
     actions,
     inject(FilesService),

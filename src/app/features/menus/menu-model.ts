@@ -85,6 +85,8 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('edit.unlockAll'),
     a('edit.isolate'),
     a('edit.editSvg'),
+    // the own symbol library (prompt 084); the rest lives in the symbol picker and the palette
+    a('symbols.save'),
     sep,
     a('edit.selectAll'),
     a('edit.deselect'),

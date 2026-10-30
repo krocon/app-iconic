@@ -23,8 +23,8 @@ const LICENCE_FILE = /^(licen[cs]e|copying|notice|unlicense|copyright)([-._].*)?
 export const EXTRA_FILES = {};
 
 /** Bundled assets that are no package (relative to scripts/notices/). */
-// none so far: the symbols (Lucide) come as the npm package `lucide-static`, the test font (Caladea)
-// is not part of the app
+// none so far: the symbols come as npm packages (`lucide-static`, `@tabler/icons`, `@phosphor-icons/core`),
+// the test font (Caladea) is not part of the app
 const ASSETS = [];
 
 /**

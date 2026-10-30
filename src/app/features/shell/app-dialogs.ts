@@ -11,6 +11,7 @@ import { OptimizePathDialog } from '../../features/svg-source/optimize-path-dial
 import { ExportDialog } from '../../features/export/export-dialog';
 import { TextPathDialog } from '../../features/tools/text-path-dialog';
 import { SymbolPickerDialog } from '../../features/symbols/symbol-picker-dialog';
+import { SaveSymbolDialog } from '../../features/symbols/save-symbol-dialog';
 import { OffsetDialog } from '../../features/offset/offset-dialog';
 import { FilletDialog } from '../../features/fillet/fillet-dialog';
 import { PatternDialog } from '../../features/pattern/pattern-dialog';
@@ -35,6 +36,7 @@ import { RecoveryDialog } from '../../features/recovery/recovery-dialog';
     ExportDialog,
     TextPathDialog,
     SymbolPickerDialog,
+    SaveSymbolDialog,
     OffsetDialog,
     FilletDialog,
     PatternDialog,
@@ -75,6 +77,9 @@ import { RecoveryDialog } from '../../features/recovery/recovery-dialog';
       }
       @case ('symbolPicker') {
         <app-symbol-picker-dialog />
+      }
+      @case ('saveSymbol') {
+        <app-save-symbol-dialog />
       }
       @case ('transform') {
         <app-transform-dialog />

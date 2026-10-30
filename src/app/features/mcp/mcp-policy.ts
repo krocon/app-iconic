@@ -22,6 +22,11 @@ const DENIED = new Set([
   'mockups.copyPng',
   'mockups.savePng',
   'mockups.background',
+  // own symbols (prompt 084): saving and renaming are fine; deleting cannot be undone and the
+  // folders are file dialogs
+  'symbols.delete',
+  'symbols.import',
+  'symbols.export',
 ]);
 
 /** `null` = allowed, else why not (for the AI's error message). */

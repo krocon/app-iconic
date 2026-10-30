@@ -32,7 +32,7 @@
 | Frontend-Build          | `pnpm build`                                                                                                                                                                                            |
 | KI-Sidecar              | `pnpm mcp:sidecar:dev` (Debug neben der Debug-App), Doku `docs/mcp.md`                                                                                                                                  |
 | Rust                    | `pnpm rust:fmt`, `pnpm rust:lint` (clippy `-D warnings`), `pnpm rust:test` (ganzer Workspace inkl. `ai-core`)                                                                                           |
-| Fixture-Module          | `pnpm fixtures` (neu erzeugen), `pnpm fixtures:check`, `pnpm scripts:test`                                                                                                                              |
+| Fixture-Module          | `pnpm fixtures` (neu erzeugen), `pnpm fixtures:check`, `pnpm scripts:test`; Symbol-Daten `pnpm symbols:data` / `symbols:check` (084)                                                                                                                              |
 | Alles prüfen            | `pnpm check` (+ `pnpm e2e`)                                                                                                                                                                             |
 | Release                 | `pnpm version:set X.Y.Z`, `pnpm release:notes`, `pnpm notices` + `pnpm licenses:report` (nach Abhängigkeitsänderungen!); Pipeline testen: Workflow „Release“ Modus `dry-run` – Ablauf `docs/release.md` |
 | Debug-App ohne Bundle   | `pnpm tauri build --debug --no-bundle` → `src-tauri/target/debug/app-iconic`                                                                                                                            |
@@ -50,6 +50,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/icon-file/         IconFileApi (open/save/new/close .icon, read SVG/Bild, Dialoge), DTOs, findAsset (002, 008)
   app/core/window/            WindowApi (Titel, Fenster, Schließen-Frage, 003)
   app/core/recent/            RecentFilesApi („Open Recent“, 003)
+  app/core/symbols/           SymbolLibraryApi (eigene Symbole, Zuletzt benutzt, Ordner), DTOs (084)
   app/core/recovery/          RecoveryApi (write/list/open/discard der Wiederherstellungs-Schnappschüsse), DTOs (083)
   app/core/actions/           Aktionskatalog (+ action-catalog.de.ts: deutsche Namen, 015; Teile je Bereich in
                               catalog/ + action-def: Typen/Helfer, 033), Keymaps
@@ -127,7 +128,12 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               TextPathService + TextPathDialog, tools-actions, Texte
   app/features/symbols/       Symbole (013): symbol-provider (Plugin-Schnittstelle), symbol-providers (Registry),
                               lucide-provider (Daten lazy aus lucide-static), symbol-search, symbol-grid (rein),
-                              SymbolService (placeSymbol, Einfügen), SymbolPickerDialog
+                              SymbolService (placeSymbol, Einfügen, find), SymbolPickerDialog; 084: node-set-provider
+                              (Tabler/Phosphor aus data/*.json, generiert von scripts/symbol-data.mjs),
+                              my-symbols-provider + symbol-flatten (eigene Symbole → Pfade), symbol-capture (Auswahl →
+                              SVG), SymbolLibraryService (Speichern/Umbenennen/Löschen/Ordner, Zuletzt benutzt),
+                              symbol-picker-model (rein: Sätze, Alle, Zuletzt), SymbolTile, MySymbolsBar,
+                              SaveSymbolDialog, symbol-actions (`symbols.*`)
   app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3, Breiten), Splitter (APG Window
                               Splitter) + panel-width (rein), Texte der Fensterhülle (015); key-contexts (wo die
                               Tastatur ist, aus app.ts, 082)
@@ -225,14 +231,15 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               command-cases.ts, tree-documents.ts, fake-clipboard-api.ts, fake-export-api.ts,
                               fake-font-api.ts (Kästchen-Schrift, gleiche Fehlercodes), fake-drop-api.ts, fake-settings-api.ts
                               (Regeln wie Rust, im Browser-Modus in localStorage), fake-recovery-api.ts (Regeln wie
-                              Rust, im Browser-Modus in localStorage: Reload = Absturz),
+                              Rust, im Browser-Modus in localStorage: Reload = Absturz), fake-symbol-library-api.ts (084),
                               browser-hook.ts = `window.__appIconic` für Playwright)
   testing/fixtures/           generiert aus testdata/ (camscanner.icon, all-fields.icon, svg/, unique-names.json;
                               `pnpm fixtures`)
 e2e/                          Playwright-Tests gegen den Dev-Server (hardening: großes/tiefes SVG, a11y: Tab-Weg,
                               Fokus, Dialoge – 031; composited-shadow: Schatten pixelgleich – 033; export-packages – 078;
                               export-android-web: Favicon hell/dunkel, sichere Zone – 079; png-layer – 080;
-                              mockups: Szenen folgen dem Dokument, Dark-Szene – 081; start-screen – 082; recovery – 083)
+                              mockups: Szenen folgen dem Dokument, Dark-Szene – 081; start-screen – 082; recovery – 083;
+                              symbol-library – 084)
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
@@ -257,6 +264,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/thumbnail_commands.rs   save_thumbnail, recent_entries (Startbildschirm, 082)
   src/recovery_commands.rs    write_recovery, list_recovery, open_recovery, discard_recovery; RecoveryState (Instanz,
                               Angebot einmal je Prozess), release beim regulären Beenden (083)
+  src/symbol_commands.rs      list/save/update/delete_symbol, record_symbol_use, import/export_symbols; SymbolLock (084)
   src/drop_files.rs           DragDrop → `file-drop` ans Fenster, Drop-Pfade in UserPaths, `read_clipboard_image` (071),
                               `copy_png` (078), `copy_scene_png` (081)
   Info.plist, entitlements.plist  macOS: `.icon` als Package-Dokument (Alternate), Hardened-Runtime-Rechte (030)
@@ -269,6 +277,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
                               svg_file (002),
                               image_file (Bild als Data-URL, Magic Bytes, Größe aus dem Kopf, 008)
     src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
+    src/symbols/              eigene Symbol-Bibliothek (084): mod (list/save/update/delete, Ordner-Import/-Export),
+                              clean (Whitelist-Bereinigung mit roxmltree, Grenzen), recent (recent.json)
     src/thumbnails.rs         Vorschaubilder der Recent-Einträge (256 px PNG, FNV-Name, atomar, prune, Data-URL, 082)
     src/recovery/             Wiederherstellungs-Schnappschüsse (083): write (Temp + Tausch, meta.json zuletzt), list,
                               read, adopt, discard, prune; instance (Sperrdatei je Prozess, `try_lock`, Ids)
@@ -374,8 +384,8 @@ THIRD-PARTY-NOTICES.txt       Lizenzen aller ausgelieferten Teile (`pnpm notices
   werden – mit Herkunftsvermerk im Modulkopf und den zugehörigen Tests.
 - Die Vorlage AppIconic (Swift) ist Marcs eigener Code: Algorithmen (Path-Fitting, Pfad-Optimierer, Snapping) dürfen
   nach TypeScript/Rust übertragen werden, mit Herkunftsvermerk.
-- Symbole: **keine SF Symbols** (Lizenz verbietet App-Icons); Lucide (ISC, Teil MIT von Feather) mit Lizenz in
-  `THIRD-PARTY-NOTICES.txt` und im About-Dialog (Prompt 013). Weitere Sets nur mit geprüfter Lizenz.
+- Symbole: **keine SF Symbols** (Lizenz verbietet App-Icons); Lucide (ISC, Teil MIT von Feather), Tabler und Phosphor
+  (MIT, 084) mit Lizenz in `THIRD-PARTY-NOTICES.txt` und im About-Dialog. Weitere Sets nur mit geprüfter Lizenz.
 
 ## 8. Arbeitsumgebung für Claude (Remote-Sitzung)
 

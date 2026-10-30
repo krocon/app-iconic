@@ -130,6 +130,54 @@ impl RecentFileDto {
     }
 }
 
+// ---- prompt 084: the own symbol library (`src/app/core/symbols/symbol-library.models.ts`) ----
+
+/// A symbol of the own library: id (a file stem, never a path), name, tags and the cleaned SVG.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LibrarySymbolDto {
+    pub id: String,
+    pub name: String,
+    pub tags: Vec<String>,
+    pub svg: String,
+}
+
+impl From<ai_core::symbols::LibrarySymbol> for LibrarySymbolDto {
+    fn from(s: ai_core::symbols::LibrarySymbol) -> Self {
+        Self {
+            id: s.id,
+            name: s.name,
+            tags: s.tags,
+            svg: s.svg,
+        }
+    }
+}
+
+/// `list_symbols`: the library and the recently used symbols of every set.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SymbolLibraryDto {
+    pub symbols: Vec<LibrarySymbolDto>,
+    pub recent: Vec<ai_core::symbols::recent::SymbolRef>,
+}
+
+/// `import_symbols`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SymbolImportDto {
+    pub imported: usize,
+    pub skipped: usize,
+    pub full: bool,
+}
+
+/// `export_symbols`: the new folder (a path the user chose a parent of) and the count.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SymbolExportDto {
+    pub folder: String,
+    pub count: usize,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -202,6 +250,45 @@ mod tests {
         assert_eq!(
             serde_json::to_value(e).unwrap(),
             json!({ "path": "/a/b.icon", "name": "b.icon", "location": "/a", "thumbnail": null })
+        );
+    }
+    #[test]
+    fn symbol_dtos_are_camel_case() {
+        let lib = SymbolLibraryDto {
+            symbols: vec![LibrarySymbolDto {
+                id: "star".into(),
+                name: "Star".into(),
+                tags: vec!["shape".into()],
+                svg: "<svg/>".into(),
+            }],
+            recent: vec![ai_core::symbols::recent::SymbolRef {
+                set: "tabler".into(),
+                id: "heart".into(),
+            }],
+        };
+        assert_eq!(
+            serde_json::to_value(&lib).unwrap(),
+            json!({
+                "symbols": [{ "id": "star", "name": "Star", "tags": ["shape"], "svg": "<svg/>" }],
+                "recent": [{ "set": "tabler", "id": "heart" }]
+            })
+        );
+        assert_eq!(
+            serde_json::to_value(SymbolImportDto {
+                imported: 2,
+                skipped: 1,
+                full: false
+            })
+            .unwrap(),
+            json!({ "imported": 2, "skipped": 1, "full": false })
+        );
+        assert_eq!(
+            serde_json::to_value(SymbolExportDto {
+                folder: "/a/AppIconic Symbols".into(),
+                count: 3
+            })
+            .unwrap(),
+            json!({ "folder": "/a/AppIconic Symbols", "count": 3 })
         );
     }
 }

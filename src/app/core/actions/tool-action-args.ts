@@ -48,8 +48,8 @@ export const TEXT_PATH_ARGS: ArgsSpec = {
 export const SYMBOL_ARGS: ArgsSpec = {
   type: 'object',
   properties: {
-    /** Symbol set (`lucide`). */
-    set: { type: 'string', maxLength: 64 },
+    /** Symbol set: `lucide` (default), `tabler`, `phosphor` or `mine` (own symbols, prompt 084). */
+    set: { type: 'string', enum: ['lucide', 'tabler', 'phosphor', 'mine'] },
     /** Symbol id (`heart`); without it the picker opens. */
     id: { type: 'string', maxLength: 128 },
     /** Width and height in document units. */
@@ -62,4 +62,29 @@ export const SYMBOL_ARGS: ArgsSpec = {
     y: COORD,
     ...PLACE,
   },
+};
+
+/** Tags of an own symbol (prompt 084): a list of short words (checked by the handler). */
+const SYMBOL_TAGS: ArgSpec = { type: 'json' };
+const SYMBOL_ID: ArgSpec = { type: 'string', maxLength: 48 };
+const SYMBOL_NAME: ArgSpec = { type: 'string', maxLength: 80 };
+
+/** `symbols.save { name?, tags? }`: without `name` the dialog opens. */
+export const SYMBOL_SAVE_ARGS: ArgsSpec = {
+  type: 'object',
+  properties: { name: SYMBOL_NAME, tags: SYMBOL_TAGS },
+};
+
+/** `symbols.rename { id, name, tags? }` – an own symbol (ids from `find_symbols`, set `mine`). */
+export const SYMBOL_RENAME_ARGS: ArgsSpec = {
+  type: 'object',
+  properties: { id: SYMBOL_ID, name: SYMBOL_NAME, tags: SYMBOL_TAGS },
+  required: ['id', 'name'],
+};
+
+/** `symbols.delete { id }`. */
+export const SYMBOL_DELETE_ARGS: ArgsSpec = {
+  type: 'object',
+  properties: { id: SYMBOL_ID },
+  required: ['id'],
 };

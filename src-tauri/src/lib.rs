@@ -21,6 +21,7 @@
 //! - [`reveal`]        "Show in Finder" for files this process exported (030)
 //! - [`drop_files`]    files dragged onto a window, images from the system clipboard (071)
 //! - [`recovery_commands`] recovery snapshots of unsaved documents: write, offer, restore (083)
+//! - [`symbol_commands`]   the own symbol library and the recently used symbols (084)
 //! - [`thumbnail_commands`] preview images of the recent files for the start screen (082)
 //!
 //! The engine (icon documents, file I/O, export, fonts) lives in the Tauri-free crate
@@ -42,6 +43,7 @@ pub mod recovery_commands;
 pub mod reveal;
 pub mod sessions;
 pub mod settings_commands;
+pub mod symbol_commands;
 pub mod thumbnail_commands;
 pub mod window_commands;
 pub mod windows;
@@ -77,6 +79,7 @@ pub fn run() {
         .manage(reveal::Exported::default())
         .manage(ai_core::user_paths::UserPaths::default())
         .manage(recovery_commands::RecoveryState::default())
+        .manage(symbol_commands::SymbolLock::default())
         .setup(|app| {
             // system fonts for text to path and the PNG export, scanned in the background
             font_commands::warm_up();
@@ -147,6 +150,13 @@ pub fn run() {
             recovery_commands::list_recovery,
             recovery_commands::open_recovery,
             recovery_commands::discard_recovery,
+            symbol_commands::list_symbols,
+            symbol_commands::save_symbol,
+            symbol_commands::update_symbol,
+            symbol_commands::delete_symbol,
+            symbol_commands::record_symbol_use,
+            symbol_commands::import_symbols,
+            symbol_commands::export_symbols,
             window_commands::set_window_title,
             window_commands::open_document_window,
             window_commands::focus_document_window,

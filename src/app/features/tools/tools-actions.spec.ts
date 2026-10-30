@@ -153,15 +153,16 @@ describe('tool actions (design 013)', () => {
     expect(store.undoLabel()).toBe('Undo Add Symbol');
   });
 
-  it('an unknown symbol or set is a notice', async () => {
+  it('an unknown symbol is a notice, an unknown set is refused by the arguments (084)', async () => {
     await TestBed.inject(SymbolService).providers[0].load();
     actions.run('add.symbol', { id: 'no-such-symbol' });
     for (let i = 0; i < 20 && !notice(); i++) await flush();
     expect(notice()).toBe('There is no such symbol.');
     TestBed.inject(FilesService).notice.set(null);
-    actions.run('add.symbol', { id: 'heart', set: 'sf-symbols' });
+    // the sets are an enum of the arguments: the AI learns them from list_actions
+    expect(actions.run('add.symbol', { id: 'heart', set: 'sf-symbols' })).toBe(false);
     await flush();
-    expect(notice()).toBe('There is no such symbol.');
+    expect(notice()).toBeNull();
   });
 });
 

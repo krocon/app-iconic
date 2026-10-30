@@ -7,7 +7,9 @@ import { BLACK, buildElement, ElementSpec } from '../commands/element-defaults';
 import { FilesService } from '../files/files.service';
 import { TOOLS_TEXTS } from '../tools/tools-texts';
 import { SYMBOL_PROVIDERS } from './symbol-providers';
-import { SymbolProvider, SymbolSvg } from './symbol-provider';
+import { SymbolInfo, SymbolProvider, SymbolSvg } from './symbol-provider';
+import { SymbolLibraryService } from './symbol-library.service';
+import { searchSymbols } from './symbol-search';
 
 const T = TOOLS_TEXTS.symbol;
 
@@ -49,18 +51,51 @@ export function placeSymbol(svg: SymbolSvg, p: SymbolPlacement): ElementSpec {
   };
 }
 
+/** A match of a search over several sets (prompt 084). */
+export type SetSymbol = SymbolInfo & { set: string };
+
+/** Every symbol of `providers` (loaded ones) with its set, for the search over all sets. */
+export function allSymbols(providers: readonly SymbolProvider[]): SetSymbol[] {
+  return providers.flatMap((p) => p.all().map((i) => ({ ...i, set: p.id })));
+}
+
 /**
- * Symbols (design 013 E15–E21): the providers, the last choice of the session, the picker and
- * the insertion – one undo step "Add Symbol" at the place of design 008 E2.
+ * Symbols (design 013 E15–E21, 084): the providers (the sets of the app and "My Symbols"), the last
+ * choice of the session, the picker, the recently used ones and the insertion – one undo step
+ * "Add Symbol" at the place of design 008 E2.
  */
 @Injectable({ providedIn: 'root' })
 export class SymbolService {
   private readonly add = inject(AddService);
   private readonly files = inject(FilesService);
   private readonly dialogs = inject(DialogService);
-  readonly providers = SYMBOL_PROVIDERS;
+  readonly library = inject(SymbolLibraryService);
+  readonly providers: readonly SymbolProvider[] = [...SYMBOL_PROVIDERS, this.library.mine];
   /** Last choice of the session (design 013 E20; persistent with prompt 015). */
   readonly last = signal({ set: SYMBOL_PROVIDERS[0].id, query: '', size: SYMBOL_SIZE, weight: 2 });
+
+  /**
+   * The AI's `find_symbols { query?, set?, limit }` (prompt 084): matches over one or every set
+   * (each loaded on demand); an empty query = the recently used symbols.
+   */
+  async find(query: string, set: string | undefined, limit: number): Promise<SetSymbol[]> {
+    const sets = set ? this.providers.filter((p) => p.id === set) : this.providers;
+    await this.library.refresh();
+    await Promise.all(sets.map((p) => p.load().catch(() => undefined)));
+    if (!query.trim()) {
+      return this.library
+        .recent()
+        .filter((r) => sets.some((p) => p.id === r.set))
+        .flatMap((r) => {
+          const info = this.provider(r.set)
+            ?.all()
+            .find((i) => i.id === r.id);
+          return info ? [{ ...info, set: r.set }] : [];
+        })
+        .slice(0, limit);
+    }
+    return searchSymbols(allSymbols(sets), query, limit).items;
+  }
 
   provider(id: string | undefined): SymbolProvider | null {
     return this.providers.find((p) => p.id === (id ?? this.providers[0].id)) ?? null;
@@ -108,9 +143,14 @@ export class SymbolService {
     const size = o.size ?? SYMBOL_SIZE;
     const place = { parent: o.args?.['parent'], index: o.args?.['index'] };
     const args = Object.fromEntries(Object.entries(place).filter(([, v]) => v !== undefined));
-    return this.add.insertBuilt('addSymbol', args, (c) => {
-      const center = { x: o.x ?? c.x, y: o.y ?? c.y };
-      return [buildElement(placeSymbol(svg, { size, center, stroke: o.stroke }))];
-    });
+    return this.add
+      .insertBuilt('addSymbol', args, (c) => {
+        const center = { x: o.x ?? c.x, y: o.y ?? c.y };
+        return [buildElement(placeSymbol(svg, { size, center, stroke: o.stroke }))];
+      })
+      .then((ok) => {
+        if (ok) void this.library.recordUse({ set: provider.id, id });
+        return ok;
+      });
   }
 }

@@ -46,11 +46,6 @@
     outline-offset: -2px;
     background: var(--color-selection);
   }
-
-  svg {
-    width: 60%;
-    height: 60%;
-  }
 }
 
 .note {

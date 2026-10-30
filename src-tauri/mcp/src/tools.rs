@@ -11,6 +11,9 @@ pub const SVG_CHARS_DEFAULT: u64 = 20_000;
 /// Largest `max_nodes` of `get_tree` and its default.
 pub const TREE_NODES_MAX: u64 = 5_000;
 pub const TREE_NODES_DEFAULT: u64 = 500;
+/// Most matches of `find_symbols` (prompt 084) and its default.
+pub const SYMBOLS_MAX: u64 = 200;
+pub const SYMBOLS_DEFAULT: u64 = 40;
 /// Preview sizes (pixels, square) and the default.
 pub const PREVIEW_MIN: u64 = 16;
 pub const PREVIEW_MAX: u64 = 1024;
@@ -185,6 +188,17 @@ pub fn list() -> Vec<Value> {
             &["action"],
         ),
         tool(
+            "find_symbols",
+            "Searches the symbol sets of the picker (lucide, tabler, phosphor and the user's own symbols \"mine\") by name and tags; answers {set, id, name} to insert with run_action add.symbol {set, id, size?, weight?, stroke?, x?, y?}. Empty query = recently used symbols.",
+            json!({
+                "id": id(),
+                "query": {"type": "string", "maxLength": 200},
+                "set": {"type": "string", "enum": ["lucide", "tabler", "phosphor", "mine"]},
+                "limit": {"type": "integer", "minimum": 1, "maximum": SYMBOLS_MAX}
+            }),
+            &[],
+        ),
+        tool(
             "insert_svg",
             "Inserts SVG markup (one element, several, or a whole <svg>) like the SVG Snippet command – cleaned, centred unless it has a transform, into `parent` (a container node ref) or the current target. One undo step.",
             json!({
@@ -285,7 +299,7 @@ mod tests {
     #[test]
     fn every_tool_has_a_unique_name_a_description_and_an_object_schema() {
         let names = names();
-        assert_eq!(names.len(), 19);
+        assert_eq!(names.len(), 20);
         let mut sorted = names.clone();
         sorted.sort();
         sorted.dedup();

@@ -153,6 +153,8 @@
 - [x] Freehand mit RDP + Glättung, offen/geschlossen, Live-Vorschau, Esc (013; Werkzeug-Modus, Optionen Glättung/Strichbreite, `C`, Auto-Schließen, `add.freehand { points }` für die KI)
 - [x] Text to Path mit Systemschriften (Rust, fontdb) (013; harfrust-Shaping + skrifa-Umrisse, Dialog mit Vorschau, fehlende Glyphen → Fehler)
 - [x] Symbol-Picker mit freiem Icon-Set, Suche, Gewicht/Größe, Plugin-Schnittstelle (013; Lucide ISC, Daten lazy, Lizenz in THIRD-PARTY-NOTICES.txt und About)
+- [x] Weitere Symbol-Sets Tabler (Outline) und Phosphor (regular), Suche über alle Sätze, „Zuletzt benutzt“ (084; MIT, Daten lazy, Lizenz in Notices und About)
+- [x] Eigene Symbol-Bibliothek: „Als Symbol speichern…“ (Name, Schlagwörter), „Meine Symbole“ mit Umbenennen/Löschen, Ordner importieren/exportieren (084; Rust bereinigt beim Speichern und Laden)
 
 ## 6. Hierarchie
 

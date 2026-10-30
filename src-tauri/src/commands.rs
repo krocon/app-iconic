@@ -235,7 +235,7 @@ impl RecentLock {
     }
 }
 
-/// The app config directory (`recent.json`, `settings.json`, `thumbnails/`).
+/// The app config directory (`recent.json`, `settings.json`, `thumbnails/`, `symbols/`).
 pub(crate) fn config_dir(app: &AppHandle) -> Result<PathBuf, FsError> {
     app.path()
         .app_config_dir()
@@ -370,6 +370,10 @@ mod path_rules {
             (
                 include_str!("recovery_commands.rs"),
                 &["write_recovery"][..],
+            ),
+            (
+                include_str!("symbol_commands.rs"),
+                &["import_symbols", "export_symbols"][..],
             ),
         ] {
             for name in names {
