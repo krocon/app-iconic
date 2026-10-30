@@ -18,6 +18,7 @@ import { ClipPathSection } from '../clip/clip-path-section';
 import { AlignSection } from '../align/align-section';
 import { GradientSection } from '../gradient/gradient-section';
 import { ColorsSection } from '../color/colors-section';
+import { EffectsSection } from '../effects/effects-section';
 
 /**
  * The properties panel (design 009 E9): header with the kind of the selection and "Reset All…"
@@ -35,6 +36,7 @@ import { ColorsSection } from '../color/colors-section';
     GradientSection,
     ClipPathSection,
     ColorsSection,
+    EffectsSection,
     IconInspector,
     PropertyRow,
     TransformEditor,
@@ -124,6 +126,7 @@ import { ColorsSection } from '../color/colors-section';
       <app-align-section />
       <app-gradient-section />
       <app-clip-path-section />
+      <app-effects-section />
       <app-colors-section />
       @if (actions.enabled('edit.editSvg') || actions.enabled('path.optimize')) {
         <div class="source-tools">

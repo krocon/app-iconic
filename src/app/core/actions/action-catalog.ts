@@ -463,6 +463,47 @@ export const ACTIONS: readonly ActionDef[] = [
   ADD('sketch.toggleConstructionMode', 'Draw as Construction'),
   // live fills (prompt 060)
   ADD('fill.tool', 'Fill Tool'),
+  // effects and masks (prompt 076)
+  ...(['effect.add', 'effect.set', 'effect.remove'] as const).map((id) =>
+    EDIT(
+      id,
+      { 'effect.add': 'Add Effect', 'effect.set': 'Set Effect', 'effect.remove': 'Remove Effect' }[
+        id
+      ],
+      {
+        palette: false,
+        args: {
+          type: 'object',
+          required: ['kind'],
+          properties: {
+            kind: { type: 'string', enum: ['dropShadow', 'innerShadow', 'blur'] },
+            node: { type: 'json' },
+            on: { type: 'boolean' },
+            color: { type: 'string', maxLength: 16 },
+            opacity: { type: 'number', minimum: 0, maximum: 1 },
+            dx: { type: 'number', minimum: -1000, maximum: 1000 },
+            dy: { type: 'number', minimum: -1000, maximum: 1000 },
+            radius: { type: 'number', minimum: 0, maximum: 500 },
+          },
+        },
+      },
+    ),
+  ),
+  EDIT('mask.create', 'Create Mask'),
+  EDIT('mask.release', 'Release Mask', {
+    args: { type: 'object', properties: { node: { type: 'json' } } },
+  }),
+  EDIT('mask.type', 'Mask Type', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['type'],
+      properties: {
+        type: { type: 'string', enum: ['luminance', 'alpha'] },
+        node: { type: 'json' },
+      },
+    },
+  }),
   // live typography (prompt 075)
   ADD('text.tool', 'Text Tool'),
   EDIT('text.edit', 'Edit Text'),

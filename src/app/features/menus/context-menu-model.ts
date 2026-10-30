@@ -82,6 +82,8 @@ export function contextMenuFor(target: ContextTarget): ContextEntry[] {
         a('edit.toggleVisibility'),
         sep(a('path.convert')),
         a('text.toPath'),
+        a('mask.create'),
+        a('mask.release'),
         {
           id: 'submenu:pathfinder',
           label: t.pathfinder,

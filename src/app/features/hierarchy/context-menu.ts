@@ -172,11 +172,21 @@ export class ContextMenu {
   protected readonly resolved = computed(() => this.entries().map((e) => this.resolve(e)));
 
   /** Kept inside the window (an estimate before the size is known; corrected after render). */
-  protected readonly x = computed(() => Math.max(0, Math.min(this.at().x, innerWidth - 220)));
-  protected readonly y = computed(() => Math.max(0, Math.min(this.at().y, innerHeight - 320)));
+  /** The measured size once rendered (a long menu moves up so that all of it is in the window). */
+  private readonly size = signal<{ w: number; h: number }>({ w: 220, h: 320 });
+  protected readonly x = computed(() =>
+    Math.max(0, Math.min(this.at().x, innerWidth - this.size().w - 4)),
+  );
+  protected readonly y = computed(() =>
+    Math.max(0, Math.min(this.at().y, innerHeight - this.size().h - 4)),
+  );
 
   constructor() {
-    afterNextRender(() => this.items()[0]?.focus());
+    afterNextRender(() => {
+      const r = this.host.nativeElement.querySelector(':scope > ul')?.getBoundingClientRect();
+      if (r && r.height) this.size.set({ w: r.width, h: r.height });
+      this.items()[0]?.focus();
+    });
   }
 
   /** The items of the top menu (not of the submenu). */

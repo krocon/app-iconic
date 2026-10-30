@@ -165,3 +165,9 @@
 1. **Mac**: Text per Doppelklick bearbeiten mit japanischer IME (Kandidatenfenster) – sitzt das Feld richtig?
 2. Verschachtelte `tspan`s (ein farbiges Wort) gehen beim Bearbeiten in der Zeile auf – reicht das, oder soll das
    Bearbeiten dann gesperrt sein (nur „SVG bearbeiten …“)?
+
+## Prompt 076
+
+1. Masken bearbeiten: reicht „lösen – ändern – wieder maskieren“ (plus Auswahl im Baum unter „Definitionen“), oder
+   soll es einen Bearbeitungsmodus wie bei Clip Paths geben?
+2. `mix-blend-mode` an einzelnen SVG-Elementen (nur als CSS-Stil möglich, Icon Composer ignoriert es) – gewünscht?

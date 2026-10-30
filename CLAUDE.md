@@ -128,6 +128,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/color/         Farb-Workflow (074): document-colors (rein: sammeln, replaceColorCommand), ColorLibrary
                               (Swatches: Dokument/Zuletzt/Palette), Eyedropper (Werkzeug ⇧I, resvg-Pixel), color-actions
                               (`color.*`), ColorsSection (Dokumentfarben im Panel), Texte
+  app/features/effects/       Effekte und Masken (076): effect-model + mask-model (rein: Filter aus `data-effects`,
+                              Masken erstellen/lösen), EffectsService (Geste), EffectsSection (Panel), effects-actions
+                              (`effect.*`, `mask.*`), Texte
   app/features/text/          Live-Typografie (075): text-lines (rein: Zeilen, tspans, textSetCommand), TextEdit +
                               TextEditOverlay (Bearbeiten auf der Zeichenfläche), TextTool (⇧T), text-to-path (rein) +
                               TextToPathService (`text.toPath`), text-actions (`text.*`), Texte

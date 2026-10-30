@@ -8,17 +8,27 @@ import { rewriteReferences } from '../document/svg/svg-references';
  */
 
 const isClip = (e: Element) => e.localName === 'clipPath';
+/** Definitions that go along like clips (prompt 076: masks and effect filters). */
+const OWNED = new Set(['clipPath', 'mask', 'filter']);
+const urlRef = (v: string | null) => /^\s*url\(\s*['"]?#([^'")\s]+)/.exec(v ?? '')?.[1] ?? null;
 
-/** The `<clipPath>`s of `root` that the subtrees of `els` refer to but that lie outside all of them. */
+/**
+ * The `<clipPath>`s, `<mask>`s and `<filter>`s of `root` that the subtrees of `els` refer to but
+ * that lie outside all of them (prompt 076 extends 014 E10 to masks and effects).
+ */
 export function outsideClips(els: readonly Element[], root: Element): Element[] {
   const ids = new Set<string>();
   for (const el of els) {
     for (const e of elementsOf(el)) {
-      const id = clipIdOf(e);
-      if (id) ids.add(id);
+      for (const id of [
+        clipIdOf(e),
+        urlRef(e.getAttribute('mask')),
+        urlRef(e.getAttribute('filter')),
+      ])
+        if (id) ids.add(id);
     }
   }
-  const all = elementsOf(root).filter(isClip);
+  const all = elementsOf(root).filter((e) => OWNED.has(e.localName));
   return all.filter((c) => {
     const id = c.getAttribute('id');
     return !!id && ids.has(id) && !els.some((el) => el.contains(c));

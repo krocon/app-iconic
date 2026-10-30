@@ -271,6 +271,94 @@ mod tests {
         assert!(has_transparency(&p));
     }
 
+    /// The filter the effects panel writes (prompt 076, `effect-model.ts` `filterMarkup`).
+    fn effect_filter(primitives: &str) -> String {
+        format!(
+            r##"<defs><filter id="fx" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">{primitives}</filter></defs>"##
+        )
+    }
+
+    #[test]
+    fn a_drop_shadow_paints_beside_the_shape() {
+        let svg = icon(&format!(
+            r##"{}<rect x="256" y="256" width="256" height="256" fill="#ff0000" filter="url(#fx)"/>"##,
+            effect_filter(
+                r##"<feDropShadow in="SourceGraphic" dx="200" dy="200" stdDeviation="1" flood-color="#0000ff" flood-opacity="1"/>"##
+            )
+        ));
+        let p = render_png(&svg, 64, empty_fonts()).unwrap();
+        // the shape stays red, the shadow (offset 200 → 12.5 px at 64) is blue
+        assert!(
+            close(rgba(&p, 24, 24), [255, 0, 0, 255]),
+            "{:?}",
+            rgba(&p, 24, 24)
+        );
+        assert!(
+            close(rgba(&p, 38, 38), [0, 0, 255, 255]),
+            "{:?}",
+            rgba(&p, 38, 38)
+        );
+        assert_eq!(rgba(&p, 4, 4)[3], 0);
+    }
+
+    #[test]
+    fn a_blur_softens_the_edge() {
+        let svg = icon(&format!(
+            r##"{}<rect x="256" y="256" width="512" height="512" fill="#000000" filter="url(#fx)"/>"##,
+            effect_filter(r##"<feGaussianBlur in="SourceGraphic" stdDeviation="64"/>"##)
+        ));
+        let p = render_png(&svg, 64, empty_fonts()).unwrap();
+        // the edge (x = 16 px) half covered, the middle solid, outside a soft rim
+        let edge = rgba(&p, 16, 32)[3];
+        assert!((90..=170).contains(&edge), "{edge}");
+        assert!(rgba(&p, 32, 32)[3] > 240);
+        assert!(rgba(&p, 12, 32)[3] > 0);
+    }
+
+    #[test]
+    fn an_inner_shadow_stays_inside() {
+        let svg = icon(&format!(
+            r##"{}<rect x="256" y="256" width="512" height="512" fill="#ffffff" filter="url(#fx)"/>"##,
+            effect_filter(
+                r##"<feOffset in="SourceAlpha" dx="0" dy="128" result="fx-io"/><feGaussianBlur in="fx-io" stdDeviation="0" result="fx-ib"/><feComposite in="SourceAlpha" in2="fx-ib" operator="arithmetic" k2="1" k3="-1" result="fx-ii"/><feFlood flood-color="#000000" flood-opacity="1" result="fx-if"/><feComposite in="fx-if" in2="fx-ii" operator="in" result="fx-is"/><feComposite in="fx-is" in2="SourceGraphic" operator="over"/>"##
+            )
+        ));
+        let p = render_png(&svg, 64, empty_fonts()).unwrap();
+        // the top band (y 16…24 px) is shadow, below white, outside nothing
+        assert!(
+            close(rgba(&p, 32, 18), [0, 0, 0, 255]),
+            "{:?}",
+            rgba(&p, 32, 18)
+        );
+        assert!(
+            close(rgba(&p, 32, 40), [255, 255, 255, 255]),
+            "{:?}",
+            rgba(&p, 32, 40)
+        );
+        assert_eq!(rgba(&p, 32, 4)[3], 0);
+    }
+
+    #[test]
+    fn a_luminance_and_an_alpha_mask() {
+        let masked = |kind: &str, fill: &str| {
+            icon(&format!(
+                r##"<defs><mask id="m" mask-type="{kind}"><rect width="512" height="1024" fill="{fill}"/></mask></defs><g mask="url(#m)"><rect width="1024" height="1024" fill="#00ff00"/></g>"##
+            ))
+        };
+        let lum = render_png(&masked("luminance", "#ffffff"), 64, empty_fonts()).unwrap();
+        assert!(close(rgba(&lum, 16, 32), [0, 255, 0, 255]));
+        assert_eq!(rgba(&lum, 48, 32)[3], 0);
+        // black: invisible as luminance, opaque as alpha
+        let dark = render_png(&masked("luminance", "#000000"), 64, empty_fonts()).unwrap();
+        assert_eq!(rgba(&dark, 16, 32)[3], 0);
+        let alpha = render_png(&masked("alpha", "#000000"), 64, empty_fonts()).unwrap();
+        assert!(
+            close(rgba(&alpha, 16, 32), [0, 255, 0, 255]),
+            "{:?}",
+            rgba(&alpha, 16, 32)
+        );
+    }
+
     #[test]
     fn eight_digit_hex_alpha_is_half_transparent() {
         // the colour popover writes alpha as #RRGGBBAA (prompt 074 E1)

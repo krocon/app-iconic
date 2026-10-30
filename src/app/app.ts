@@ -1,3 +1,5 @@
+import { registerEffectsActions } from './features/effects/effects-actions';
+import { EffectsService } from './features/effects/effects.service';
 import { registerTextActions } from './features/text/text-actions';
 import { TextTool } from './features/text/text-tool';
 import { TextEdit } from './features/text/text-edit';
@@ -296,6 +298,7 @@ export class App implements OnInit {
       },
       this.destroyRef,
     );
+    registerEffectsActions(this.actions, inject(EffectsService), this.destroyRef);
     // files from Finder/Explorer (design 071)
     inject(FileDropService).start(this.destroyRef);
     const canvasTools = inject(CanvasTools);
