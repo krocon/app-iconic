@@ -1,4 +1,4 @@
-import { DestroyRef, inject, Injectable } from '@angular/core';
+import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { ActionContext } from './action-catalog';
 import { ActionService } from './action.service';
 import { chordOf } from './shortcut';
@@ -50,6 +50,44 @@ export class KeyboardDispatcher {
   private readonly held = new Map<string, string>();
   /** Alt pressed and released alone (Windows/Linux) focuses the menu bar. */
   private altAlone = false;
+  /** Recording a new shortcut (design 085 E4): no action runs, the chord goes here. */
+  private sink: ((chord: string | null) => void) | null = null;
+  /** A shortcut is being recorded (the native menu drops its accelerators meanwhile). */
+  readonly recording = signal(false);
+
+  /**
+   * Starts recording (design 085 E4): until the returned function is called, keys run no
+   * action; the recording field hands its key events to {@link capture}, which gives `sink` the
+   * chord – or `null` for Esc (cancel). A newer recording replaces an older one.
+   */
+  record(sink: (chord: string | null) => void): () => void {
+    this.sink = sink;
+    this.recording.set(true);
+    this.releaseAll();
+    return () => {
+      if (this.sink !== sink) return;
+      this.sink = null;
+      this.recording.set(false);
+    };
+  }
+
+  /**
+   * A key event of the recording field: the key is taken (no default, no bubbling – Esc does not
+   * close the dialog, Tab does not move the focus). Lone modifiers and repeats are ignored.
+   */
+  capture(e: KeyboardEvent): void {
+    const sink = this.sink;
+    if (!sink) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.repeat || e.isComposing) return;
+    if (e.key === 'Escape' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+      sink(null);
+      return;
+    }
+    const chord = chordOf(e, this.actions.os);
+    if (chord) sink(chord);
+  }
 
   setContextProvider(p: ContextProvider): void {
     this.provider = p;
@@ -86,6 +124,10 @@ export class KeyboardDispatcher {
   }
 
   keyup(e: KeyboardEvent): void {
+    if (this.sink) {
+      this.altAlone = false;
+      return;
+    }
     const id = this.held.get(e.key);
     if (id) {
       this.held.delete(e.key);
@@ -108,6 +150,11 @@ export class KeyboardDispatcher {
   }
 
   handle(e: KeyboardEvent): void {
+    // recording a shortcut: no key runs an action (design 085 E4)
+    if (this.sink) {
+      this.altAlone = false;
+      return;
+    }
     this.altAlone = e.key === 'Alt' && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.repeat;
     if (e.defaultPrevented || e.isComposing) return;
     if (this.held.has(e.key)) {

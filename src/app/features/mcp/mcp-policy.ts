@@ -4,7 +4,8 @@
  * clipboard, keyboard-only actions and AI control itself are not for the AI. Pure.
  */
 
-const DENIED_PREFIXES = ['file.', 'hierarchy.', 'mcp.'];
+// shortcuts belong to the user (prompt 085), like AI control itself
+const DENIED_PREFIXES = ['file.', 'hierarchy.', 'mcp.', 'keymap.'];
 
 const DENIED = new Set([
   'app.quit',

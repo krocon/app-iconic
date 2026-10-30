@@ -258,3 +258,11 @@
    oder sollen Verläufe (mit eigenen `defs`) mit?
 3. **Mac/Windows**: Bibliothek unter `~/Library/Application Support/io.github.krocon.appiconic/symbols` bzw.
    `%APPDATA%\…\symbols` – Import/Export eines Ordners mit dem nativen Dialog prüfen.
+
+## Prompt 085
+
+1. **Mac**: Kürzel aufnehmen, die das native Menü kennt (z. B. ⌘S, ⇧⌘P): während der Aufnahme schickt das Fenster eine
+   Menü-Spec ohne Accelerators – fängt das Menü die Taste trotzdem ab (Neuaufbau nach 150 ms)?
+2. Gesperrt vs. gewarnt: ⌘Q/⌘H/⌘M gesperrt, ⌘W/⌘, und andere Standardkürzel nur gewarnt – passt das?
+3. Esc beendet die Aufnahme; Esc selbst lässt sich daher nicht als neues Kürzel aufnehmen (nur über `keymap.json` bzw.
+   Zurücksetzen). Ok?

@@ -1,6 +1,7 @@
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { language } from '../i18n/i18n';
 import { KeymapApi } from '../menu/menu-api';
+import { KeymapOverrides } from '../menu/menu.models';
 import { ACTION_LABELS_DE } from './action-catalog.de';
 import { checkArgs, ArgsSpec } from './action-args';
 import { ActionContext, actionDef, ActionDef, ActionGroup, ACTIONS } from './action-catalog';
@@ -54,19 +55,35 @@ export class ActionService {
   /** Bumped on every (un)registration – menus and palette recompute. */
   private readonly version = signal(0);
   readonly keymap = signal<Keymap>(buildKeymap(this.os));
+  /** The `bindings` of `keymap.json` the keymap was built with. */
+  readonly overrides = signal<Readonly<Record<string, string[]>>>({});
+  private listening = false;
 
-  /** Loads `keymap.json` (design 005 E14); problems go to the console only. */
+  /**
+   * Loads `keymap.json` (design 005 E14) and follows changes made in any window (`keymap-changed`,
+   * design 085 E3); problems go to the console only.
+   */
   async loadOverrides(): Promise<void> {
+    if (this.keymapApi && !this.listening) {
+      this.listening = true;
+      void this.keymapApi.onChanged((o) => this.applyOverrides(o)).catch(() => undefined);
+    }
     try {
       const o = await this.keymapApi?.loadOverrides();
       if (!o) return;
-      const k = buildKeymap(this.os, o.bindings);
-      k.notes.forEach((n) => console.warn(n));
       if (o.warning) console.warn('keymap.json', o.warning.code, o.warning.path);
-      this.keymap.set(k);
+      this.applyOverrides(o);
     } catch {
       // no backend (browser) or unreadable: the defaults stay
     }
+  }
+
+  /** Rebuilds the keymap from `keymap.json` (menus, tooltips and keys follow at once). */
+  applyOverrides(o: Pick<KeymapOverrides, 'bindings'>): void {
+    const k = buildKeymap(this.os, o.bindings);
+    k.notes.forEach((n) => console.warn(n));
+    this.overrides.set(o.bindings);
+    this.keymap.set(k);
   }
 
   register(id: string, handler: ActionHandler, destroyRef?: DestroyRef): () => void {

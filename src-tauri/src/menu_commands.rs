@@ -65,6 +65,27 @@ pub async fn load_keymap_overrides(
     blocking(move || Ok(ai_core::keymap_file::load(&dir))).await
 }
 
+/// Event to every window after the shortcuts changed (payload `KeymapOverrides`, design 085 E3).
+pub const KEYMAP_CHANGED: &str = "keymap-changed";
+
+/// The shortcut editor's patch (design 085 E2/E3): written to `<app config>/keymap.json` – the
+/// path is the app's own, none comes from the WebView – then every window rebuilds its keymap
+/// (and with it the native menu's accelerators, design 005 E6).
+#[tauri::command]
+pub async fn save_keymap(
+    app: AppHandle,
+    changes: ai_core::keymap_file::KeymapChanges,
+) -> Result<ai_core::keymap_file::KeymapOverrides, FsError> {
+    use tauri::Emitter;
+    let dir = app
+        .path()
+        .app_config_dir()
+        .map_err(|e| FsError::new(FsErrorCode::Io, e.to_string(), None))?;
+    let saved = blocking(move || ai_core::keymap_file::save(&dir, &changes)).await?;
+    let _ = app.emit(KEYMAP_CHANGED, saved.clone());
+    Ok(saved)
+}
+
 /// Quit (design 005 E13): asks every window about unsaved changes, one after the other.
 #[tauri::command]
 pub async fn quit_app(app: AppHandle) -> Result<(), FsError> {
@@ -155,6 +176,6 @@ mod command_rules {
                 count += 1;
             }
         }
-        assert_eq!(count, 4);
+        assert_eq!(count, 5);
     }
 }

@@ -169,7 +169,7 @@ describe('App', () => {
     await fixture.whenStable();
     const dialog = el.querySelector('[role="dialog"]')!;
     expect(dialog.querySelector('h2')?.textContent).toBe('Keyboard Shortcuts');
-    const heads = [...dialog.querySelectorAll('th')].map((h) => h.textContent);
+    const heads = [...dialog.querySelectorAll('h3')].map((h) => h.textContent);
     expect(heads.slice(0, 3)).toEqual(['File', 'Edit', 'View']);
     expect(dialog.textContent).toContain('Ctrl+Shift+N');
   });

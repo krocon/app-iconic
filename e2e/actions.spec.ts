@@ -90,9 +90,10 @@ test('Undo in the Edit menu names the action; Keyboard Shortcuts lists the chord
   await page.keyboard.press('Escape');
   await menu(page, 'Help', 'Keyboard Shortcuts');
   const dialog = page.getByRole('dialog', { name: 'Keyboard Shortcuts' });
-  await expect(dialog.getByRole('row', { name: /Import SVG…/ })).toContainText('Ctrl+Shift+I');
+  // one line per action (prompt 085: rows of the shortcut editor)
+  await expect(dialog.locator('[data-action="file.importSvg"]')).toContainText('Ctrl+Shift+I');
   await dialog.getByRole('searchbox').fill('zoom in');
-  await expect(dialog.getByRole('row').filter({ hasText: 'Zoom In' })).toContainText('Ctrl+=');
+  await expect(dialog.locator('[data-action="view.zoomIn"]')).toContainText('Ctrl+=');
 });
 
 test('the AI path: actions with arguments and serialised commands (design 005 E15)', async ({

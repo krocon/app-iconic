@@ -166,6 +166,7 @@ pub fn run() {
             window_commands::window_start_action,
             menu_commands::set_app_menu,
             menu_commands::load_keymap_overrides,
+            menu_commands::save_keymap,
             menu_commands::quit_app,
             menu_commands::cancel_quit,
             export_commands::pick_export_dir,

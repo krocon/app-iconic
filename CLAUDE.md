@@ -32,7 +32,7 @@
 | Frontend-Build          | `pnpm build`                                                                                                                                                                                            |
 | KI-Sidecar              | `pnpm mcp:sidecar:dev` (Debug neben der Debug-App), Doku `docs/mcp.md`                                                                                                                                  |
 | Rust                    | `pnpm rust:fmt`, `pnpm rust:lint` (clippy `-D warnings`), `pnpm rust:test` (ganzer Workspace inkl. `ai-core`)                                                                                           |
-| Fixture-Module          | `pnpm fixtures` (neu erzeugen), `pnpm fixtures:check`, `pnpm scripts:test`; Symbol-Daten `pnpm symbols:data` / `symbols:check` (084)                                                                                                                              |
+| Fixture-Module          | `pnpm fixtures` (neu erzeugen), `pnpm fixtures:check`, `pnpm scripts:test`; Symbol-Daten `pnpm symbols:data` / `symbols:check` (084)                                                                    |
 | Alles prüfen            | `pnpm check` (+ `pnpm e2e`)                                                                                                                                                                             |
 | Release                 | `pnpm version:set X.Y.Z`, `pnpm release:notes`, `pnpm notices` + `pnpm licenses:report` (nach Abhängigkeitsänderungen!); Pipeline testen: Workflow „Release“ Modus `dry-run` – Ablauf `docs/release.md` |
 | Debug-App ohne Bundle   | `pnpm tauri build --debug --no-bundle` → `src-tauri/target/debug/app-iconic`                                                                                                                            |
@@ -58,8 +58,10 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               KeyboardDispatcher (einziger keydown-Listener), shortcut, action-args (005),
                               add-action-args (Schema der Add-Argumente, 008), export-action-args (012),
                               tool-action-args (Freehand/Text to Path/Symbol, 013), clip-action-args (014),
-                              sketch-action-args (019)
-  app/core/menu/              MenuApi (natives Menü, menu-action), KeymapApi (keymap.json), MenuSpec (005)
+                              sketch-action-args (019); keymap-edit (rein: Kürzel je Aktion ändern, Konflikte,
+                              Abweichungen → Patch) + reserved-shortcuts (System-Kürzel je OS mit Quelle, 085)
+  app/core/menu/              MenuApi (natives Menü, menu-action), KeymapApi (keymap.json laden/speichern,
+                              keymap-changed, 085), MenuSpec (005)
   app/core/clipboard/         ClipboardApi (Text der System-Zwischenablage über navigator.clipboard, 006; Bild:
                               readImage über Rust/arboard, imageFromBlob, 071)
   app/core/drop/              DropApi (`file-drop`: Dateien aus Finder/Explorer, 071), DTOs
@@ -85,7 +87,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               Typ-Weiche), FileDropService + DropHint (abgelegte Dateien, 071); file-questions
                               (Fragen: Änderungen sichern?, Format, Hinweis – 083)
   app/features/menus/         Menümodell (rein), MenuService (nativ/HTML), MenuBar (Windows/Linux), Befehlspalette,
-                              Kürzel-Dialog, app-actions (005); context-menu-model (Kontextmenüs Baum + Canvas, 070)
+                              Kürzel-Dialog, app-actions (005); context-menu-model (Kontextmenüs Baum + Canvas, 070);
+                              Kürzel-Editor (085): KeymapEditor (sofort anwenden, speichern), shortcuts-model (rein:
+                              Zeilen, Filter), ShortcutRow (Aufnahme, Konflikt), keymap-actions (`keymap.*`)
   app/features/hierarchy/     Ebenenbaum (006): hierarchy-model (Baum rein aus dem Dokument, vorderste oben +
                               domPosition, 063), HierarchyTree (APG
                               Tree, virtualisiert), tree-navigation/-selection/-drag, context-menu, swatch,
@@ -136,7 +140,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               SaveSymbolDialog, symbol-actions (`symbols.*`)
   app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3, Breiten), Splitter (APG Window
                               Splitter) + panel-width (rein), Texte der Fensterhülle (015); key-contexts (wo die
-                              Tastatur ist, aus app.ts, 082)
+                              Tastatur ist, aus app.ts, 082); shell-actions (Aktionen der Fensterhülle, aus app.ts, 085)
   app/features/settings/      Einstellungen (015): SettingsStore (sofort anwenden, gebündelt speichern, andere
                               Fenster), SettingsSync (Stores ↔ Einstellungen, Theme, Sprache, Undo-Log),
                               SettingsDialog (⌘,, Tabs) + settings-view, settings-actions (app.settings,
@@ -239,13 +243,14 @@ e2e/                          Playwright-Tests gegen den Dev-Server (hardening: 
                               Fokus, Dialoge – 031; composited-shadow: Schatten pixelgleich – 033; export-packages – 078;
                               export-android-web: Favicon hell/dunkel, sichere Zone – 079; png-layer – 080;
                               mockups: Szenen folgen dem Dokument, Dark-Szene – 081; start-screen – 082; recovery – 083;
-                              symbol-library – 084)
+                              symbol-library – 084;
+                              shortcut-editor – 085)
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
   src/commands.rs             dünne Command-Schicht für Dateien/Recent, Pfadprüfung `allowed`/`grant` (033), Test
                               command_rules; window_commands.rs (Fenster, Titel, Startpfade), menu_commands.rs
-                              (Menü, Keymap, Quit) – geteilt in 033
+                              (Menü, Keymap laden/speichern 085, Quit) – geteilt in 033
   src/sessions.rs             IconSessions: zuletzt geöffnete/gespeicherte .icon je Pfad (002 E5)
   src/windows.rs              DocWindows: Labels doc-<n>, Startpfade/-aktionen, Pfad je Fenster, Schließen-Übernahme
                               (003), QuitQueue (005)
@@ -286,7 +291,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
                               Pfade (033: Dialoge, Recent, System, Drop, KI; allow_tree für interne Ordner; checked →
                               not_allowed), Art einer abgelegten Datei
     src/menu_spec.rs          MenuSpec prüfen, Accelerators, Menü ohne Fenster (005)
-    src/keymap_file.rs        keymap.json laden (005)
+    src/keymap_file.rs        keymap.json laden (005), Patch atomar schreiben, Unbekanntes bleibt (085)
     src/settings.rs           settings.json: je Feld nachsichtig (merge), sanitize, migrate, apply_patch (015);
                               settings/model.rs: Typen + Standardwerte (033)
     src/export/               Export (012): png (resvg, sichere usvg-Optionen), files (Namen, Überschreiben, atomar,

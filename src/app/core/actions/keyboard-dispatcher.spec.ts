@@ -146,4 +146,41 @@ describe('KeyboardDispatcher (design 005 E4)', () => {
     key(el('.canvas'), 'Delete', { isComposing: true });
     expect(ran).toEqual([]);
   });
+
+  it('records a shortcut without running an action (design 085 E4)', () => {
+    const { ran, reg, dispatcher } = setup();
+    reg('file.save');
+    const got: (string | null)[] = [];
+    const stop = dispatcher.record((c) => got.push(c));
+    expect(dispatcher.recording()).toBe(true);
+    // a key that reaches the document while recording runs nothing
+    key(el('.canvas'), 's', { ctrlKey: true });
+    expect(ran).toEqual([]);
+    // the recording field hands its keys over: taken, not bubbling
+    const field = el('#b');
+    let bubbled = 0;
+    host.addEventListener('keydown', () => bubbled++);
+    field.addEventListener('keydown', (e) => dispatcher.capture(e as KeyboardEvent));
+    const e = key(field, 'r', { shiftKey: true });
+    expect(e.defaultPrevented).toBe(true);
+    key(field, 'Shift', { shiftKey: true }); // a lone modifier
+    key(field, 'r', { shiftKey: true, repeat: true }); // a repeat
+    key(field, 'Escape'); // cancel
+    expect(got).toEqual(['Shift+r', null]);
+    expect(bubbled).toBe(0);
+    stop();
+    expect(dispatcher.recording()).toBe(false);
+    key(el('.canvas'), 's', { ctrlKey: true });
+    expect(ran).toEqual(['file.save']);
+  });
+
+  it('a newer recording replaces an older one; the old stop does nothing', () => {
+    const { dispatcher } = setup();
+    const stopA = dispatcher.record(() => undefined);
+    const stopB = dispatcher.record(() => undefined);
+    stopA();
+    expect(dispatcher.recording()).toBe(true);
+    stopB();
+    expect(dispatcher.recording()).toBe(false);
+  });
 });

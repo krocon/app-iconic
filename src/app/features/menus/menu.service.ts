@@ -1,5 +1,6 @@
 import { computed, effect, inject, Injectable, Injector, signal, untracked } from '@angular/core';
 import { ActionService } from '../../core/actions/action.service';
+import { KeyboardDispatcher } from '../../core/actions/keyboard-dispatcher';
 import { MenuApi } from '../../core/menu/menu-api';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { settledComputed } from '../document/settled';
@@ -30,6 +31,7 @@ export class MenuService {
   private readonly recent = inject(RecentFilesService);
   private readonly files = inject(FilesService);
   private readonly dialogs = inject(DialogService);
+  private readonly dispatcher = inject(KeyboardDispatcher);
   private readonly injector = inject(Injector);
   /** Bumped after every native click: the native menu toggles a check item itself. */
   private readonly clicks = signal(0);
@@ -47,6 +49,8 @@ export class MenuService {
 
   private resolve(): ResolvedMenu[] {
     const os = this.actions.os;
+    // while a shortcut is recorded the native menu must not take the keys (design 085 E4)
+    const recording = this.dispatcher.recording();
     const model = buildMenuModel(os, { recent: this.recent.files().map((f) => f.name) });
     return resolveMenu(
       model,
@@ -54,7 +58,7 @@ export class MenuService {
         label: (id) => this.actions.label(id),
         enabled: (id) => this.actions.enabled(id),
         checked: (id) => this.actions.checked(id),
-        chord: (id) => menuChord(this.actions.chords(id)),
+        chord: (id) => (recording ? '' : menuChord(this.actions.chords(id))),
         anyChord: (id) => this.actions.chords(id)[0] ?? '',
       },
       os,
@@ -66,7 +70,7 @@ export class MenuService {
     ...toSpec(this.menus()),
     app: appMenuSpec(
       (id) => this.actions.label(id),
-      menuChord(this.actions.chords('app.settings')),
+      this.dispatcher.recording() ? '' : menuChord(this.actions.chords('app.settings')),
     ),
   }));
 

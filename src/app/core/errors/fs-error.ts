@@ -50,6 +50,8 @@ export type FsErrorCode =
   | 'not_allowed'
   /** A recovery snapshot that is gone, taken elsewhere or still in use by a running app (083). */
   | 'recovery_unavailable'
+  /** Shortcut changes the backend refused: bad action ids, chords or too many (prompt 085). */
+  | 'invalid_keymap'
   /** Frontend only: no Tauri backend (e.g. `pnpm start` in a browser). */
   | 'backend_unavailable'
   /** Frontend only: something that is no `FsError` was thrown. */
@@ -86,6 +88,7 @@ const KNOWN: readonly FsErrorCode[] = [
   'unavailable',
   'not_allowed',
   'recovery_unavailable',
+  'invalid_keymap',
   'backend_unavailable',
   'unknown',
 ];
@@ -132,6 +135,7 @@ const EN = {
     'The app may not use this file. Choose it with Open or Import, or drop it on the window.',
   recovery_unavailable:
     'This recovered document is no longer available. Another window may have restored it.',
+  invalid_keymap: 'The shortcuts could not be saved.',
   backend_unavailable: 'The desktop backend is not available (running in a browser?).',
   unknown: 'Something went wrong.',
 } as const satisfies Record<FsErrorCode, string>;
@@ -166,6 +170,7 @@ const TEXTS = translatable('errors', EN, {
       'Die App darf diese Datei nicht verwenden. Wähle sie mit Öffnen oder Importieren oder lege sie auf dem Fenster ab.',
     recovery_unavailable:
       'Dieses wiederhergestellte Dokument ist nicht mehr verfügbar. Vielleicht hat ein anderes Fenster es schon wiederhergestellt.',
+    invalid_keymap: 'Die Tastenkürzel konnten nicht gesichert werden.',
     backend_unavailable: 'Das Desktop-Backend ist nicht verfügbar (läuft es im Browser?).',
     unknown: 'Etwas ist schiefgegangen.',
   },

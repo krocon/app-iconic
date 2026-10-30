@@ -81,7 +81,8 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
       { provide: RecentFilesApi, useClass: FakeRecentFilesApi },
       { provide: WindowApi, useFactory: browserWindow },
       { provide: MenuApi, useClass: FakeMenuApi },
-      { provide: KeymapApi, useClass: FakeKeymapApi },
+      // "keymap.json" in localStorage; other tabs (= windows) follow a change (prompt 085)
+      { provide: KeymapApi, useFactory: () => new FakeKeymapApi(browserStorage()) },
       { provide: ExportApi, useFactory: () => new FakeExportApi() },
       { provide: FontApi, useFactory: () => new FakeFontApi() },
       // "settings.json" in localStorage: a reload is the restart of the e2e tests (design 015 E18);

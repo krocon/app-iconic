@@ -57,6 +57,8 @@ pub enum FsErrorCode {
     /// A recovery snapshot that is gone, taken by another window, or still belongs to a running
     /// instance (prompt 083).
     RecoveryUnavailable,
+    /// Shortcut changes (`save_keymap`) with bad action ids, chords or too many entries (prompt 085).
+    InvalidKeymap,
 }
 
 /// The one error type every command returns.
@@ -143,6 +145,7 @@ mod tests {
             (FsErrorCode::Unavailable, "unavailable"),
             (FsErrorCode::NotAllowed, "not_allowed"),
             (FsErrorCode::RecoveryUnavailable, "recovery_unavailable"),
+            (FsErrorCode::InvalidKeymap, "invalid_keymap"),
         ] {
             assert_eq!(serde_json::to_value(code).unwrap(), text);
         }

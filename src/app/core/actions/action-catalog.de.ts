@@ -9,6 +9,8 @@ const FIXED: Record<string, string> = {
   'mcp.disconnect': 'KI trennen',
   'settings.set': 'Einstellung ändern',
   'settings.reset': 'Einstellungen zurücksetzen …',
+  'keymap.set': 'Tastenkürzel festlegen',
+  'keymap.reset': 'Alle Tastenkürzel zurücksetzen …',
   'app.quit': 'AppIconic beenden',
   'app.focusMenu': 'Menüleiste fokussieren',
   'file.newWindow': 'Neues Fenster',

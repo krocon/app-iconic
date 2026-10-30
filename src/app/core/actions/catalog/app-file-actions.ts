@@ -22,6 +22,22 @@ export const APP_FILE_ACTIONS: readonly ActionDef[] = [
   APP('settings.reset', 'Reset Settings to Default…', {
     args: { type: 'object', properties: { confirm: { type: 'boolean' } } },
   }),
+  // shortcuts (prompt 085): `chords` = string[] in the notation of keymap.json (`Mod+Shift+r`)
+  APP('keymap.set', 'Set a Shortcut', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['action', 'chords'],
+      properties: { action: { type: 'string', maxLength: 64 }, chords: { type: 'json' } },
+    },
+  }),
+  // without `action` every shortcut (asks first unless `confirm: false`)
+  APP('keymap.reset', 'Reset All Shortcuts…', {
+    args: {
+      type: 'object',
+      properties: { action: { type: 'string', maxLength: 64 }, confirm: { type: 'boolean' } },
+    },
+  }),
   APP('app.quit', 'Quit AppIconic'),
   APP('app.focusMenu', 'Focus the menu bar', { palette: false }),
   // file (legacy §4)

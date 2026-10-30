@@ -29,6 +29,8 @@
       dazu Grid-Abstand/-Ursprung, Selection Mode, Start-Zoom, Appearance-Vorschau, Maske, Export- und Freehand-Vorgaben)
 - [x] Menüs File/Edit/View/Add/Arrange/Help aus einem Modell: natives macOS-Menü, HTML-Menüleiste Windows/Linux (005; macOS auf dem Mac prüfen)
 - [x] Befehlspalette ⇧⌘P, Übersicht „Keyboard Shortcuts“, eigene Kürzel in `keymap.json` _(neu)_ (005)
+- [x] Kürzel im Dialog ändern: aufnehmen, Konflikte tauschen/ersetzen, reservierte System-Kürzel gesperrt/gewarnt,
+      Zurücksetzen je Eintrag und alle, Filter nach Name/Kürzel, Ansicht je OS; gilt sofort in allen Fenstern _(neu)_ (085)
 - [x] Quit ⌘Q fragt alle Fenster mit ungespeicherten Änderungen nacheinander (005; auf dem Mac prüfen)
 - [x] `settings.json` mit Schema-Version und Migration (je Feld nachsichtig, kaputt → `.bad`); „Reset to Default“ mit
       Bestätigung; Änderungen wirken in allen offenen Fenstern (015)

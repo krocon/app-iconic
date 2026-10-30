@@ -45,3 +45,9 @@ export interface KeymapOverrides {
   bindings: Record<string, string[]>;
   warning: ConfigWarning | null;
 }
+
+/**
+ * Patch of `keymap.json` (Rust `keymap_file::KeymapChanges`, design 085 E2): action id → its
+ * shortcuts, `null` = back to the built-in ones (the entry goes).
+ */
+export type KeymapChanges = Record<string, string[] | null>;

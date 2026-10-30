@@ -62,9 +62,11 @@ describe('TauriWindowApi / TauriRecentFilesApi', () => {
     await (m as unknown as TauriMenuApi).setAppMenu(spec);
     const k = recording(new TauriKeymapApi() as unknown as { backend: unknown }, calls);
     await (k as unknown as TauriKeymapApi).loadOverrides();
+    await (k as unknown as TauriKeymapApi).save({ 'transform.rotate': ['q'], 'edit.undo': null });
     expect(calls).toEqual([
       ['set_app_menu', { spec }],
       ['load_keymap_overrides', undefined],
+      ['save_keymap', { changes: { 'transform.rotate': ['q'], 'edit.undo': null } }],
     ]);
   });
 

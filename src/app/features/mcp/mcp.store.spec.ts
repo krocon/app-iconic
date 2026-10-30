@@ -133,6 +133,9 @@ describe('McpStore (design 018)', () => {
     expect(listed.some((x) => x.id === 'add.circle')).toBe(true);
     expect(listed.some((x) => x.id === 'app.quit' || x.id.startsWith('file.'))).toBe(false);
     expect(deniedReason('settings.set', { key: 'canvas.rulers' })).toBeNull();
+    // shortcuts belong to the user (prompt 085)
+    expect(deniedReason('keymap.set')).toBe('not available to the AI');
+    expect(listed.some((x) => x.id.startsWith('keymap.'))).toBe(false);
   });
 
   it('reads the tree, a node and an asset – bounded', async () => {

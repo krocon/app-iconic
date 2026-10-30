@@ -92,4 +92,15 @@ describe('ActionService (design 005 E3)', () => {
     await actions.loadOverrides();
     expect(actions.shortcut('file.save')).toBe('F2');
   });
+
+  it('follows keymap-changed of any window (design 085 E3)', async () => {
+    const { actions, keymap } = setup('other');
+    await actions.loadOverrides();
+    expect(actions.shortcut('transform.rotate')).toBe('Shift+R');
+    await keymap.save({ 'transform.rotate': ['q'] });
+    expect(actions.chords('transform.rotate')).toEqual(['q']);
+    expect(actions.overrides()).toEqual({ 'transform.rotate': ['q'] });
+    actions.applyOverrides({ bindings: {} });
+    expect(actions.chords('transform.rotate')).toEqual(['Shift+r']);
+  });
 });

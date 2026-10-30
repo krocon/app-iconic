@@ -34,14 +34,12 @@ import { FreehandStore } from './features/tools/freehand.store';
 import { registerPenActions } from './features/pen/pen-actions';
 import { registerPathTools } from './features/pathfinder/path-tools';
 import { AppDialogs } from './features/shell/app-dialogs';
-import { registerFileActions } from './features/files/file-actions';
 import { FILES_TEXTS } from './features/files/files-texts';
 import { FilesService } from './features/files/files.service';
 import { RecentFilesService } from './features/files/recent-files.service';
 import { registerEditActions } from './features/hierarchy/edit-actions';
 import { EditService } from './features/hierarchy/edit.service';
 import { HierarchyTree } from './features/hierarchy/hierarchy-tree';
-import { registerAppActions } from './features/menus/app-actions';
 import { MenuBar } from './features/menus/menu-bar';
 import { MenuService } from './features/menus/menu.service';
 import { registerPropertiesActions } from './features/properties/properties-actions';
@@ -59,6 +57,7 @@ import { registerBoxActions } from './features/properties/box-actions';
 import { BoxService } from './features/properties/box.service';
 import { PropertiesService } from './features/properties/properties.service';
 import { LayoutStore } from './features/shell/layout.store';
+import { registerShellActions } from './features/shell/shell-actions';
 import { SHELL_TEXTS } from './features/shell/shell-texts';
 import { PanelStrip, SidePanel } from './features/shell/side-panel';
 import { Splitter } from './features/shell/splitter';
@@ -75,10 +74,7 @@ import { SvgSourceService } from './features/svg-source/svg-source.service';
 import { McpStore } from './features/mcp/mcp.store';
 import { StartScreen } from './features/start/start-screen';
 import { StartService } from './features/start/start.service';
-import { registerStartActions } from './features/start/start-actions';
-import { ThumbnailService } from './features/start/thumbnail.service';
 import { RecoveryService } from './features/recovery/recovery.service';
-import { registerRecoveryActions } from './features/recovery/recovery-actions';
 import { keyContexts } from './features/shell/key-contexts';
 import { MCP_TEXTS } from './features/mcp/mcp-texts';
 
@@ -284,18 +280,8 @@ export class App implements OnInit {
   private readonly recovery = inject(RecoveryService);
 
   constructor() {
-    registerFileActions(this.actions, this.files, this.recent, this.destroyRef);
-    registerStartActions(this.actions, this.start, this.files, this.destroyRef);
-    inject(ThumbnailService); // previews of opened/saved files (prompt 082)
-    // recovery snapshots of unsaved changes, the offer at start (prompt 083)
-    registerRecoveryActions(this.actions, this.recovery, this.files, this.destroyRef);
-    registerAppActions(
-      this.actions,
-      this.dialogs,
-      inject(LayoutStore),
-      this.files,
-      this.destroyRef,
-    );
+    // files, start screen, recovery, panels, shortcuts (split in prompt 085)
+    registerShellActions(this.actions, this.files, this.dialogs, this.destroyRef);
     registerEditActions(this.actions, inject(EditService), this.dialogs, this.destroyRef);
     registerRenameActions(this.actions, inject(RenameService), this.files, this.destroyRef);
     registerAddActions(this.actions, inject(AddService), this.destroyRef);

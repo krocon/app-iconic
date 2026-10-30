@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
+import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { call } from '../backend/call';
-import { KeymapOverrides, MenuSpec } from './menu.models';
+import { KeymapChanges, KeymapOverrides, MenuSpec } from './menu.models';
 
 /** Event of a click in the native menu, sent to the focused window (design 005 E6). */
 export const MENU_ACTION = 'menu-action';
@@ -28,9 +29,18 @@ export class TauriMenuApi extends MenuApi {
   }
 }
 
-/** `load_keymap_overrides` (design 005 E14). */
+/** Event to every window after the shortcuts changed (Rust `KEYMAP_CHANGED`, design 085 E3). */
+export const KEYMAP_CHANGED = 'keymap-changed';
+
+/**
+ * `keymap.json`: `load_keymap_overrides` (design 005 E14), `save_keymap` and the event every
+ * window gets after a change (design 085 E2/E3).
+ */
 export abstract class KeymapApi {
   abstract loadOverrides(): Promise<KeymapOverrides>;
+  /** Writes the patch; resolves with the file as it is now. */
+  abstract save(changes: KeymapChanges): Promise<KeymapOverrides>;
+  abstract onChanged(fn: (o: KeymapOverrides) => void): Promise<() => void>;
 }
 
 @Injectable()
@@ -39,5 +49,13 @@ export class TauriKeymapApi extends KeymapApi {
 
   loadOverrides(): Promise<KeymapOverrides> {
     return this.backend<KeymapOverrides>('load_keymap_overrides');
+  }
+
+  save(changes: KeymapChanges): Promise<KeymapOverrides> {
+    return this.backend<KeymapOverrides>('save_keymap', { changes });
+  }
+
+  onChanged(fn: (o: KeymapOverrides) => void): Promise<() => void> {
+    return listen<KeymapOverrides>(KEYMAP_CHANGED, (e) => fn(e.payload));
   }
 }
