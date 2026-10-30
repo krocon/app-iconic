@@ -6,7 +6,10 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
+import { DialogService } from './dialog.service';
+import { popoverPosition } from './popover-position';
 
 let modalSeq = 0;
 
@@ -16,20 +19,28 @@ let modalSeq = 0;
  * Modal frame: `role="dialog"` + `aria-modal`, focus trap, Escape closes, focus
  * goes to the first `[data-autofocus]` (or first focusable) element. The opener gets
  * the focus back through {@link DialogService.close}.
+ *
+ * Popover (prompt 073 E3, `DialogService.popover()`): the same frame without backdrop, without
+ * `aria-modal` and focus trap, beside its opener – the canvas stays usable; Escape closes, the
+ * focus goes in and back the same way.
  */
 @Component({
   selector: 'app-modal',
   template: `
-    <div class="backdrop" (pointerdown)="onBackdrop($event)">
+    <div class="backdrop" [class.popover-host]="popover()" (pointerdown)="onBackdrop($event)">
       <div
         class="dialog"
+        [class.popover]="popover()"
         [attr.role]="dialogRole()"
         [attr.aria-describedby]="describedBy()"
-        aria-modal="true"
+        [attr.aria-modal]="popover() ? null : 'true'"
         [attr.aria-labelledby]="titleId"
+        [attr.data-popover]="popover() ? '' : null"
         [style.width]="width()"
         [style.height]="height()"
         [style.max-height]="height() ? '90vh' : null"
+        [style.left.px]="popover() ? (at()?.left ?? -9999) : null"
+        [style.top.px]="popover() ? (at()?.top ?? 0) : null"
       >
         <h2 class="title" [id]="titleId">{{ heading() }}</h2>
         <ng-content />
@@ -52,10 +63,16 @@ export class Modal {
   readonly closed = output<void>();
   protected readonly titleId = `ed-modal-${++modalSeq}`;
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly dialogs = inject(DialogService);
+  /** Shown as a non-modal popover (prompt 073). */
+  protected readonly popover = this.dialogs.popover;
+  /** The popover's place once its size is known. */
+  protected readonly at = signal<{ left: number; top: number } | null>(null);
 
   constructor() {
     afterNextRender(() => {
       const el = this.host.nativeElement;
+      if (this.popover()) this.place();
       const target = el.querySelector<HTMLElement>('[data-autofocus]') ?? this.focusables()[0];
       target?.focus();
       if (target instanceof HTMLInputElement) {
@@ -64,7 +81,21 @@ export class Modal {
     });
   }
 
+  /** Beside the opener, inside the window. */
+  private place(): void {
+    const box = this.host.nativeElement.querySelector('.dialog')?.getBoundingClientRect();
+    if (!box) return;
+    this.at.set(
+      popoverPosition(
+        this.dialogs.anchor(),
+        { width: box.width, height: box.height },
+        { width: innerWidth, height: innerHeight },
+      ),
+    );
+  }
+
   protected onBackdrop(evt: PointerEvent): void {
+    if (this.popover()) return;
     if (evt.target === evt.currentTarget) {
       this.closed.emit();
     }
@@ -79,7 +110,7 @@ export class Modal {
       this.closed.emit();
       return;
     }
-    if (evt.key === 'Tab') {
+    if (evt.key === 'Tab' && !this.popover()) {
       const items = this.focusables();
       if (items.length === 0) {
         return;

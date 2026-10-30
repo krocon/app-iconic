@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { PathPreview } from '../canvas/path-preview';
+import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { Modal } from '../../shared/dialog/modal';
 import { DEFAULT_EPSILON, DEFAULT_PRECISION } from '../../shared/geometry/path-optimize';
@@ -7,7 +17,8 @@ import { SvgSourceService } from './svg-source.service';
 
 /**
  * "Optimize Path…" (design 011 E12): tolerance and decimals, a preview of points and characters
- * before / after for the selected paths, "Optimize" as one undo step.
+ * before / after for the selected paths and their outlines on the canvas (prompt 073 E4: a popover,
+ * before dashed, after in the accent), "Optimize" as one undo step.
  */
 @Component({
   selector: 'app-optimize-path-dialog',
@@ -136,6 +147,18 @@ export class OptimizePathDialog {
     this.revision();
     return this.service.optimizeStats({ epsilon: this.epsilon(), precision: this.precision() });
   });
+  private readonly preview = inject(PathPreview);
+  private readonly canvas = inject(CanvasViewStore);
+
+  constructor() {
+    // before / after as outlines on the canvas (prompt 073 E4) – the document stays as it is
+    effect(() => {
+      this.revision();
+      const opts = { epsilon: this.epsilon(), precision: this.precision() };
+      this.preview.show(this.service.optimizeOutlines(opts, this.canvas.host));
+    });
+    inject(DestroyRef).onDestroy(() => this.preview.clear());
+  }
 
   protected onEpsilon(e: Event): void {
     const v = Number((e.target as HTMLInputElement).value);

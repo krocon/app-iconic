@@ -350,7 +350,9 @@ export class App implements OnInit {
     this.mcp.start(this.destroyRef);
     // where the keyboard is (design 005 E4): a dialog owns it; else hierarchy or canvas first
     this.dispatcher.setContextProvider((target) => {
-      if (this.dialogs.open() !== null) return ['dialog'];
+      if (this.dialogs.modal()) return ['dialog'];
+      // a popover (prompt 073) owns the keys inside it; the canvas keeps its own
+      if (this.dialogs.popover() && target?.closest('[data-popover]')) return ['dialog'];
       if (target?.closest('app-side-panel.hierarchy')) return ['hierarchy', 'global'];
       // the panel's sliders and buttons keep their arrow keys (no canvas nudge, design 009 E12)
       if (target?.closest('app-side-panel.properties')) return ['global'];

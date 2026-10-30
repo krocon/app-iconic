@@ -136,6 +136,17 @@ export const PROPERTIES_TEXTS = translatable('properties', EN, {
  */
 export const propertyLabel = phrasebook('properties.labels', {
   de: {
+    // options of the icon toggles (prompt 073 E2)
+    Butt: 'Stumpf',
+    Round: 'Rund',
+    Square: 'Überstehend',
+    Miter: 'Spitz',
+    Bevel: 'Abgeschrägt',
+    'Non-zero': 'Nicht null',
+    'Even-odd': 'Gerade-ungerade',
+    Start: 'Anfang',
+    Middle: 'Mitte',
+    End: 'Ende',
     X: 'X',
     Y: 'Y',
     Width: 'Breite',

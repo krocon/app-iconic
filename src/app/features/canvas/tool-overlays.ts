@@ -12,6 +12,7 @@ import { KeyObjectOverlay } from '../align/key-object-overlay';
 import { GuideOverlay } from '../guides/guide-overlay';
 import { PixelGridOverlay } from '../preview/pixel-grid-overlay';
 import { SmallPreview } from '../preview/small-preview';
+import { PathPreviewOverlay } from './path-preview';
 
 /**
  * The overlays of the construction tools (prompts 045–050) in one place: each draws only while its
@@ -32,6 +33,7 @@ import { SmallPreview } from '../preview/small-preview';
     GuideOverlay,
     PixelGridOverlay,
     SmallPreview,
+    PathPreviewOverlay,
   ],
   template: `
     <app-pixel-grid-overlay [toView]="toView()" />
@@ -45,6 +47,7 @@ import { SmallPreview } from '../preview/small-preview';
     <app-transform-overlay [toView]="toView()" />
     <app-key-object-overlay [toView]="toView()" />
     <app-guide-overlay [toView]="toView()" />
+    <app-path-preview-overlay [toView]="toView()" />
     <app-small-preview />
   `,
   styles: `

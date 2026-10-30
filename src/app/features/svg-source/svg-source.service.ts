@@ -1,3 +1,6 @@
+import { MAX_PREVIEW_PATHS, PreviewPath } from '../canvas/path-preview';
+import { fromDom } from '../../shared/geometry/matrix';
+import { nodeToDocument } from '../../shared/geometry/dom-geometry';
 import { inject, Injectable, signal } from '@angular/core';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { optimizePath, OptimizeOptions } from '../../shared/geometry/path-optimize';
@@ -215,6 +218,25 @@ export class SvgSourceService {
       }
     }
     return { changes, stats };
+  }
+
+  /**
+   * The outlines before and after for the canvas (prompt 073 E4): each changing path in its own
+   * space with that space → document; empty without a canvas.
+   */
+  optimizeOutlines(opts: OptimizeOptions, host: SVGSVGElement | null): PreviewPath[] {
+    if (!host) return [];
+    const out: PreviewPath[] = [];
+    for (const el of this.optimizeTargets()) {
+      if (out.length >= MAX_PREVIEW_PATHS) break;
+      const d = el.getAttribute('d');
+      const r = d === null ? null : optimizePath(d, opts);
+      const m = r ? nodeToDocument(host, el as SVGGraphicsElement) : null;
+      if (!r || !m || d === null) continue;
+      const toDocument = fromDom(m);
+      out.push({ d, toDocument, kind: 'before' }, { d: r.d, toDocument, kind: 'after' });
+    }
+    return out;
   }
 
   /** Points / characters before and after (the preview of the dialog). */

@@ -95,7 +95,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               style/Attribut/berechnet/Default), property-edit (setAttributes/setText, PropertySession
                               = Geste je Feld, Reset), panel-model, mixed, constrain, transform-list (rein) +
                               transform-editor/-step-row, PropertiesService + properties-actions (properties.*)
-                              BoxSection + BoxService + box-actions (Kopf Position & Größe, `properties.box`, 062)
+                              BoxSection + BoxService + box-actions (Kopf Position & Größe, `properties.box`, 062);
+                              row-pairs (rein: X/Y, W/H … nebeneinander, 073)
   app/features/inspector/     Icon-Inspector (010) im Properties-Panel: icon-fields (rein: Feld-Specs je Root/Gruppe/
                               Layer), fill-model, icon-color-text, platforms, icon-json-text (rein), inspector-edit
                               (Felder → SetIconJsonValue, Umbenennen), IconInspectorService + icon-actions (icon.*),
@@ -137,7 +138,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               (Rahmen + Handle-Sets über CTM), selection-overlay, magic-points, edit-ops (rein),
                               canvas-edit-actions (Esc, Punkt löschen, Pfeiltasten, moveBy); handles/ (rein:
                               node-geometry, node-handles, handle-edit, handle-types)
-                              grid-hint-overlay (Rasterpunkte um den Zeiger bei Snap to Grid)
+                              grid-hint-overlay (Rasterpunkte um den Zeiger bei Snap to Grid); path-preview
+                              (PathPreview + Overlay: Kurven einer Vorschau, 073)
   app/features/sketch/        Zeichenwerkzeuge wie Fusion (019): SketchStore (Werkzeug, Schritte, feste Maße, Bezüge),
                               SketchService (Einfügen, `points`/`values` der KI), sketch-interaction (Zeiger + Snap),
                               sketch-targets (Kanten/Kreise/Linienenden aus dem DOM), sketch-elements (Form → SVG im
@@ -168,8 +170,10 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               sketch-model, constraints); sketch/ (019, rein): sketch-shapes,
                               sketch-tools (Schritte, Maße), apollonius (Tangentenkreise), svg-arc (Bogen-Mittelpunkt)
   app/shared/controls/        Generische Editoren (009): DraftField (Basis: live/commit/cancel), NumberField (Stepped
-                              Slider), ColorField + color-value (rein), SelectField, TextField, ToggleField, step-value
-  app/shared/dialog/          Modal (Fokusfalle, Esc), DialogService (aus files-and-folders)
+                              Slider), ColorField + color-value (rein), SelectField, TextField, ToggleField, step-value,
+                              SegmentedField (Icon-Umschalter, 073)
+  app/shared/dialog/          Modal (Fokusfalle, Esc; als Popover ohne Backdrop, 073), DialogService (aus
+                              files-and-folders; popover/anchor), popover-position (rein)
   app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,
                               command-cases.ts, tree-documents.ts, fake-clipboard-api.ts, fake-export-api.ts,

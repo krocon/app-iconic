@@ -112,6 +112,31 @@ svg {
   }
 }
 
+/* prompt 073 E1: X/Y, W/H … side by side; one column in a narrow panel */
+.body {
+  container-type: inline-size;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1) var(--space-3);
+}
+
+.half {
+  display: grid;
+  grid-template-columns: minmax(1.25rem, auto) minmax(0, 1fr) auto;
+  gap: var(--space-1);
+  align-items: center;
+  min-width: 0;
+}
+
+@container (max-width: 250px) {
+  .pair {
+    grid-template-columns: 1fr;
+  }
+}
+
 .empty {
   margin: var(--space-4) var(--space-2);
   font-size: var(--font-size-small);

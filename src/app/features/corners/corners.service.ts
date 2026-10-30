@@ -63,6 +63,59 @@ export class CornersService {
     return true;
   }
 
+  // ---- live preview of the popover (prompt 073 E4): an undo gesture, OK = one step ----
+
+  private previewing: { refs: readonly NodeRef[] } | null = null;
+  private previewRefs: NodeRef[] | null = null;
+
+  /** Shows `radius` / `kind` on the canvas (replaces the preview before). */
+  preview(radius: number, kind: CornerKind): boolean {
+    const store = this.files.store();
+    if (!store || !(radius >= 0) || !CORNER_KINDS.includes(kind)) return false;
+    if (this.previewing) store.cancel();
+    else this.previewing = { refs: [...store.selection()] };
+    const refs = this.previewing.refs;
+    const cmds = editableRefs(store.document(), refs).flatMap((r) => {
+      const c = this.command(r, radius, kind);
+      return c ? [{ r, c }] : [];
+    });
+    store.begin('roundCorners');
+    if (cmds.length) {
+      store.update(
+        new CompositeCommand(
+          'roundCorners',
+          cmds.map((x) => x.c),
+        ),
+      );
+    }
+    this.previewRefs = refs.map((r) => {
+      const hit = cmds.find((x) => x.r === r);
+      return hit ? this.refAfter(hit.c, r) : r;
+    });
+    return cmds.length > 0;
+  }
+
+  /** Keeps the preview as one undo step. */
+  commit(): void {
+    const store = this.files.store();
+    if (!store || !this.previewing) return;
+    store.commit();
+    if (this.previewRefs) store.selection.set(this.previewRefs);
+    this.previewing = null;
+    this.previewRefs = null;
+  }
+
+  /** Takes the preview back – no undo step. */
+  cancel(): void {
+    const store = this.files.store();
+    const p = this.previewing;
+    this.previewing = null;
+    this.previewRefs = null;
+    if (!store || !p) return;
+    store.cancel();
+    store.selection.set([...p.refs]);
+  }
+
   /** The selection has a node with corners. */
   canApply(): boolean {
     const store = this.files.store();

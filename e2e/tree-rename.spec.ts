@@ -75,10 +75,13 @@ test('quick actions, expand / collapse all, lock a layer', async ({ page }) => {
       () => (window.__appIconic!.store()!.document().iconJson['groups'] as unknown[]).length,
     );
   const before = await groups();
+  const layerRows = tree(page).locator('[data-kind="layer"]');
+  const layersBefore = await layerRows.count();
   await page.locator('app-tree-toolbar [data-action="add.iconGroup"]').click();
   await expect.poll(groups).toBe(before + 1);
   await page.locator('app-tree-toolbar [data-action="add.layer"]').click();
-  await expect(tree(page).locator('[data-kind="layer"]')).toHaveCount(3);
+  // the new group's layer and one more in it
+  await expect(layerRows).toHaveCount(layersBefore + 2);
   await page.locator('app-tree-toolbar [data-action="hierarchy.collapseAll"]').click();
   await expect(tree(page).locator('[data-kind="layer"]')).toHaveCount(0);
   await page.locator('app-tree-toolbar [data-action="hierarchy.expandAll"]').click();

@@ -9,6 +9,21 @@
   background: var(--color-backdrop);
 }
 
+/* a popover (prompt 073): no backdrop, the canvas stays usable */
+.backdrop.popover-host {
+  display: block;
+  padding: 0;
+  background: none;
+  pointer-events: none;
+}
+
+.dialog.popover {
+  position: fixed;
+  max-height: calc(100vh - 16px);
+  pointer-events: auto;
+  overflow: auto;
+}
+
 .dialog {
   max-width: calc(100vw - 2rem);
   max-height: 84vh;

@@ -6,6 +6,7 @@ import { panelModel, PanelRow } from './panel-model';
 import { PropertiesService } from './properties.service';
 import { PROPERTIES_TEXTS } from './properties-texts';
 import { PropertyRow } from './property-row';
+import { pairRows, SHORT_LABELS } from './row-pairs';
 import { SectionId } from './property-spec';
 import { TransformEditor } from './transform-editor';
 import { BoxSection } from './box-section';
@@ -80,12 +81,27 @@ import { GradientSection } from '../gradient/gradient-section';
                     [revision]="revision()"
                   />
                 } @else {
-                  @for (r of s.rows; track r.def.name) {
-                    <app-property-row
-                      [row]="r"
-                      [fieldId]="'prop-' + r.def.name"
-                      [swatch]="swatch(r, m.elements[0])"
-                    />
+                  @for (it of pairs(s.rows); track it.key) {
+                    @if (it.kind === 'pair') {
+                      <div class="pair wide" [attr.data-pair]="it.key">
+                        @for (r of it.rows; track r.def.name) {
+                          <div class="half">
+                            <app-property-row
+                              [row]="r"
+                              [fieldId]="'prop-' + r.def.name"
+                              [compact]="true"
+                              [shortLabel]="shortLabel(r.def.name)"
+                            />
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <app-property-row
+                        [row]="it.row"
+                        [fieldId]="'prop-' + it.row.def.name"
+                        [swatch]="swatch(it.row, m.elements[0])"
+                      />
+                    }
                   }
                 }
               </div>
@@ -133,6 +149,12 @@ export class PropertiesPanel {
   protected readonly actions = inject(ActionService);
   protected readonly props = inject(PropertiesService);
   protected readonly t = PROPERTIES_TEXTS;
+  protected readonly pairs = pairRows;
+  protected shortLabel(name: string): string | null {
+    const l = SHORT_LABELS[name];
+    // German "B" for Breite like the Box section
+    return l === 'W' ? this.t.box.width : l === 'H' ? this.t.box.height : (l ?? null);
+  }
   /** "Edit SVG…" and "Optimize Path…" (design 011 E13). */
   protected readonly sourceActions = ['edit.editSvg', 'path.optimize'] as const;
   private readonly open = signal<Record<SectionId, boolean>>({

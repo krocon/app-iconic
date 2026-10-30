@@ -36,6 +36,8 @@ export interface PropertyDef {
   off?: string;
   /** Reset removes the attribute (false: the shape would vanish without it, design 009 E8). */
   reset: boolean;
+  /** An enum shown as icon toggles (prompt 073 E2): a picture per option. */
+  icons?: Readonly<Record<string, { d: string; fill?: 'nonzero' | 'evenodd' }>>;
 }
 
 type Def = Omit<PropertyDef, 'reset'> & { reset?: boolean };
@@ -115,6 +117,10 @@ export const P = {
     section: 'appearance',
     options: ['nonzero', 'evenodd'],
     default: 'nonzero',
+    icons: {
+      nonzero: { d: 'M2 2h12v12H2z M5 5h6v6H5z', fill: 'nonzero' },
+      evenodd: { d: 'M2 2h12v12H2z M5 5h6v6H5z', fill: 'evenodd' },
+    },
   }),
   opacity: def({
     name: 'opacity',
@@ -209,6 +215,11 @@ export const P = {
     section: 'stroke',
     options: ['butt', 'round', 'square'],
     default: 'butt',
+    icons: {
+      butt: { d: 'M1 5h9v6H1 M10 2v12' },
+      round: { d: 'M1 5h9a3 3 0 0 1 0 6H1 M10 2v12' },
+      square: { d: 'M1 5h12v6H1 M10 2v12' },
+    },
   }),
   linejoin: def({
     name: 'stroke-linejoin',
@@ -217,6 +228,11 @@ export const P = {
     section: 'stroke',
     options: ['miter', 'round', 'bevel'],
     default: 'miter',
+    icons: {
+      miter: { d: 'M2 14L8 2l6 12' },
+      round: { d: 'M2 14l5-9.5a1.2 1.2 0 0 1 2 0L14 14' },
+      bevel: { d: 'M2 14l5-10h2l5 10' },
+    },
   }),
   miterlimit: def({
     name: 'stroke-miterlimit',
@@ -266,6 +282,11 @@ export const P = {
     section: 'text',
     options: ['start', 'middle', 'end'],
     default: 'start',
+    icons: {
+      start: { d: 'M2.5 2v12 M2.5 6h11 M2.5 10h7' },
+      middle: { d: 'M8 2v12 M2.5 6h11 M4.5 10h7' },
+      end: { d: 'M13.5 2v12 M2.5 6h11 M6.5 10h7' },
+    },
   }),
   textDecoration: def({
     name: 'text-decoration',

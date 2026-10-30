@@ -72,9 +72,13 @@ export class NumberField extends DraftField {
   readonly unit = input<string | undefined>(undefined);
   /** A length: a unit may follow the number. */
   readonly units = input(false);
+  /** Without the slider (half a row, prompt 073 E1). */
+  readonly compact = input(false);
   protected readonly t = CONTROLS_TEXTS;
 
-  protected readonly ranged = computed(() => this.min() !== undefined && this.max() !== undefined);
+  protected readonly ranged = computed(
+    () => !this.compact() && this.min() !== undefined && this.max() !== undefined,
+  );
   protected readonly sliderValue = computed(() => {
     const n = readNumber(this.shown(), this.units())?.n ?? readNumber(this.placeholder(), true)?.n;
     return n ?? this.min() ?? 0;

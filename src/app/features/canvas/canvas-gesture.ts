@@ -87,6 +87,12 @@ export class GestureController {
     r.pending = true;
     if (!r.active) {
       if (Math.hypot(e.clientX - r.start.x, e.clientY - r.start.y) < DRAG_THRESHOLD_PX) return;
+      // a popover's live preview owns the store (prompt 073 E3): no drag would end it unasked
+      if (r.op.label && r.store.gesture()) {
+        this.run = null;
+        r.op.end?.(false);
+        return;
+      }
       r.active = true;
       if (r.op.label) r.store.begin(r.op.label);
     }
