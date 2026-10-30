@@ -25,7 +25,7 @@ Die Befunde des Reviews aus 031, die dort bewusst nicht mehr behoben wurden.
   mit `opacity` 341 ms bzw. 292 ms. Ursache messen (Chromium-Trace und WKWebView in der echten App): Neu-Rastern der
   ganzen Fläche je Schritt, isolierte Gruppen durch `opacity`, Neuaufbau der Auswahl-Overlays, Snap-Kandidaten. Ideen:
   während einer Geste die bewegten Elemente in einer eigenen Overlay-Ebene zeigen und den Rest als festes Bild
-  (Undo/Ergebnis unverändert ein `setAttributes`), Magic-Punkte einmal je Geste sammeln. Danach neu messen.
+  (Undo/Ergebnis unverändert ein `setAttributes`), Magic-Punkte einmal je Geste sammeln. Danach neu messen. (Auch Befund der [Analyse vom 30.10.2026](2026.10.30%20-%20analyse.md) §2.5.)
 
 ## Akzeptanz
 

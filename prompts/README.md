@@ -24,6 +24,10 @@ Danach 010–014 (untereinander weitgehend unabhängig; 014 braucht 009), 015 je
 040–048: Zeichnen wie VectorCraft (Marc, 29.10.2026) – zuerst 040 und 041, dann 042 → 043 → 046 → 047; 044, 045, 048
 unabhängig. 050–059: Konstruieren wie Fusion (Marc, 29.10.2026) – Reihenfolge 050 → 051 → 052 → 053 → 054 → 055,
 dann 056, 057, 058, 032 (Verlaufseditor), zuletzt 059.
+061–086: Umsetzung der [Analyse vom 30.10.2026](2026.10.30%20-%20analyse.md) (Abdeckung siehe unten). Reihenfolge nach
+Priorität: **P0** 061 → 062 → 063 → 064 → 065 → 066; **P1** 067 → 068, dann 069–076 (073 nach 062/067, 074 nach 064);
+**P2** 077 → 078 → 079, 080; **P3** 081–086 (untereinander unabhängig). Die Befunde der Analyse vor der Umsetzung im
+Code bestätigen (roter Test) – sie stammen aus einer Fremdanalyse und können teils überholt oder ungenau sein.
 
 | Nr. | Prompt | Inhalt | Braucht | Umfang | Status |
 |---|---|---|---|---|---|
@@ -70,9 +74,60 @@ dann 056, 057, 058, 032 (Verlaufseditor), zuletzt 059.
 | 058 | [058-als-konstruktion-zeichnen.md](done/058-als-konstruktion-zeichnen.md) | Direkt als Konstruktion zeichnen | 049 | S | ✅ 29.10.2026 |
 | 059 | [059-abhaengigkeiten.md](done/059-abhaengigkeiten.md) | Abhängigkeiten und treibende Maße (parametrisch) | 048, 050, 051 | XL | ✅ 29.10.2026 |
 | 060 | [060-flaechen-fuellen.md](done/060-flaechen-fuellen.md) | Flächen füllen (live): durch Überlagerung entstehende Flächen einfärben | 047, 050 | L | ✅ 29.10.2026 |
+| 061 | [061-auswahlwerkzeug.md](061-auswahlwerkzeug.md) | Auswahl `V` / Direktauswahl `A`, ein ToolStore, aktives Werkzeug sichtbar (`aria-pressed`, auch eingeklappt) | 005, 007, 008 | S | offen |
+| 062 | [062-bbox-inspektor.md](062-bbox-inspektor.md) | Transform-Kopf im Properties-Panel: X, Y, B, H, Drehung, Spiegeln, Bezugspunkt – für Pfade, Gruppen, Mehrfachauswahl | 007, 009, 053 | M | offen |
+| 063 | [063-z-reihenfolge-baum.md](063-z-reihenfolge-baum.md) | SVG-Kinder im Baum „oben = vorn“ wie Gruppen/Layer (Frage 006/1) | 006 | S–M | offen |
+| 064 | [064-fehlerbehebungen.md](064-fehlerbehebungen.md) | Gesperrte Objekte vor Trim & Co. schützen, Display-P3 ↔ sRGB, Pattern-Grenze, Blend-Modes im PNG-Export prüfen | 010, 012, 049–051, 055 | S–M | offen |
+| 065 | [065-abhaengigkeiten-robust.md](065-abhaengigkeiten-robust.md) | Constraints: Verletzung anzeigen, optional live lösen, Maße löschbar, Overlay über CTM, Liste im Panel, keine Waisen | 059, 060 | M | offen |
+| 066 | [066-hilfslinien-fuellungen-alltag.md](066-hilfslinien-fuellungen-alltag.md) | Hilfslinien vor ⌘A geschützt, Kennzeichnung im Baum, Live-Fill im Panel, eingefrorene Füllungen melden | 048, 055, 056, 060 | M | offen |
+| 067 | [067-kontextleiste.md](067-kontextleiste.md) | Einheitliche Kontextleiste je Werkzeug (Name, Optionen, Tipp, Fertig) statt Pillen/Banner/Statuszeile | 061 | M | offen |
+| 068 | [068-werkzeugleiste-ordnen.md](068-werkzeugleiste-ordnen.md) | Werkzeuge vs. Einfügen vs. Ändern trennen, Sektion Konstruktion, Rotate/Scale/Reflect in der Leiste, Kürzelkonflikte | 061, 067 | M | offen |
+| 069 | [069-toolbar-direktzugriffe.md](069-toolbar-direktzugriffe.md) | Appearance und Maske als Segmented Controls, Speichern/Export… in der Toolbar, Undo/Redo nur einmal | 004, 012, 015 | S | offen |
+| 070 | [070-kontextmenues.md](070-kontextmenues.md) | Rechtsklick-Menü auf dem Canvas, dasselbe Modell im Baum, Shift+F10 | 005, 006, 061 | M | offen |
+| 071 | [071-dateien-ziehen-bilder-einfuegen.md](071-dateien-ziehen-bilder-einfuegen.md) | `.icon`/`.svg`/Bilder ins Fenster ziehen, Bilder aus der Zwischenablage einfügen | 003, 008, 030 | M | offen |
+| 072 | [072-ebenenbaum-komfort.md](072-ebenenbaum-komfort.md) | Inline-Umbenennen (id + Verweise), Suche/Filter, alle zu-/aufklappen, + Gruppe/Layer, Schloss an Gruppen/Layern | 055, 063, 066 | M | offen |
+| 073 | [073-properties-kompakt-popovers.md](073-properties-kompakt-popovers.md) | Paare zweispaltig, Icon-Toggles, nicht-modale Popovers, Live-Vorschau auch für Corners/Optimize Path | 062, 067 | M | offen |
+| 074 | [074-farb-workflow.md](074-farb-workflow.md) | Farb-Popover (Alpha, HSL/HSB/OKLCH), Pipette, Dokumentfarben, Farbe ersetzen, Paletten | 009, 015, 064, 067 | M–L | offen |
+| 075 | [075-live-typografie.md](075-live-typografie.md) | Schriftwahl für `<text>`, Text-Werkzeug, Bearbeiten auf dem Canvas, mehrzeilig, Text → Pfad | 009, 013, 067 | M–L | offen |
+| 076 | [076-effekte-masken.md](076-effekte-masken.md) | Effekte je Element (Schatten, Unschärfe, Blend) und Masken wie Clip Paths | 009, 012, 014, 032, 064 | L | offen |
+| 077 | [077-icon-format-vollstaendig.md](077-icon-format-vollstaendig.md) | Layer-Fill, Tinted-Vorschau/-Export, `plus-darker`, Radialverlauf anlegen, Glas/Licht angenähert | 004, 010, 012, 069 | M–L | offen |
+| 078 | [078-export-apple-windows.md](078-export-apple-windows.md) | `AppIcon.appiconset`, `.icns`, `.ico`, PNG in die Zwischenablage, Schnell-Export | 012, 077 | M–L | offen |
+| 079 | [079-export-android-web.md](079-export-android-web.md) | Android Adaptive Icons, Web/PWA-Satz mit Manifest und Favicon-SVG | 078 | M | offen |
+| 080 | [080-png-layer.md](080-png-layer.md) | Bild als Layer importieren/ersetzen, Layer-Handles auf dem Canvas (`position`) | 002, 007, 010 | M | offen |
+| 081 | [081-mockups.md](081-mockups.md) | Icon im Kontext: Dock, Home Screen, Spotlight, Taskleiste (eigene neutrale Grafik) | 057, 077 | M | offen |
+| 082 | [082-startbildschirm-vorlagen.md](082-startbildschirm-vorlagen.md) | Startbildschirm mit Vorschaubildern, Vorlagen (iOS-Keylines, macOS, watchOS, Light/Dark) | 003, 015, 056 | M | offen |
+| 083 | [083-autosave-wiederherstellung.md](083-autosave-wiederherstellung.md) | Wiederherstellungs-Schnappschüsse, Angebot nach Absturz | 002, 003, 015 | M | offen |
+| 084 | [084-symbol-bibliotheken.md](084-symbol-bibliotheken.md) | Tabler, Phosphor, eigene Symbol-Bibliothek | 013, 030 | M | offen |
+| 085 | [085-kuerzel-editor.md](085-kuerzel-editor.md) | Kürzel im Dialog aufnehmen, Konflikte, Zurücksetzen, `keymap.json` schreiben | 005, 015, 068 | M | offen |
+| 086 | [086-ki-einrichtung-verlauf.md](086-ki-einrichtung-verlauf.md) | MCP-Eintrag für Claude Desktop/Cursor per Klick, Verbindungstest, KI-Verlauf am AI-Badge | 018 | M | offen |
 
 ## Folge-Ideen (noch ohne Prompt)
 
 - Werbe-Webseite `/site` wie bei den Schwesterprojekten.
-- Weitere Icon-Sets im Symbol-Picker; eigene Bibliothek wiederverwendbarer Formen.
-- Import von Icon-Composer-Projekten mit PNG-Assets bearbeiten (heute nur durchreichen).
+
+## Abdeckung der Analyse vom 30.10.2026
+
+| Abschnitt der Analyse | Prompt |
+|---|---|
+| §1.1 Tinted/Clear, Layer-Fill, Liquid Glass, `plus-darker`, Radialverlauf (§1.3) | 077 |
+| §1.1 Exporte: appiconset, `.icns`, `.ico`, Copy PNG, Schnell-Export | 078 |
+| §1.1 Exporte: Android Adaptive, Web/PWA | 079 |
+| §1.1 Kontext-Mockups | 081 |
+| §1.1 PNG-Layer-Import und -Transformation | 080 |
+| §1.2 Pipette, Swatches, Paletten, Alpha, Farbräume | 074 |
+| §1.2 Effekte und Masken je Element | 076 |
+| §1.2 Live-Typografie | 075 |
+| §1.3 Drag & Drop von Dateien, Bild-Zwischenablage | 071 |
+| §1.3 Autosave/Crash-Recovery | 083 |
+| §1.3 Startbildschirm/Vorlagen · Symbol-Sets/eigene Bibliothek | 082 · 084 |
+| §2.1 Bounding-Box-Inspektor | 062 |
+| §2.2 Z-Reihenfolge im Baum | 063 |
+| §2.3 Constraints | 065 |
+| §2.4 Hilfslinien, Bemaßungen, Live-Fill | 066 |
+| §2.5 Bugs (Lock, P3, Pattern, Blend-Export) · Live-Vorschau in Dialogen · Drag-Leistung | 064 · 073 · 033 |
+| §3.1 Auswahlwerkzeug, Aktiv-Status | 061 |
+| §3.2 Werkzeuge vs. Einmal-Aktionen | 068 |
+| §3.3 Kontextleiste | 067 |
+| §3.4 Canvas-Kontextmenü · Toolbar-Direktzugriffe, doppeltes Undo | 070 · 069 |
+| §3.5 Baum · Properties-Panel | 072 · 073 |
+| §3.6 Kürzel-Editor · MCP-Einrichtung/KI-Verlauf | 085 · 086 |
