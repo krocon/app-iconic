@@ -1,13 +1,23 @@
 import { ExportAppearance, PNG_SIZES, PngSize } from '../../core/export/export.models';
 import { MaskShape } from '../canvas/canvas-view.store';
 import { DEFAULT_TINT, parseTint } from '../canvas/tinted';
+import {
+  AppIconPlatform,
+  isPackage,
+  PackageFormat,
+  packageFiles,
+  packageKind,
+  PLATFORMS,
+} from './export-packages';
 
 /**
  * What an export writes (design 012 E14–E16): the dialog edits it, the actions take it as
  * serialisable arguments (AI rule). Pure.
  */
 
-export type ExportFormat = 'svg' | 'png';
+/** Loose files (012) or a package (078: Xcode icon set, `.icns`, `.ico`). */
+export type ExportFormat = 'svg' | 'png' | PackageFormat;
+export const FORMATS: readonly ExportFormat[] = ['png', 'svg', 'appiconset', 'icns', 'ico'];
 export const MASKS: readonly MaskShape[] = ['none', 'squircle', 'circle'];
 /** In this order (file order, Rust `APPEARANCES`); `tinted` since prompt 077. */
 export const APPEARANCES: readonly ExportAppearance[] = ['light', 'dark', 'tinted'];
@@ -25,6 +35,8 @@ export interface ExportChoice {
   tint: string;
   /** Opaque path of the target folder; `null` = not chosen yet. */
   targetDir: string | null;
+  /** `appiconset` only: the platforms of the icon set (prompt 078). */
+  platforms: AppIconPlatform[];
 }
 
 export const DEFAULT_CHOICE: ExportChoice = {
@@ -36,6 +48,7 @@ export const DEFAULT_CHOICE: ExportChoice = {
   dimensions: false,
   tint: DEFAULT_TINT,
   targetDir: null,
+  platforms: ['ios', 'macos'],
 };
 
 export { EXPORT_ARGS } from '../../core/actions/export-action-args';
@@ -63,7 +76,9 @@ export function exportRequest(
     args['appearances'] === undefined ? base.appearances : list(args['appearances'], APPEARANCES);
   const sizes = args['sizes'] === undefined ? base.sizes : list(args['sizes'], PNG_SIZES);
   const tint = args['tint'] === undefined ? base.tint : parseTint(args['tint']);
-  if (!appearances || !sizes || !tint) return null;
+  const platforms =
+    args['platforms'] === undefined ? base.platforms : list(args['platforms'], PLATFORMS);
+  if (!appearances || !sizes || !tint || !platforms) return null;
   return {
     format,
     appearances,
@@ -73,12 +88,15 @@ export function exportRequest(
     dimensions: (args['dimensions'] as boolean | undefined) ?? base.dimensions,
     tint,
     targetDir: (args['targetDir'] as string | undefined) ?? base.targetDir,
+    platforms,
     overwrite: (args['overwrite'] as boolean | undefined) ?? false,
   };
 }
 
 /** The choice can be exported (something to write). */
 export function choiceReady(c: ExportChoice): boolean {
+  if (c.format === 'appiconset') return c.platforms.length > 0;
+  if (isPackage(c.format)) return true;
   return c.appearances.length > 0 && (c.format === 'svg' || c.sizes.length > 0);
 }
 
@@ -90,6 +108,9 @@ export function fileBaseName(docName: string | null, untitled: string): string {
 
 /** Number of files an export writes. */
 export function fileCount(c: ExportChoice): number {
+  const kind = packageKind(c);
+  if (kind) return packageFiles(kind, 'x').files.length;
+  if (isPackage(c.format)) return 0;
   return c.appearances.length * (c.format === 'png' ? c.sizes.length : 1);
 }
 

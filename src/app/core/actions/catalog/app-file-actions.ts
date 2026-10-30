@@ -1,5 +1,5 @@
 import { ActionDef, APP, FILE, MAX_RECENT_ACTIONS } from './action-def';
-import { EXPORT_ARGS } from '../export-action-args';
+import { COPY_PNG_ARGS, EXPORT_ARGS } from '../export-action-args';
 
 /** The actions of app, AI control, settings and file (split from `action-catalog.ts` in prompt 033). */
 export const APP_FILE_ACTIONS: readonly ActionDef[] = [
@@ -37,6 +37,12 @@ export const APP_FILE_ACTIONS: readonly ActionDef[] = [
   // without arguments the export dialog; with them straight to the files (design 012 E14)
   FILE('file.exportSvg', 'Export SVG…', { args: EXPORT_ARGS }),
   FILE('file.exportPng', 'Export PNG…', { args: EXPORT_ARGS }),
+  // packages (prompt 078)
+  FILE('file.exportAppIconSet', 'Export Xcode Icon Set…', { args: EXPORT_ARGS }),
+  FILE('file.exportIcns', 'Export macOS .icns…', { args: EXPORT_ARGS }),
+  FILE('file.exportIco', 'Export Windows .ico…', { args: EXPORT_ARGS }),
+  FILE('file.exportAgain', 'Export Again'),
+  FILE('file.copyPng', 'Copy as PNG', { args: COPY_PNG_ARGS }),
   FILE('file.revealExport', 'Show Last Export in Folder'),
   FILE('file.save', 'Save'),
   FILE('file.saveAs', 'Save As…'),

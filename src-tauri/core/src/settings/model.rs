@@ -67,7 +67,7 @@ pub struct CanvasSettings {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportSettings {
-    /// `png` | `svg`.
+    /// `png` | `svg` | `appiconset` | `icns` | `ico` (prompt 078).
     pub format: String,
     pub appearances: Vec<String>,
     pub sizes: Vec<u32>,
@@ -75,6 +75,8 @@ pub struct ExportSettings {
     pub effects: bool,
     /// The last export folder (opaque path) or `None`.
     pub target_dir: Option<String>,
+    /// Platforms of the Xcode icon set: `ios`, `macos`, `watchos` (prompt 078).
+    pub platforms: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -290,6 +292,7 @@ impl Default for Settings {
                 mask: "none".into(),
                 effects: false,
                 target_dir: None,
+                platforms: vec!["ios".into(), "macos".into()],
             },
             freehand: FreehandSettings {
                 epsilon: 2.5,

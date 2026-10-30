@@ -8,7 +8,9 @@ describe('TauriExportApi without Tauri', () => {
       api.pickExportDir(),
       api.exportSvg([], '/d', opts),
       api.exportPng([], [16], '/d', opts, () => undefined),
+      api.exportPackage({ kind: 'ico' }, [], '/d', opts, () => undefined),
       api.cancelExport(),
+      api.copyPng('<svg/>', 1024),
     ]) {
       await expect(p).rejects.toMatchObject({ code: 'backend_unavailable' });
     }

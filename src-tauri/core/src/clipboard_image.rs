@@ -3,6 +3,9 @@
 //! the app crate (`arboard`); this module only checks and encodes what it delivered – it never
 //! trusts the source: sides and pixel count are limited, the buffer must fit the size, the PNG
 //! must stay under the image limit of `image_file`.
+//!
+//! The other way (prompt 078 E7): [`copy_svg`] renders the icon with resvg and hands straight
+//! RGBA to an [`ImageSink`] (the platform clipboard in the app crate, a fake in tests).
 
 use crate::error::{FsError, FsErrorCode};
 use crate::icon::image_file::{ImageFile, MAX_IMAGE};
@@ -25,6 +28,44 @@ pub struct RgbaImage<'a> {
 /// clipboard holds no image.
 pub trait ImageSource {
     fn with_image<R>(&mut self, f: impl FnOnce(RgbaImage<'_>) -> R) -> Result<Option<R>, FsError>;
+}
+
+/// A target for an image (the platform clipboard, a fake in tests).
+pub trait ImageSink {
+    fn set_image(&mut self, img: RgbaImage<'_>) -> Result<(), FsError>;
+}
+
+/// Straight (not premultiplied) RGBA bytes of a pixmap, row by row.
+pub fn straight_rgba(pixmap: &Pixmap) -> Vec<u8> {
+    let mut out = Vec::with_capacity(pixmap.pixels().len() * 4);
+    for p in pixmap.pixels() {
+        let c = p.demultiply();
+        out.extend_from_slice(&[c.red(), c.green(), c.blue(), c.alpha()]);
+    }
+    out
+}
+
+/// Renders `svg` square in `size` px (one of the export sizes) and puts it into `sink`.
+pub fn copy_svg(
+    svg: &str,
+    size: u32,
+    fonts: std::sync::Arc<resvg::usvg::fontdb::Database>,
+    sink: &mut impl ImageSink,
+) -> Result<(), FsError> {
+    if !crate::export::PNG_SIZES.contains(&size) {
+        return Err(FsError::new(
+            FsErrorCode::InvalidRequest,
+            format!("size {size} is not offered"),
+            None,
+        ));
+    }
+    let pixmap = crate::export::png::render_png(svg, size, fonts)?;
+    let bytes = straight_rgba(&pixmap);
+    sink.set_image(RgbaImage {
+        width: size,
+        height: size,
+        bytes: &bytes,
+    })
 }
 
 fn invalid(message: &str) -> FsError {
@@ -117,6 +158,33 @@ mod tests {
         let back = Pixmap::decode_png(&png).unwrap();
         let p = back.pixel(1, 0).unwrap().demultiply();
         assert_eq!((p.blue(), p.alpha()), (255, 128));
+    }
+
+    #[derive(Default)]
+    struct Sink(Option<(u32, u32, Vec<u8>)>);
+
+    impl ImageSink for Sink {
+        fn set_image(&mut self, img: RgbaImage<'_>) -> Result<(), FsError> {
+            self.0 = Some((img.width, img.height, img.bytes.to_vec()));
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn copy_renders_straight_rgba_in_the_size() {
+        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><rect width="1" height="2" fill="#f00" fill-opacity="0.5"/></svg>"##;
+        let fonts = std::sync::Arc::new(resvg::usvg::fontdb::Database::new());
+        let mut sink = Sink::default();
+        copy_svg(svg, 16, fonts.clone(), &mut sink).unwrap();
+        let (w, h, bytes) = sink.0.unwrap();
+        assert_eq!((w, h, bytes.len()), (16, 16, 16 * 16 * 4));
+        // left: half transparent red, straight (not 128,0,0); right: empty
+        assert_eq!(&bytes[..4], &[255, 0, 0, 128]);
+        assert_eq!(bytes[15 * 4 + 3], 0);
+        let mut sink = Sink::default();
+        let err = copy_svg(svg, 100, fonts, &mut sink).unwrap_err();
+        assert_eq!(err.code, FsErrorCode::InvalidRequest);
+        assert!(sink.0.is_none());
     }
 
     #[test]

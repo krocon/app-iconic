@@ -42,6 +42,7 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
       mask: 'none',
       effects: false,
       targetDir: null,
+      platforms: ['ios', 'macos'],
     },
     freehand: { epsilon: 2.5, strokeWidth: 8, closed: false },
     debug: { logUndoGrouping: false },
@@ -214,7 +215,7 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
           appearance: 'light',
           mask: 'circle',
         },
-        export: { format: 'svg', mask: 'squircle' },
+        export: { format: 'ico', mask: 'squircle', platforms: ['watchos', 'ios', 'watchos'] },
       },
       expect: [
         ['theme', 'dark'],
@@ -223,8 +224,9 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
         ['canvas.selectionMode', 'boxed'],
         ['canvas.appearance', 'light'],
         ['canvas.mask', 'circle'],
-        ['export.format', 'svg'],
+        ['export.format', 'ico'],
         ['export.mask', 'squircle'],
+        ['export.platforms', ['ios', 'watchos']],
       ],
     },
     {

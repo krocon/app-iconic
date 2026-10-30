@@ -4,13 +4,16 @@ import {
   ExportProgress,
   ExportReport,
   ExportVariant,
+  PackageKind,
+  PackageSource,
   PngSize,
 } from '../app/core/export/export.models';
 import { FsError } from '../app/core/errors/fs-error';
+import { packageFiles } from '../app/features/export/export-packages';
 
 /** One call of the fake, as the backend would get it. */
 export interface FakeExportCall {
-  kind: 'svg' | 'png';
+  kind: 'svg' | 'png' | 'package';
   variants: ExportVariant[];
   sizes: PngSize[];
   targetDir: string;
@@ -100,6 +103,62 @@ export class FakeExportApi extends ExportApi {
       onProgress({ done: files.length, total: names.length, name });
     }
     return { files, cancelled: false };
+  }
+
+  /** Package calls with their kind and sources (prompt 078). */
+  readonly packages: { kind: PackageKind; sources: PackageSource[]; targetDir: string }[] = [];
+
+  /**
+   * Package export like Rust: names from `packageFiles` (the mirror of the Rust plan), a folder
+   * counts as one target (exists → `already_exists`), a cancelled folder leaves nothing.
+   */
+  async exportPackage(
+    kind: PackageKind,
+    sources: PackageSource[],
+    targetDir: string,
+    options: ExportFileOptions,
+    onProgress: (p: ExportProgress) => void,
+  ): Promise<ExportReport> {
+    this.calls.push({ kind: 'package', variants: [], sizes: [], targetDir, options });
+    this.packages.push({ kind, sources, targetDir });
+    const plan = packageFiles(kind, options.baseName);
+    const targets = plan.folder ? [plan.folder] : plan.files;
+    this.check(targetDir, targets, options);
+    this.cancelled = false;
+    const root = plan.folder ? `${targetDir}/${plan.folder}` : targetDir;
+    const files: ExportReport['files'] = [];
+    const written: [string, string][] = [];
+    for (const name of plan.files) {
+      if (this.hold) await this.hold;
+      if (this.cancelled) {
+        if (plan.folder) return { files: [], cancelled: true, folder: null };
+        break;
+      }
+      const path = `${root}/${name}`;
+      written.push([path, `package:${name}`]);
+      if (!plan.folder) this.files.set(path, `package:${name}`);
+      files.push({ name, path, transparent: name.endsWith('.png') ? false : null });
+      onProgress({ done: files.length, total: plan.files.length, name });
+    }
+    if (this.cancelled) return { files, cancelled: true, folder: null };
+    if (plan.folder) {
+      this.files.set(root, 'folder');
+      for (const [p, v] of written) this.files.set(p, v);
+    }
+    return { files, cancelled: false, folder: plan.folder ? root : null };
+  }
+
+  /** PNGs put into the "clipboard" (prompt 078). */
+  readonly clipboard: { svg: string; size: PngSize }[] = [];
+
+  copyPng(svg: string, size: PngSize): Promise<void> {
+    if (this.failNext) {
+      const e = this.failNext;
+      this.failNext = null;
+      return Promise.reject(e);
+    }
+    this.clipboard.push({ svg, size });
+    return Promise.resolve();
   }
 
   cancelExport(): Promise<void> {

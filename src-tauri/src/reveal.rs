@@ -57,7 +57,8 @@ pub fn reveal_command(os: &str, path: &Path) -> (String, Vec<String>) {
 #[tauri::command]
 pub async fn reveal_export(exported: State<'_, Exported>, path: String) -> Result<(), FsError> {
     let p = std::path::PathBuf::from(&path);
-    if !exported.contains(&path) || !p.is_file() {
+    // a file or the folder of a package export (`AppIcon.appiconset`, prompt 078)
+    if !exported.contains(&path) || !p.exists() {
         return Err(FsError::new(
             FsErrorCode::NotFound,
             "not an exported file",

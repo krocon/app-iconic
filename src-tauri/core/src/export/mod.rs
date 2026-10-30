@@ -6,8 +6,13 @@
 //!   [`crate::fonts::system`], shared with text to path, prompt 013)
 //! - [`png`]    one SVG → one pixmap, without loading anything from outside (design 012 E9)
 //! - [`files`]  file names, overwrite check, atomic writes, progress and cancelling (E10–E13)
+//! - [`package`] package exports (prompt 078): plan + one writer for folders and containers;
+//!   [`appiconset`] Xcode icon set, [`containers`] `.icns`/`.ico`
 
+pub mod appiconset;
+pub mod containers;
 pub mod files;
+pub mod package;
 pub use crate::fonts::system as fonts;
 pub mod png;
 
@@ -54,6 +59,9 @@ pub struct ExportReport {
     pub files: Vec<ExportedFile>,
     /// Stopped by `cancel_export`; the files written so far are complete.
     pub cancelled: bool,
+    /// Package exports with a folder (`AppIcon.appiconset`, prompt 078): its path.
+    #[serde(default)]
+    pub folder: Option<String>,
 }
 
 /// Sent after every written PNG (design 012 E12).

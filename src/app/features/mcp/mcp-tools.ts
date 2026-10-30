@@ -146,6 +146,13 @@ export class McpTools {
       case 'export_png':
       case 'export_svg':
         return this.export(tool === 'export_png' ? 'png' : 'svg', a);
+      // packages (prompt 078): the format is an argument
+      case 'export_package': {
+        const f = a['format'];
+        if (f !== 'appiconset' && f !== 'icns' && f !== 'ico')
+          throw mcpError('invalid_request', 'format: appiconset, icns or ico');
+        return this.export(f, a);
+      }
       case 'preview_svg':
         return this.previewSvg(a);
       default:
@@ -257,13 +264,17 @@ export class McpTools {
       throw mcpError('denied', 'the user did not allow the export');
     }
     const args: Args = { targetDir: dir };
-    for (const k of ['appearances', 'sizes', 'mask', 'effects', 'tint', 'overwrite']) {
+    for (const k of ['appearances', 'sizes', 'mask', 'effects', 'tint', 'overwrite', 'platforms']) {
       if (a[k] !== undefined) args[k] = a[k];
     }
     const o = await this.exporter.runAction(format, args);
     switch (o.kind) {
       case 'done':
-        return { files: o.report.files, transparentWarning: o.transparentWarning };
+        return {
+          files: o.report.files,
+          transparentWarning: o.transparentWarning,
+          ...(o.report.folder ? { folder: o.report.folder } : {}),
+        };
       case 'cancelled':
         return { files: o.report.files, cancelled: true };
       case 'exists':

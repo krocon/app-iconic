@@ -13,15 +13,16 @@ import { Modal } from '../../shared/dialog/modal';
 import { ColorButton } from '../../shared/controls/color-button';
 import { browserColor, toHex, toRgba } from '../../shared/controls/color-value';
 import { MaskShape } from '../canvas/canvas-view.store';
-import { APPEARANCES, choiceReady, ExportFormat, fileCount, MASKS } from './export-options';
+import { APPEARANCES, choiceReady, fileCount, FORMATS, MASKS } from './export-options';
+import { AppIconPlatform, isPackage, PLATFORMS } from './export-packages';
 import { ExportOutcome, ExportService, noticeOf } from './export.service';
 import { EXPORT_TEXTS } from './export-texts';
 
 type Phase = 'edit' | 'running' | 'exists' | 'result';
 
 /**
- * File › Export… (design 012 E16): format, appearances, sizes (PNG), mask, effects and target
- * folder – the last choice is remembered (E15). While PNGs render: progress and "Stop"; existing
+ * File › Export… (design 012 E16): format (078: also Xcode icon set, `.icns`, `.ico` with their
+ * platforms), appearances, sizes (PNG), mask, effects and target folder – the last choice is remembered (E15). While PNGs render: progress and "Stop"; existing
  * files: inline question (E11); afterwards the result with the Apple hint (E13).
  */
 @Component({
@@ -31,7 +32,7 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
     <app-modal [heading]="t.title" width="32rem" (closed)="close()">
       <fieldset class="group" [disabled]="phase() === 'running'">
         <legend>{{ t.format }}</legend>
-        <div class="row">
+        <div class="row wrap">
           @for (f of formats; track f) {
             <label class="check">
               <input
@@ -46,36 +47,61 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
             </label>
           }
         </div>
+        @if (hint(); as h) {
+          <p class="hint" data-testid="export-format-hint">{{ h }}</p>
+        }
       </fieldset>
-      <fieldset class="group" [disabled]="phase() === 'running'">
-        <legend>{{ t.appearances }}</legend>
-        <div class="row">
-          @for (a of appearances; track a) {
-            <label class="check">
-              <input
-                type="checkbox"
-                [attr.data-testid]="'export-appearance-' + a"
-                [checked]="choice().appearances.includes(a)"
-                (change)="toggleAppearance(a)"
-              />
-              {{ t.appearanceNames[a] }}
-            </label>
-          }
-          @if (choice().appearances.includes('tinted')) {
-            <!-- tint of the tinted approximation (prompt 077 E2): not part of the document -->
-            <span class="check">
-              <app-color-button
-                testId="export-tint"
-                [value]="choice().tint"
-                [label]="t.tint"
-                [disabled]="phase() === 'running'"
-                (edited)="setTint($event)"
-              />
-              {{ t.tint }}
-            </span>
-          }
-        </div>
-      </fieldset>
+      @if (choice().format === 'appiconset') {
+        <fieldset class="group" [disabled]="phase() === 'running'">
+          <legend>{{ t.platforms }}</legend>
+          <div class="row wrap">
+            @for (p of platforms; track p) {
+              <label class="check">
+                <input
+                  type="checkbox"
+                  [attr.data-testid]="'export-platform-' + p"
+                  [checked]="choice().platforms.includes(p)"
+                  (change)="togglePlatform(p)"
+                />
+                {{ t.platformNames[p] }}
+              </label>
+            }
+          </div>
+        </fieldset>
+      }
+      @if (showAppearances()) {
+        <fieldset class="group" [disabled]="phase() === 'running'">
+          <legend>{{ isSet() ? t.appearancesIos : t.appearances }}</legend>
+          <div class="row">
+            @for (a of appearances; track a) {
+              <label class="check">
+                <!-- the icon set always has the default (light) image -->
+                <input
+                  type="checkbox"
+                  [attr.data-testid]="'export-appearance-' + a"
+                  [checked]="choice().appearances.includes(a) || (isSet() && a === 'light')"
+                  [disabled]="isSet() && a === 'light'"
+                  (change)="toggleAppearance(a)"
+                />
+                {{ t.appearanceNames[a] }}
+              </label>
+            }
+            @if (choice().appearances.includes('tinted') && !isSet()) {
+              <!-- tint of the tinted approximation (prompt 077 E2): not part of the document -->
+              <span class="check">
+                <app-color-button
+                  testId="export-tint"
+                  [value]="choice().tint"
+                  [label]="t.tint"
+                  [disabled]="phase() === 'running'"
+                  (edited)="setTint($event)"
+                />
+                {{ t.tint }}
+              </span>
+            }
+          </div>
+        </fieldset>
+      }
       @if (choice().format === 'png') {
         <fieldset class="group" [disabled]="phase() === 'running'">
           <legend>{{ t.sizes }}</legend>
@@ -95,19 +121,21 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
         </fieldset>
       }
       <div class="fields">
-        <label class="field">
-          <span>{{ t.mask }}</span>
-          <select
-            class="input"
-            data-testid="export-mask"
-            [disabled]="phase() === 'running'"
-            (change)="setMask($event)"
-          >
-            @for (m of masks; track m) {
-              <option [value]="m" [selected]="choice().mask === m">{{ t.masks[m] }}</option>
-            }
-          </select>
-        </label>
+        @if (showMask()) {
+          <label class="field">
+            <span>{{ t.mask }}</span>
+            <select
+              class="input"
+              data-testid="export-mask"
+              [disabled]="phase() === 'running'"
+              (change)="setMask($event)"
+            >
+              @for (m of masks; track m) {
+                <option [value]="m" [selected]="choice().mask === m">{{ t.masks[m] }}</option>
+              }
+            </select>
+          </label>
+        }
         <label class="check">
           <input
             type="checkbox"
@@ -220,85 +248,15 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
       </div>
     </app-modal>
   `,
-  styles: `
-    .group {
-      margin: 0 0 var(--space-3);
-      padding: 0;
-      border: 0;
-      & legend {
-        margin-bottom: var(--space-1);
-        font-weight: 600;
-      }
-    }
-    .row {
-      display: flex;
-      gap: var(--space-3);
-      &.wrap {
-        flex-wrap: wrap;
-      }
-    }
-    .check {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-1);
-    }
-    .fields {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
-    }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-1);
-    }
-    .target {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-    }
-    .path {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      color: var(--color-text-muted);
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      /* rtl: a long path is cut at its start, the folder name stays visible; <bdi> keeps it ltr */
-      direction: rtl;
-      text-align: left;
-    }
-    .status {
-      min-height: 3.2em;
-      margin: var(--space-3) 0 var(--space-2);
-      & p {
-        margin: 0 0 var(--space-1);
-      }
-      & progress {
-        width: 70%;
-        margin-right: var(--space-2);
-        vertical-align: middle;
-      }
-    }
-    .count {
-      color: var(--color-text-muted);
-    }
-    .warning {
-      color: var(--color-warning);
-    }
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: var(--space-2);
-    }
-  `,
+  styleUrl: './export-dialog.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExportDialog {
   protected readonly service = inject(ExportService);
   private readonly dialogs = inject(DialogService);
   protected readonly t = EXPORT_TEXTS;
-  protected readonly formats: readonly ExportFormat[] = ['png', 'svg'];
+  protected readonly formats = FORMATS;
+  protected readonly platforms = PLATFORMS;
   protected readonly appearances = APPEARANCES;
   protected readonly sizes = PNG_SIZES;
   protected readonly masks = MASKS;
@@ -307,6 +265,20 @@ export class ExportDialog {
   protected readonly phase = signal<Phase>('edit');
   private readonly outcome = signal<ExportOutcome | null>(null);
   protected readonly count = computed(() => fileCount(this.choice()));
+  protected readonly isSet = computed(() => this.choice().format === 'appiconset');
+  /** `.icns` and `.ico` are always Light (design 078 E9). */
+  protected readonly showAppearances = computed(
+    () => !isPackage(this.choice().format) || this.isSet(),
+  );
+  /** The icon set and `.icns` bring their own masks (078 E3/E4). */
+  protected readonly showMask = computed(() => {
+    const f = this.choice().format;
+    return !isPackage(f) || f === 'ico';
+  });
+  protected readonly hint = computed(() => {
+    const f = this.choice().format;
+    return isPackage(f) ? this.t.formatHints[f] : null;
+  });
   protected readonly ready = computed(
     () => choiceReady(this.choice()) && !!this.choice().targetDir && this.service.canExport(),
   );
@@ -323,6 +295,12 @@ export class ExportDialog {
     const list = this.choice().appearances;
     const next = list.includes(a) ? list.filter((x) => x !== a) : [...list, a];
     this.service.update({ appearances: APPEARANCES.filter((x) => next.includes(x)) });
+  }
+
+  protected togglePlatform(p: AppIconPlatform): void {
+    const list = this.choice().platforms;
+    const next = list.includes(p) ? list.filter((x) => x !== p) : [...list, p];
+    this.service.update({ platforms: PLATFORMS.filter((x) => next.includes(x)) });
   }
 
   protected setTint(color: string): void {

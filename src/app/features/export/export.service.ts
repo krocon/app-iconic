@@ -1,6 +1,17 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { ExportApi } from '../../core/export/export-api';
-import { ExportProgress, ExportReport, ExportVariant } from '../../core/export/export.models';
+import {
+  ExportAppearance,
+  ExportProgress,
+  ExportReport,
+  ExportVariant,
+  PackageKind,
+  PackageSource,
+  PNG_SIZES,
+  PngSize,
+} from '../../core/export/export.models';
+import { AskService } from '../../shared/ask/ask.service';
+import { DocumentStore } from '../document/document.store';
 import { describeFsError, toFsError } from '../../core/errors/fs-error';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { IconDocument } from '../document/icon-document';
@@ -15,6 +26,7 @@ import {
   exportVariants,
   fileBaseName,
 } from './export-options';
+import { isPackage, packageKind, packageSources } from './export-packages';
 import { exportSvg, RasterSizes } from './export-svg';
 import { EXPORT_TEXTS as T } from './export-texts';
 
@@ -57,6 +69,7 @@ export class ExportService {
   private readonly dialogs = inject(DialogService);
   /** The tint of the canvas is the default tint of a tinted export (prompt 077 E2). */
   private readonly canvas = inject(CanvasViewStore);
+  private readonly ask = inject(AskService);
 
   readonly choice = signal<ExportChoice>(DEFAULT_CHOICE);
   readonly running = signal(false);
@@ -66,6 +79,15 @@ export class ExportService {
   readonly canExport = computed(() => !!this.files.store() && !this.running());
   /** Stop pressed before the backend had the job (while the SVGs were built). */
   private stopRequested = false;
+  /** The last finished export per document for "Export Again" (prompt 078, session only). */
+  private readonly lastRequests = new WeakMap<DocumentStore, ExportRequest>();
+  private readonly lastVersion = signal(0);
+  /** The window's document has an export to repeat. */
+  readonly canExportAgain = computed(() => {
+    this.lastVersion();
+    const store = this.files.store();
+    return !!store && !this.running() && this.lastRequests.has(store);
+  });
 
   openDialog(format: ExportFormat): void {
     this.choice.update((c) => ({ ...c, format, tint: this.canvas.options().tint }));
@@ -101,6 +123,51 @@ export class ExportService {
     }));
   }
 
+  /** The SVG sources of a package (design 078 E1), built from the current document. */
+  async packageSources(
+    doc: IconDocument,
+    kind: PackageKind,
+    req: ExportChoice,
+  ): Promise<PackageSource[]> {
+    const raster = await rasterSizes(doc);
+    return packageSources(kind, req).map((s) => ({
+      id: s.id,
+      svg: exportSvg(
+        doc,
+        s.appearance,
+        {
+          mask: s.mask,
+          frame: s.frame,
+          effects: req.effects,
+          dimensions: req.dimensions,
+          tint: s.tint,
+        },
+        raster,
+      ),
+    }));
+  }
+
+  private async write(
+    doc: IconDocument,
+    req: ExportRequest,
+    targetDir: string,
+  ): Promise<ExportReport | 'stopped'> {
+    const options = { baseName: fileBaseName(doc.name, T.untitled), overwrite: req.overwrite };
+    const onProgress = (p: ExportProgress) => this.progress.set(p);
+    if (isPackage(req.format)) {
+      const kind = packageKind(req);
+      if (!kind) throw { code: 'invalid_request', message: 'no platform', path: null };
+      const sources = await this.packageSources(doc, kind, req);
+      if (this.stopRequested) return 'stopped';
+      return this.api.exportPackage(kind, sources, targetDir, options, onProgress);
+    }
+    const variants = await this.variants(doc, req);
+    if (this.stopRequested) return 'stopped';
+    return req.format === 'svg'
+      ? this.api.exportSvg(variants, targetDir, options)
+      : this.api.exportPng(variants, req.sizes, targetDir, options, onProgress);
+  }
+
   async export(req: ExportRequest): Promise<ExportOutcome> {
     const store = this.files.store();
     if (!store) return { kind: 'noDocument' };
@@ -110,18 +177,15 @@ export class ExportService {
     this.progress.set(null);
     this.stopRequested = false;
     try {
-      const doc = store.document();
-      const variants = await this.variants(doc, req);
-      if (this.stopRequested) return { kind: 'cancelled', report: { files: [], cancelled: true } };
-      const options = { baseName: fileBaseName(doc.name, T.untitled), overwrite: req.overwrite };
-      const report =
-        req.format === 'svg'
-          ? await this.api.exportSvg(variants, req.targetDir, options)
-          : await this.api.exportPng(variants, req.sizes, req.targetDir, options, (p) =>
-              this.progress.set(p),
-            );
+      const report = await this.write(store.document(), req, req.targetDir);
+      if (report === 'stopped')
+        return { kind: 'cancelled', report: { files: [], cancelled: true } };
       if (report.cancelled) return { kind: 'cancelled', report };
-      if (report.files.length) this.lastExport.set(report.files[0].path);
+      const shown = report.folder ?? report.files[0]?.path;
+      if (shown) this.lastExport.set(shown);
+      this.lastRequests.set(store, { ...req, overwrite: false });
+      this.lastVersion.update((v) => v + 1);
+      // only loose PNGs: package exports flatten the App Store icons themselves (design 078 E3)
       const transparentWarning =
         req.format === 'png' && req.mask === 'none' && report.files.some((f) => f.transparent);
       return { kind: 'done', report, transparentWarning };
@@ -152,6 +216,65 @@ export class ExportService {
     if (!this.running()) return;
     this.stopRequested = true;
     void this.api.cancelExport().catch(() => undefined);
+  }
+
+  /**
+   * `file.exportAgain` (prompt 078): the last export of this document with the same choice, the
+   * folder included; existing files (normally the last export's) are replaced after a question.
+   */
+  async exportAgain(): Promise<ExportOutcome> {
+    const store = this.files.store();
+    const req = store && this.lastRequests.get(store);
+    if (!req) return { kind: 'noDocument' };
+    let outcome = await this.export(req);
+    if (outcome.kind === 'exists') {
+      const answer = await this.ask.ask({
+        title: T.againTitle,
+        message: T.exists,
+        buttons: [
+          { id: 'cancel', label: T.cancel },
+          { id: 'replace', label: T.replace, primary: true },
+        ],
+        cancel: 'cancel',
+      });
+      if (answer === 'replace') outcome = await this.export({ ...req, overwrite: true });
+    }
+    this.files.notice.set(noticeOf(outcome));
+    return outcome;
+  }
+
+  /**
+   * `file.copyPng` (prompt 078 E7): the icon as the canvas shows it (appearance, mask, effects,
+   * tint) rendered by Rust into the system clipboard. `size` one of the export sizes (1024).
+   */
+  async copyPng(args: { size?: unknown; appearance?: unknown } = {}): Promise<boolean> {
+    const store = this.files.store();
+    if (!store) {
+      this.files.notice.set(T.noDocument);
+      return false;
+    }
+    const size = (args.size ?? 1024) as PngSize;
+    const view = this.canvas.options();
+    const appearance = (args.appearance ?? view.appearance) as ExportAppearance;
+    if (!PNG_SIZES.includes(size)) {
+      this.files.notice.set(T.copyFailed(T.badArguments));
+      return false;
+    }
+    try {
+      const doc = store.document();
+      const svg = exportSvg(
+        doc,
+        appearance,
+        { mask: view.mask, effects: view.effects, tint: view.tint },
+        await rasterSizes(doc),
+      );
+      await this.api.copyPng(svg, size);
+      this.files.notice.set(T.copied(size));
+      return true;
+    } catch (e) {
+      this.files.notice.set(T.copyFailed(describeFsError(toFsError(e))));
+      return false;
+    }
   }
 
   /**

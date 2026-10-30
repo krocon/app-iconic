@@ -5,6 +5,8 @@ import { camscannerDocument } from '../../../testing/documents';
 import { ActionService } from '../../core/actions/action.service';
 import { OS } from '../../core/actions/platform';
 import { DialogService } from '../../shared/dialog/dialog.service';
+import { AskService } from '../../shared/ask/ask.service';
+import { tintedMatrix } from '../canvas/tinted';
 import { DocumentStore } from '../document/document.store';
 import { FilesService } from '../files/files.service';
 import { registerExportActions } from './export-actions';
@@ -153,5 +155,75 @@ describe('ExportService (design 012)', () => {
     api.files.clear();
     expect(await service.reveal()).toBe(false);
     expect(files.notice()).toContain('could not be shown');
+  });
+
+  describe('packages, export again, copy PNG (prompt 078)', () => {
+    it('icon set: sources per platform, folder report, reveal shows the folder', async () => {
+      const o = await service.export(
+        req({ format: 'appiconset', appearances: ['light', 'dark', 'tinted'], tint: '#ff0000' }),
+      );
+      expect(o.kind).toBe('done');
+      const call = api.packages[0];
+      expect(call.kind).toEqual({
+        kind: 'appIconSet',
+        ios: true,
+        appearances: ['dark', 'tinted'],
+        macos: true,
+        watchos: false,
+      });
+      const ids = call.sources.map((s) => s.id);
+      expect(ids).toEqual(['ios-light', 'ios-dark', 'ios-tinted', 'macos']);
+      const svg = (id: string) => call.sources.find((s) => s.id === id)!.svg;
+      // tinted in grey (white tint), not the chosen red
+      expect(svg('ios-tinted')).toContain('<feColorMatrix');
+      expect(svg('ios-tinted')).toContain(tintedMatrix('#ffffff'));
+      // macOS: framed (824 squircle, 100 margin, shadow); iOS: no mask at all
+      expect(svg('macos')).toContain('translate(100 100) scale(0.8046875)');
+      expect(svg('macos')).toContain('feDropShadow');
+      expect(svg('ios-light')).not.toContain('clip-path');
+      expect(o.kind === 'done' && o.transparentWarning).toBe(false);
+      expect(service.lastExport()).toBe('/out/AppIcon.appiconset');
+      expect(api.files.has('/out/AppIcon.appiconset/mac-512x512@2x.png')).toBe(true);
+      // the same set again: exists (the folder is one target)
+      expect((await service.export(req({ format: 'appiconset' }))).kind).toBe('exists');
+    });
+
+    it('icns / ico as single files; ico takes the chosen mask', async () => {
+      await service.export(req({ format: 'ico', mask: 'circle' }));
+      await service.export(req({ format: 'icns' }));
+      expect([...api.files.keys()]).toEqual(['/out/camscanner.ico', '/out/camscanner.icns']);
+      expect(api.packages[0].sources[0].svg).toContain('<circle');
+      expect(api.packages[1].sources[0].id).toBe('macos');
+    });
+
+    it('export again repeats the last export of this document and asks before replacing', async () => {
+      expect(actions.enabled('file.exportAgain')).toBe(false);
+      await service.export(req({ format: 'ico' }));
+      expect(actions.enabled('file.exportAgain')).toBe(true);
+      const ask = TestBed.inject(AskService);
+      const again = service.exportAgain();
+      await vi.waitFor(() => expect(ask.current()).not.toBeNull());
+      ask.answer('replace');
+      expect((await again).kind).toBe('done');
+      expect(api.calls.at(-1)!.options.overwrite).toBe(true);
+      expect(files.notice()).toBe('Exported 1 file.');
+      // per document: another document has nothing to repeat
+      files.store.set(new DocumentStore(camscannerDocument()));
+      expect(actions.enabled('file.exportAgain')).toBe(false);
+    });
+
+    it('copy PNG: the canvas appearance, size 1024 by default, errors as notice', async () => {
+      expect(actions.run('file.copyPng')).toBe(true);
+      await vi.waitFor(() => expect(api.clipboard).toHaveLength(1));
+      expect(api.clipboard[0].size).toBe(1024);
+      expect(files.notice()).toBe('PNG (1024 px) copied to the clipboard.');
+      await service.copyPng({ size: 64, appearance: 'dark' });
+      expect(api.clipboard[1].size).toBe(64);
+      expect(api.clipboard[1].svg).toContain('#3a3a3c');
+      expect(await service.copyPng({ size: 100 })).toBe(false);
+      api.failNext = { code: 'unavailable', message: 'x' };
+      expect(await service.copyPng()).toBe(false);
+      expect(files.notice()).toContain('could not be copied');
+    });
   });
 });

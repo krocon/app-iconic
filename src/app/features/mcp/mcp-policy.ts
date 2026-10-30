@@ -24,7 +24,7 @@ const DENIED = new Set([
 export function deniedReason(id: string, args?: unknown): string | null {
   if (DENIED.has(id) || DENIED_PREFIXES.some((p) => id.startsWith(p))) {
     if (id.startsWith('file.save') || id === 'file.saveAs') return 'use save_document';
-    if (id.startsWith('file.export')) return 'use export_png / export_svg';
+    if (id.startsWith('file.export')) return 'use export_png / export_svg / export_package';
     if (id === 'file.new' || id === 'file.newWindow') return 'use new_document';
     if (id === 'file.open' || id.startsWith('file.recent')) return 'use open_document';
     if (id.startsWith('edit.') || id === 'icon.copyJson')

@@ -72,7 +72,7 @@ fn check_sizes(sizes: &[u32]) -> Result<Vec<u32>, FsError> {
     Ok(out)
 }
 
-fn check_dir(dir: &Path) -> Result<(), FsError> {
+pub(crate) fn check_dir(dir: &Path) -> Result<(), FsError> {
     if !dir.is_absolute() {
         return Err(FsError::new(
             FsErrorCode::InvalidPath,
@@ -148,6 +148,7 @@ pub fn export_svg(
     Ok(ExportReport {
         files,
         cancelled: false,
+        folder: None,
     })
 }
 
@@ -184,6 +185,7 @@ pub fn export_png(
                 return Ok(ExportReport {
                     files,
                     cancelled: true,
+                    folder: None,
                 });
             }
             let pixmap = render(&tree, size)?;
@@ -204,6 +206,7 @@ pub fn export_png(
     Ok(ExportReport {
         files,
         cancelled: false,
+        folder: None,
     })
 }
 

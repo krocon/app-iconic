@@ -1,0 +1,76 @@
+/* Export dialog (design 012 E16, 078 E9). */
+.group {
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  border: 0;
+  & legend {
+    margin-bottom: var(--space-1);
+    font-weight: 600;
+  }
+}
+.row {
+  display: flex;
+  gap: var(--space-3);
+  &.wrap {
+    flex-wrap: wrap;
+  }
+}
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.target {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.path {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* rtl: a long path is cut at its start, the folder name stays visible; <bdi> keeps it ltr */
+  direction: rtl;
+  text-align: left;
+}
+.status {
+  min-height: 3.2em;
+  margin: var(--space-3) 0 var(--space-2);
+  & p {
+    margin: 0 0 var(--space-1);
+  }
+  & progress {
+    width: 70%;
+    margin-right: var(--space-2);
+    vertical-align: middle;
+  }
+}
+.count {
+  color: var(--color-text-muted);
+}
+.hint {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-small);
+}
+.warning {
+  color: var(--color-warning);
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}

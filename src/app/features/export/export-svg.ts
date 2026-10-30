@@ -34,7 +34,21 @@ export interface ExportSvgOptions {
   tint?: string;
   /** Keep the dimensions (`data-dimension`, prompt 048); default: left out. */
   dimensions?: boolean;
+  /**
+   * `macos`: Apple's macOS template (prompt 078 E4) – the icon scaled into the 824-unit squircle
+   * with 100 units margin and a drop shadow; replaces `mask`.
+   */
+  frame?: 'macos' | null;
 }
+
+/** macOS template on 1024 units (Apple: 824 × 824 shape, 100 margin, shadow 28 blur, 12 down, 50 % black). */
+export const MACOS_FRAME = {
+  inset: 100,
+  body: 824,
+  shadowDy: 12,
+  shadowBlur: 28,
+  shadowOpacity: 0.5,
+};
 
 /** Natural pixel size of raster assets by name (design 012 E7). */
 export type RasterSizes = ReadonlyMap<string, { width: number; height: number }>;
@@ -122,7 +136,43 @@ class Builder {
     return rect;
   }
 
+  /** The macOS frame: shadow around a scaled, squircle-clipped group (E4 of design 078). */
+  macosFrame(): Element {
+    const f = MACOS_FRAME;
+    const shadow = this.el('filter', {
+      id: `${ID}frame-shadow`,
+      filterUnits: 'userSpaceOnUse',
+      x: 0,
+      y: 0,
+      width: CANVAS_SIZE,
+      height: CANVAS_SIZE,
+      'color-interpolation-filters': 'sRGB',
+    });
+    // a blur "radius" of design tools is about two standard deviations
+    shadow.append(
+      this.el('feDropShadow', {
+        dx: 0,
+        dy: f.shadowDy,
+        stdDeviation: f.shadowBlur / 2,
+        'flood-color': '#000',
+        'flood-opacity': f.shadowOpacity,
+      }),
+    );
+    const clip = this.el('clipPath', { id: `${ID}mask` });
+    clip.append(this.el('path', { d: squirclePath() }));
+    this.defs.append(shadow, clip);
+    const outer = this.el('g', { class: `${ID}frame`, filter: `url(#${ID}frame-shadow)` });
+    const inner = this.el('g', {
+      transform: `translate(${f.inset} ${f.inset}) scale(${f.body / CANVAS_SIZE})`,
+      'clip-path': `url(#${ID}mask)`,
+    });
+    outer.append(inner);
+    this.root.append(outer);
+    return inner;
+  }
+
   maskGroup(): Element {
+    if (this.opts.frame === 'macos') return this.macosFrame();
     if (this.opts.mask === 'none') return this.root;
     const clip = this.el('clipPath', { id: `${ID}mask` });
     clip.append(

@@ -6,11 +6,13 @@
 
 use crate::commands::blocking;
 use crate::error::{FsError, FsErrorCode};
-use ai_core::clipboard_image::{self, ImageSource, RgbaImage};
+use ai_core::clipboard_image::{self, ImageSink, ImageSource, RgbaImage};
+use ai_core::export::fonts::system_fonts;
 use ai_core::icon::image_file::ImageFile;
 use ai_core::user_paths::{DropKind, UserPaths, drop_kind};
 use serde::Serialize;
 use std::path::PathBuf;
+use std::sync::Mutex;
 use tauri::{DragDropEvent, Emitter, Manager, Window};
 
 /// The event of a drag of files over a window.
@@ -111,6 +113,42 @@ pub async fn read_clipboard_image() -> Result<Option<ImageFile>, FsError> {
         let cb = arboard::Clipboard::new()
             .map_err(|e| FsError::new(FsErrorCode::Unavailable, e.to_string(), None))?;
         clipboard_image::read_image(&mut SystemClipboard(cb))
+    })
+    .await
+}
+
+fn unavailable(e: arboard::Error) -> FsError {
+    FsError::new(FsErrorCode::Unavailable, e.to_string(), None)
+}
+
+impl ImageSink for SystemClipboard {
+    fn set_image(&mut self, img: RgbaImage<'_>) -> Result<(), FsError> {
+        self.0
+            .set_image(arboard::ImageData {
+                width: img.width as usize,
+                height: img.height as usize,
+                bytes: std::borrow::Cow::Borrowed(img.bytes),
+            })
+            .map_err(unavailable)
+    }
+}
+
+/// The clipboard that wrote last stays alive: on X11/Wayland the data is served by the process
+/// that owns it – dropping the `Clipboard` would take the image away again (prompt 078 E7).
+static WRITER: Mutex<Option<SystemClipboard>> = Mutex::new(None);
+
+/// The icon `svg` rendered in `size` px into the system clipboard (`file.copyPng`, prompt 078).
+#[tauri::command]
+pub async fn copy_png(svg: String, size: u32) -> Result<(), FsError> {
+    blocking(move || {
+        let mut keeper = WRITER.lock().unwrap_or_else(|e| e.into_inner());
+        if keeper.is_none() {
+            *keeper = Some(SystemClipboard(
+                arboard::Clipboard::new().map_err(unavailable)?,
+            ));
+        }
+        let cb = keeper.as_mut().expect("set above");
+        clipboard_image::copy_svg(&svg, size, system_fonts(), cb)
     })
     .await
 }

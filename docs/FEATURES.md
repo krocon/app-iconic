@@ -205,11 +205,15 @@
 - [x] Export PNG mit resvg, Größen-Set 1024/512/256/128/64/32/16 _(neu: Größen)_ (012; Fortschritt, Abbruch, Apple-Hinweis zur Transparenz)
 - [x] Optional mit Plattform-Maske _(neu)_ (012; dazu Schatten/Effekte als Annäherung, Schalter)
 - [x] Share Export → „Im Ordner zeigen“ nach dem Export (030 E6; Share-Sheet bewusst nicht)
+- [x] Xcode `AppIcon.appiconset` (Contents.json; iOS 1024 als App-Store-Icon ohne Alpha + Dark/Tinted über
+      `appearances`/`luminosity`, macOS 16–512 @1x/@2x mit Maske, Rand und Schatten, optional watchOS) _(neu)_ (078)
+- [x] macOS `.icns` und Windows `.ico` (16–256, PNG-kodiert), eigene kleine Writer _(neu)_ (078)
+- [x] Als PNG kopieren (⇧⌘C / Strg+Umschalt+C, Rust rendert, System-Zwischenablage) und „Erneut exportieren“ je Dokument _(neu)_ (078)
 
 ## 11a. KI-Steuerung (MCP) _(neu)_
 
 - [x] Sidecar `app-iconic-mcp` (stdio) + lokale Brücke (127.0.0.1, Token je Start), Einstellung „KI-Steuerung (MCP) erlauben“ (Standard aus), Konfig-Zeile für Claude Code, Status „KI verbunden“, „KI trennen“ (018)
-- [x] Tools: Dokumente, Lesen (icon.json, Baum, Node mit BBox, Asset-SVG, Auswahl), Schreiben (Commands, Aktionen, SVG, Auswahl), Vorschau als PNG, Export, Speichern (018)
+- [x] Tools: Dokumente, Lesen (icon.json, Baum, Node mit BBox, Asset-SVG, Auswahl), Schreiben (Commands, Aktionen, SVG, Auswahl), Vorschau als PNG, Export, Speichern (018); `export_package` (appiconset/icns/ico, 078)
 - [x] Jeder KI-Aufruf ein Undo-Schritt („Undo AI: …“), erwartete Revision, Rückfrage vor Speichern an neuem Ort/Export, Sperrliste (018)
 - [x] Sidecar in den Paketen, signiert wie die App (030: Release-Workflow baut ihn und bündelt ihn über `tauri.sidecar.conf.json`)
 

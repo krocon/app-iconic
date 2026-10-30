@@ -59,7 +59,7 @@ const init = await rpc('initialize', {
 check(init.result.serverInfo.name === 'app-iconic', 'initialize');
 child.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
 const list = await rpc('tools/list', {});
-check(list.result.tools.length === 18, `tools/list: ${list.result.tools.length} tools`);
+check(list.result.tools.length === 19, `tools/list: ${list.result.tools.length} tools`);
 
 if (out === '--expect-off') {
   const r = (await rpc('tools/call', { name: 'list_documents', arguments: {} })).result;
@@ -147,6 +147,44 @@ check(
   `export_png: ${ex.files.map((f) => f.name).join(', ')}`,
 );
 check(readFileSync(ex.files[0].path).subarray(1, 4).toString() === 'PNG', 'exported file is a PNG');
+
+// prompt 078: Xcode icon set – structure, pixel sizes, App Store icon without alpha
+const set = await tool('export_package', {
+  id,
+  dir: out,
+  format: 'appiconset',
+  platforms: ['ios', 'macos', 'watchos'],
+  appearances: ['dark', 'tinted'],
+  overwrite: true,
+});
+const contents = JSON.parse(readFileSync(join(set.folder, 'Contents.json'), 'utf8'));
+const pngInfo = (f) => {
+  const b = readFileSync(join(set.folder, f));
+  return { width: b.readUInt32BE(16), colorType: b[25] };
+};
+const sizesOk = contents.images.every((img) => {
+  const pt = Number(img.size.split('x')[0]);
+  const scale = img.scale ? Number(img.scale[0]) : 1;
+  return pngInfo(img.filename).width === pt * scale;
+});
+check(
+  contents.images.length === 14 && sizesOk,
+  `export_package appiconset: ${contents.images.length} images, sizes match Contents.json`,
+);
+check(
+  pngInfo('ios-1024.png').colorType === 2 && pngInfo('ios-1024-dark.png').colorType === 6,
+  'iOS App Store icon is RGB without alpha, dark keeps alpha',
+);
+check(
+  contents.images.some((i) => i.appearances?.[0]?.value === 'tinted'),
+  'Contents.json has the tinted luminosity entry',
+);
+for (const format of ['icns', 'ico']) {
+  const r = await tool('export_package', { id, dir: out, format, overwrite: true });
+  const b = readFileSync(r.files[0].path);
+  const ok = format === 'icns' ? b.subarray(0, 4).toString() === 'icns' : b.readUInt16LE(2) === 1;
+  check(ok && b.length > 1000, `export_package ${format}: ${r.files[0].name}, ${b.length} bytes`);
+}
 
 // every AI call is one undo step
 const steps = [];

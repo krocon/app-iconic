@@ -467,6 +467,75 @@
     "name": "export_svg"
   },
   {
+    "description": "Exports a developer package into a folder (prompt 078): appiconset = Xcode AppIcon.appiconset (Contents.json, iOS 1024 + dark/tinted, macOS 16–512 @1x/@2x, optional watchOS), icns = <name>.icns, ico = <name>.ico (16–256). May ask the user first.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "appearances": {
+          "description": "appiconset: iOS variants (light is always there)",
+          "items": {
+            "enum": [
+              "light",
+              "dark",
+              "tinted"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dir": {
+          "description": "Absolute path of an existing folder",
+          "type": "string"
+        },
+        "effects": {
+          "type": "boolean"
+        },
+        "format": {
+          "enum": [
+            "appiconset",
+            "icns",
+            "ico"
+          ],
+          "type": "string"
+        },
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        },
+        "mask": {
+          "description": "ico only",
+          "enum": [
+            "none",
+            "squircle",
+            "circle"
+          ],
+          "type": "string"
+        },
+        "overwrite": {
+          "type": "boolean"
+        },
+        "platforms": {
+          "description": "appiconset only. Default: ios, macos",
+          "items": {
+            "enum": [
+              "ios",
+              "macos",
+              "watchos"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "dir",
+        "format"
+      ],
+      "type": "object"
+    },
+    "name": "export_package"
+  },
+  {
     "description": "Renders the icon as a PNG image (the export path) so you can see the result: size 16…1024 (default 512), appearance light/dark/tinted, mask (default squircle).",
     "inputSchema": {
       "additionalProperties": false,

@@ -224,6 +224,17 @@ describe('McpStore (design 018)', () => {
     // without the question when the setting says so
     TestBed.inject(SettingsStore).set('mcp.confirmFiles', false);
     expect(await call('export_svg', { dir: '/out', overwrite: true })).toHaveProperty('files');
+    // packages (prompt 078): the format decides, the folder comes back
+    const set = await call('export_package', {
+      dir: '/out',
+      format: 'appiconset',
+      platforms: ['ios'],
+    });
+    expect(set).toMatchObject({ folder: '/out/AppIcon.appiconset' });
+    expect(backend.exporter.packages.at(-1)!.kind).toMatchObject({ ios: true, macos: false });
+    expect(await call('export_package', { dir: '/out', format: 'pdf' })).toMatchObject({
+      error: { code: 'invalid_request' },
+    });
   });
 
   it('builds the preview SVG for Rust to render', async () => {

@@ -129,7 +129,7 @@ pub fn bound(tool: &str, a: &mut Map<String, Value>) -> Result<(), BridgeError> 
                 ));
             }
         }
-        "export_png" | "export_svg" => {
+        "export_png" | "export_svg" | "export_package" => {
             absolute(a["dir"].as_str().unwrap_or(""))?;
         }
         "save_document" => {
@@ -144,7 +144,7 @@ pub fn bound(tool: &str, a: &mut Map<String, Value>) -> Result<(), BridgeError> 
 
 pub fn timeout_of(tool: &str) -> Duration {
     match tool {
-        "save_document" | "export_png" | "export_svg" | "open" => FILE_TIMEOUT,
+        "save_document" | "export_png" | "export_svg" | "export_package" | "open" => FILE_TIMEOUT,
         _ => CALL_TIMEOUT,
     }
 }
@@ -154,7 +154,7 @@ pub fn timeout_of(tool: &str) -> Duration {
 pub fn file_paths(tool: &str, a: &Map<String, Value>) -> Vec<String> {
     let key = match tool {
         "open_document" | "save_document" => "path",
-        "export_png" | "export_svg" => "dir",
+        "export_png" | "export_svg" | "export_package" => "dir",
         _ => return vec![],
     };
     a.get(key)
@@ -179,6 +179,10 @@ mod tests {
             vec!["/b.icon"]
         );
         assert!(file_paths("save_document", &a(json!({}))).is_empty());
+        assert_eq!(
+            file_paths("export_package", &a(json!({"dir": "/out"}))),
+            vec!["/out".to_string()]
+        );
         assert_eq!(
             file_paths("export_png", &a(json!({"dir": "/out"}))),
             vec!["/out"]

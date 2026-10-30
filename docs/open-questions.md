@@ -190,3 +190,16 @@
 4. **Mac**: Kann WKWebView `mix-blend-mode: plus-darker` (dann nativ in der Vorschau, Export bleibt `multiply`)?
    Sehen Layer-Verlauf (`feImage` mit Data-URL) und Tinted-Filter in WKWebView wie in Chromium aus?
 5. Glas-Annäherung (Glanzkante oben, Milchglas-Aufhellung nur bei blur-material) brauchbar, oder lieber schwächer/kräftiger?
+
+## Prompt 078
+
+1. **Mac/Xcode**: `AppIcon.appiconset` (Export › Xcode-Icon-Satz) in `Assets.xcassets` ziehen – erkennt Xcode 16/26
+   Light/Dark/Tinted (iOS, `appearances`/`luminosity`), alle macOS-Größen und watchOS ohne Warnung? Geht ein
+   Archive/Upload ohne Alpha-Fehler durch?
+2. macOS-Bilder (Satz und `.icns`) mit Maske, 100er-Rand und Schatten nach der Big-Sur-Vorlage – oder für macOS 26
+   lieber vollflächig ohne Maske (das System maskiert dort selbst)?
+3. **Mac**: `iconutil -c iconset Name.icns` und Finder/Vorschau – werden alle zehn Größen gelesen (`icp4`/`icp5` als
+   PNG für 16/32 px)?
+4. Windows: `.ico` im Explorer und mit dem Ressourcen-Compiler prüfen (PNG auch für 16–64 px; ältere Werkzeuge
+   erwarten dort BMP).
+

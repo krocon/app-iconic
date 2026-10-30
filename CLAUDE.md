@@ -61,7 +61,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/clipboard/         ClipboardApi (Text der System-Zwischenablage über navigator.clipboard, 006; Bild:
                               readImage über Rust/arboard, imageFromBlob, 071)
   app/core/drop/              DropApi (`file-drop`: Dateien aus Finder/Explorer, 071), DTOs
-  app/core/export/            ExportApi (Ordner-Dialog, export_svg, export_png mit Channel, cancel), DTOs (012)
+  app/core/export/            ExportApi (Ordner-Dialog, export_svg, export_png mit Channel, cancel), DTOs (012);
+                              exportPackage, copyPng, PackageKind (078)
   app/core/fonts/             FontApi (list_fonts, text_to_path), DTOs + Grenzen (013)
   app/core/i18n/              translatable() (tiefer Proxy), phrasebook(), Sprach-Signal, systemLanguage,
                               catalogs.spec (Vollständigkeit aller Kataloge + Aktionsnamen, 015)
@@ -112,7 +113,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               svg-source-actions (edit.editSvg, path.optimize), Texte
   app/features/export/        Export (012): export-svg (Export-SVG aus stackOf/fillPreview, ID-Präfixe), export-options
                               (rein: Wahl, Argumente der KI, Dateiname), ExportService (Wahl der Sitzung, Fortschritt,
-                              Abbruch, Hinweise), ExportDialog, export-actions (file.exportSvg/Png), Texte
+                              Abbruch, Hinweise, Erneut exportieren, Als PNG kopieren), ExportDialog (+ .css),
+                              export-actions (file.exportSvg/Png/AppIconSet/Icns/Ico/Again, file.copyPng), Texte;
+                              export-packages (rein: Paket-Art, Quellen je Id, Dateinamen-Spiegel des Rust-Plans, 078)
   app/features/tools/         Werkzeuge (013): FreehandStore (Werkzeug-Modus, Abtastung, Esc), FreehandService
                               (Einfügen, `points` der KI), freehand-overlay (Vorschau in Viewport-Pixeln),
                               text-path (rein: Schrift auflösen, zentrieren),
@@ -201,7 +204,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   testing/fixtures/           generiert aus testdata/ (camscanner.icon, all-fields.icon, svg/, unique-names.json;
                               `pnpm fixtures`)
 e2e/                          Playwright-Tests gegen den Dev-Server (hardening: großes/tiefes SVG, a11y: Tab-Weg,
-                              Fokus, Dialoge – 031; composited-shadow: Schatten pixelgleich – 033)
+                              Fokus, Dialoge – 031; composited-shadow: Schatten pixelgleich – 033; export-packages – 078)
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
@@ -212,7 +215,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/windows.rs              DocWindows: Labels doc-<n>, Startpfade/-aktionen, Pfad je Fenster, Schließen-Übernahme
                               (003), QuitQueue (005)
   src/app_menu.rs             natives macOS-Menü: Spec je Fenster, fokussiertes zeigt seins, Klicks routen (005)
-  src/export_commands.rs      Export-Commands (pick_export_dir, export_svg, export_png, cancel_export), ExportJobs (012)
+  src/export_commands.rs      Export-Commands (pick_export_dir, export_svg, export_png, export_package 078, cancel_export),
+                              ExportJobs (012)
   src/font_commands.rs        list_fonts, text_to_path, Vorladen der Schriften beim Start (013)
   src/settings_commands.rs    load_settings, save_settings(patch), reset_settings, set_window_theme; SettingsState,
                               Ereignis settings-changed an alle Fenster (015)
@@ -221,7 +225,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/mcp_commands.rs         Brücke an/aus nach settings.mcp, TauriHost (mcp-call → mcp_reply), mcp_* Commands (018)
   src/open_files.rs           `.icon` aus argv, Zweitstart (single-instance) und Finder (`RunEvent::Opened`) → Fenster (030)
   src/reveal.rs               „Im Ordner zeigen“ nur für exportierte Dateien (030)
-  src/drop_files.rs           DragDrop → `file-drop` ans Fenster, Drop-Pfade in UserPaths, `read_clipboard_image` (071)
+  src/drop_files.rs           DragDrop → `file-drop` ans Fenster, Drop-Pfade in UserPaths, `read_clipboard_image` (071),
+                              `copy_png` (078)
   Info.plist, entitlements.plist  macOS: `.icon` als Package-Dokument (Alternate), Hardened-Runtime-Rechte (030)
   tauri.linux.conf.json, tauri.windows.conf.json, linux/  Dateizuordnung je OS, Mime-XML + postinst/postrm (030)
   src/about.rs, model.rs      AppInfo, DTOs (serde camelCase)
@@ -231,7 +236,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
     src/icon/                 .icon: model (Sicht), json_format, names, bundle, zip_io, save, svg_file (002),
                               image_file (Bild als Data-URL, Magic Bytes, Größe aus dem Kopf, 008)
     src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
-    src/clipboard_image.rs    Bild der Zwischenablage prüfen + als PNG-Data-URL (071); src/user_paths.rs: vertraute
+    src/clipboard_image.rs    Bild der Zwischenablage prüfen + als PNG-Data-URL (071), copy_svg (078); src/user_paths.rs: vertraute
                               Pfade (033: Dialoge, Recent, System, Drop, KI; allow_tree für interne Ordner; checked →
                               not_allowed), Art einer abgelegten Datei
     src/menu_spec.rs          MenuSpec prüfen, Accelerators, Menü ohne Fenster (005)
@@ -239,7 +244,9 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
     src/settings.rs           settings.json: je Feld nachsichtig (merge), sanitize, migrate, apply_patch (015);
                               settings/model.rs: Typen + Standardwerte (033)
     src/export/               Export (012): png (resvg, sichere usvg-Optionen), files (Namen, Überschreiben, atomar,
-                              Fortschritt, Abbruch); `export::fonts` = Re-Export von `fonts::system`
+                              Fortschritt, Abbruch); `export::fonts` = Re-Export von `fonts::system`; 078: package
+                              (PackageKind → PackagePlan, ein Writer: Ordner tauschen, Fortschritt, Abbruch, RGB ohne
+                              Alpha), appiconset (Contents.json im Xcode-Stil), containers (.icns/.ico schreiben/lesen)
     src/fonts/                Schriften (012, 013): system (fontdb einmal je Prozess, generische Familien), FontCatalog
                               (Familien/Stile/Ids), outline (Text → Pfad: harfrust-Shaping, skrifa-Umrisse, BBox)
   mcp/                        Crate `ai-mcp` + Binary `app-iconic-mcp` (018, aus editlicious ed-mcp): server (MCP über
@@ -251,6 +258,7 @@ testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverän
 testdata/fonts/               Caladea-Regular.ttf + OFL.txt (Testschrift für Rust-Tests, nicht im Bundle, 013)
 testdata/unique-names.json    Tabelle der eindeutigen Asset-/Layer-Namen (Rust `names.rs` und TS `unique-names.ts`)
 testdata/settings-cases.json  Standardwerte + Fälle von settings.json (Rust `settings.rs` und TS `settings-rules`, 015)
+testdata/export/              Referenz-Contents.json eines Xcode-Icon-Satzes (Rust appiconset, TS packageFiles, 078)
 scripts/                      version.mjs, release-notes.mjs, notices.mjs, licenses.mjs, collect-packages.mjs (030, aus
                               editlicious, je mit Test); fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test, keymaps.test.mjs,
                               theme-contrast.test.mjs (Tokens light/dark, Kontraste, 015); mcp-sidecar.mjs (+ Test,

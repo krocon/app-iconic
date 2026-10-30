@@ -37,13 +37,16 @@ export interface CanvasSettings {
 }
 
 export interface ExportSettings {
-  format: 'png' | 'svg';
+  /** Packages since prompt 078. */
+  format: 'png' | 'svg' | 'appiconset' | 'icns' | 'ico';
   /** `tinted` since prompt 077. */
   appearances: ('light' | 'dark' | 'tinted')[];
   sizes: number[];
   mask: 'none' | 'squircle' | 'circle';
   effects: boolean;
   targetDir: string | null;
+  /** Platforms of the Xcode icon set (prompt 078). */
+  platforms: ('ios' | 'macos' | 'watchos')[];
 }
 
 /** The remembered paint of one kind of shape (design 019 E12): attribute values, `''` = not set. */
@@ -151,6 +154,7 @@ export const DEFAULT_SETTINGS: Settings = {
     mask: 'none',
     effects: false,
     targetDir: null,
+    platforms: ['ios', 'macos'],
   },
   freehand: { epsilon: 2.5, strokeWidth: 8, closed: false },
   debug: { logUndoGrouping: false },

@@ -131,6 +131,9 @@ export function sanitizeSettings(s: Settings): Settings {
     e.appearances.includes(a),
   );
   const sizes = PNG_SIZES.filter((n) => e.sizes.includes(n));
+  const platforms = (['ios', 'macos', 'watchos'] as const).filter((p) =>
+    (e.platforms as readonly string[]).includes(p),
+  );
   const dir = e.targetDir;
   return {
     schemaVersion: SCHEMA_VERSION,
@@ -153,12 +156,13 @@ export function sanitizeSettings(s: Settings): Settings {
       mask: oneOf(c.mask, MASKS, d.canvas.mask),
     },
     export: {
-      format: oneOf(e.format, ['png', 'svg'], d.export.format),
+      format: oneOf(e.format, ['png', 'svg', 'appiconset', 'icns', 'ico'], d.export.format),
       appearances: appearances.length ? appearances : [...d.export.appearances],
       sizes: sizes.length ? sizes : [...d.export.sizes],
       mask: oneOf(e.mask, MASKS, d.export.mask),
       effects: e.effects,
       targetDir: dir && dir.length <= 4096 && !dir.includes('\0') ? dir : null,
+      platforms: platforms.length ? platforms : [...d.export.platforms],
     },
     freehand: {
       epsilon: Number.isFinite(s.freehand.epsilon)

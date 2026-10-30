@@ -4,6 +4,7 @@
 use crate::commands::{allowed, blocking, grant, to_string};
 use crate::error::FsError;
 use crate::reveal::Exported;
+use ai_core::export::package::{self, PackageKind, PackageSource};
 use ai_core::export::{
     ExportOptions, ExportProgress, ExportReport, Variant, files, fonts::system_fonts,
 };
@@ -113,6 +114,50 @@ pub async fn export_png(
     result
 }
 
+/// A package (prompt 078: `AppIcon.appiconset`, `.icns`, `.ico`; 079: Android, Web) from the
+/// SVG sources the frontend built; progress per file, cancellable like `export_png`.
+#[tauri::command]
+pub async fn export_package(
+    window: WebviewWindow,
+    jobs: State<'_, ExportJobs>,
+    kind: PackageKind,
+    sources: Vec<PackageSource>,
+    target_dir: String,
+    options: ExportOptions,
+    on_progress: Channel<ExportProgress>,
+) -> Result<ExportReport, FsError> {
+    use tauri::Manager;
+    let dir = allowed(&window.app_handle().state::<UserPaths>(), &target_dir)?;
+    let label = window.label().to_string();
+    let flag = jobs.start(&label);
+    let cancel = flag.clone();
+    let result = blocking(move || {
+        package::export_package(
+            &kind,
+            &sources,
+            &dir,
+            &options,
+            system_fonts(),
+            &cancel,
+            |p| {
+                let _ = on_progress.send(p);
+            },
+        )
+    })
+    .await;
+    jobs.finish(&label, &flag);
+    if let Ok(report) = &result {
+        window.app_handle().state::<Exported>().remember(
+            report
+                .folder
+                .iter()
+                .cloned()
+                .chain(report.files.iter().map(|f| f.path.clone())),
+        );
+    }
+    result
+}
+
 /// The colour of the composed icon at a document point (prompt 074 E3: the eyedropper on images
 /// and gradients), `#RRGGBBAA`.
 #[tauri::command]
@@ -170,6 +215,6 @@ mod tests {
                 count += 1;
             }
         }
-        assert_eq!(count, 5);
+        assert_eq!(count, 6);
     }
 }

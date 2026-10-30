@@ -33,6 +33,30 @@ export interface ExportedFile {
 export interface ExportReport {
   files: ExportedFile[];
   cancelled: boolean;
+  /** Package exports with a folder (`AppIcon.appiconset`, prompt 078): its opaque path. */
+  folder?: string | null;
+}
+
+/**
+ * A package export (prompt 078, Rust `export::package::PackageKind`, tagged by `kind`):
+ * `appIconSet` = Xcode `AppIcon.appiconset` (`appearances`: iOS variants besides the default),
+ * `icns` = `<name>.icns`, `ico` = `<name>.ico`. 079 adds Android and Web.
+ */
+export type PackageKind =
+  | {
+      kind: 'appIconSet';
+      ios: boolean;
+      appearances: ExportAppearance[];
+      macos: boolean;
+      watchos: boolean;
+    }
+  | { kind: 'icns' }
+  | { kind: 'ico' };
+
+/** One SVG built for a package; `id` from `PACKAGE_SOURCE` (Rust `package::source`). */
+export interface PackageSource {
+  id: string;
+  svg: string;
 }
 
 /** After every written PNG (design 012 E12). */

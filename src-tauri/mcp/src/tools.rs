@@ -232,6 +232,21 @@ pub fn list() -> Vec<Value> {
             &["dir"],
         ),
         tool(
+            "export_package",
+            "Exports a developer package into a folder (prompt 078): appiconset = Xcode AppIcon.appiconset (Contents.json, iOS 1024 + dark/tinted, macOS 16–512 @1x/@2x, optional watchOS), icns = <name>.icns, ico = <name>.ico (16–256). May ask the user first.",
+            json!({
+                "id": id(),
+                "dir": dir(),
+                "format": {"type": "string", "enum": ["appiconset", "icns", "ico"]},
+                "platforms": {"type": "array", "items": {"type": "string", "enum": ["ios", "macos", "watchos"]}, "description": "appiconset only. Default: ios, macos"},
+                "appearances": {"type": "array", "items": {"type": "string", "enum": ["light", "dark", "tinted"]}, "description": "appiconset: iOS variants (light is always there)"},
+                "mask": {"type": "string", "enum": ["none", "squircle", "circle"], "description": "ico only"},
+                "effects": {"type": "boolean"},
+                "overwrite": {"type": "boolean"}
+            }),
+            &["dir", "format"],
+        ),
+        tool(
             "render_preview",
             "Renders the icon as a PNG image (the export path) so you can see the result: size 16…1024 (default 512), appearance light/dark/tinted, mask (default squircle).",
             json!({
@@ -268,7 +283,7 @@ mod tests {
     #[test]
     fn every_tool_has_a_unique_name_a_description_and_an_object_schema() {
         let names = names();
-        assert_eq!(names.len(), 18);
+        assert_eq!(names.len(), 19);
         let mut sorted = names.clone();
         sorted.sort();
         sorted.dedup();

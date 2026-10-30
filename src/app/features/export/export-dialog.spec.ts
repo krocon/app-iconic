@@ -91,4 +91,28 @@ describe('ExportDialog (design 012 E16)', () => {
     const dialogs = TestBed.inject(DialogService);
     expect(dialogs.open()).toBe('export');
   });
+
+  it('package formats (prompt 078): platforms, hints, no sizes, mask only for .ico', async () => {
+    const { el, q, click } = await open();
+    await click('export-choose');
+    await click('export-format-appiconset');
+    expect(q('export-format-hint')!.textContent).toContain('Xcode 26');
+    expect(q('export-size-1024')).toBeNull();
+    expect(q('export-mask')).toBeNull();
+    expect(q('export-tint')).toBeNull();
+    // light is always part of the icon set
+    expect(q<HTMLInputElement>('export-appearance-light')!.disabled).toBe(true);
+    expect(q<HTMLInputElement>('export-platform-ios')!.checked).toBe(true);
+    await click('export-platform-watchos');
+    // Contents.json + iOS light + dark + 10 macOS + watchOS
+    expect(el.querySelector('.count')!.textContent).toBe('14 files');
+    await click('export-run');
+    await flush();
+    expect(q('export-result')!.textContent).toBe('Exported 14 files.');
+    expect(api.packages[0].kind).toMatchObject({ kind: 'appIconSet', watchos: true });
+    await click('export-format-ico');
+    expect(q('export-mask')).not.toBeNull();
+    expect(q('export-appearance-light')).toBeNull();
+    expect(q('export-format-hint')!.textContent).toContain('256 px');
+  });
 });

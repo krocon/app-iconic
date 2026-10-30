@@ -140,6 +140,7 @@ export class SettingsSync {
         mask: e.mask,
         effects: e.effects,
         targetDir: e.targetDir,
+        platforms: [...e.platforms],
       };
       if (!same({ ...c, ...choice }, c)) this.exporter.update(choice);
     }
@@ -187,6 +188,7 @@ export class SettingsSync {
         mask: c.mask,
         effects: c.effects,
         targetDir: c.targetDir,
+        platforms: c.platforms,
       };
       if (!same(exp, e)) patch.export = exp;
       if (!same(f, s.freehand)) patch.freehand = f;

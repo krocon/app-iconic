@@ -83,4 +83,25 @@ describe('export options', () => {
     expect(exportFileName('icon', 'dark')).toBe('icon-dark.svg');
     expect(checkArgs(EXPORT_ARGS, { tint: '#ffffff', appearances: ['tinted'] })).toBe(true);
   });
+
+  it('packages (prompt 078): platforms argument, readiness and file count', () => {
+    const r = exportRequest(
+      'appiconset',
+      { platforms: ['watchos', 'ios', 'ios'], appearances: ['dark'] },
+      DEFAULT_CHOICE,
+    )!;
+    expect(r.platforms).toEqual(['ios', 'watchos']);
+    expect(exportRequest('appiconset', { platforms: ['android'] }, DEFAULT_CHOICE)).toBeNull();
+    expect(exportRequest('appiconset', { platforms: [] }, DEFAULT_CHOICE)).toBeNull();
+    expect(checkArgs(EXPORT_ARGS, { platforms: ['ios'] })).toBe(true);
+    const set = { ...DEFAULT_CHOICE, format: 'appiconset' as const };
+    expect(choiceReady({ ...set, platforms: [] })).toBe(false);
+    // the icon set does not need loose appearances or sizes
+    expect(choiceReady({ ...set, appearances: [], sizes: [] })).toBe(true);
+    // Contents.json + iOS default + dark + 10 macOS images
+    expect(fileCount(set)).toBe(13);
+    expect(fileCount({ ...set, appearances: ['light'], platforms: ['ios'] })).toBe(2);
+    expect(fileCount({ ...DEFAULT_CHOICE, format: 'ico' })).toBe(1);
+    expect(choiceReady({ ...DEFAULT_CHOICE, format: 'icns', appearances: [] })).toBe(true);
+  });
 });

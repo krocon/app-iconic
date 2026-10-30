@@ -73,6 +73,7 @@ that was active last. Coordinates are icon units of the 1024 × 1024 canvas.
 | `insert_svg(id?, markup, parent?, index?, expected_revision?)`                                              | SVG markup like _Add › SVG Snippet_ – cleaned, centred                                                                                                      |
 | `render_preview(id?, size?, appearance?, tint?, mask?)`                                                     | the icon as a PNG image (same renderer as the export)                                                                                                       |
 | `export_png(id?, dir, sizes?, appearances?, mask?, effects?, tint?, overwrite?)`, `export_svg(id?, dir, …)` | exports into a folder (may ask the user)                                                                                                                    |
+| `export_package(id?, dir, format, platforms?, appearances?, mask?, effects?, overwrite?)` | `appiconset` (Xcode `AppIcon.appiconset`), `icns`, `ico` into a folder (may ask the user; 078) |
 
 `expected_revision` (from `get_document` or the answer of the last write) protects against changing a document that
 was edited in between: the call fails with `revision_conflict` and the current state.

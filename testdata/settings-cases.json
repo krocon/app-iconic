@@ -43,7 +43,8 @@
       "sizes": [1024],
       "mask": "none",
       "effects": false,
-      "targetDir": null
+      "targetDir": null,
+      "platforms": ["ios", "macos"]
     },
     "freehand": {
       "epsilon": 2.5,
@@ -251,8 +252,9 @@
           "mask": "circle"
         },
         "export": {
-          "format": "svg",
-          "mask": "squircle"
+          "format": "ico",
+          "mask": "squircle",
+          "platforms": ["watchos", "ios", "watchos"]
         }
       },
       "expect": [
@@ -262,8 +264,9 @@
         ["canvas.selectionMode", "boxed"],
         ["canvas.appearance", "light"],
         ["canvas.mask", "circle"],
-        ["export.format", "svg"],
-        ["export.mask", "squircle"]
+        ["export.format", "ico"],
+        ["export.mask", "squircle"],
+        ["export.platforms", ["ios", "watchos"]]
       ]
     },
     {

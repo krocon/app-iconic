@@ -329,7 +329,7 @@ mod path_rules {
             ),
             (
                 include_str!("export_commands.rs"),
-                &["export_svg", "export_png"][..],
+                &["export_svg", "export_png", "export_package"][..],
             ),
             (
                 include_str!("window_commands.rs"),

@@ -4,6 +4,7 @@
     "Mod+n": "file.new",
     "Mod+o": "file.open",
     "Mod+Shift+i": "file.importSvg",
+    "Mod+Shift+c": "file.copyPng",
     "Mod+s": "file.save",
     "Mod+Shift+s": "file.saveAs",
     "Mod+w": "file.close",

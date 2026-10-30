@@ -179,7 +179,11 @@ pub fn sanitize(mut s: Settings) -> Settings {
     );
     one_of(&mut c.mask, &MASKS, &d.canvas.mask);
     let e = &mut s.export;
-    one_of(&mut e.format, &["png", "svg"], &d.export.format);
+    one_of(
+        &mut e.format,
+        &["png", "svg", "appiconset", "icns", "ico"],
+        &d.export.format,
+    );
     one_of(&mut e.mask, &MASKS, &d.export.mask);
     // allowed values in their order, without duplicates; empty → default
     e.appearances = APPEARANCES
@@ -197,6 +201,15 @@ pub fn sanitize(mut s: Settings) -> Settings {
         .collect();
     if e.sizes.is_empty() {
         e.sizes = d.export.sizes.clone();
+    }
+    // allowed platforms in their order, without duplicates; empty → default (prompt 078)
+    e.platforms = ["ios", "macos", "watchos"]
+        .iter()
+        .filter(|p| e.platforms.iter().any(|x| x == *p))
+        .map(|p| (*p).to_owned())
+        .collect();
+    if e.platforms.is_empty() {
+        e.platforms = d.export.platforms.clone();
     }
     if e.target_dir
         .as_ref()

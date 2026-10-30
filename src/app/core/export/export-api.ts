@@ -6,6 +6,8 @@ import {
   ExportProgress,
   ExportReport,
   ExportVariant,
+  PackageKind,
+  PackageSource,
   PngSize,
 } from './export.models';
 
@@ -29,8 +31,21 @@ export abstract class ExportApi {
     options: ExportFileOptions,
     onProgress: (p: ExportProgress) => void,
   ): Promise<ExportReport>;
-  /** Stops the running PNG export of this window after the current file. */
+  /**
+   * A package (prompt 078: `AppIcon.appiconset`, `.icns`, `.ico`) from SVG sources; progress per
+   * file, cancellable. A folder appears complete or not at all.
+   */
+  abstract exportPackage(
+    kind: PackageKind,
+    sources: PackageSource[],
+    targetDir: string,
+    options: ExportFileOptions,
+    onProgress: (p: ExportProgress) => void,
+  ): Promise<ExportReport>;
+  /** Stops the running PNG/package export of this window after the current file. */
   abstract cancelExport(): Promise<void>;
+  /** Renders `svg` in `size` px into the system clipboard (prompt 078, `file.copyPng`). */
+  abstract copyPng(svg: string, size: PngSize): Promise<void>;
   /** Shows a file this app exported in the file manager (design 030 E6). */
   abstract revealExport(path: string): Promise<void>;
   /** The colour of `svg` at a point as `#RRGGBBAA` (resvg, the eyedropper – prompt 074 E3). */
@@ -71,8 +86,31 @@ export class TauriExportApi extends ExportApi {
     });
   }
 
+  exportPackage(
+    kind: PackageKind,
+    sources: PackageSource[],
+    targetDir: string,
+    options: ExportFileOptions,
+    onProgress: (p: ExportProgress) => void,
+  ): Promise<ExportReport> {
+    if (!isTauri()) return call<ExportReport>('export_package');
+    const ch = new Channel<ExportProgress>();
+    ch.onmessage = onProgress;
+    return call<ExportReport>('export_package', {
+      kind,
+      sources,
+      targetDir,
+      options,
+      onProgress: ch,
+    });
+  }
+
   cancelExport(): Promise<void> {
     return call<void>('cancel_export');
+  }
+
+  copyPng(svg: string, size: PngSize): Promise<void> {
+    return call<void>('copy_png', { svg, size });
   }
 
   revealExport(path: string): Promise<void> {
