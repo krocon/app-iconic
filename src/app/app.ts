@@ -1,3 +1,7 @@
+import { registerTextActions } from './features/text/text-actions';
+import { TextTool } from './features/text/text-tool';
+import { TextEdit } from './features/text/text-edit';
+import { TextToPathService } from './features/text/text-to-path.service';
 import { registerColorActions } from './features/color/color-actions';
 import { Eyedropper } from './features/color/eyedropper';
 import { registerRenameActions, RenameService } from './features/hierarchy/rename.service';
@@ -278,6 +282,18 @@ export class App implements OnInit {
       inject(CanvasTools),
       inject(FreehandStore),
       this.files,
+      this.destroyRef,
+    );
+    registerTextActions(
+      this.actions,
+      {
+        tool: inject(TextTool),
+        edit: inject(TextEdit),
+        toPath: inject(TextToPathService),
+        tools: inject(CanvasTools),
+        freehand: inject(FreehandStore),
+        files: this.files,
+      },
       this.destroyRef,
     );
     // files from Finder/Explorer (design 071)

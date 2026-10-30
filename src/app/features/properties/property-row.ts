@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { ColorField } from '../../shared/controls/color-field';
 import { NumberField } from '../../shared/controls/number-field';
 import { SegmentedField } from '../../shared/controls/segmented-field';
+import { FontField } from '../../shared/controls/font-field';
+import { TextPathService } from '../tools/text-path.service';
 import { SelectField } from '../../shared/controls/select-field';
 import { TextField } from '../../shared/controls/text-field';
 import { ToggleField } from '../../shared/controls/toggle-field';
@@ -21,6 +23,8 @@ const OPTION_NAMES: Readonly<Record<string, string>> = {
   start: 'Start',
   middle: 'Middle',
   end: 'End',
+  normal: 'Normal',
+  italic: 'Italic',
 };
 
 /**
@@ -30,7 +34,15 @@ const OPTION_NAMES: Readonly<Record<string, string>> = {
  */
 @Component({
   selector: 'app-property-row',
-  imports: [ColorField, NumberField, SegmentedField, SelectField, TextField, ToggleField],
+  imports: [
+    ColorField,
+    FontField,
+    NumberField,
+    SegmentedField,
+    SelectField,
+    TextField,
+    ToggleField,
+  ],
   template: `
     @let r = row();
     @let d = r.def;
@@ -77,6 +89,19 @@ const OPTION_NAMES: Readonly<Record<string, string>> = {
             (reverted)="props.cancel()"
           />
         }
+      }
+      @case ('font') {
+        <app-font-field
+          [fieldId]="fieldId()"
+          [label]="label"
+          [value]="value()"
+          [placeholder]="placeholder()"
+          [families]="families()"
+          (focused)="loadFonts()"
+          (edited)="edit($event)"
+          (committed)="props.commit()"
+          (reverted)="props.cancel()"
+        />
       }
       @case ('toggle') {
         <app-toggle-field
@@ -228,6 +253,12 @@ export class PropertyRow {
   protected readonly tr = propertyLabel;
 
   protected readonly mixed = computed(() => this.row().value.kind === 'mixed');
+  private readonly fonts = inject(TextPathService);
+  /** The installed families for the font field (prompt 075 E1; loaded once, on focus). */
+  protected readonly families = computed(() => (this.fonts.fonts() ?? []).map((f) => f.family));
+  protected loadFonts(): void {
+    void this.fonts.loadFonts();
+  }
   /** Names of the icon toggles' options in the UI language (prompt 073 E2). */
   protected readonly optionLabels = computed(() =>
     Object.fromEntries(

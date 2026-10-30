@@ -4,7 +4,16 @@
  * (the template's `PropertySpec.swift`, values from legacy §7.4). Pure.
  */
 
-export type PropertyType = 'number' | 'length' | 'color' | 'enum' | 'text' | 'textarea' | 'toggle';
+export type PropertyType =
+  | 'number'
+  | 'length'
+  | 'color'
+  | 'enum'
+  | 'text'
+  | 'textarea'
+  | 'toggle'
+  /** A font family with the installed families (prompt 075). */
+  | 'font';
 
 export type SectionId = 'geometry' | 'appearance' | 'stroke' | 'text' | 'transform' | 'advanced';
 
@@ -266,7 +275,20 @@ export const P = {
     step: 1,
     default: '16',
   }),
-  fontFamily: def({ name: 'font-family', label: 'Font Family', type: 'text', section: 'text' }),
+  fontFamily: def({ name: 'font-family', label: 'Font Family', type: 'font', section: 'text' }),
+  fontStyle: def({
+    name: 'font-style',
+    label: 'Font Style',
+    type: 'enum',
+    section: 'text',
+    options: ['normal', 'italic'],
+    default: 'normal',
+    icons: {
+      normal: { d: 'M6 13l2-10 M5 13h3 M6 3h3' },
+      italic: { d: 'M5 13l5-10 M4 13h3 M8 3h3' },
+    },
+  }),
+  letterSpacing: len('letter-spacing', 'Letter Spacing', { section: 'text', step: 0.5 }),
   fontWeight: def({
     name: 'font-weight',
     label: 'Font Weight',

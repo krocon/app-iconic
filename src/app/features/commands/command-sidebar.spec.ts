@@ -62,6 +62,7 @@ describe('CommandSidebar (design 008 E10)', () => {
       'add.freehand',
       'fill.tool',
       'color.eyedropper',
+      'text.tool',
       'shapeBuilder.tool',
       'editPath',
       'combine',
@@ -130,14 +131,14 @@ describe('CommandSidebar (design 008 E10)', () => {
     await type('zzz');
     expect(options()).toHaveLength(0);
     await key('Escape');
-    expect(options()).toHaveLength(23);
+    expect(options()).toHaveLength(24);
   });
 
   it('keyboard: → opens the submenu, ↑/↓ move in it, ← closes, Enter runs', async () => {
     const { input, key } = await render();
-    // the "Shape at Centre" group (row 17)
-    for (let i = 0; i < 17; i++) await key('ArrowDown');
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-17');
+    // the "Shape at Centre" group (row 18)
+    for (let i = 0; i < 18; i++) await key('ArrowDown');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-18');
     await key('ArrowRight');
     expect(ids(submenu())).toEqual([
       'add.rect',
@@ -154,7 +155,7 @@ describe('CommandSidebar (design 008 E10)', () => {
     expect(input.getAttribute('aria-activedescendant')).toBe('command-sub-6');
     await key('ArrowLeft');
     expect(submenu()).toHaveLength(0);
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-17');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-18');
     await key('Enter');
     await key('ArrowDown');
     await key('Enter');
@@ -194,7 +195,7 @@ describe('CommandSidebar (design 008 E10)', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('input')).toBeNull();
     const tools = Array.from(el.querySelectorAll<HTMLButtonElement>('[role="toolbar"] button'));
-    expect(tools).toHaveLength(23);
+    expect(tools).toHaveLength(24);
     expect(el.querySelectorAll('[role="separator"]')).toHaveLength(3);
     expect(tools.find((b) => b.dataset['sectionToggle'])!.getAttribute('aria-expanded')).toBe(
       'false',

@@ -20,7 +20,15 @@ const STROKE = [
   P.miterlimit,
   P.vectorEffect,
 ];
-const TEXT = [P.fontSize, P.fontFamily, P.fontWeight, P.textAnchor, P.textDecoration];
+const TEXT = [
+  P.fontSize,
+  P.fontFamily,
+  P.fontWeight,
+  P.fontStyle,
+  P.letterSpacing,
+  P.textAnchor,
+  P.textDecoration,
+];
 const ADVANCED = [P.id, P.filter, P.mask];
 
 /** Painted / containing elements: appearance, stroke, transform, advanced. */

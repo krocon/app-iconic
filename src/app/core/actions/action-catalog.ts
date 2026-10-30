@@ -463,6 +463,20 @@ export const ACTIONS: readonly ActionDef[] = [
   ADD('sketch.toggleConstructionMode', 'Draw as Construction'),
   // live fills (prompt 060)
   ADD('fill.tool', 'Fill Tool'),
+  // live typography (prompt 075)
+  ADD('text.tool', 'Text Tool'),
+  EDIT('text.edit', 'Edit Text'),
+  EDIT('text.set', 'Set Text', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['node', 'text'],
+      properties: { node: { type: 'json' }, text: { type: 'string', maxLength: 65536 } },
+    },
+  }),
+  EDIT('text.toPath', 'Convert Text to Path', {
+    args: { type: 'object', properties: { nodes: { type: 'json' } } },
+  }),
   // the colour workflow (prompt 074)
   ADD('color.eyedropper', 'Eyedropper'),
   EDIT('color.pick', 'Pick Colour', {

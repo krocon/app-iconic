@@ -128,6 +128,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/color/         Farb-Workflow (074): document-colors (rein: sammeln, replaceColorCommand), ColorLibrary
                               (Swatches: Dokument/Zuletzt/Palette), Eyedropper (Werkzeug ⇧I, resvg-Pixel), color-actions
                               (`color.*`), ColorsSection (Dokumentfarben im Panel), Texte
+  app/features/text/          Live-Typografie (075): text-lines (rein: Zeilen, tspans, textSetCommand), TextEdit +
+                              TextEditOverlay (Bearbeiten auf der Zeichenfläche), TextTool (⇧T), text-to-path (rein) +
+                              TextToPathService (`text.toPath`), text-actions (`text.*`), Texte
   app/features/about/         About-Dialog + Texte
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
@@ -174,7 +177,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               sketch-tools (Schritte, Maße), apollonius (Tangentenkreise), svg-arc (Bogen-Mittelpunkt)
   app/shared/controls/        Generische Editoren (009): DraftField (Basis: live/commit/cancel), NumberField (Stepped
                               Slider), ColorField + color-value (rein), SelectField, TextField, ToggleField, step-value,
-                              SegmentedField (Icon-Umschalter, 073); ColorPicker (Farb-Popover) + ColorButton,
+                              SegmentedField (Icon-Umschalter, 073), FontField (075); ColorPicker (Farb-Popover) + ColorButton,
                               ColorSwatches (abstrakt, 074)
   app/shared/color/           color-spaces (rein: HSL/HSB/OKLCH, Formate, writeLike, 074)
   app/shared/dialog/          Modal (Fokusfalle, Esc; als Popover ohne Backdrop, 073), DialogService (aus

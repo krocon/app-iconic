@@ -159,3 +159,9 @@
    (das nachsichtige Lesen kennt nur Listen von Texten/Zahlen) – lieber eine Datei `palettes.json` daneben?
 2. **Mac**: Pipette auf einem PNG-Layer und auf einem Verlauf – stimmt die Farbe mit dem Bildschirm überein
    (resvg rendert sRGB; Display-P3-Farben aus `icon.json` erscheinen umgerechnet)?
+
+## Prompt 075
+
+1. **Mac**: Text per Doppelklick bearbeiten mit japanischer IME (Kandidatenfenster) – sitzt das Feld richtig?
+2. Verschachtelte `tspan`s (ein farbiges Wort) gehen beim Bearbeiten in der Zeile auf – reicht das, oder soll das
+   Bearbeiten dann gesperrt sein (nur „SVG bearbeiten …“)?

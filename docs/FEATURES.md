@@ -40,6 +40,7 @@
 - [x] Ebenenbaum: Umbenennen inline (Doppelklick/F2; Elemente über ihre `id`, Verweise folgen), Filter nach Name/id/Tag mit Hervorhebung, Alle auf-/zuklappen, `+ Gruppe`/`+ Ebene` im Kopf, Schloss an Gruppen und Ebenen _(neu)_ (072)
 - [x] Properties kompakt: X/Y, B/H, RX/RY … nebeneinander, Line Cap/Join, Fill Rule, Text Anchor als Icon-Umschalter; Corners, Offset, Fillet, Transform, Pattern, Optimize Path als Popover mit Live-Vorschau (Optimize: vorher/nachher auf der Zeichenfläche) _(neu)_ (073)
 - [x] Farb-Popover (Fläche, Farbton, Alpha, Hex/RGB/HSL/HSB/OKLCH, Dokument-/Zuletzt-/Paletten-Farben, System-Picker), Pipette ⇧I (auch Bilder/Verläufe über resvg), Dokumentfarben im Panel mit „im ganzen Icon ersetzen“ _(neu)_ (074)
+- [x] Live-Typografie: Text-Werkzeug ⇧T, Bearbeiten per Doppelklick auf der Zeichenfläche (mehrzeilig als `tspan`s), Schrift-Combobox, Stil, Zeichenabstand, „Text in Pfad umwandeln“ für vorhandene Texte _(neu)_ (075)
 - [x] Zoom 25/33/50/66/75/100/125/150/200 %, Anzeige, Pinch, ⌘+/⌘−/⌘0, Center Canvas (004, dazu „Fit“; Kürzel als Aktionen 005)
 - [x] Pan (Scroll / Space+Drag / mittlere Maustaste) (004)
 - [x] Lineale mit Haupt-/Nebenteilung, zoomabhängig (004)

@@ -57,6 +57,7 @@
     "k": "constraint.tool",
     "f": "fill.tool",
     "Shift+i": "color.eyedropper",
+    "Shift+t": "text.tool",
     "e": "extend.tool",
     "Shift+r": "transform.rotate",
     "Shift+s": "transform.scale",

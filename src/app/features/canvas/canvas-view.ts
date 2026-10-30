@@ -1,3 +1,5 @@
+import { TextEdit } from '../text/text-edit';
+import { TextEditOverlay } from '../text/text-edit-overlay';
 import {
   afterNextRender,
   ChangeDetectionStrategy,
@@ -71,6 +73,7 @@ const WHEEL_ZOOM = 0.01;
 @Component({
   selector: 'app-canvas-view',
   imports: [
+    TextEditOverlay,
     CanvasBackground,
     CanvasRuler,
     CanvasToolbar,
@@ -136,6 +139,7 @@ export class CanvasView {
   protected readonly edit = inject(CanvasEditStore);
   /** The freehand tool (design 013 E3): while on, dragging draws instead of selecting. */
   protected readonly freehand = inject(FreehandStore);
+  private readonly textEdit = inject(TextEdit);
   private readonly freehandService = inject(FreehandService);
   /** The sketch tools (design 019 E3): while one is on, clicks place its steps. */
   protected readonly sketch = inject(SketchStore);
@@ -356,6 +360,9 @@ export class CanvasView {
     const tool = this.tools.current();
     if (tool) tool.dblclick?.({ ...pointerOf(e), pointerId: 0 });
     if (tool || this.freehand.active()) return;
+    // a text: edit it on the canvas (prompt 075 E3)
+    const text = this.textEdit.textAt(e);
+    if (text && this.textEdit.start(text)) return;
     this.interaction.dblclick({ ...pointerOf(e), pointerId: 0 });
   }
 

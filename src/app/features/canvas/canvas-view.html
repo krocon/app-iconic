@@ -117,6 +117,7 @@
     <!-- one bar for every active tool (prompt 067) -->
     <app-context-bar />
     <app-canvas-context-menu #ctx />
+    <app-text-edit-overlay />
     @if (opt().crossCursor && pointerView(); as p) {
       <div class="cross-h" [style.top.px]="p.y"></div>
       <div class="cross-v" [style.left.px]="p.x"></div>
