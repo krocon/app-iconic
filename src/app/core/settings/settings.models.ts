@@ -38,7 +38,7 @@ export interface CanvasSettings {
 
 export interface ExportSettings {
   /** Packages since prompt 078. */
-  format: 'png' | 'svg' | 'appiconset' | 'icns' | 'ico';
+  format: 'png' | 'svg' | 'appiconset' | 'icns' | 'ico' | 'android' | 'web';
   /** `tinted` since prompt 077. */
   appearances: ('light' | 'dark' | 'tinted')[];
   sizes: number[];

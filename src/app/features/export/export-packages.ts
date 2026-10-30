@@ -1,6 +1,13 @@
 import { ExportAppearance, PackageKind } from '../../core/export/export.models';
 import { MaskShape } from '../canvas/canvas-view.store';
 import type { ExportChoice, ExportFormat } from './export-options';
+import {
+  ANDROID_CANVAS_SCALE,
+  androidFiles,
+  androidLayers,
+  WEB_FILES,
+  WEB_MASKABLE_SCALE,
+} from './export-android-web';
 
 /**
  * Package exports (design 078 E1): which package a choice exports and which SVG sources it needs.
@@ -11,8 +18,14 @@ import type { ExportChoice, ExportFormat } from './export-options';
  * sides, its sources here and its file names in `packageFiles` (the mirror of the Rust plan).
  */
 
-export type PackageFormat = 'appiconset' | 'icns' | 'ico';
-export const PACKAGE_FORMATS: readonly PackageFormat[] = ['appiconset', 'icns', 'ico'];
+export type PackageFormat = 'appiconset' | 'icns' | 'ico' | 'android' | 'web';
+export const PACKAGE_FORMATS: readonly PackageFormat[] = [
+  'appiconset',
+  'icns',
+  'ico',
+  'android',
+  'web',
+];
 
 export type AppIconPlatform = 'ios' | 'macos' | 'watchos';
 export const PLATFORMS: readonly AppIconPlatform[] = ['ios', 'macos', 'watchos'];
@@ -25,6 +38,16 @@ export const PACKAGE_SOURCE = {
   macos: 'macos',
   watchos: 'watchos',
   windows: 'windows',
+  androidForeground: 'android-foreground',
+  androidBackground: 'android-background',
+  androidMonochrome: 'android-monochrome',
+  androidLegacy: 'android-legacy',
+  androidRound: 'android-round',
+  androidPlay: 'android-play',
+  webAny: 'web-any',
+  webFavicon: 'web-favicon',
+  webTouch: 'web-touch',
+  webMaskable: 'web-maskable',
 } as const;
 
 /** Apple wants the tinted icon as greyscale – the system tints it (design 078 E3). */
@@ -37,6 +60,14 @@ export interface PackageSourceSpec {
   mask: MaskShape;
   frame: 'macos' | null;
   tint: string;
+  /** Groups drawn (icon.json indexes); `null` = all (079: the adaptive layers). */
+  groups: number[] | null;
+  /** Draw the icon fill (079: not on the Android foreground and monochrome layers). */
+  fill: boolean;
+  /** The canvas scaled into the middle, the fill to the edges (079: 72/108, maskable 0.8). */
+  scale: number;
+  /** Light and dark in one SVG, switched by `prefers-color-scheme` (079 `favicon.svg`). */
+  colorScheme: boolean;
 }
 
 export function isPackage(f: ExportFormat): f is PackageFormat {
@@ -59,6 +90,10 @@ export function packageKind(c: ExportChoice): PackageKind | null {
       return { kind: 'icns' };
     case 'ico':
       return { kind: 'ico' };
+    case 'android':
+      return { kind: 'android', monochrome: c.monochrome };
+    case 'web':
+      return { kind: 'web' };
     default:
       return null;
   }
@@ -69,10 +104,29 @@ const spec = (
   appearance: ExportAppearance,
   mask: MaskShape = 'none',
   frame: 'macos' | null = null,
-): PackageSourceSpec => ({ id, appearance, mask, frame, tint: GREY_TINT });
+  more: Partial<PackageSourceSpec> = {},
+): PackageSourceSpec => ({
+  id,
+  appearance,
+  mask,
+  frame,
+  tint: GREY_TINT,
+  groups: null,
+  fill: true,
+  scale: 1,
+  colorScheme: false,
+  ...more,
+});
 
-/** The sources a package needs, in the order Rust expects none (ids are matched). */
-export function packageSources(kind: PackageKind, c: ExportChoice): PackageSourceSpec[] {
+/**
+ * The sources a package needs (Rust matches them by id). `groupCount`: the document's groups –
+ * the Android layers split them (design 079 E4).
+ */
+export function packageSources(
+  kind: PackageKind,
+  c: ExportChoice,
+  groupCount = 0,
+): PackageSourceSpec[] {
   switch (kind.kind) {
     case 'appIconSet': {
       const out: PackageSourceSpec[] = [];
@@ -89,6 +143,41 @@ export function packageSources(kind: PackageKind, c: ExportChoice): PackageSourc
       return [spec(PACKAGE_SOURCE.macos, 'light', 'none', 'macos')];
     case 'ico':
       return [spec(PACKAGE_SOURCE.windows, 'light', c.mask)];
+    case 'android': {
+      const { foreground, background } = androidLayers(groupCount, c.backgroundGroups);
+      const scale = ANDROID_CANVAS_SCALE;
+      const out = [
+        spec(PACKAGE_SOURCE.androidForeground, 'light', 'none', null, {
+          groups: foreground,
+          fill: false,
+          scale,
+        }),
+        spec(PACKAGE_SOURCE.androidBackground, 'light', 'none', null, {
+          groups: background,
+          scale,
+        }),
+        spec(PACKAGE_SOURCE.androidLegacy, 'light', 'squircle'),
+        spec(PACKAGE_SOURCE.androidRound, 'light', 'circle'),
+        spec(PACKAGE_SOURCE.androidPlay, 'light'),
+      ];
+      // themed icons: the foreground through the tinted calculation in grey (077 E2, 079 E5)
+      if (kind.monochrome)
+        out.push(
+          spec(PACKAGE_SOURCE.androidMonochrome, 'tinted', 'none', null, {
+            groups: foreground,
+            fill: false,
+            scale,
+          }),
+        );
+      return out;
+    }
+    case 'web':
+      return [
+        spec(PACKAGE_SOURCE.webAny, 'light', c.mask),
+        spec(PACKAGE_SOURCE.webFavicon, 'light', c.mask, null, { colorScheme: true }),
+        spec(PACKAGE_SOURCE.webTouch, 'light'),
+        spec(PACKAGE_SOURCE.webMaskable, 'light', 'none', null, { scale: WEB_MASKABLE_SCALE }),
+      ];
   }
 }
 
@@ -118,5 +207,9 @@ export function packageFiles(
       return { folder: null, files: [`${base}.icns`] };
     case 'ico':
       return { folder: null, files: [`${base}.ico`] };
+    case 'android':
+      return { folder: 'android', files: androidFiles(kind.monochrome) };
+    case 'web':
+      return { folder: 'web', files: [...WEB_FILES] };
   }
 }

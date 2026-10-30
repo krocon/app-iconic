@@ -2,7 +2,8 @@ import { ArgsSpec } from './action-args';
 
 /**
  * Arguments of `file.exportSvg` / `file.exportPng` (design 012 E14, AI rule) and of the package
- * exports `file.exportAppIconSet` / `file.exportIcns` / `file.exportIco` (prompt 078). Lists as `json`,
+ * exports `file.exportAppIconSet` / `file.exportIcns` / `file.exportIco` (prompt 078) and
+ * `file.exportAndroid` / `file.exportWeb` (prompt 079). Lists as `json`,
  * checked further by `exportRequest()` (`features/export/export-options.ts`).
  */
 export const EXPORT_ARGS: ArgsSpec = {
@@ -22,6 +23,10 @@ export const EXPORT_ARGS: ArgsSpec = {
     overwrite: { type: 'boolean' },
     /** `appiconset`: a subset of `["ios", "macos", "watchos"]` (prompt 078). */
     platforms: { type: 'json' },
+    /** `android`: also the monochrome layer for themed icons (prompt 079, default true). */
+    monochrome: { type: 'boolean' },
+    /** `android`: icon.json group indexes on the background layer, e.g. `[1]` (079 E4). */
+    backgroundGroups: { type: 'json' },
   },
 };
 

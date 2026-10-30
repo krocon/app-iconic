@@ -30,6 +30,9 @@ export function registerExportActions(
       'file.exportAppIconSet': handler('appiconset'),
       'file.exportIcns': handler('icns'),
       'file.exportIco': handler('ico'),
+      // prompt 079: + `monochrome`, `backgroundGroups` (Android)
+      'file.exportAndroid': handler('android'),
+      'file.exportWeb': handler('web'),
       'file.exportAgain': {
         run: () => service.exportAgain(),
         enabled: () => service.canExportAgain(),

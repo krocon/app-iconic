@@ -11,6 +11,7 @@ import { CommandError } from '../document/commands/command';
 import { DocumentStore } from '../document/document.store';
 import { ExportService } from '../export/export.service';
 import { DEFAULT_CHOICE, ExportFormat } from '../export/export-options';
+import { isPackage } from '../export/export-packages';
 import { FILES_TEXTS } from '../files/files-texts';
 import { FilesService } from '../files/files.service';
 import { SettingsStore } from '../settings/settings.store';
@@ -149,9 +150,9 @@ export class McpTools {
       // packages (prompt 078): the format is an argument
       case 'export_package': {
         const f = a['format'];
-        if (f !== 'appiconset' && f !== 'icns' && f !== 'ico')
-          throw mcpError('invalid_request', 'format: appiconset, icns or ico');
-        return this.export(f, a);
+        if (!isPackage(f as ExportFormat))
+          throw mcpError('invalid_request', 'format: appiconset, icns, ico, android or web');
+        return this.export(f as ExportFormat, a);
       }
       case 'preview_svg':
         return this.previewSvg(a);
@@ -264,9 +265,20 @@ export class McpTools {
       throw mcpError('denied', 'the user did not allow the export');
     }
     const args: Args = { targetDir: dir };
-    for (const k of ['appearances', 'sizes', 'mask', 'effects', 'tint', 'overwrite', 'platforms']) {
+    for (const k of [
+      'appearances',
+      'sizes',
+      'mask',
+      'effects',
+      'tint',
+      'overwrite',
+      'platforms',
+      'monochrome',
+    ]) {
       if (a[k] !== undefined) args[k] = a[k];
     }
+    // Android layers (prompt 079): snake_case like the other tool arguments
+    if (a['background_groups'] !== undefined) args['backgroundGroups'] = a['background_groups'];
     const o = await this.exporter.runAction(format, args);
     switch (o.kind) {
       case 'done':

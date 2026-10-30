@@ -115,7 +115,10 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               (rein: Wahl, Argumente der KI, Dateiname), ExportService (Wahl der Sitzung, Fortschritt,
                               Abbruch, Hinweise, Erneut exportieren, Als PNG kopieren), ExportDialog (+ .css),
                               export-actions (file.exportSvg/Png/AppIconSet/Icns/Ico/Again, file.copyPng), Texte;
-                              export-packages (rein: Paket-Art, Quellen je Id, Dateinamen-Spiegel des Rust-Plans, 078)
+                              export-packages (rein: Paket-Art, Quellen je Id, Dateinamen-Spiegel des Rust-Plans, 078);
+                              079: export-android-web (rein: Ebenen je Gruppe, Plattformwerte, Dateinamen, Manifest/
+                              Snippet), favicon-svg (Light + Dark mit prefers-color-scheme), ExportPackageFields
+                              (Dialog: Android-Ebenen, Texte kopieren)
   app/features/tools/         Werkzeuge (013): FreehandStore (Werkzeug-Modus, Abtastung, Esc), FreehandService
                               (Einfügen, `points` der KI), freehand-overlay (Vorschau in Viewport-Pixeln),
                               text-path (rein: Schrift auflösen, zentrieren),
@@ -204,7 +207,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   testing/fixtures/           generiert aus testdata/ (camscanner.icon, all-fields.icon, svg/, unique-names.json;
                               `pnpm fixtures`)
 e2e/                          Playwright-Tests gegen den Dev-Server (hardening: großes/tiefes SVG, a11y: Tab-Weg,
-                              Fokus, Dialoge – 031; composited-shadow: Schatten pixelgleich – 033; export-packages – 078)
+                              Fokus, Dialoge – 031; composited-shadow: Schatten pixelgleich – 033; export-packages – 078;
+                              export-android-web: Favicon hell/dunkel, sichere Zone – 079)
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
@@ -246,7 +250,9 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
     src/export/               Export (012): png (resvg, sichere usvg-Optionen), files (Namen, Überschreiben, atomar,
                               Fortschritt, Abbruch); `export::fonts` = Re-Export von `fonts::system`; 078: package
                               (PackageKind → PackagePlan, ein Writer: Ordner tauschen, Fortschritt, Abbruch, RGB ohne
-                              Alpha), appiconset (Contents.json im Xcode-Stil), containers (.icns/.ico schreiben/lesen)
+                              Alpha), appiconset (Contents.json im Xcode-Stil), containers (.icns/.ico schreiben/lesen);
+                              079: android (Adaptive Icon, Legacy, Play), web (Favicons, PWA, Manifest), package_render
+                              (Renderer der Pakete)
     src/fonts/                Schriften (012, 013): system (fontdb einmal je Prozess, generische Familien), FontCatalog
                               (Familien/Stile/Ids), outline (Text → Pfad: harfrust-Shaping, skrifa-Umrisse, BBox)
   mcp/                        Crate `ai-mcp` + Binary `app-iconic-mcp` (018, aus editlicious ed-mcp): server (MCP über
@@ -258,7 +264,8 @@ testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverän
 testdata/fonts/               Caladea-Regular.ttf + OFL.txt (Testschrift für Rust-Tests, nicht im Bundle, 013)
 testdata/unique-names.json    Tabelle der eindeutigen Asset-/Layer-Namen (Rust `names.rs` und TS `unique-names.ts`)
 testdata/settings-cases.json  Standardwerte + Fälle von settings.json (Rust `settings.rs` und TS `settings-rules`, 015)
-testdata/export/              Referenz-Contents.json eines Xcode-Icon-Satzes (Rust appiconset, TS packageFiles, 078)
+testdata/export/              Referenz-Contents.json eines Xcode-Icon-Satzes (Rust appiconset, TS packageFiles, 078);
+                              android/ic_launcher.xml, web/manifest.webmanifest + snippet.html (Rust und TS, 079)
 scripts/                      version.mjs, release-notes.mjs, notices.mjs, licenses.mjs, collect-packages.mjs (030, aus
                               editlicious, je mit Test); fixtures.mjs (TS-Fixture-Module erzeugen/prüfen) + node:test, keymaps.test.mjs,
                               theme-contrast.test.mjs (Tokens light/dark, Kontraste, 015); mcp-sidecar.mjs (+ Test,

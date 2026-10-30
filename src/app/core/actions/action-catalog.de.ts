@@ -22,6 +22,8 @@ const FIXED: Record<string, string> = {
   'file.exportAppIconSet': 'Xcode-Icon-Satz exportieren …',
   'file.exportIcns': 'macOS-.icns exportieren …',
   'file.exportIco': 'Windows-.ico exportieren …',
+  'file.exportAndroid': 'Android-Icons exportieren …',
+  'file.exportWeb': 'Web-Icons exportieren …',
   'file.exportAgain': 'Erneut exportieren',
   'file.copyPng': 'Als PNG kopieren',
   'file.revealExport': 'Letzten Export im Ordner zeigen',

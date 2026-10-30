@@ -186,6 +186,31 @@ for (const format of ['icns', 'ico']) {
   check(ok && b.length > 1000, `export_package ${format}: ${r.files[0].name}, ${b.length} bytes`);
 }
 
+// prompt 079: Android adaptive icon and web set
+const android = await tool('export_package', { id, dir: out, format: 'android', overwrite: true });
+const res = (f) => readFileSync(join(android.folder, f));
+const pxOf = (b) => b.readUInt32BE(16);
+check(
+  android.files.length === 28 &&
+    res('res/mipmap-anydpi-v26/ic_launcher.xml').toString().includes('<monochrome') &&
+    pxOf(res('res/mipmap-xxxhdpi/ic_launcher_foreground.png')) === 432 &&
+    pxOf(res('res/mipmap-mdpi/ic_launcher.png')) === 48 &&
+    res('ic_launcher-playstore.png')[25] === 2,
+  `export_package android: ${android.files.length} files, layers 108 dp per density, Play 512 RGB`,
+);
+const web = await tool('export_package', { id, dir: out, format: 'web', overwrite: true });
+const wf = (f) => readFileSync(join(web.folder, f));
+check(
+  web.files.length === 8 &&
+    // light and dark differ → both halves with prefers-color-scheme; here they are the same
+    wf('favicon.svg').toString().includes('<svg') &&
+    wf('favicon.ico').readUInt16LE(4) === 3 &&
+    pxOf(wf('apple-touch-icon.png')) === 180 &&
+    wf('icon-maskable-512.png')[25] === 2 &&
+    JSON.parse(wf('manifest.webmanifest').toString()).icons.length === 3,
+  `export_package web: ${web.files.map((f) => f.name).join(', ')}`,
+);
+
 // every AI call is one undo step
 const steps = [];
 for (const expect of ['Undo AI: Add SVG Snippet', 'Undo AI: Change Background']) {

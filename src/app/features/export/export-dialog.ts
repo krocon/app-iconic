@@ -17,17 +17,18 @@ import { APPEARANCES, choiceReady, fileCount, FORMATS, MASKS } from './export-op
 import { AppIconPlatform, isPackage, PLATFORMS } from './export-packages';
 import { ExportOutcome, ExportService, noticeOf } from './export.service';
 import { EXPORT_TEXTS } from './export-texts';
+import { ExportPackageFields } from './export-package-fields';
 
 type Phase = 'edit' | 'running' | 'exists' | 'result';
 
 /**
  * File › Export… (design 012 E16): format (078: also Xcode icon set, `.icns`, `.ico` with their
- * platforms), appearances, sizes (PNG), mask, effects and target folder – the last choice is remembered (E15). While PNGs render: progress and "Stop"; existing
+ * platforms; 079: Android layers, web snippets in `ExportPackageFields`), appearances, sizes (PNG), mask, effects and target folder – the last choice is remembered (E15). While PNGs render: progress and "Stop"; existing
  * files: inline question (E11); afterwards the result with the Apple hint (E13).
  */
 @Component({
   selector: 'app-export-dialog',
-  imports: [Modal, ColorButton],
+  imports: [Modal, ColorButton, ExportPackageFields],
   template: `
     <app-modal [heading]="t.title" width="32rem" (closed)="close()">
       <fieldset class="group" [disabled]="phase() === 'running'">
@@ -69,6 +70,7 @@ type Phase = 'edit' | 'running' | 'exists' | 'result';
           </div>
         </fieldset>
       }
+      <app-export-package-fields [disabled]="phase() === 'running'" />
       @if (showAppearances()) {
         <fieldset class="group" [disabled]="phase() === 'running'">
           <legend>{{ isSet() ? t.appearancesIos : t.appearances }}</legend>
@@ -270,10 +272,10 @@ export class ExportDialog {
   protected readonly showAppearances = computed(
     () => !isPackage(this.choice().format) || this.isSet(),
   );
-  /** The icon set and `.icns` bring their own masks (078 E3/E4). */
+  /** The icon set, `.icns` and Android bring their own masks (078 E3/E4, 079 E3). */
   protected readonly showMask = computed(() => {
     const f = this.choice().format;
-    return !isPackage(f) || f === 'ico';
+    return !isPackage(f) || f === 'ico' || f === 'web';
   });
   protected readonly hint = computed(() => {
     const f = this.choice().format;

@@ -181,7 +181,7 @@ pub fn sanitize(mut s: Settings) -> Settings {
     let e = &mut s.export;
     one_of(
         &mut e.format,
-        &["png", "svg", "appiconset", "icns", "ico"],
+        &["png", "svg", "appiconset", "icns", "ico", "android", "web"],
         &d.export.format,
     );
     one_of(&mut e.mask, &MASKS, &d.export.mask);

@@ -55,7 +55,17 @@ describe('export packages (design 078)', () => {
     ]);
     expect(set.every((s) => s.tint === GREY_TINT)).toBe(true);
     expect(packageSources({ kind: 'ico' }, c)).toEqual([
-      { id: 'windows', appearance: 'light', mask: 'circle', frame: null, tint: GREY_TINT },
+      {
+        id: 'windows',
+        appearance: 'light',
+        mask: 'circle',
+        frame: null,
+        tint: GREY_TINT,
+        groups: null,
+        fill: true,
+        scale: 1,
+        colorScheme: false,
+      },
     ]);
     expect(packageSources({ kind: 'icns' }, c)[0].frame).toBe('macos');
   });

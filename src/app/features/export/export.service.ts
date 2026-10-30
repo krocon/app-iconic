@@ -28,6 +28,9 @@ import {
 } from './export-options';
 import { isPackage, packageKind, packageSources } from './export-packages';
 import { exportSvg, RasterSizes } from './export-svg';
+import { colorSchemeSvg } from './favicon-svg';
+import { groups } from '../document/model/icon-json';
+import { groupLabel } from '../hierarchy/node-label';
 import { EXPORT_TEXTS as T } from './export-texts';
 
 export type ExportOutcome =
@@ -77,6 +80,16 @@ export class ExportService {
   /** The first file of the last finished export – "Show in Folder" (design 030 E6). */
   readonly lastExport = signal<string | null>(null);
   readonly canExport = computed(() => !!this.files.store() && !this.running());
+  /** The document's groups for the Android layer choice (prompt 079 E4): index and label. */
+  readonly groupChoices = computed(() => {
+    const store = this.files.store();
+    return store
+      ? groups(store.document().iconJson).map((g, index) => ({
+          index,
+          label: groupLabel(g, index),
+        }))
+      : [];
+  });
   /** Stop pressed before the backend had the job (while the SVGs were built). */
   private stopRequested = false;
   /** The last finished export per document for "Export Again" (prompt 078, session only). */
@@ -130,21 +143,29 @@ export class ExportService {
     req: ExportChoice,
   ): Promise<PackageSource[]> {
     const raster = await rasterSizes(doc);
-    return packageSources(kind, req).map((s) => ({
-      id: s.id,
-      svg: exportSvg(
-        doc,
-        s.appearance,
-        {
-          mask: s.mask,
-          frame: s.frame,
-          effects: req.effects,
-          dimensions: req.dimensions,
-          tint: s.tint,
-        },
-        raster,
-      ),
-    }));
+    return packageSources(kind, req, groups(doc.iconJson).length).map((s) => {
+      const svg = (appearance: ExportAppearance) =>
+        exportSvg(
+          doc,
+          appearance,
+          {
+            mask: s.mask,
+            frame: s.frame,
+            effects: req.effects,
+            dimensions: req.dimensions,
+            tint: s.tint,
+            groups: s.groups,
+            fill: s.fill,
+            scale: s.scale,
+          },
+          raster,
+        );
+      // favicon.svg: light and dark in one file (prompt 079 E6)
+      return {
+        id: s.id,
+        svg: s.colorScheme ? colorSchemeSvg(svg('light'), svg('dark')) : svg(s.appearance),
+      };
+    });
   }
 
   private async write(

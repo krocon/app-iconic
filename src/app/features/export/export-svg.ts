@@ -39,6 +39,15 @@ export interface ExportSvgOptions {
    * with 100 units margin and a drop shadow; replaces `mask`.
    */
   frame?: 'macos' | null;
+  /** Only these groups (icon.json indexes); `null`/absent = all (prompt 079: adaptive layers). */
+  groups?: readonly number[] | null;
+  /** Draw the icon fill (default `true`; 079: not on the Android foreground). */
+  fill?: boolean;
+  /**
+   * The canvas scaled by this factor into the middle of the image, the fill extended to the
+   * edges (prompt 079: Android 72/108, maskable 0.8); default 1.
+   */
+  scale?: number;
 }
 
 /** macOS template on 1024 units (Apple: 824 × 824 shape, 100 margin, shadow 28 blur, 12 down, 50 % black). */
@@ -54,6 +63,7 @@ export const MACOS_FRAME = {
 export type RasterSizes = ReadonlyMap<string, { width: number; height: number }>;
 
 const ID = 'ai-export-';
+const round = (v: number) => Math.round(v * 10000) / 10000;
 const URL_IN_TEXT = /url\(\s*(['"]?)#([^'")\s]+)\1\s*\)/g;
 const HASH_IN_TEXT = /#([A-Za-z_][\w-]*)/g;
 
@@ -99,12 +109,14 @@ class Builder {
     return e;
   }
 
-  background(fill: FillPreview<SvgColor>): Element | null {
+  background(fill: FillPreview<SvgColor>, bleed = 0): Element | null {
     if (fill.kind === 'none') return null;
     const rect = this.el('rect', {
       class: `${ID}background`,
-      width: CANVAS_SIZE,
-      height: CANVAS_SIZE,
+      x: bleed ? -bleed : null,
+      y: bleed ? -bleed : null,
+      width: CANVAS_SIZE + 2 * bleed,
+      height: CANVAS_SIZE + 2 * bleed,
     });
     if (fill.kind === 'solid') {
       rect.setAttribute('fill', fill.color.hex);
@@ -121,6 +133,15 @@ class Builder {
           })
         : this.el('radialGradient', { cx: fill.center.x, cy: fill.center.y, r: fill.radius });
     grad.setAttribute('id', `${ID}fill`);
+    if (bleed) {
+      // unit coordinates of the canvas inside the larger rect (prompt 079): same gradient, padded
+      const w = CANVAS_SIZE + 2 * bleed;
+      const t = round(bleed / w);
+      grad.setAttribute(
+        'gradientTransform',
+        `translate(${t} ${t}) scale(${round(CANVAS_SIZE / w)})`,
+      );
+    }
     const n = fill.stops.length;
     fill.stops.forEach((c, i) => {
       grad.append(
@@ -279,6 +300,17 @@ class Builder {
     return g;
   }
 
+  /** The canvas scaled into the middle (prompt 079 E3/E7); the margin in canvas units. */
+  scaled(target: Element, scale: number): { group: Element; bleed: number } {
+    const offset = (CANVAS_SIZE * (1 - scale)) / 2;
+    const g = this.el('g', {
+      class: `${ID}scaled`,
+      transform: `translate(${round(offset)} ${round(offset)}) scale(${round(scale)})`,
+    });
+    target.append(g);
+    return { group: g, bleed: round((CANVAS_SIZE / scale - CANVAS_SIZE) / 2) };
+  }
+
   /** The tinted approximation (prompt 077 E2) around background and groups. */
   tinted(target: Element): Element {
     this.defs.append(tintFilter(this.d, `${ID}tint`, this.opts.tint ?? DEFAULT_TINT));
@@ -331,10 +363,18 @@ export function exportSvg(
   }
   b.root.append(b.defs);
   const masked = b.maskGroup();
-  const target = appearance === 'tinted' ? b.tinted(masked) : masked;
-  const bg = b.background(fillPreview(doc.iconJson, appearance, svgColor).preview);
-  if (bg) target.append(bg);
-  for (const g of stackOf(doc, appearance, opts.effects)) target.append(b.group(g));
+  const tinted = appearance === 'tinted' ? b.tinted(masked) : masked;
+  const scale = opts.scale ?? 1;
+  const { group: target, bleed } =
+    scale !== 1 ? b.scaled(tinted, scale) : { group: tinted, bleed: 0 };
+  if (opts.fill !== false) {
+    const bg = b.background(fillPreview(doc.iconJson, appearance, svgColor).preview, bleed);
+    if (bg) target.append(bg);
+  }
+  const only = opts.groups ? new Set(opts.groups) : null;
+  for (const g of stackOf(doc, appearance, opts.effects)) {
+    if (!only || only.has(g.group)) target.append(b.group(g));
+  }
   if (!b.defs.hasChildNodes()) b.defs.remove();
   return (
     '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(b.d) + '\n'

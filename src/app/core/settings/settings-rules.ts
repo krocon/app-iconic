@@ -156,7 +156,11 @@ export function sanitizeSettings(s: Settings): Settings {
       mask: oneOf(c.mask, MASKS, d.canvas.mask),
     },
     export: {
-      format: oneOf(e.format, ['png', 'svg', 'appiconset', 'icns', 'ico'], d.export.format),
+      format: oneOf(
+        e.format,
+        ['png', 'svg', 'appiconset', 'icns', 'ico', 'android', 'web'],
+        d.export.format,
+      ),
       appearances: appearances.length ? appearances : [...d.export.appearances],
       sizes: sizes.length ? sizes : [...d.export.sizes],
       mask: oneOf(e.mask, MASKS, d.export.mask),

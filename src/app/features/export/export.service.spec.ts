@@ -226,4 +226,23 @@ describe('ExportService (design 012)', () => {
       expect(files.notice()).toContain('could not be copied');
     });
   });
+
+  it('Android and web sources (prompt 079): layers, grey monochrome, favicon light + dark', async () => {
+    const o = await service.export(req({ format: 'android', backgroundGroups: [0] }));
+    expect(o).toMatchObject({ kind: 'done', report: { folder: '/out/android' } });
+    const a = api.packages[0];
+    const svg = (id: string) => a.sources.find((s) => s.id === id)!.svg;
+    expect(svg('android-monochrome')).toContain(tintedMatrix('#ffffff'));
+    expect(svg('android-monochrome')).not.toContain('ai-export-background');
+    expect(svg('android-background')).toContain('ai-export-background');
+    expect(svg('android-foreground')).toContain('scale(0.6667)');
+    expect(svg('android-legacy')).toContain('clip-path="url(#ai-export-mask)"');
+    const w = await service.export(req({ format: 'web', mask: 'squircle' }));
+    expect(w.kind).toBe('done');
+    const web = api.packages[1];
+    const fav = web.sources.find((s) => s.id === 'web-favicon')!.svg;
+    expect(fav).toContain('prefers-color-scheme: dark');
+    expect(fav).toContain('#3a3a3c'); // dark system background in the dark half
+    expect(web.sources.find((s) => s.id === 'web-maskable')!.svg).toContain('scale(0.8)');
+  });
 });

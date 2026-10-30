@@ -203,3 +203,11 @@
 4. Windows: `.ico` im Explorer und mit dem Ressourcen-Compiler prüfen (PNG auch für 16–64 px; ältere Werkzeuge
    erwarten dort BMP).
 
+## Prompt 079
+
+1. Android: die `.icon`-Fläche wird der 72-dp-Ausschnitt der 108-dp-Ebene (gleicher Bildausschnitt wie iOS; Ecken
+   können von runden Masken beschnitten werden) – so lassen, oder Fläche = 66-dp-Zone (alles sicher, Motiv kleiner)?
+2. **Gerät/Emulator**: Ordner `android/` in ein Projekt kopieren – zeigt der Launcher Vordergrund/Hintergrund,
+   Themed Icon (Android 13+) und auf API < 26 die Legacy-Icons wie erwartet?
+3. `favicon.ico` im Snippet mit `sizes="32x32"` (Praxis gegen Chromiums ICO-Vorliebe) – oder `sizes="any"`?
+4. Monochrom = Form der Vordergrund-Gruppen aus der Tinted-Rechnung – oder lieber Luminanz → Alpha?

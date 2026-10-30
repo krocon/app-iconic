@@ -233,14 +233,16 @@ pub fn list() -> Vec<Value> {
         ),
         tool(
             "export_package",
-            "Exports a developer package into a folder (prompt 078): appiconset = Xcode AppIcon.appiconset (Contents.json, iOS 1024 + dark/tinted, macOS 16–512 @1x/@2x, optional watchOS), icns = <name>.icns, ico = <name>.ico (16–256). May ask the user first.",
+            "Exports a developer package into a folder (prompts 078, 079): appiconset = Xcode AppIcon.appiconset (Contents.json, iOS 1024 + dark/tinted, macOS 16–512 @1x/@2x, optional watchOS), icns = <name>.icns, ico = <name>.ico (16–256), android = android/ (adaptive icon foreground/background/monochrome per density, legacy icons, Play Store 512), web = web/ (favicon.ico/.svg, apple-touch-icon, PWA icons incl. maskable, manifest.webmanifest, snippet.html). May ask the user first.",
             json!({
                 "id": id(),
                 "dir": dir(),
-                "format": {"type": "string", "enum": ["appiconset", "icns", "ico"]},
+                "format": {"type": "string", "enum": ["appiconset", "icns", "ico", "android", "web"]},
                 "platforms": {"type": "array", "items": {"type": "string", "enum": ["ios", "macos", "watchos"]}, "description": "appiconset only. Default: ios, macos"},
                 "appearances": {"type": "array", "items": {"type": "string", "enum": ["light", "dark", "tinted"]}, "description": "appiconset: iOS variants (light is always there)"},
-                "mask": {"type": "string", "enum": ["none", "squircle", "circle"], "description": "ico only"},
+                "mask": {"type": "string", "enum": ["none", "squircle", "circle"], "description": "ico and web (favicons, icon-192/512)"},
+                "monochrome": {"type": "boolean", "description": "android: also the monochrome layer for themed icons (default true)"},
+                "background_groups": {"type": "array", "items": {"type": "integer", "minimum": 0}, "description": "android: indexes of icon.json groups drawn on the background layer (default none: only the icon fill); the others are the foreground"},
                 "effects": {"type": "boolean"},
                 "overwrite": {"type": "boolean"}
             }),

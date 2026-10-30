@@ -52,6 +52,8 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
     a('file.exportAppIconSet'),
     a('file.exportIcns'),
     a('file.exportIco'),
+    a('file.exportAndroid'),
+    a('file.exportWeb'),
     a('file.exportAgain'),
     a('file.copyPng'),
     a('file.revealExport'),

@@ -14,6 +14,8 @@ const EN = {
     appiconset: 'Xcode icon set',
     icns: 'macOS .icns',
     ico: 'Windows .ico',
+    android: 'Android',
+    web: 'Web / PWA',
   } satisfies Record<ExportFormat, string>,
   platforms: 'Platforms',
   platformNames: {
@@ -29,7 +31,25 @@ const EN = {
       'Xcode 26 also takes the .icon file directly.',
     icns: 'macOS icon file, 16–1024 px, with mask, margin and shadow (Light).',
     ico: 'Windows icon file, 16, 24, 32, 48, 64 and 256 px as PNG (Light).',
+    android:
+      'Folder android/ for app/src/main: adaptive icon (foreground, background, monochrome; ' +
+      '108 dp, the icon fills the 72 dp viewport) in mipmap-mdpi … xxxhdpi, legacy icons ' +
+      '48 dp and the Google Play icon 512 px.',
+    web:
+      'Folder web/ for the site root: favicon.ico (16, 32, 48), favicon.svg (light and dark), ' +
+      'apple-touch-icon.png (180), icon-192/512 and a maskable 512 for PWAs, manifest and links.',
   },
+  monochrome: 'Monochrome layer (themed icons, Android 13+)',
+  layers: 'Adaptive icon layers',
+  layerNames: { foreground: 'Foreground', background: 'Background' },
+  layersHint: 'The background layer always holds the icon fill.',
+  noGroups: 'The document has no groups.',
+  snippet: 'HTML for <head>',
+  manifest: 'Web manifest (icons)',
+  copy: 'Copy',
+  copyLabel: (what: string) => `Copy ${what}`,
+  textCopied: 'Copied to the clipboard.',
+  textCopyFailed: 'Could not copy to the clipboard.',
   appearancesIos: 'Appearances (iOS)',
   appearances: 'Appearances',
   light: 'Light',
@@ -87,6 +107,8 @@ export const EXPORT_TEXTS = translatable('export', EN, {
       appiconset: 'Xcode-Icon-Satz',
       icns: 'macOS .icns',
       ico: 'Windows .ico',
+      android: 'Android',
+      web: 'Web / PWA',
     },
     platforms: 'Plattformen',
     platformNames: { ios: 'iOS / iPadOS', macos: 'macOS', watchos: 'watchOS' },
@@ -97,7 +119,26 @@ export const EXPORT_TEXTS = translatable('export', EN, {
         'Xcode 26 nimmt die .icon-Datei auch direkt.',
       icns: 'macOS-Icon-Datei, 16–1024 px, mit Maske, Rand und Schatten (Hell).',
       ico: 'Windows-Icon-Datei, 16, 24, 32, 48, 64 und 256 px als PNG (Hell).',
+      android:
+        'Ordner android/ für app/src/main: Adaptive Icon (Vordergrund, Hintergrund, Monochrom; ' +
+        '108 dp, das Icon füllt den 72-dp-Ausschnitt) in mipmap-mdpi … xxxhdpi, Legacy-Icons ' +
+        '48 dp und das Google-Play-Icon 512 px.',
+      web:
+        'Ordner web/ für das Wurzelverzeichnis der Website: favicon.ico (16, 32, 48), favicon.svg ' +
+        '(hell und dunkel), apple-touch-icon.png (180), icon-192/512 und ein maskierbares 512 ' +
+        'für PWAs, Manifest und Links.',
     },
+    monochrome: 'Monochrome Ebene (Designsymbole, Android 13+)',
+    layers: 'Ebenen des Adaptive Icons',
+    layerNames: { foreground: 'Vordergrund', background: 'Hintergrund' },
+    layersHint: 'Die Hintergrund-Ebene enthält immer die Füllung des Icons.',
+    noGroups: 'Das Dokument hat keine Gruppen.',
+    snippet: 'HTML für <head>',
+    manifest: 'Web-Manifest (Icons)',
+    copy: 'Kopieren',
+    copyLabel: (what: string) => `${what} kopieren`,
+    textCopied: 'In die Zwischenablage kopiert.',
+    textCopyFailed: 'Kopieren in die Zwischenablage fehlgeschlagen.',
     appearancesIos: 'Erscheinungsbilder (iOS)',
     appearances: 'Erscheinungsbilder',
     light: 'Hell',

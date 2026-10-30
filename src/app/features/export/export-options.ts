@@ -9,6 +9,7 @@ import {
   packageKind,
   PLATFORMS,
 } from './export-packages';
+import { parseGroupIndexes } from './export-android-web';
 
 /**
  * What an export writes (design 012 E14–E16): the dialog edits it, the actions take it as
@@ -17,7 +18,15 @@ import {
 
 /** Loose files (012) or a package (078: Xcode icon set, `.icns`, `.ico`). */
 export type ExportFormat = 'svg' | 'png' | PackageFormat;
-export const FORMATS: readonly ExportFormat[] = ['png', 'svg', 'appiconset', 'icns', 'ico'];
+export const FORMATS: readonly ExportFormat[] = [
+  'png',
+  'svg',
+  'appiconset',
+  'icns',
+  'ico',
+  'android',
+  'web',
+];
 export const MASKS: readonly MaskShape[] = ['none', 'squircle', 'circle'];
 /** In this order (file order, Rust `APPEARANCES`); `tinted` since prompt 077. */
 export const APPEARANCES: readonly ExportAppearance[] = ['light', 'dark', 'tinted'];
@@ -37,6 +46,13 @@ export interface ExportChoice {
   targetDir: string | null;
   /** `appiconset` only: the platforms of the icon set (prompt 078). */
   platforms: AppIconPlatform[];
+  /** `android` only: also the monochrome layer for themed icons (prompt 079). */
+  monochrome: boolean;
+  /**
+   * `android` only: icon.json group indexes on the background layer (079 E4); the others are the
+   * foreground. Belongs to one document – not kept in the settings.
+   */
+  backgroundGroups: number[];
 }
 
 export const DEFAULT_CHOICE: ExportChoice = {
@@ -49,6 +65,8 @@ export const DEFAULT_CHOICE: ExportChoice = {
   tint: DEFAULT_TINT,
   targetDir: null,
   platforms: ['ios', 'macos'],
+  monochrome: true,
+  backgroundGroups: [],
 };
 
 export { EXPORT_ARGS } from '../../core/actions/export-action-args';
@@ -78,7 +96,11 @@ export function exportRequest(
   const tint = args['tint'] === undefined ? base.tint : parseTint(args['tint']);
   const platforms =
     args['platforms'] === undefined ? base.platforms : list(args['platforms'], PLATFORMS);
-  if (!appearances || !sizes || !tint || !platforms) return null;
+  const backgroundGroups =
+    args['backgroundGroups'] === undefined
+      ? base.backgroundGroups
+      : parseGroupIndexes(args['backgroundGroups']);
+  if (!appearances || !sizes || !tint || !platforms || !backgroundGroups) return null;
   return {
     format,
     appearances,
@@ -89,6 +111,8 @@ export function exportRequest(
     tint,
     targetDir: (args['targetDir'] as string | undefined) ?? base.targetDir,
     platforms,
+    monochrome: (args['monochrome'] as boolean | undefined) ?? base.monochrome,
+    backgroundGroups,
     overwrite: (args['overwrite'] as boolean | undefined) ?? false,
   };
 }

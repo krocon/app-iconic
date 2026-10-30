@@ -232,6 +232,21 @@ describe('McpStore (design 018)', () => {
     });
     expect(set).toMatchObject({ folder: '/out/AppIcon.appiconset' });
     expect(backend.exporter.packages.at(-1)!.kind).toMatchObject({ ios: true, macos: false });
+    // prompt 079: Android with its layers, web
+    const android = await call('export_package', {
+      dir: '/out2',
+      format: 'android',
+      monochrome: false,
+      background_groups: [1],
+    });
+    expect(android).toMatchObject({ folder: '/out2/android' });
+    expect(backend.exporter.packages.at(-1)!.kind).toEqual({ kind: 'android', monochrome: false });
+    expect(
+      backend.exporter.packages.at(-1)!.sources.find((s) => s.id === 'android-background')!.svg,
+    ).toContain('ai-export-group');
+    expect(await call('export_package', { dir: '/out2', format: 'web' })).toMatchObject({
+      folder: '/out2/web',
+    });
     expect(await call('export_package', { dir: '/out', format: 'pdf' })).toMatchObject({
       error: { code: 'invalid_request' },
     });

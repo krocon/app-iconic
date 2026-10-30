@@ -1,7 +1,9 @@
 use super::*;
 use crate::export::appiconset::FOLDER;
-use crate::export::containers::{read_icns, read_ico};
+use crate::export::containers::{ICNS_TYPES, read_icns, read_ico};
 use crate::icon::image_file::{ImageKind, detect};
+use resvg::tiny_skia::Pixmap;
+use std::sync::atomic::Ordering;
 
 const SQUARE: &str = r##"<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#f80"/></svg>"##;
 /// Transparent corners – flattening must remove the alpha channel.

@@ -8,6 +8,9 @@ import { DocumentStore } from '../document/document.store';
 import { FilesService } from '../files/files.service';
 import { ExportDialog } from './export-dialog';
 import { ExportService } from './export.service';
+import { ClipboardApi } from '../../core/clipboard/clipboard-api';
+import { FakeClipboardApi } from '../../../testing/fake-clipboard-api';
+import { WEB_MANIFEST, WEB_SNIPPET } from './export-android-web';
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
@@ -18,7 +21,11 @@ describe('ExportDialog (design 012 E16)', () => {
     const backend = fakeBackend();
     api = backend.exporter;
     TestBed.configureTestingModule({
-      providers: [...backend.providers, { provide: OS, useValue: 'other' }],
+      providers: [
+        ...backend.providers,
+        { provide: OS, useValue: 'other' },
+        { provide: ClipboardApi, useValue: new FakeClipboardApi() },
+      ],
     });
     TestBed.inject(FilesService).store.set(new DocumentStore(camscannerDocument()));
     TestBed.inject(ExportService).openDialog(format);
@@ -114,5 +121,52 @@ describe('ExportDialog (design 012 E16)', () => {
     expect(q('export-mask')).not.toBeNull();
     expect(q('export-appearance-light')).toBeNull();
     expect(q('export-format-hint')!.textContent).toContain('256 px');
+  });
+
+  it('Android (prompt 079): monochrome, a layer per group, no mask or appearances', async () => {
+    const { el, q, click } = await open();
+    await click('export-choose');
+    await click('export-format-android');
+    expect(q('export-mask')).toBeNull();
+    expect(q('export-appearance-light')).toBeNull();
+    expect(q('export-format-hint')!.textContent).toContain('72 dp');
+    expect(el.querySelector('.count')!.textContent).toBe('28 files');
+    const layer = q<HTMLSelectElement>('export-layer-1')!;
+    expect(layer.value).toBe('foreground');
+    layer.value = 'background';
+    layer.dispatchEvent(new Event('change'));
+    await click('export-monochrome');
+    expect(el.querySelector('.count')!.textContent).toBe('23 files');
+    expect(TestBed.inject(ExportService).choice()).toMatchObject({
+      backgroundGroups: [1],
+      monochrome: false,
+    });
+    await click('export-run');
+    await flush();
+    expect(q('export-result')!.textContent).toBe('Exported 23 files.');
+    const p = api.packages[0];
+    expect(p.kind).toEqual({ kind: 'android', monochrome: false });
+    // group 1 drawn on the background, not on the foreground
+    const svg = (id: string) => p.sources.find((s) => s.id === id)!.svg;
+    expect(svg('android-foreground').match(/class="ai-export-group"/g)).toHaveLength(1);
+    expect(svg('android-background').match(/class="ai-export-group"/g)).toHaveLength(1);
+    expect(svg('android-foreground')).not.toContain('ai-export-background');
+  });
+
+  it('Web (prompt 079): mask, snippet and manifest to copy', async () => {
+    const { q, click } = await open();
+    const clip = TestBed.inject(ClipboardApi) as FakeClipboardApi;
+    await click('export-format-web');
+    expect(q('export-mask')).not.toBeNull();
+    expect(q('export-text-snippet')!.textContent).toBe(WEB_SNIPPET);
+    expect(q('export-text-manifest')!.textContent).toBe(WEB_MANIFEST);
+    await click('export-copy-snippet');
+    expect(clip.text).toBe(WEB_SNIPPET);
+    expect(q('export-copied')!.textContent!.trim()).toBe('Copied to the clipboard.');
+    await click('export-copy-manifest');
+    expect(clip.text).toBe(WEB_MANIFEST);
+    clip.fail = true;
+    await click('export-copy-manifest');
+    expect(q('export-copied')!.textContent!.trim()).toBe('Could not copy to the clipboard.');
   });
 });

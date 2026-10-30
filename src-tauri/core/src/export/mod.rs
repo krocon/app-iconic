@@ -7,12 +7,16 @@
 //! - [`png`]    one SVG → one pixmap, without loading anything from outside (design 012 E9)
 //! - [`files`]  file names, overwrite check, atomic writes, progress and cancelling (E10–E13)
 //! - [`package`] package exports (prompt 078): plan + one writer for folders and containers;
-//!   [`appiconset`] Xcode icon set, [`containers`] `.icns`/`.ico`
+//!   [`appiconset`] Xcode icon set, [`containers`] `.icns`/`.ico`; 079: [`android`] adaptive
+//!   icon, [`web`] favicons and PWA icons
 
+pub mod android;
 pub mod appiconset;
 pub mod containers;
 pub mod files;
 pub mod package;
+mod package_render;
+pub mod web;
 pub use crate::fonts::system as fonts;
 pub mod png;
 

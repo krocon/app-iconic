@@ -209,11 +209,17 @@
       `appearances`/`luminosity`, macOS 16–512 @1x/@2x mit Maske, Rand und Schatten, optional watchOS) _(neu)_ (078)
 - [x] macOS `.icns` und Windows `.ico` (16–256, PNG-kodiert), eigene kleine Writer _(neu)_ (078)
 - [x] Als PNG kopieren (⇧⌘C / Strg+Umschalt+C, Rust rendert, System-Zwischenablage) und „Erneut exportieren“ je Dokument _(neu)_ (078)
+- [x] Android: Adaptive Icon (Vordergrund/Hintergrund/Monochrom, 108 dp, `mipmap-mdpi` … `xxxhdpi`,
+      `mipmap-anydpi-v26/ic_launcher.xml` + `_round`), Legacy-Icons 48 dp, Play-Store 512; Gruppen je Ebene wählbar,
+      Monochrom aus der Tinted-Rechnung _(neu)_ (079)
+- [x] Web/PWA: `favicon.ico` (16/32/48), `favicon.svg` hell/dunkel über `prefers-color-scheme`,
+      `apple-touch-icon.png` (180, deckend), `icon-192/512`, `icon-maskable-512` (sichere Zone), Manifest-Ausschnitt
+      und `<link>`-Snippet zum Kopieren _(neu)_ (079)
 
 ## 11a. KI-Steuerung (MCP) _(neu)_
 
 - [x] Sidecar `app-iconic-mcp` (stdio) + lokale Brücke (127.0.0.1, Token je Start), Einstellung „KI-Steuerung (MCP) erlauben“ (Standard aus), Konfig-Zeile für Claude Code, Status „KI verbunden“, „KI trennen“ (018)
-- [x] Tools: Dokumente, Lesen (icon.json, Baum, Node mit BBox, Asset-SVG, Auswahl), Schreiben (Commands, Aktionen, SVG, Auswahl), Vorschau als PNG, Export, Speichern (018); `export_package` (appiconset/icns/ico, 078)
+- [x] Tools: Dokumente, Lesen (icon.json, Baum, Node mit BBox, Asset-SVG, Auswahl), Schreiben (Commands, Aktionen, SVG, Auswahl), Vorschau als PNG, Export, Speichern (018); `export_package` (appiconset/icns/ico, 078; android/web, 079)
 - [x] Jeder KI-Aufruf ein Undo-Schritt („Undo AI: …“), erwartete Revision, Rückfrage vor Speichern an neuem Ort/Export, Sperrliste (018)
 - [x] Sidecar in den Paketen, signiert wie die App (030: Release-Workflow baut ihn und bündelt ihn über `tauri.sidecar.conf.json`)
 

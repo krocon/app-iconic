@@ -67,7 +67,7 @@ pub struct CanvasSettings {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportSettings {
-    /// `png` | `svg` | `appiconset` | `icns` | `ico` (prompt 078).
+    /// `png` | `svg` | `appiconset` | `icns` | `ico` (prompt 078) | `android` | `web` (079).
     pub format: String,
     pub appearances: Vec<String>,
     pub sizes: Vec<u32>,

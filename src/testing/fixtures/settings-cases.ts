@@ -230,6 +230,16 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
       ],
     },
     {
+      name: 'export formats of prompt 079: android and web',
+      input: { export: { format: 'android' } },
+      expect: [['export.format', 'android']],
+    },
+    {
+      name: 'export format web',
+      input: { export: { format: 'web' } },
+      expect: [['export.format', 'web']],
+    },
+    {
       name: 'zoom: 0 = fit, else 0.25…2',
       input: { canvas: { zoom: 5 } },
       expect: [['canvas.zoom', 2]],

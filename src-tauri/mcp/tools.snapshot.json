@@ -467,7 +467,7 @@
     "name": "export_svg"
   },
   {
-    "description": "Exports a developer package into a folder (prompt 078): appiconset = Xcode AppIcon.appiconset (Contents.json, iOS 1024 + dark/tinted, macOS 16–512 @1x/@2x, optional watchOS), icns = <name>.icns, ico = <name>.ico (16–256). May ask the user first.",
+    "description": "Exports a developer package into a folder (prompts 078, 079): appiconset = Xcode AppIcon.appiconset (Contents.json, iOS 1024 + dark/tinted, macOS 16–512 @1x/@2x, optional watchOS), icns = <name>.icns, ico = <name>.ico (16–256), android = android/ (adaptive icon foreground/background/monochrome per density, legacy icons, Play Store 512), web = web/ (favicon.ico/.svg, apple-touch-icon, PWA icons incl. maskable, manifest.webmanifest, snippet.html). May ask the user first.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
@@ -483,6 +483,14 @@
           },
           "type": "array"
         },
+        "background_groups": {
+          "description": "android: indexes of icon.json groups drawn on the background layer (default none: only the icon fill); the others are the foreground",
+          "items": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "type": "array"
+        },
         "dir": {
           "description": "Absolute path of an existing folder",
           "type": "string"
@@ -494,7 +502,9 @@
           "enum": [
             "appiconset",
             "icns",
-            "ico"
+            "ico",
+            "android",
+            "web"
           ],
           "type": "string"
         },
@@ -503,13 +513,17 @@
           "type": "string"
         },
         "mask": {
-          "description": "ico only",
+          "description": "ico and web (favicons, icon-192/512)",
           "enum": [
             "none",
             "squircle",
             "circle"
           ],
           "type": "string"
+        },
+        "monochrome": {
+          "description": "android: also the monochrome layer for themed icons (default true)",
+          "type": "boolean"
         },
         "overwrite": {
           "type": "boolean"

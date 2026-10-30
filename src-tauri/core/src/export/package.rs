@@ -11,24 +11,23 @@
 //! like saving an `.icon`): it appears complete or not at all – a cancelled package leaves nothing.
 //!
 //! A new package kind = one enum variant + its `plan` (here or in its own module, like
-//! [`super::appiconset`]) + its source table in TS.
+//! [`super::appiconset`], [`super::android`], [`super::web`]) + its source table in TS. The
+//! rendering lives in [`super::package_render`].
 
-use super::containers::{ICNS_TYPES, ICO_SIZES, write_icns, write_ico};
+use super::containers::ICO_SIZES;
 use super::files::{check_dir, file_base_name};
-use super::png::{encode, has_transparency, parse, render};
+use super::package_render::Renderer;
+pub use super::package_render::encode_opaque;
 use super::{ExportOptions, ExportProgress, ExportReport, ExportedFile, MAX_SVG_BYTES};
 use crate::error::{FsError, FsErrorCode};
 use crate::fs_atomic::write_atomic;
 use crate::icon::bundle::{sibling, swap_into_place};
-use resvg::tiny_skia::Pixmap;
-use resvg::usvg::Tree;
 use resvg::usvg::fontdb::Database;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::AtomicBool;
 
 /// Most sources of one package.
 pub const MAX_SOURCES: usize = 8;
@@ -43,6 +42,23 @@ pub mod source {
     pub const WATCHOS: &str = "watchos";
     /// Windows `.ico`: the export choice's mask.
     pub const WINDOWS: &str = "windows";
+    /// Android (prompt 079): the adaptive layers on 108 dp (canvas = the 72 dp viewport).
+    pub const ANDROID_FOREGROUND: &str = "android-foreground";
+    pub const ANDROID_BACKGROUND: &str = "android-background";
+    pub const ANDROID_MONOCHROME: &str = "android-monochrome";
+    /// Legacy launcher icons (before API 26): squircle and circle.
+    pub const ANDROID_LEGACY: &str = "android-legacy";
+    pub const ANDROID_ROUND: &str = "android-round";
+    /// Google Play 512: full square, flattened.
+    pub const ANDROID_PLAY: &str = "android-play";
+    /// Web (prompt 079): `favicon.ico`, `icon-192/512` with the export choice's mask.
+    pub const WEB_ANY: &str = "web-any";
+    /// `favicon.svg`: light and dark switched by `prefers-color-scheme`, written as it is.
+    pub const WEB_FAVICON: &str = "web-favicon";
+    /// `apple-touch-icon.png`: unmasked, flattened.
+    pub const WEB_TOUCH: &str = "web-touch";
+    /// `icon-maskable-512.png`: canvas in the safe zone, fill to the edges.
+    pub const WEB_MASKABLE: &str = "web-maskable";
 }
 
 /// One SVG the frontend built for a package.
@@ -73,6 +89,10 @@ pub enum PackageKind {
     Icns,
     /// `<name>.ico` (Windows, E6).
     Ico,
+    /// Android adaptive icon + legacy + Play Store (prompt 079, [`super::android`]).
+    Android { monochrome: bool },
+    /// Favicons, touch icon, PWA icons and manifest (prompt 079, [`super::web`]).
+    Web,
 }
 
 /// What one planned file holds.
@@ -90,8 +110,13 @@ pub enum Content {
     Icns {
         source: String,
     },
-    /// All [`ICO_SIZES`] of `source`.
+    /// `sizes` of `source` (078: [`ICO_SIZES`], 079 favicon: 16, 32, 48).
     Ico {
+        source: String,
+        sizes: Vec<u32>,
+    },
+    /// The source's SVG text as it is (checked by parsing; 079 `favicon.svg`).
+    Svg {
         source: String,
     },
 }
@@ -132,9 +157,10 @@ impl PlannedFile {
     fn sources(&self) -> Option<&str> {
         match &self.content {
             Content::Text(_) => None,
-            Content::Png { source, .. } | Content::Icns { source } | Content::Ico { source } => {
-                Some(source)
-            }
+            Content::Png { source, .. }
+            | Content::Icns { source }
+            | Content::Ico { source, .. }
+            | Content::Svg { source } => Some(source),
         }
     }
 }
@@ -168,9 +194,12 @@ impl PackageKind {
                     path: format!("{base}.ico"),
                     content: Content::Ico {
                         source: source::WINDOWS.into(),
+                        sizes: ICO_SIZES.to_vec(),
                     },
                 }],
             }),
+            PackageKind::Android { monochrome } => Ok(super::android::plan(*monochrome)),
+            PackageKind::Web => Ok(super::web::plan()),
         }
     }
 }
@@ -220,113 +249,6 @@ fn check_plan(plan: &PackagePlan, sources: &[PackageSource]) -> Result<(), FsErr
         }
     }
     Ok(())
-}
-
-/// PNG bytes of `pixmap` flattened onto `bg` (premultiplied over), RGB without alpha channel.
-pub fn encode_opaque(pixmap: &Pixmap, bg: [u8; 3]) -> Result<Vec<u8>, FsError> {
-    let mut rgb = Vec::with_capacity(pixmap.width() as usize * pixmap.height() as usize * 3);
-    for p in pixmap.pixels() {
-        let rest = 255 - u16::from(p.alpha());
-        for (c, b) in [p.red(), p.green(), p.blue()].into_iter().zip(bg) {
-            rgb.push((u16::from(c) + (u16::from(b) * rest + 127) / 255).min(255) as u8);
-        }
-    }
-    let io = |e: png::EncodingError| FsError::new(FsErrorCode::Io, e.to_string(), None);
-    let mut out = Vec::new();
-    let mut enc = png::Encoder::new(&mut out, pixmap.width(), pixmap.height());
-    enc.set_color(png::ColorType::Rgb);
-    enc.set_depth(png::BitDepth::Eight);
-    enc.write_header()
-        .map_err(io)?
-        .write_image_data(&rgb)
-        .map_err(io)?;
-    Ok(out)
-}
-
-/// Parses each source once and renders each size once.
-struct Renderer<'a> {
-    sources: &'a [PackageSource],
-    fonts: Arc<Database>,
-    cancel: &'a AtomicBool,
-    trees: HashMap<String, Tree>,
-    pixmaps: HashMap<(String, u32), Pixmap>,
-}
-
-/// `Ok(None)`: cancelled.
-type Step<T> = Result<Option<T>, FsError>;
-
-impl Renderer<'_> {
-    fn pixmap(&mut self, id: &str, size: u32) -> Step<&Pixmap> {
-        let key = (id.to_string(), size);
-        if !self.pixmaps.contains_key(&key) {
-            if self.cancel.load(Ordering::SeqCst) {
-                return Ok(None);
-            }
-            if !self.trees.contains_key(id) {
-                let svg = &self
-                    .sources
-                    .iter()
-                    .find(|s| s.id == id)
-                    .ok_or_else(|| invalid("source is missing"))?
-                    .svg;
-                self.trees
-                    .insert(id.to_string(), parse(svg, self.fonts.clone())?);
-            }
-            let p = render(&self.trees[id], size)?;
-            self.pixmaps.insert(key.clone(), p);
-        }
-        Ok(Some(&self.pixmaps[&key]))
-    }
-
-    fn pngs(&mut self, id: &str, sizes: impl Iterator<Item = u32>) -> Step<Vec<(u32, Vec<u8>)>> {
-        let mut out = Vec::new();
-        for s in sizes {
-            let Some(p) = self.pixmap(id, s)? else {
-                return Ok(None);
-            };
-            out.push((s, encode(p)?));
-        }
-        Ok(Some(out))
-    }
-
-    /// Bytes of a file and whether the image has transparent pixels (PNG only).
-    fn produce(&mut self, content: &Content) -> Step<(Vec<u8>, Option<bool>)> {
-        Ok(Some(match content {
-            Content::Text(t) => (t.as_bytes().to_vec(), None),
-            Content::Png {
-                source,
-                size,
-                background,
-            } => {
-                let Some(p) = self.pixmap(source, *size)? else {
-                    return Ok(None);
-                };
-                match background {
-                    Some(bg) => (encode_opaque(p, *bg)?, Some(false)),
-                    None => (encode(p)?, Some(has_transparency(p))),
-                }
-            }
-            Content::Icns { source } => {
-                let Some(pngs) = self.pngs(source, ICNS_TYPES.iter().map(|(_, s)| *s))? else {
-                    return Ok(None);
-                };
-                let elements: Vec<(&[u8; 4], &[u8])> = ICNS_TYPES
-                    .iter()
-                    .zip(&pngs)
-                    .map(|((ty, _), (_, d))| (*ty, d.as_slice()))
-                    .collect();
-                (write_icns(&elements)?, None)
-            }
-            Content::Ico { source } => {
-                let Some(pngs) = self.pngs(source, ICO_SIZES.into_iter())? else {
-                    return Ok(None);
-                };
-                let images: Vec<(u32, &[u8])> =
-                    pngs.iter().map(|(s, d)| (*s, d.as_slice())).collect();
-                (write_ico(&images)?, None)
-            }
-        }))
-    }
 }
 
 fn cancelled(files: Vec<ExportedFile>) -> ExportReport {
@@ -381,13 +303,7 @@ pub fn export_package(
             Some(p),
         ));
     }
-    let mut r = Renderer {
-        sources,
-        fonts,
-        cancel,
-        trees: HashMap::new(),
-        pixmaps: HashMap::new(),
-    };
+    let mut r = Renderer::new(sources, fonts, cancel);
     let total = plan.files.len() as u32;
     let mut files = Vec::new();
     if plan.folder.is_none() {
@@ -451,3 +367,7 @@ pub fn export_package(
 #[cfg(test)]
 #[path = "package_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "package_tests_079.rs"]
+mod tests_079;

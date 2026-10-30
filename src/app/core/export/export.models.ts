@@ -40,7 +40,8 @@ export interface ExportReport {
 /**
  * A package export (prompt 078, Rust `export::package::PackageKind`, tagged by `kind`):
  * `appIconSet` = Xcode `AppIcon.appiconset` (`appearances`: iOS variants besides the default),
- * `icns` = `<name>.icns`, `ico` = `<name>.ico`. 079 adds Android and Web.
+ * `icns` = `<name>.icns`, `ico` = `<name>.ico`; 079: `android` = folder `android/` (adaptive icon,
+ * `monochrome` = also the themed-icon layer), `web` = folder `web/` (favicons, PWA icons).
  */
 export type PackageKind =
   | {
@@ -51,7 +52,9 @@ export type PackageKind =
       watchos: boolean;
     }
   | { kind: 'icns' }
-  | { kind: 'ico' };
+  | { kind: 'ico' }
+  | { kind: 'android'; monochrome: boolean }
+  | { kind: 'web' };
 
 /** One SVG built for a package; `id` from `PACKAGE_SOURCE` (Rust `package::source`). */
 export interface PackageSource {

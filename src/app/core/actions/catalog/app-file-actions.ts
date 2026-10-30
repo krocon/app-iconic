@@ -41,6 +41,9 @@ export const APP_FILE_ACTIONS: readonly ActionDef[] = [
   FILE('file.exportAppIconSet', 'Export Xcode Icon Set…', { args: EXPORT_ARGS }),
   FILE('file.exportIcns', 'Export macOS .icns…', { args: EXPORT_ARGS }),
   FILE('file.exportIco', 'Export Windows .ico…', { args: EXPORT_ARGS }),
+  // prompt 079: Android adaptive icon set, web favicons and PWA icons
+  FILE('file.exportAndroid', 'Export Android Icons…', { args: EXPORT_ARGS }),
+  FILE('file.exportWeb', 'Export Web Icons…', { args: EXPORT_ARGS }),
   FILE('file.exportAgain', 'Export Again'),
   FILE('file.copyPng', 'Copy as PNG', { args: COPY_PNG_ARGS }),
   FILE('file.revealExport', 'Show Last Export in Folder'),
