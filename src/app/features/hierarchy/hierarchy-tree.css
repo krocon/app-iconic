@@ -220,3 +220,23 @@
     box-sizing: border-box;
   }
 }
+
+/* prompt 072: inline rename, filter matches */
+.rename {
+  flex: 1;
+  min-width: 0;
+  height: calc(var(--tree-row-height) - 4px);
+  padding: 0 var(--space-1);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-focus);
+  border-radius: 3px;
+  font: inherit;
+  outline: none;
+}
+
+mark {
+  color: inherit;
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  border-radius: 2px;
+}

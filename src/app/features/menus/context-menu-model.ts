@@ -54,6 +54,9 @@ export function contextMenuFor(target: ContextTarget): ContextEntry[] {
         a('arrange.moveDown'),
         a('arrange.moveInto'),
         sep(a('add.iconGroup')),
+        a('add.layer'),
+        sep(a('hierarchy.expandAll')),
+        a('hierarchy.collapseAll'),
       ];
     case 'nodes':
       return [

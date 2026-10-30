@@ -8,6 +8,7 @@ export const COMMAND_ICONS: Record<string, string> = {
   'tool.select': 'M4 2.5v10l2.6-2.4 1.9 4 1.6-.8-1.9-3.9h3.5z',
   'tool.direct': 'M3 2.5v9l2.3-2.1 1.7 3.6 1.4-.7-1.7-3.5h3.1z M11 11h3v3h-3z',
   'add.iconGroup': 'M2 5l6-3 6 3-6 3z M2 8l6 3 6-3 M2 11l6 3 6-3',
+  'add.layer': 'M2 7l6-3 6 3-6 3z M2 10l6 3 6-3 M12 1v4 M10 3h4',
   'add.container': 'M2 4.5h4l1.5 1.5H14v6.5H2z',
   'add.circle': 'M8 3a5 5 0 1 0 0.01 0',
   'add.ellipse': 'M8 4.5c3.3 0 5.5 1.6 5.5 3.5S11.3 11.5 8 11.5 2.5 9.9 2.5 8 4.7 4.5 8 4.5z',

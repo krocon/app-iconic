@@ -1,4 +1,4 @@
-import { AddAsset, AddGroup, CompositeCommand } from '../document/commands';
+import { AddAsset, AddGroup, AddLayer, CompositeCommand } from '../document/commands';
 import { IconDocument } from '../document/icon-document';
 import { groups, layerNames, newGroup, newLayer } from '../document/model/icon-json';
 import { layerNameFor, uniqueAssetName, uniqueLayerName } from '../document/model/unique-names';
@@ -44,4 +44,31 @@ export function iconGroupPlan(
     new AddGroup(newGroup(newLayer(asset, layer)), group),
   ]);
   return { command, group, asset, layer };
+}
+
+export interface LayerPlan {
+  command: CompositeCommand;
+  group: number;
+  layer: number;
+}
+
+/**
+ * "Add › Layer (SVG)" (prompt 072 E4): a new layer with an empty asset in the current group (the
+ * selection's, else the first editable one), in front of the selected layer, else on top;
+ * `null` without a group (then "Group (SVG)" makes one).
+ */
+export function layerPlan(doc: IconDocument, sel: Selection): LayerPlan | null {
+  const group = currentGroupIndex(doc, sel);
+  if (group === null) return null;
+  const item = sel.items.find((i) => i.kind === 'layer' && i.group === group);
+  const layer = item && item.kind === 'layer' ? item.layer : 0;
+  const asset = uniqueAssetName(`layer-${layerNames(doc.iconJson).length + 1}.svg`, [
+    ...doc.assets.keys(),
+  ]);
+  const name = uniqueLayerName(layerNameFor(asset), layerNames(doc.iconJson));
+  const command = new CompositeCommand('addLayer', [
+    new AddAsset(asset, emptyLayerSvg()),
+    new AddLayer(group, newLayer(asset, name), layer),
+  ]);
+  return { command, group, layer };
 }

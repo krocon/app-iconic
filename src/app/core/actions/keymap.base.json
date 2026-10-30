@@ -107,6 +107,8 @@
     "Space": "hierarchy.select",
     "Enter": "hierarchy.select",
     "Shift+F10": "hierarchy.menu",
+    "F2": "hierarchy.rename",
+    "Mod+F": "hierarchy.find",
     "ContextMenu": "hierarchy.menu"
   },
   "dialog": {}

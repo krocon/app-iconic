@@ -12,13 +12,21 @@ export interface NavigableTree {
   scrollToIndex(i: number, focus?: boolean): void;
   toggleOpen(row: TreeRow): void;
   openMenuAtFocus(): void;
+  /** Inline rename of the focused row (prompt 072 E1). */
+  startRename(row: TreeRow): void;
+  canRename(row: TreeRow | undefined): boolean;
+  /** Focus the filter field (prompt 072 E2). */
+  focusFilter(): void;
+  /** Open or close every row (prompt 072 E3). */
+  setAllOpen(open: boolean): void;
 }
 
 /**
  * The keys of the tree as actions of the `hierarchy` context (design 006 E5, WAI-ARIA APG tree
  * pattern; CLAUDE.md §4 "Tastatur nur über Aktionen"): ↑/↓/Home/End move focus and selection,
  * →/← open/close or go to the child/parent, ⇧ extends the range from the anchor, Mod+↑/↓ move the
- * focus only, Space/Enter select, Mod+Space (macOS Ctrl+Space) toggles, ⇧F10 opens the menu.
+ * focus only, Space/Enter select, Mod+Space (macOS Ctrl+Space) toggles, ⇧F10 opens the menu;
+ * F2 (macOS Enter) renames, Mod+F filters, Expand / Collapse All (prompt 072).
  */
 export function treeNavigation(tree: NavigableTree): Record<string, ActionHandler> {
   const has = () => tree.rows().length > 0;
@@ -91,5 +99,15 @@ export function treeNavigation(tree: NavigableTree): Record<string, ActionHandle
       },
     },
     'hierarchy.menu': { enabled: has, run: () => tree.openMenuAtFocus() },
+    'hierarchy.rename': {
+      enabled: () => tree.canRename(current()),
+      run: () => {
+        const row = current();
+        if (row && tree.canRename(row)) tree.startRename(row);
+      },
+    },
+    'hierarchy.find': { run: () => tree.focusFilter() },
+    'hierarchy.expandAll': { enabled: has, run: () => tree.setAllOpen(true) },
+    'hierarchy.collapseAll': { enabled: has, run: () => tree.setAllOpen(false) },
   };
 }

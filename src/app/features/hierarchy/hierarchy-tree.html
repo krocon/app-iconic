@@ -1,3 +1,8 @@
+<app-tree-toolbar
+  [(query)]="query"
+  [matches]="filtered()?.matches?.length ?? 0"
+  (leave)="leaveFilter($event)"
+/>
 <!-- APG tree: flat treeitems with level / position; the keys are actions (tree-navigation.ts) -->
 <div
   #list
@@ -33,6 +38,7 @@
         [class.dimmed]="r.dimmed || r.node.hidden"
         [class.definition]="r.node.definition"
         (click)="onRowClick($event, r, rowIndex(i))"
+        (dblclick)="onDblClick($event, r)"
         (pointerdown)="drag.down($event, r)"
         (contextmenu)="onContextMenu($event, r)"
         (focus)="focusedId.set(r.node.id)"
@@ -62,7 +68,27 @@
             }
           </span>
         }
-        <span class="label">{{ r.node.label }}</span>
+        @if (renamer.editing() === r.node.id) {
+          <input
+            class="rename"
+            type="text"
+            data-testid="tree-rename"
+            [attr.aria-label]="t.renameField(r.node.label)"
+            [value]="r.node.kind === 'node' ? elementId(r.node) : r.node.label"
+            (pointerdown)="$event.stopPropagation()"
+            (click)="$event.stopPropagation()"
+            (dblclick)="$event.stopPropagation()"
+            (keydown)="renamer.onKey($event, r.node)"
+            (blur)="renamer.commit(r.node, $any($event.target).value)"
+          />
+        } @else if (hl(r.node.label); as h) {
+          <span class="label"
+            >{{ h.before }}<mark>{{ h.match }}</mark
+            >{{ h.after }}</span
+          >
+        } @else {
+          <span class="label">{{ r.node.label }}</span>
+        }
         @if (r.node.clip) {
           <span class="clip" data-testid="tree-clip" [title]="clipTitle(r.node.clip)">
             <svg viewBox="0 0 16 16" aria-hidden="true">
@@ -75,7 +101,11 @@
         @if (r.node.warning) {
           <span class="warn">{{ r.node.warning }}</span>
         }
-        @if (r.node.ref && r.node.kind === 'node') {
+        @if (
+          (r.node.ref && r.node.kind === 'node') ||
+          r.node.kind === 'group' ||
+          (r.node.kind === 'layer' && r.node.container)
+        ) {
           <button
             type="button"
             class="lock"

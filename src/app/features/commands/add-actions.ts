@@ -42,6 +42,7 @@ export function registerAddActions(
     {
       ...shapes,
       'add.iconGroup': { run: () => add.addIconGroup(), enabled },
+      'add.layer': { run: () => add.addLayer(), enabled },
       'add.image': { run: (a) => add.addImage(a as Args), enabled },
       'add.svgSnippet': {
         run: (a) => {

@@ -5,7 +5,8 @@ import { isEnterable } from '../canvas/hit-test';
 import { LayerStyleService } from '../canvas/layer-style.service';
 import { NodeRef } from '../document/icon-document';
 import { FilesService } from '../files/files.service';
-import { LOCK_ATTR, lockCommand, unlockAllCommand } from './lock';
+import { IconItem } from '../document/model/selection';
+import { itemLockRefs, LOCK_ATTR, lockCommand, unlockAllCommand } from './lock';
 import { GuideService } from '../guides/guide.service';
 import { ConstructionMode } from '../construction/construction-mode';
 
@@ -28,8 +29,19 @@ export function registerLockActions(
       'edit.toggleLock': {
         run: (a) => {
           const store = files.store();
-          const given = (a as { nodes?: NodeRef[] } | undefined)?.nodes;
-          const refs = Array.isArray(given) ? given : (store?.selection() ?? []);
+          const args = (a ?? {}) as { nodes?: NodeRef[]; items?: IconItem[] };
+          const given = args.nodes;
+          // groups and layers lock their assets' roots (prompt 072 E5)
+          const items = Array.isArray(args.items)
+            ? args.items
+            : Array.isArray(given)
+              ? []
+              : (store?.items() ?? []);
+          const refs = Array.isArray(given)
+            ? given
+            : items.length && store
+              ? itemLockRefs(store.document(), items)
+              : (store?.selection() ?? []);
           const cmd = store ? lockCommand(store.document(), refs) : null;
           if (!store || !cmd) return false;
           store.execute(cmd);
@@ -39,7 +51,10 @@ export function registerLockActions(
           );
           return true;
         },
-        enabled: () => (files.store()?.selection().length ?? 0) > 0,
+        enabled: () => {
+          const s = files.store();
+          return !!s && (s.selection().length > 0 || s.items().some((i) => i.kind !== 'root'));
+        },
       },
       'edit.unlockAll': {
         run: () => {

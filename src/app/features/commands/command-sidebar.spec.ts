@@ -69,6 +69,7 @@ describe('CommandSidebar (design 008 E10)', () => {
       'measure',
       'construction',
       'add.iconGroup',
+      'add.layer',
       'add.container',
       'centre',
       'add.text',
@@ -128,14 +129,14 @@ describe('CommandSidebar (design 008 E10)', () => {
     await type('zzz');
     expect(options()).toHaveLength(0);
     await key('Escape');
-    expect(options()).toHaveLength(21);
+    expect(options()).toHaveLength(22);
   });
 
   it('keyboard: → opens the submenu, ↑/↓ move in it, ← closes, Enter runs', async () => {
     const { input, key } = await render();
-    // the "Shape at Centre" group (row 15)
-    for (let i = 0; i < 15; i++) await key('ArrowDown');
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-15');
+    // the "Shape at Centre" group (row 16)
+    for (let i = 0; i < 16; i++) await key('ArrowDown');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-16');
     await key('ArrowRight');
     expect(ids(submenu())).toEqual([
       'add.rect',
@@ -152,7 +153,7 @@ describe('CommandSidebar (design 008 E10)', () => {
     expect(input.getAttribute('aria-activedescendant')).toBe('command-sub-6');
     await key('ArrowLeft');
     expect(submenu()).toHaveLength(0);
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-15');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-16');
     await key('Enter');
     await key('ArrowDown');
     await key('Enter');
@@ -192,7 +193,7 @@ describe('CommandSidebar (design 008 E10)', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('input')).toBeNull();
     const tools = Array.from(el.querySelectorAll<HTMLButtonElement>('[role="toolbar"] button'));
-    expect(tools).toHaveLength(21);
+    expect(tools).toHaveLength(22);
     expect(el.querySelectorAll('[role="separator"]')).toHaveLength(3);
     expect(tools.find((b) => b.dataset['sectionToggle'])!.getAttribute('aria-expanded')).toBe(
       'false',

@@ -27,7 +27,7 @@ import {
   imageSpec,
   ShapeKind,
 } from './element-defaults';
-import { iconGroupPlan } from './icon-group';
+import { iconGroupPlan, layerPlan } from './icon-group';
 import { isImageDataUrl, svgDataUrlSize } from './image-size';
 import { localMatrix, toLocal, visibleCenter } from './insert-center';
 import { Matrix } from '../../shared/geometry/matrix';
@@ -283,6 +283,23 @@ export class AddService {
       return false;
     }
     store.selectItems([{ kind: 'layer', group: plan.group, layer: 0 }]);
+    return true;
+  }
+
+  /** A new layer in the current group, selected (prompt 072 E4); without a group a new one. */
+  async addLayer(): Promise<boolean> {
+    const store = await this.ensureStore();
+    if (!store) return false;
+    const plan = layerPlan(store.document(), this.edit.selection());
+    if (!plan) return this.addIconGroup();
+    try {
+      store.execute(plan.command);
+    } catch (e) {
+      if (!(e instanceof CommandError)) throw e;
+      this.files.notice.set(T.addFailed);
+      return false;
+    }
+    store.selectItems([{ kind: 'layer', group: plan.group, layer: plan.layer }]);
     return true;
   }
 

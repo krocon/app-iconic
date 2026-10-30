@@ -544,7 +544,16 @@ export const ACTIONS: readonly ActionDef[] = [
   EDIT('gradient.makeUnique', 'Make Gradient Unique', { args: GRADIENT_PAINT_ARGS }),
   // lock and isolate (prompt 055)
   EDIT('edit.toggleLock', 'Lock / Unlock', {
-    args: { type: 'object', properties: { nodes: { type: 'json' } } },
+    args: { type: 'object', properties: { nodes: { type: 'json' }, items: { type: 'json' } } },
+  }),
+  // the tree (prompt 072): rename an element (its `id`, references follow)
+  EDIT('edit.renameElement', 'Rename Element', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['ref', 'id'],
+      properties: { ref: { type: 'json' }, id: { type: 'string', maxLength: 255 } },
+    },
   }),
   EDIT('edit.unlockAll', 'Unlock All'),
   EDIT('edit.isolate', 'Isolate Group'),
@@ -668,6 +677,7 @@ export const ACTIONS: readonly ActionDef[] = [
   ADD('freehand.toggleClosed', 'Freehand: Open / Closed', { context: 'canvas' }),
   // add (legacy §8; prompts 008, 013) – with serialisable arguments (design 008 E6)
   ADD('add.iconGroup', 'Group (SVG)'),
+  ADD('add.layer', 'Layer (SVG)'),
   ADD('add.container', 'Container <g>', { args: shapeArgsSpec('container') }),
   ADD('add.circle', 'Circle at Center', { args: shapeArgsSpec('circle') }),
   ADD('add.ellipse', 'Ellipse', { args: shapeArgsSpec('ellipse') }),
@@ -829,6 +839,10 @@ export const ACTIONS: readonly ActionDef[] = [
   TREE('hierarchy.select', 'Select Row'),
   TREE('hierarchy.toggleSelect', 'Add or Remove Row'),
   TREE('hierarchy.menu', 'Row Menu'),
+  TREE('hierarchy.rename', 'Rename Row'),
+  TREE('hierarchy.find', 'Filter Layers'),
+  { ...TREE('hierarchy.expandAll', 'Expand All'), palette: true },
+  { ...TREE('hierarchy.collapseAll', 'Collapse All'), palette: true },
   // help
   HELP('app.shortcuts', 'Keyboard Shortcuts'),
 ];

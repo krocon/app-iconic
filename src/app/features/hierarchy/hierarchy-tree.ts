@@ -38,6 +38,10 @@ import { TreeDrag } from './tree-drag';
 import { treeIcon } from './tree-icons';
 import { LiveFillService } from '../live-fill/live-fill.service';
 import { selectable, selectSingle, selectRange, toggleRow } from './tree-selection';
+import { filterTree, highlight, normalizeQuery, toggledFor } from './tree-filter';
+import { TreeToolbar } from './tree-toolbar';
+import { canRename, TreeRename } from './tree-rename';
+import { RenameService } from './rename.service';
 import { Swatch } from './swatch';
 
 /** From this many rows on only the visible ones are rendered (design 006 E1). */
@@ -55,7 +59,7 @@ const ROW_HEIGHT = 24;
  */
 @Component({
   selector: 'app-hierarchy-tree',
-  imports: [ContextMenu],
+  imports: [ContextMenu, TreeToolbar],
   templateUrl: './hierarchy-tree.html',
   styleUrl: './hierarchy-tree.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -94,7 +98,15 @@ export class HierarchyTree {
     this.lastTree = { store, tree };
     return tree;
   });
-  readonly rows = computed(() => flatten(this.tree(), this.toggled()));
+  /** The filter of the head (prompt 072 E2); empty = the whole tree. */
+  readonly query = signal('');
+  protected readonly filtered = computed(() =>
+    normalizeQuery(this.query()) ? filterTree(this.tree(), this.query()) : null,
+  );
+  readonly rows = computed(() => this.filtered()?.rows ?? flatten(this.tree(), this.toggled()));
+  /** Inline rename (prompt 072 E1). */
+  readonly renamer = new TreeRename(inject(RenameService), () => this.refocus());
+  private readonly toolbar = viewChild(TreeToolbar);
   protected readonly virtual = computed(() => this.rows().length >= VIRTUAL_FROM);
   /**
    * The rows to render and their indices. Virtualised: the visible part plus the row with tab
@@ -174,6 +186,49 @@ export class HierarchyTree {
   }
 
   protected icon = treeIcon;
+  readonly canRename = (row: TreeRow | undefined) => canRename(row?.node);
+
+  protected hl(label: string) {
+    return this.filtered() ? highlight(label, this.query()) : null;
+  }
+
+  /** The `id` of an element row (rename starts with it, not with the label's hint). */
+  protected elementId(n: TreeNode): string {
+    return (n.ref && this.store().document().node(n.ref)?.getAttribute('id')) || '';
+  }
+
+  startRename(row: TreeRow): void {
+    this.renamer.start(row);
+    setTimeout(() => {
+      const f = this.listEl()?.nativeElement.querySelector<HTMLInputElement>('input.rename');
+      f?.focus();
+      f?.select();
+    });
+  }
+
+  private refocus(): void {
+    const i = this.focusedIndex();
+    if (i >= 0) setTimeout(() => this.rowElement(i)?.focus());
+  }
+
+  focusFilter(): void {
+    this.toolbar()?.focus();
+  }
+
+  /** ↓ / Enter in the filter: the first match gets the focus (Enter selects it). */
+  protected leaveFilter(e: { select: boolean }): void {
+    const first = this.filtered()?.matches[0];
+    const rows = this.rows();
+    const i = first ? rows.findIndex((r) => r.node.id === first) : rows.length ? 0 : -1;
+    if (i < 0) return;
+    if (e.select) selectSingle(this.store(), rows[i].node);
+    this.scrollToIndex(i, true);
+  }
+
+  setAllOpen(open: boolean): void {
+    this.query.set('');
+    this.toggled.set(toggledFor(this.tree(), open));
+  }
 
   protected clipTitle(id: string): string {
     return CLIP_TEXTS.treeBadge(id);
@@ -312,7 +367,15 @@ export class HierarchyTree {
 
   protected onLock(e: MouseEvent, row: TreeRow): void {
     e.stopPropagation();
-    if (row.node.ref) this.actions.run('edit.toggleLock', { nodes: [row.node.ref] });
+    const n = row.node;
+    if (n.ref) this.actions.run('edit.toggleLock', { nodes: [n.ref] });
+    // groups and layers lock their assets (prompt 072 E5)
+    else if (n.item) this.actions.run('edit.toggleLock', { items: [n.item] });
+  }
+
+  protected onDblClick(e: MouseEvent, row: TreeRow): void {
+    if ((e.target as Element).closest('button, .twisty')) return;
+    this.startRename(row);
   }
 
   protected onContextMenu(e: MouseEvent, row: TreeRow): void {

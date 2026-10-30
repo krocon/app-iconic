@@ -39,7 +39,7 @@ export interface TreeNode {
   stroke: Swatch | null;
   /** Hidden itself (`display: none` / `hidden: true`). */
   hidden: boolean;
-  /** Locked itself (`data-locked`, prompt 055); elements only. */
+  /** Locked itself (`data-locked`, prompt 055); a layer: its asset root, a group: all layers (072). */
   locked?: boolean;
   /** Paints nothing (inside "Definitions"): no canvas actions. */
   definition: boolean;
@@ -150,6 +150,8 @@ function layerNode(doc: IconDocument, g: number, l: number, stale: ReadonlySet<s
     id,
     kind: 'layer',
     label: layerLabel(layer),
+    // a locked layer = its asset's root (prompt 072 E5; `data-locked` like 055)
+    ...(root?.hasAttribute('data-locked') ? { locked: true } : {}),
     item: { kind: 'layer', group: g, layer: l },
     fill: null,
     stroke: null,
@@ -173,18 +175,25 @@ export function buildTree(doc: IconDocument, stale: ReadonlySet<string> = new Se
     hidden: false,
     definition: false,
     container: false,
-    children: groups(doc.iconJson).map((grp, g) => ({
-      id: `g${g}`,
-      kind: 'group',
-      label: groupLabel(grp, g),
-      item: { kind: 'group', group: g },
-      fill: null,
-      stroke: null,
-      hidden: grp['hidden'] === true,
-      definition: false,
-      container: true,
-      children: layers(grp).map((_, l) => layerNode(doc, g, l, stale)),
-    })),
+    children: groups(doc.iconJson).map((grp, g) => {
+      const children = layers(grp).map((_, l) => layerNode(doc, g, l, stale));
+      const editable = children.filter((c) => c.container);
+      // locked when every layer with an asset is (prompt 072 E5)
+      const locked = editable.length > 0 && editable.every((c) => c.locked);
+      return {
+        id: `g${g}`,
+        kind: 'group' as const,
+        label: groupLabel(grp, g),
+        item: { kind: 'group' as const, group: g },
+        fill: null,
+        stroke: null,
+        hidden: grp['hidden'] === true,
+        ...(locked ? { locked: true } : {}),
+        definition: false,
+        container: true,
+        children,
+      };
+    }),
   };
 }
 

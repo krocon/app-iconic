@@ -100,6 +100,7 @@ export const ADD_LAYOUT: readonly AddSection[] = [
     section: 'insert',
     entries: [
       act('add.iconGroup'),
+      act('add.layer'),
       act('add.container'),
       group('centre', [
         'add.rect',

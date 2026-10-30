@@ -85,7 +85,7 @@ Code bestätigen (roter Test) – sie stammen aus einer Fremdanalyse und können
 | 069 | [069-toolbar-direktzugriffe.md](done/069-toolbar-direktzugriffe.md) | Appearance und Maske als Segmented Controls, Speichern/Export… in der Toolbar, Undo/Redo nur einmal | 004, 012, 015 | S | ✅ 30.10.2026 |
 | 070 | [070-kontextmenues.md](done/070-kontextmenues.md) | Rechtsklick-Menü auf dem Canvas, dasselbe Modell im Baum, Shift+F10 | 005, 006, 061 | M | ✅ 30.10.2026 |
 | 071 | [071-dateien-ziehen-bilder-einfuegen.md](done/071-dateien-ziehen-bilder-einfuegen.md) | `.icon`/`.svg`/Bilder ins Fenster ziehen, Bilder aus der Zwischenablage einfügen | 003, 008, 030 | M | ✅ 30.10.2026 |
-| 072 | [072-ebenenbaum-komfort.md](072-ebenenbaum-komfort.md) | Inline-Umbenennen (id + Verweise), Suche/Filter, alle zu-/aufklappen, + Gruppe/Layer, Schloss an Gruppen/Layern | 055, 063, 066 | M | offen |
+| 072 | [072-ebenenbaum-komfort.md](done/072-ebenenbaum-komfort.md) | Inline-Umbenennen (id + Verweise), Suche/Filter, alle zu-/aufklappen, + Gruppe/Layer, Schloss an Gruppen/Layern | 055, 063, 066 | M | ✅ 30.10.2026 |
 | 073 | [073-properties-kompakt-popovers.md](073-properties-kompakt-popovers.md) | Paare zweispaltig, Icon-Toggles, nicht-modale Popovers, Live-Vorschau auch für Corners/Optimize Path | 062, 067 | M | offen |
 | 074 | [074-farb-workflow.md](074-farb-workflow.md) | Farb-Popover (Alpha, HSL/HSB/OKLCH), Pipette, Dokumentfarben, Farbe ersetzen, Paletten | 009, 015, 064, 067 | M–L | offen |
 | 075 | [075-live-typografie.md](075-live-typografie.md) | Schriftwahl für `<text>`, Text-Werkzeug, Bearbeiten auf dem Canvas, mehrzeilig, Text → Pfad | 009, 013, 067 | M–L | offen |

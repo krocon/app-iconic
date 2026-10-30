@@ -41,6 +41,15 @@ const EN = {
   pasteFailed: 'The clipboard holds no SVG markup that could be pasted.',
   clipboardFailed: 'The clipboard could not be used.',
   imagePasteFailed: 'The image could not be pasted.',
+  renameInvalid: 'Not a valid name: letters, digits, “_”, “-” and “.”, starting with a letter.',
+  renameTaken: (id: string) => `The name “${id}” is already used in this image.`,
+  renameReferenced: 'The element is referred to – it needs a name.',
+  renameField: (name: string) => `New name for ${name}`,
+  filter: 'Filter layers',
+  filterPlaceholder: 'Filter…',
+  noMatches: 'No matches',
+  matches: (n: number) => (n === 1 ? '1 match' : `${n} matches`),
+  tools: 'Layer tools',
 } as const;
 
 export const HIERARCHY_TEXTS = translatable('hierarchy', EN, {
@@ -84,5 +93,15 @@ export const HIERARCHY_TEXTS = translatable('hierarchy', EN, {
     pasteFailed: 'Die Zwischenablage enthält kein SVG, das eingefügt werden kann.',
     clipboardFailed: 'Die Zwischenablage konnte nicht benutzt werden.',
     imagePasteFailed: 'Das Bild konnte nicht eingefügt werden.',
+    renameInvalid:
+      'Kein gültiger Name: Buchstaben, Ziffern, „_“, „-“ und „.“, beginnend mit einem Buchstaben.',
+    renameTaken: (id: string) => `Der Name „${id}“ wird in diesem Bild schon benutzt.`,
+    renameReferenced: 'Auf das Element wird verwiesen – es braucht einen Namen.',
+    renameField: (name: string) => `Neuer Name für ${name}`,
+    filter: 'Ebenen filtern',
+    filterPlaceholder: 'Filtern …',
+    noMatches: 'Keine Treffer',
+    matches: (n: number) => (n === 1 ? '1 Treffer' : `${n} Treffer`),
+    tools: 'Ebenen-Werkzeuge',
   },
 });
