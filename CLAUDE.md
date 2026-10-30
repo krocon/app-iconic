@@ -89,6 +89,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               style/Attribut/berechnet/Default), property-edit (setAttributes/setText, PropertySession
                               = Geste je Feld, Reset), panel-model, mixed, constrain, transform-list (rein) +
                               transform-editor/-step-row, PropertiesService + properties-actions (properties.*)
+                              BoxSection + BoxService + box-actions (Kopf Position & Größe, `properties.box`, 062)
   app/features/inspector/     Icon-Inspector (010) im Properties-Panel: icon-fields (rein: Feld-Specs je Root/Gruppe/
                               Layer), fill-model, icon-color-text, platforms, icon-json-text (rein), inspector-edit
                               (Felder → SetIconJsonValue, Umbenennen), IconInspectorService + icon-actions (icon.*),
@@ -149,7 +150,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               matrix, snapping, bounds-guard, box-math, box-selection, transform-text,
                               path-data (Tokenizer für `d`), path-edit; 011 (rein): path-write (runden, Form
                               behalten / kürzeste Form), path-optimize (RDP mit Eckenschutz); 013 (rein): freehand
-                              (RDP + Catmull-Rom), shape-path (Grundformen → `d`), path-translate; 014:
+                              (RDP + Catmull-Rom), shape-path (Grundformen → `d`), path-translate; box-frame (062:
+                              Rahmen + Matrix der Box-Felder); 014:
                               clip-geometry (Clip-Raum → Dokument über den Owner, Treffer durch Clips)
                               grid-hint (rein: Rasterpunkte um den Zeiger); constraints/ (059, rein: solver,
                               sketch-model, constraints); sketch/ (019, rein): sketch-shapes,

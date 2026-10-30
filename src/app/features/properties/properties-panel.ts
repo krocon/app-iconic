@@ -8,6 +8,7 @@ import { PROPERTIES_TEXTS } from './properties-texts';
 import { PropertyRow } from './property-row';
 import { SectionId } from './property-spec';
 import { TransformEditor } from './transform-editor';
+import { BoxSection } from './box-section';
 import { IconInspector } from '../inspector/icon-inspector';
 import { itemTitle } from '../inspector/inspector-title';
 import { ClipPathSection } from '../clip/clip-path-section';
@@ -24,6 +25,7 @@ import { GradientSection } from '../gradient/gradient-section';
   selector: 'app-properties-panel',
   imports: [
     AlignSection,
+    BoxSection,
     GradientSection,
     ClipPathSection,
     IconInspector,
@@ -72,6 +74,7 @@ import { GradientSection } from '../gradient/gradient-section';
     </div>
     <div class="body">
       @if (model(); as m) {
+        <app-box-section [store]="store()" />
         @for (s of m.sections; track s.section) {
           <section class="section" [attr.data-section]="s.section">
             <h3 class="section-title">

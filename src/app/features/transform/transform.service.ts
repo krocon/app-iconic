@@ -124,6 +124,18 @@ export class TransformService {
         refs: () => plans.flatMap((p) => p.selection().nodes),
       };
     }
+    return this.moveNodes(nodes, matrixOf);
+  }
+
+  /**
+   * The plan of a change given as a matrix in document space (prompt 062: the box fields), the
+   * same for every selected node.
+   */
+  planMatrix(m: Matrix): Plan | null {
+    return this.moveNodes(this.nodes(), () => m);
+  }
+
+  private moveNodes(nodes: Node[], matrixOf: (n: Node) => Matrix): Plan | null {
     const changes: AttributeChange[] = nodes.flatMap((n) => {
       const p = n.el.parentElement ? this.toDoc(n.el.parentElement) : null;
       const local = p ? conjugate(matrixOf(n), p) : null;
@@ -146,8 +158,16 @@ export class TransformService {
 
   /** At once (the AI's way). */
   apply(req: TransformRequest): boolean {
+    return this.run(this.plan(req));
+  }
+
+  /** A matrix (document space) at once – one undo step (prompt 062). */
+  applyMatrix(m: Matrix): boolean {
+    return this.run(this.planMatrix(m));
+  }
+
+  private run(plan: Plan | null): boolean {
     const store = this.files.store();
-    const plan = this.plan(req);
     if (!store || !plan) return false;
     store.execute(plan.command);
     store.selection.set(plan.refs());
@@ -156,11 +176,20 @@ export class TransformService {
 
   /** A live preview (dialog, drag): replaces the one before. */
   preview(req: TransformRequest): void {
+    this.previewWith(() => this.plan(req));
+  }
+
+  /** A live preview of a matrix (prompt 062: typing / dragging a box field). */
+  previewMatrix(m: Matrix): void {
+    this.previewWith(() => this.planMatrix(m));
+  }
+
+  private previewWith(make: () => Plan | null): void {
     const store = this.files.store();
     if (!store) return;
     if (this.previewing) store.cancel();
     else this.previewing = { refs: [...store.selection()], plan: null };
-    const plan = this.plan(req);
+    const plan = make();
     this.previewing.plan = plan;
     store.begin('transform');
     if (plan) store.update(plan.command);

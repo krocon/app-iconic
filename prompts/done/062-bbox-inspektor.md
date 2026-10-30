@@ -1,7 +1,14 @@
 # Prompt 062: Bounding-Box-Inspektor (X, Y, B, H, Drehung, Spiegeln)
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 007, 009, 053 · Quelle:
-> [Analyse 30.10.2026](2026.10.30%20-%20analyse.md) §2.1 (P0, Aufwand M)
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 007, 009, 053 · Quelle:
+> [Analyse 30.10.2026](../2026.10.30%20-%20analyse.md) §2.1 (P0, Aufwand M)
+
+## Stand
+
+- ✅ 30.10.2026: Kopf „Position & Größe“ oben im Properties-Panel für jede SVG-Auswahl (X/Y des Bezugspunkts, B/H mit
+  Schloss, Drehung absolut bzw. „Drehen um“ bei mehreren/geneigten, Spiegeln, 9-Punkte-Bezug, gesperrt =
+  schreibgeschützt); Aktionen `properties.box`, `properties.flipH`, `properties.flipV`. Design:
+  [062-bbox-inspektor.design.md](062-bbox-inspektor.design.md).
 
 ## Ziel
 

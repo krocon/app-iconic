@@ -110,7 +110,11 @@ test('Escape takes a typed value back; constrain keeps the ratio', async ({ page
   await expect(field).toHaveValue('100');
   expect((await undoState(page)).label).toBe(labelBefore);
   // lock width/height: 200 × 100 → width 300 makes height 150
-  await page.getByRole('button', { name: 'Constrain proportions' }).first().click();
+  await page
+    .locator('[data-section="geometry"]')
+    .getByRole('button', { name: 'Constrain proportions' })
+    .first()
+    .click();
   await page.locator('#prop-width').fill('300');
   await page.locator('#prop-width').press('Enter');
   expect(await attr(page, A, r1, 'height')).toBe('150');

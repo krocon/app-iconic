@@ -226,6 +226,27 @@ export const ACTIONS: readonly ActionDef[] = [
       properties: { name: { type: 'string', maxLength: 255 } },
     },
   }),
+  // the box head (prompt 062): position, size, rotation and flips in document units
+  EDIT('properties.box', 'Set Position and Size', {
+    palette: false,
+    args: {
+      type: 'object',
+      properties: {
+        x: { type: 'number' },
+        y: { type: 'number' },
+        width: { type: 'number', minimum: 0 },
+        height: { type: 'number', minimum: 0 },
+        rotation: { type: 'number' },
+        rotateBy: { type: 'number' },
+        flipH: { type: 'boolean' },
+        flipV: { type: 'boolean' },
+        pivot: { type: 'string', enum: ['tl', 't', 'tr', 'l', 'c', 'r', 'bl', 'b', 'br'] },
+        lock: { type: 'boolean' },
+      },
+    },
+  }),
+  EDIT('properties.flipH', 'Flip Horizontal'),
+  EDIT('properties.flipV', 'Flip Vertical'),
   EDIT('properties.resetAll', 'Reset All Properties…', {
     // `confirm: false` resets without asking (AI, tests)
     args: { type: 'object', properties: { confirm: { type: 'boolean' } } },

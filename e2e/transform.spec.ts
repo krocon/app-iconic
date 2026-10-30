@@ -88,7 +88,7 @@ test('dialog: scale 200 % about the top-left, as a copy; inside a rotated group'
   await page.evaluate(() => window.__appIconic!.run('transform.dialog'));
   await page.locator('[data-field="sx"]').fill('200');
   await page.locator('[data-field="sy"]').fill('200');
-  await page.locator('[data-anchor="tl"]').click();
+  await page.locator('[role="dialog"] [data-anchor="tl"]').click();
   await page.locator('[data-field="copy"]').check();
   await expect.poll(async () => (await corners(page)).length).toBe(2);
   await page.getByTestId('transform-ok').click();

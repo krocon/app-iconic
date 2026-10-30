@@ -138,6 +138,9 @@
 ## 7. Properties
 
 - [x] Leerzustand „Nothing selected – Select an element in the hierarchy…“ (009; Root/Gruppe/Layer: Hinweis auf 010)
+- [x] Kopf „Position & Größe“ _(neu)_ (062): X/Y des Bezugspunkts, B/H mit Schloss, Drehung, Spiegeln, 9-Punkte-Bezug –
+      für jede Auswahl (Pfad, Gruppe, Text, Bild, gemischte Mehrfachauswahl) im Dokumentraum; ein Element im eigenen
+      gedrehten Rahmen (Größe entlang seiner Achsen), mehrere: Box um alle, Drehung relativ; `properties.box` für die KI
 - [x] Editoren aus Property-Specs (Typ, Einheit, Min/Max, Schritt) für alle Attribute aus legacy §7.4 (009; Abschnitte Geometry/Appearance/Stroke/Text/Transform/Advanced, Mehrfachauswahl „mixed“, getippte Werte = ein Undo-Schritt)
 - [x] Farbeingabe Swatch + Hex (#RRGGBB/#RRGGBBAA – CSS-Reihenfolge, Frage an Marc), none/inherit/currentColor/mixed, nativer Farbwähler, Verlaufs-Swatch (009)
 - [x] Stepped Slider (↑/↓, ⇧ × 10, Ziehen am Label), Constrain proportions (width/height, rx/ry, scale) (009)

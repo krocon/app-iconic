@@ -36,6 +36,8 @@ import { registerPropertiesActions } from './features/properties/properties-acti
 import { registerIconActions } from './features/inspector/icon-actions';
 import { IconInspectorService } from './features/inspector/icon-inspector.service';
 import { PropertiesPanel } from './features/properties/properties-panel';
+import { registerBoxActions } from './features/properties/box-actions';
+import { BoxService } from './features/properties/box.service';
 import { PropertiesService } from './features/properties/properties.service';
 import { LayoutStore } from './features/shell/layout.store';
 import { SHELL_TEXTS } from './features/shell/shell-texts';
@@ -277,6 +279,7 @@ export class App implements OnInit {
       this.destroyRef,
     );
     registerPropertiesActions(this.actions, inject(PropertiesService), this.destroyRef);
+    registerBoxActions(this.actions, inject(BoxService), this.destroyRef);
     registerIconActions(this.actions, inject(IconInspectorService), this.destroyRef);
     registerSvgSourceActions(this.actions, inject(SvgSourceService), this.destroyRef);
     registerExportActions(this.actions, inject(ExportService), this.destroyRef);

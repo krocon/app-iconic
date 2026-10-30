@@ -33,10 +33,20 @@ function itemMatrix(kind: string, args: string): Matrix | null {
   return null;
 }
 
+/**
+ * The linear part with 6 decimals (prompt 062): 4 decimals of a rotation's cos / sin are off by
+ * ~0.01 units over 300 – visible in the box fields.
+ */
+function fmtLinear(n: number): string {
+  const r = Math.round(n * 1e6) / 1e6;
+  return String(r === 0 ? 0 : r);
+}
+
 /** One transform function for `m`: `translate(e f)` if it is a pure translation. */
 export function affineText(m: Matrix): string {
   if (isTranslation(m)) return `translate(${fmt(m.e)} ${fmt(m.f)})`;
-  return `matrix(${[m.a, m.b, m.c, m.d, m.e, m.f].map(fmt).join(' ')})`;
+  const linear = [m.a, m.b, m.c, m.d].map(fmtLinear);
+  return `matrix(${[...linear, fmt(m.e), fmt(m.f)].join(' ')})`;
 }
 
 const isIdentity = (m: Matrix) => isTranslation(m) && Math.abs(m.e) < 1e-9 && Math.abs(m.f) < 1e-9;
