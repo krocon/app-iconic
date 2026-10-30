@@ -36,6 +36,7 @@
     "Mod+,": "app.settings",
     "Mod+Shift+h": "edit.toggleVisibility",
     "v": "tool.select",
+    "F6": "tool.focusOptions",
     "a": "tool.direct",
     "l": "sketch.line",
     "r": "sketch.rect2p",

@@ -1,7 +1,13 @@
 # Prompt 067: Einheitliche Kontextleiste für aktive Werkzeuge
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 061 · Quelle:
-> [Analyse 30.10.2026](2026.10.30%20-%20analyse.md) §3.3 (P1, Aufwand M)
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 061 · Quelle:
+> [Analyse 30.10.2026](../2026.10.30%20-%20analyse.md) §3.3 (P1, Aufwand M)
+
+## Stand
+
+- ✅ 30.10.2026: `ContextBar` für jedes Werkzeug und den Clip-Bearbeitungsmodus, Optionen über `ToolContexts`,
+  `tool.option`/`tool.done`/`tool.focusOptions` (F6). Freehand-Optionen, Leisten von K und F und das Clip-Banner
+  ersetzt. Design: [067-kontextleiste.design.md](067-kontextleiste.design.md).
 
 ## Ziel
 

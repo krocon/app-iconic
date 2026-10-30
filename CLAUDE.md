@@ -105,7 +105,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               Abbruch, Hinweise), ExportDialog, export-actions (file.exportSvg/Png), Texte
   app/features/tools/         Werkzeuge (013): FreehandStore (Werkzeug-Modus, Abtastung, Esc), FreehandService
                               (Einfügen, `points` der KI), freehand-overlay (Vorschau in Viewport-Pixeln),
-                              freehand-options (Werkzeugleiste), text-path (rein: Schrift auflösen, zentrieren),
+                              text-path (rein: Schrift auflösen, zentrieren),
                               TextPathService + TextPathDialog, tools-actions, Texte
   app/features/symbols/       Symbole (013): symbol-provider (Plugin-Schnittstelle), symbol-providers (Registry),
                               lucide-provider (Daten lazy aus lucide-static), symbol-search, symbol-grid (rein),
@@ -125,6 +125,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               icon-color, asset-placement (004), effects (Vorschau-Annäherung, 010),
                               canvas-actions, View-Options-Menü (005); CanvasTools (ein Werkzeug zur Zeit, Modi
                               wie Freehand) + selection-tools (`tool.select` V / `tool.direct` A, 061);
+                              ContextBar + ToolContexts (Kontextleiste je Werkzeug, Provider in
+                              tools/tool-context-providers, 067);
                               Auswahl/Handles (007): CanvasEditStore (Kontext, Punkt, Rahmen, Snap), canvas-pointer
                               (Klick/Rahmen/Ziehen), canvas-gesture (Geste je Ziehen), hit-test, selection-measure
                               (Rahmen + Handle-Sets über CTM), selection-overlay, magic-points, edit-ops (rein),

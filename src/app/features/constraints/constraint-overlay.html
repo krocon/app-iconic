@@ -103,26 +103,3 @@
     </button>
   </div>
 }
-@if (tool.on()) {
-  <div
-    class="bar"
-    role="toolbar"
-    [attr.aria-label]="t.toolbar"
-    data-testid="constraint-bar"
-    (pointerdown)="stop($event)"
-  >
-    @for (type of types; track type) {
-      <button
-        type="button"
-        class="type"
-        [attr.data-type]="type"
-        [attr.aria-pressed]="tool.type() === type"
-        [attr.aria-label]="t.types[type]"
-        [title]="t.types[type]"
-        (click)="chooseType(type)"
-      >
-        {{ glyphs[type] }}
-      </button>
-    }
-  </div>
-}

@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { ActionService } from '../../core/actions/action.service';
 import { IDENTITY, Matrix } from '../../shared/geometry/matrix';
 import { LiveFillTool } from './live-fill-tool';
-import { LiveFillService } from './live-fill.service';
 import { LIVE_FILL_TEXTS as T } from './live-fill-texts';
 
 /** The Fill tool on the canvas (prompt 060): the area(s) under the pointer and the colour bar. */
@@ -17,25 +16,6 @@ import { LIVE_FILL_TEXTS as T } from './live-fill-texts';
           }
         </g>
       </svg>
-      <div
-        class="bar"
-        role="toolbar"
-        [attr.aria-label]="t.toolbar"
-        (pointerdown)="$event.stopPropagation()"
-      >
-        <label class="label" for="fill-color">{{ t.color }}</label>
-        <input
-          id="fill-color"
-          type="color"
-          data-testid="fill-color"
-          [value]="tool.color()"
-          (input)="setColor($event)"
-        />
-        <span class="live">{{ t.live }}</span>
-        @if (service.stale().size) {
-          <span class="stale" data-testid="fill-stale" [title]="t.stale">⚠ {{ t.staleShort }}</span>
-        }
-      </div>
     }
   `,
   styles: `
@@ -48,34 +28,11 @@ import { LIVE_FILL_TEXTS as T } from './live-fill-texts';
       overflow: visible;
       pointer-events: none;
     }
-    .stale {
-      color: var(--color-warning);
-      font-size: var(--font-size-small);
-    }
     .face {
       fill-opacity: 0.45;
       stroke: var(--ai-snap-magic);
       stroke-width: 2;
       vector-effect: non-scaling-stroke;
-    }
-    .bar {
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      padding: 4px 8px;
-      pointer-events: auto;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius);
-      background: var(--color-surface);
-      box-shadow: var(--shadow-popup);
-      font-size: var(--font-size-small);
-    }
-    .live {
-      color: var(--color-text-muted);
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -84,15 +41,10 @@ export class LiveFillOverlay {
   /** Document → viewport pixels. */
   readonly toView = input<Matrix>(IDENTITY);
   protected readonly tool = inject(LiveFillTool);
-  protected readonly service = inject(LiveFillService);
   private readonly actions = inject(ActionService);
   protected readonly t = T;
   protected readonly matrix = computed(() => {
     const m = this.toView();
     return `matrix(${m.a} ${m.b} ${m.c} ${m.d} ${m.e} ${m.f})`;
   });
-
-  protected setColor(e: Event): void {
-    this.actions.run('fill.color', { color: (e.target as HTMLInputElement).value });
-  }
 }

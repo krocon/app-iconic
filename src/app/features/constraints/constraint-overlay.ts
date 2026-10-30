@@ -11,7 +11,6 @@ import {
   viewChild,
 } from '@angular/core';
 import { ActionService } from '../../core/actions/action.service';
-import { CONSTRAINT_TYPES, ConstraintType } from '../../shared/geometry/constraints/constraints';
 import { apply, IDENTITY, Matrix } from '../../shared/geometry/matrix';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { isRendered, paintedRoots } from '../canvas/hit-test';
@@ -20,7 +19,7 @@ import { elementsByCid } from './constraint-storage';
 import { ConstraintService } from './constraint.service';
 import { ConstraintTool } from './constraint-tool';
 import { CONSTRAINT_TEXTS as T } from './constraint-texts';
-import { DrivingDimension, GLYPHS, overlayItems } from './constraint-view';
+import { DrivingDimension, overlayItems } from './constraint-view';
 
 /**
  * Constraints on the canvas (prompt 059): a badge per relation, the driving dimensions (click the
@@ -42,8 +41,6 @@ export class ConstraintOverlay {
   private readonly actions = inject(ActionService);
   private readonly view = inject(CanvasViewStore);
   protected readonly t = T;
-  protected readonly types = CONSTRAINT_TYPES;
-  protected readonly glyphs = GLYPHS;
   protected readonly editing = signal<DrivingDimension | null>(null);
   private readonly field = viewChild<ElementRef<HTMLInputElement>>('field');
   private readonly injector = inject(Injector);
@@ -125,10 +122,6 @@ export class ConstraintOverlay {
   protected isSelected(asset: string, id: string): boolean {
     const s = this.tool.selected();
     return s?.asset === asset && s.id === id;
-  }
-
-  protected chooseType(type: ConstraintType): void {
-    this.actions.run('constraint.tool', { type });
   }
 
   protected select(e: Event, asset: string, id: string): void {

@@ -4,7 +4,6 @@ import { ZOOM_STEPS, zoomPercent } from '../../shared/geometry/zoom-steps';
 import { CANVAS_TEXTS } from './canvas-texts';
 import { CanvasViewStore } from './canvas-view.store';
 import { ViewOptionsMenu } from './view-options-menu';
-import { FreehandOptions } from '../tools/freehand-options';
 import { FreehandStore } from '../tools/freehand.store';
 import { ConstructionMode } from '../construction/construction-mode';
 
@@ -15,7 +14,7 @@ import { ConstructionMode } from '../construction/construction-mode';
  */
 @Component({
   selector: 'app-canvas-toolbar',
-  imports: [FreehandOptions, ViewOptionsMenu],
+  imports: [ViewOptionsMenu],
   template: `
     <div class="bar" role="toolbar" [attr.aria-label]="t.toolbar">
       <div class="cluster">
@@ -84,9 +83,6 @@ import { ConstructionMode } from '../construction/construction-mode';
       >
         {{ t.constructionMode }}
       </button>
-      @if (freehand.active()) {
-        <app-freehand-options />
-      }
       <span class="spacer"></span>
       <app-view-options-menu />
     </div>

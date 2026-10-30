@@ -80,46 +80,6 @@
   transform: translate(-50%, -100%);
   font-size: var(--font-size-small);
 }
-.bar {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-wrap: nowrap;
-  max-width: calc(100% - 16px);
-  overflow-x: auto;
-  gap: 2px;
-  padding: 4px;
-  pointer-events: auto;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-popup);
-}
-.type {
-  min-width: 26px;
-  height: 26px;
-  padding: 0 4px;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--color-text);
-  font-size: 13px;
-  cursor: pointer;
-
-  &[aria-pressed='true'] {
-    border-color: var(--color-accent);
-    background: var(--color-hover);
-  }
-  &:hover {
-    background: var(--color-hover);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--color-accent);
-  }
-}
-
 /* constraints that do not hold (prompt 065): a note with "Solve now" at the bottom of the canvas */
 .broken-note {
   position: absolute;

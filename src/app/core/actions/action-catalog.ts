@@ -192,6 +192,17 @@ export const ACTIONS: readonly ActionDef[] = [
   // the selection tools (prompt 061): end every tool; Boxed / Point selection mode
   EDIT('tool.select', 'Selection Tool'),
   EDIT('tool.direct', 'Direct Selection Tool'),
+  // the context bar of the active tool (prompt 067)
+  EDIT('tool.option', 'Set Tool Option', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['key', 'value'],
+      properties: { key: { type: 'string', maxLength: 32 }, value: { type: 'json' } },
+    },
+  }),
+  EDIT('tool.done', 'End Tool'),
+  EDIT('tool.focusOptions', 'Go to Tool Options'),
   // selection as JSON (AI, tests; design 006 E16): `{ nodes?: NodeRef[], items?: IconItem[] }`
   EDIT('edit.select', 'Select', {
     palette: false,

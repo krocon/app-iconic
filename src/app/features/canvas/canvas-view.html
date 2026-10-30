@@ -101,21 +101,6 @@
     @if (sketch.active()) {
       <app-sketch-overlay [toView]="toView()" />
     }
-    @if (clipId(); as id) {
-      <div class="clip-banner" role="status" data-testid="clip-banner">
-        <span>{{ ct.editing(id) }}</span>
-        <span class="muted">{{ ct.editingHint }}</span>
-        <button
-          type="button"
-          class="btn primary"
-          data-testid="clip-done"
-          (pointerdown)="$event.stopPropagation()"
-          (click)="clipEdit.exit()"
-        >
-          {{ ct.done }}
-        </button>
-      </div>
-    }
     <app-grid-hint-overlay [hint]="gridHint()" [toView]="toView()" />
     <app-selection-overlay
       [model]="edit.model()"
@@ -128,6 +113,8 @@
     <app-gradient-overlay [toView]="toView()" />
     <app-constraint-overlay [toView]="toView()" />
     <app-live-fill-overlay [toView]="toView()" />
+    <!-- one bar for every active tool (prompt 067) -->
+    <app-context-bar />
     @if (opt().crossCursor && pointerView(); as p) {
       <div class="cross-h" [style.top.px]="p.y"></div>
       <div class="cross-v" [style.left.px]="p.x"></div>

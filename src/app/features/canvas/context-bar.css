@@ -1,0 +1,127 @@
+/* The context bar of the active tool (prompt 067). Tokens from styles.css only. */
+:host {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.context-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  min-height: 34px;
+  padding: 3px var(--space-2);
+  pointer-events: auto;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-popup);
+  font-size: var(--font-size-small);
+  color: var(--color-text);
+}
+
+.name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.options {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+}
+
+.opt {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.num {
+  width: 4.5em;
+  height: 24px;
+  font-size: var(--font-size-small);
+}
+
+.hex {
+  width: 6.5em;
+  height: 24px;
+  font-size: var(--font-size-small);
+}
+
+.swatch {
+  width: 26px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  background: none;
+}
+
+.choices {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.choice {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 3px;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+
+  &[aria-checked='true'] {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-accent-text);
+  }
+  &:hover {
+    background: var(--color-hover);
+  }
+  &[aria-checked='true']:hover {
+    background: var(--color-accent);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-focus);
+  }
+}
+
+.note {
+  color: var(--color-warning);
+}
+
+.text {
+  font-weight: 600;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.tip {
+  color: var(--color-text-muted);
+}
+
+.done {
+  height: 24px;
+  padding: 0 var(--space-2);
+}

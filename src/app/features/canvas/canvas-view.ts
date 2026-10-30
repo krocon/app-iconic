@@ -41,7 +41,6 @@ import { FreehandService } from '../tools/freehand.service';
 import { TOOLS_TEXTS } from '../tools/tools-texts';
 import { ClipEditStore } from '../clip/clip-edit.store';
 import { ClipEditLayer } from '../clip/clip-edit-layer';
-import { CLIP_TEXTS } from '../clip/clip-texts';
 import { SketchTool } from '../sketch/sketch-tool';
 import { PenTool } from '../pen/pen-tool';
 import { CurvatureTool } from '../pen/curvature-tool';
@@ -53,6 +52,7 @@ import { GradientOverlay } from '../gradient/gradient-overlay';
 import { ConstraintOverlay } from '../constraints/constraint-overlay';
 import { LiveFillOverlay } from '../live-fill/live-fill-overlay';
 import { selectionToolActions } from './selection-tools';
+import { ContextBar } from './context-bar';
 import { activeToolId } from '../commands/add-layout';
 import { CanvasTools } from './canvas-tools';
 import { followSelection } from './follow-selection';
@@ -82,6 +82,7 @@ const WHEEL_ZOOM = 0.01;
     GradientOverlay,
     ConstraintOverlay,
     LiveFillOverlay,
+    ContextBar,
   ],
   templateUrl: './canvas-view.html',
   styleUrl: './canvas-view.css',
@@ -153,7 +154,6 @@ export class CanvasView {
   protected readonly tt = TOOLS_TEXTS;
   /** The clip path edit mode (design 014 E7). */
   protected readonly clipEdit = inject(ClipEditStore);
-  protected readonly ct = CLIP_TEXTS;
   /** The id of the clip being edited (banner), `null` outside the mode. */
   protected readonly clipId = computed(() => {
     const el = this.clipEdit.scope(this.store()?.document());

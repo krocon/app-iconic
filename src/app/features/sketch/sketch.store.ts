@@ -213,7 +213,21 @@ export class SketchStore {
   }
 
   /** ↑/↓ while dragging: one side / point / turn / divider more or less, or a bigger radius. */
+  /** Bumped when a count changes (the context bar reads counts through it, prompt 067). */
+  readonly countVersion = signal(0);
+
+  /** Sets the count of a drag tool (sides, points, turns … – the context bar, prompt 067). */
+  setCount(tool: DragToolId, n: number): void {
+    if (tool === 'dragPolygon')
+      this.sides = Math.max(MIN_SIDES, Math.min(MAX_SIDES, Math.round(n)));
+    else if (DRAG_COUNTS[tool]) this.counts[tool] = countOf(tool, n);
+    else return;
+    this.countVersion.update((v) => v + 1);
+    if (this.lastPointer && this.tool() === tool) this.move(this.lastPointer);
+  }
+
   stepSides(d: number): void {
+    this.countVersion.update((v) => v + 1);
     const t = this.tool();
     if (t && isDragTool(t) && t !== 'dragPolygon' && DRAG_COUNTS[t]) {
       this.counts[t] = countOf(t, countOf(t, this.counts[t]) + d * DRAG_COUNTS[t]!.step);
@@ -225,6 +239,7 @@ export class SketchStore {
 
   /** The count of a drag tool (for the size dialog). */
   countOf(tool: DragToolId): number {
+    this.countVersion();
     return tool === 'dragPolygon' ? this.sides : countOf(tool, this.counts[tool]);
   }
 

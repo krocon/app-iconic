@@ -36,6 +36,13 @@ import { registerPropertiesActions } from './features/properties/properties-acti
 import { registerIconActions } from './features/inspector/icon-actions';
 import { IconInspectorService } from './features/inspector/icon-inspector.service';
 import { PropertiesPanel } from './features/properties/properties-panel';
+import { registerToolContexts } from './features/tools/tool-context-providers';
+import { ToolContexts } from './features/canvas/tool-context';
+import { SketchStore } from './features/sketch/sketch.store';
+import { FilletService } from './features/fillet/fillet.service';
+import { ConstraintTool } from './features/constraints/constraint-tool';
+import { LiveFillTool } from './features/live-fill/live-fill-tool';
+import { LiveFillService } from './features/live-fill/live-fill.service';
 import { registerBoxActions } from './features/properties/box-actions';
 import { BoxService } from './features/properties/box.service';
 import { PropertiesService } from './features/properties/properties.service';
@@ -269,6 +276,20 @@ export class App implements OnInit {
       this.destroyRef,
     );
     registerPathTools(this.actions, canvasTools, this.destroyRef);
+    // the context bar of the active tool (prompt 067)
+    registerToolContexts(
+      inject(ToolContexts),
+      {
+        settings: inject(SettingsStore),
+        sketch: inject(SketchStore),
+        freehand: inject(FreehandStore),
+        fillet: inject(FilletService),
+        constraint: inject(ConstraintTool),
+        liveFill: inject(LiveFillTool),
+        liveFillService: inject(LiveFillService),
+      },
+      this.destroyRef,
+    );
     registerPenActions(
       this.actions,
       inject(AddService),
