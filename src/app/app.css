@@ -49,6 +49,24 @@
   color: var(--color-text);
 }
 
+.save .dot {
+  margin-left: 2px;
+  color: var(--color-accent);
+}
+
+/* narrow windows (prompt 069): the document name gives way first, then the labels */
+@media (width < 900px) {
+  .doc {
+    max-width: 10rem;
+  }
+}
+@media (width < 700px) {
+  .doc,
+  .export {
+    display: none;
+  }
+}
+
 /* an AI assistant is connected (design 018 E16) – click disconnects */
 .ai-badge {
   margin-left: var(--space-2);

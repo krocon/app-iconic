@@ -83,6 +83,32 @@ import { ConstructionMode } from '../construction/construction-mode';
       >
         {{ t.constructionMode }}
       </button>
+      <!-- the most used icon switches at one click (prompt 069): the same actions as the menus -->
+      @for (g of segments; track g.key) {
+        <div
+          class="segmented"
+          role="radiogroup"
+          tabindex="-1"
+          [attr.data-testid]="'segment-' + g.key"
+          [attr.aria-label]="g.label"
+          (keydown)="segmentKey($event, g.items)"
+        >
+          @for (o of g.items; track o.id) {
+            <button
+              type="button"
+              class="seg"
+              role="radio"
+              [attr.data-action]="o.id"
+              [attr.aria-checked]="actions.checked(o.id) === true"
+              [attr.tabindex]="actions.checked(o.id) === true ? 0 : -1"
+              [title]="actions.tooltip(o.id)"
+              (click)="actions.run(o.id)"
+            >
+              {{ o.label }}
+            </button>
+          }
+        </div>
+      }
       <span class="spacer"></span>
       <app-view-options-menu />
     </div>
@@ -120,6 +146,34 @@ import { ConstructionMode } from '../construction/construction-mode';
     .zoom {
       width: 6.5em;
     }
+    .segmented {
+      display: inline-flex;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .seg {
+      height: 24px;
+      padding: 0 var(--space-2);
+      border: none;
+      border-right: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-text);
+      font-size: var(--font-size-small);
+      cursor: pointer;
+
+      &:last-child {
+        border-right: none;
+      }
+      &[aria-checked='true'] {
+        background: var(--color-accent);
+        color: var(--color-accent-text);
+      }
+      &:focus-visible {
+        outline: 2px solid var(--color-focus);
+        outline-offset: -2px;
+      }
+    }
     .construction.on {
       color: var(--color-accent-text);
       background: var(--ai-construction);
@@ -134,6 +188,39 @@ export class CanvasToolbar {
   protected readonly construction = inject(ConstructionMode);
   protected readonly t = CANVAS_TEXTS;
   protected readonly steps = ZOOM_STEPS;
+  /** Appearance and platform mask as segmented controls (prompt 069). */
+  protected readonly segments = [
+    {
+      key: 'appearance',
+      label: this.t.appearance,
+      items: [
+        { id: 'view.appearance.light', label: this.t.light },
+        { id: 'view.appearance.dark', label: this.t.dark },
+      ],
+    },
+    {
+      key: 'mask',
+      label: this.t.mask,
+      items: [
+        { id: 'view.mask.squircle', label: this.t.maskSquircleShort },
+        { id: 'view.mask.circle', label: this.t.maskCircleShort },
+        { id: 'view.mask.none', label: this.t.maskNoneShort },
+      ],
+    },
+  ];
+
+  /** APG radio group: ←/→ (↑/↓) choose the neighbour and move the focus with it. */
+  protected segmentKey(e: KeyboardEvent, items: readonly { id: string }[]): void {
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const i = items.findIndex((o) => this.actions.checked(o.id) === true);
+    const next = items[(Math.max(i, 0) + step + items.length) % items.length];
+    this.actions.run(next.id);
+    const group = e.currentTarget as HTMLElement;
+    queueMicrotask(() => group.querySelector<HTMLElement>(`[data-action="${next.id}"]`)?.focus());
+  }
   protected readonly opt = this.view.options;
   protected readonly onStep = computed(() => ZOOM_STEPS.some((s) => this.isZoom(s)));
   protected readonly zoomValue = computed(() => String(this.view.zoom()));

@@ -113,6 +113,32 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
         </button>
       }
       <span class="sep" aria-hidden="true"></span>
+      <!-- Save and Export at one click (prompt 069); Undo / Redo only here -->
+      <button
+        type="button"
+        class="btn quiet save"
+        data-testid="toolbar-save"
+        [title]="actions.tooltip('file.save')"
+        [attr.aria-label]="actions.label('file.save')"
+        [disabled]="!actions.enabled('file.save')"
+        (click)="actions.run('file.save')"
+      >
+        {{ t.save }}
+        @if (files.dirty()) {
+          <span class="dot" aria-hidden="true">•</span>
+        }
+      </button>
+      <button
+        type="button"
+        class="btn quiet export"
+        data-testid="toolbar-export"
+        [title]="t.exportHint"
+        [disabled]="!actions.enabled('file.exportPng')"
+        (click)="actions.run('file.exportPng')"
+      >
+        {{ t.export }}
+      </button>
+      <span class="sep" aria-hidden="true"></span>
       <button
         type="button"
         class="btn quiet undo"

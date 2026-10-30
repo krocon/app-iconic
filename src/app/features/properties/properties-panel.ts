@@ -18,8 +18,8 @@ import { AlignSection } from '../align/align-section';
 import { GradientSection } from '../gradient/gradient-section';
 
 /**
- * The properties panel (design 009 E9): header with the kind of the selection, Undo / Redo and
- * "Reset All…"; the common properties of the selection by section (from the property specs, not
+ * The properties panel (design 009 E9): header with the kind of the selection and "Reset All…"
+ * (Undo / Redo only in the window's toolbar since prompt 069); the common properties of the selection by section (from the property specs, not
  * hand-written); the transform list; the empty state. One selected root, group or layer shows the
  * icon inspector (design 010).
  */
@@ -40,32 +40,6 @@ import { GradientSection } from '../gradient/gradient-section';
     <div class="head">
       <span class="kind" data-testid="properties-kind">{{ title() }}</span>
       <span class="spacer"></span>
-      <button
-        type="button"
-        class="tool"
-        data-testid="properties-undo"
-        [title]="actions.tooltip('edit.undo')"
-        [attr.aria-label]="actions.label('edit.undo')"
-        [disabled]="!actions.enabled('edit.undo')"
-        (click)="actions.run('edit.undo')"
-      >
-        <svg viewBox="0 0 16 16" aria-hidden="true">
-          <path d="M6 4L3 7l3 3M3 7h6a4 4 0 0 1 0 8H7" />
-        </svg>
-      </button>
-      <button
-        type="button"
-        class="tool"
-        data-testid="properties-redo"
-        [title]="actions.tooltip('edit.redo')"
-        [attr.aria-label]="actions.label('edit.redo')"
-        [disabled]="!actions.enabled('edit.redo')"
-        (click)="actions.run('edit.redo')"
-      >
-        <svg viewBox="0 0 16 16" aria-hidden="true">
-          <path d="M10 4l3 3-3 3M13 7H7a4 4 0 0 0 0 8h2" />
-        </svg>
-      </button>
       <button
         type="button"
         class="btn quiet reset-all"

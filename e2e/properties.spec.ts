@@ -87,13 +87,13 @@ test('typing the width changes the canvas live; undo is ONE step', async ({ page
   await field.press('Shift+ArrowUp');
   await field.press('Enter');
   expect(await attr(page, A, r1, 'width')).toBe('360');
-  await panel(page).getByTestId('properties-undo').click();
+  await page.locator('header.toolbar button.undo').click();
   expect(await attr(page, A, r1, 'width')).toBe('350');
-  await panel(page).getByTestId('properties-undo').click();
+  await page.locator('header.toolbar button.undo').click();
   expect(await attr(page, A, r1, 'width')).toBe('200');
   expect((await undoState(page)).label).toBe(labelBefore);
   expect((await bounds(page, r1))!.width).toBeCloseTo(before!.width, 3);
-  await panel(page).getByTestId('properties-redo').click();
+  await page.locator('header.toolbar button.redo').click();
   expect(await attr(page, A, r1, 'width')).toBe('350');
 });
 

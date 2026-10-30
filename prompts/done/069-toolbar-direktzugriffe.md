@@ -1,7 +1,12 @@
 # Prompt 069: Direktzugriffe in Canvas- und App-Toolbar
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 004, 012, 015 · Quelle:
-> [Analyse 30.10.2026](2026.10.30%20-%20analyse.md) §3.4 (P1)
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 004, 012, 015 · Quelle:
+> [Analyse 30.10.2026](../2026.10.30%20-%20analyse.md) §3.4 (P1)
+
+## Stand
+
+- ✅ 30.10.2026: Segmented Controls für Erscheinungsbild und Maske, Speichern + Export… in der App-Toolbar, Undo/Redo
+  nur dort, Umbruch in schmalen Fenstern. Entscheidungen in `docs/architecture.md` (069 E1–E3).
 
 ## Ziel
 
