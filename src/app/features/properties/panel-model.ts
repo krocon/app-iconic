@@ -63,6 +63,9 @@ function row(def: PropertyDef, els: readonly Element[]): PanelRow {
     fallback: unset ? first.value : null,
     source: unset ? first.source : (ownValue(els[0], def.name)?.source ?? 'none'),
     set: def.reset && els.some((e) => isSet(e, def.name)),
-    editable: def.name !== 'text' || els.every((e) => readText(e).editable),
+    // the outline of a live fill is computed (prompt 066): read only until it is detached
+    editable:
+      (def.name !== 'text' || els.every((e) => readText(e).editable)) &&
+      !(def.name === 'd' && els.some((e) => e.hasAttribute('data-live-fill'))),
   };
 }

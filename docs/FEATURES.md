@@ -62,6 +62,7 @@
 - [x] Gesten = eine Undo-Gruppe (ein Command `setAttributes`), Esc bricht ab (007)
 - [x] Handles korrekt bei verschachtelten, transformierten Gruppen und Zoom 50/100/150 % (007, Playwright ± 0,5 px)
 - [x] Gesperrte Elemente sind für Trim/Extend/Fillet/Chamfer, Pfad-Werkzeuge, Pathfinder, Offset, Corners und Transform nur Begrenzung, nie Ziel _(neu)_ (064)
+- [x] Hilfslinien gesperrt (Standard), „Hilfslinien sperren“/„Alle Hilfslinien entfernen“; Alles auswählen ohne gesperrte Elemente _(neu)_ (066)
 
 ## 5. Elemente hinzufügen
 
@@ -129,6 +130,7 @@
 
 ## 6. Hierarchie
 
+- [x] Hilfslinien, Bemaßungen, Konstruktionslinien und Live-Füllungen mit eigenem Namen und Icon _(neu)_ (066); offene Live-Füllung mit Warnung
 - [x] Einheitliche Reihenfolge „oben = vorn“ auch für SVG-Knoten _(neu)_ (063): Ziehen, Move Up/Down/Into/Out, Bring to Front folgen der Anzeige; das DOM bleibt unverändert
 - [x] Baum Root → Gruppen → Layer → Nodes, Typ-Icon, Name, Swatches, Sichtbarkeit (006; „Definitions“-Knoten, ab 500 Zeilen virtualisiert)
 - [x] Auswahl synchron mit Canvas, Mehrfachauswahl (006; APG-Tree-Tastatur, Auswahlrahmen im Canvas; Auswahl per Klick im Canvas: 007)

@@ -56,8 +56,41 @@ function hint(el: Element): string | null {
   }
 }
 
+/** What a helper element is (prompt 066); `null` for an ordinary one. */
+export type NodeRole = 'guide' | 'dimension' | 'construction' | 'fill';
+
+export function nodeRole(el: Element): NodeRole | null {
+  if (el.hasAttribute('data-guide')) return 'guide';
+  if (el.hasAttribute('data-dimension')) return 'dimension';
+  if (el.hasAttribute('data-live-fill')) return 'fill';
+  if (el.hasAttribute('data-construction')) return 'construction';
+  return null;
+}
+
+/** The label of a helper: "Guide y 120", "Dimension 48", "Construction line", "Live fill". */
+function roleLabel(el: Element, role: NodeRole): string {
+  const name = T.roles[role];
+  switch (role) {
+    case 'guide': {
+      const horizontal = el.getAttribute('data-guide') === 'horizontal';
+      const v = num(el, horizontal ? 'y1' : 'x1');
+      return v ? `${name} ${horizontal ? 'y' : 'x'} ${Math.round(Number(v) * 100) / 100}` : name;
+    }
+    case 'dimension': {
+      const v = num(el, 'data-value');
+      return v ? `${name} ${v}` : name;
+    }
+    case 'construction':
+      return `${name} ${el.localName}`;
+    default:
+      return name;
+  }
+}
+
 export function nodeLabel(el: Element): string {
+  const role = nodeRole(el);
   const id = el.getAttribute('id')?.trim();
+  if (role && !id) return roleLabel(el, role);
   if (id) return short(id);
   const h = hint(el);
   return h ? `${el.localName} ${h}` : el.localName;

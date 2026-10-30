@@ -114,3 +114,51 @@ test('a circle: Alt + click removes, the AI fills with a colour, detach keeps th
   });
   expect(await fills(page)).toEqual([]);
 });
+
+test('an opened area: the fill says so in the tree, the panel and the tool; Detach (066)', async ({
+  page,
+}) => {
+  await setup(page);
+  await page.keyboard.press('f');
+  const p = await screen(page, 340, 420);
+  await expect
+    .poll(async () => {
+      await page.mouse.move(p.x + 1, p.y);
+      await page.mouse.move(p.x, p.y);
+      return page.locator('[data-testid="fill-hover"] path').count();
+    })
+    .toBe(1);
+  await page.mouse.click(p.x, p.y);
+  await expect.poll(async () => (await fills(page)).length).toBe(1);
+  // the tree names the fill
+  await expect(page.locator('[role="treeitem"]', { hasText: 'Live fill' })).toHaveCount(1);
+  // line b moved far away: the triangle opens, the fill keeps its shape
+  await page.evaluate(() => {
+    const h = window.__appIconic!;
+    const doc = h.store()!.document();
+    const ref = doc.refOf(doc.assets.get('lf.svg')!.svg!.root.querySelector('#b')!)!;
+    h.runCommand({
+      type: 'setAttributes',
+      changes: [
+        { ref, name: 'x1', value: '900' },
+        { ref, name: 'x2', value: '900' },
+      ],
+    });
+  });
+  expect(await fills(page)).toEqual([{ fill: '#0a84ff', w: 394, h: 305 }]);
+  await expect(page.getByTestId('fill-stale')).toBeVisible();
+  await expect(page.locator('[role="treeitem"]', { hasText: 'Live fill' })).toContainText('open');
+  // the panel: computed, open, Detach
+  await page.keyboard.press('v');
+  await page.evaluate(() => {
+    const h = window.__appIconic!;
+    const doc = h.store()!.document();
+    const el = doc.assets.get('lf.svg')!.svg!.root.querySelector('[data-live-fill]')!;
+    h.store()!.select([doc.refOf(el)!]);
+  });
+  await expect(page.getByTestId('live-fill-stale')).toBeVisible();
+  await expect(page.locator('#prop-d')).toHaveAttribute('readonly', '');
+  await page.getByTestId('live-fill-detach').click();
+  expect(await fills(page)).toEqual([]);
+  await expect(page.getByTestId('live-fill-section')).toHaveCount(0);
+});

@@ -23,6 +23,11 @@ const ICONS: Record<string, string> = {
   gradient: 'M3 3h10v10H3z M3 13L13 3 M3 8L8 3 M8 13l5-5',
   clip: 'M4 2.5v9h9.5 M2.5 4.5h9v9',
   other: 'M5 3.5L2.5 8 5 12.5 M11 3.5L13.5 8 11 12.5',
+  // helpers (prompt 066)
+  guide: 'M8 1.5v13 M1.5 8h13',
+  dimension: 'M2.5 5v6 M13.5 5v6 M2.5 8h11 M4.5 6.5L2.5 8l2 1.5 M11.5 6.5l2 1.5-2 1.5',
+  construction: 'M3 13L13 3 M2.5 13.5h1 M6 10h1 M9.5 6.5h1 M12.5 3h1',
+  fill: 'M3 6l5-3.5 5 3.5-5 7.5z M11.5 10.5c0 1.5 2 1.5 2 0l-1-1.5z',
 };
 
 const BY_TAG: Record<string, string> = {
@@ -53,5 +58,6 @@ const BY_TAG: Record<string, string> = {
 
 export function treeIcon(n: TreeNode): string {
   if (n.kind !== 'node') return ICONS[n.kind];
+  if (n.role) return ICONS[n.role];
   return ICONS[BY_TAG[n.tag ?? ''] ?? 'other'];
 }

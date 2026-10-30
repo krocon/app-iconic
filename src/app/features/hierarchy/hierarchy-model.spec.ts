@@ -10,6 +10,7 @@ import {
   TreeNode,
 } from './hierarchy-model';
 import { nodeLabel } from './node-label';
+import { treeIcon } from './tree-icons';
 import { swatchOf } from './swatch';
 
 const labels = (n: TreeNode): unknown => [n.label, ...n.children.map(labels)];
@@ -114,6 +115,30 @@ describe('hierarchy model (design 006 E1–E3)', () => {
       'root',
       'g1',
     ]);
+  });
+
+  it('names helpers: guide, dimension, construction, live fill – with icons and the stale warning (066)', () => {
+    const el = (markup: string) =>
+      new DOMParser().parseFromString(markup, 'image/svg+xml').documentElement;
+    const NS = 'xmlns="http://www.w3.org/2000/svg"';
+    expect(nodeLabel(el(`<line ${NS} data-guide="horizontal" y1="120.004" y2="120"/>`))).toBe(
+      'Guide y 120',
+    );
+    expect(nodeLabel(el(`<line ${NS} data-guide="vertical" x1="30"/>`))).toBe('Guide x 30');
+    expect(nodeLabel(el(`<g ${NS} data-dimension="linear" data-value="48"/>`))).toBe(
+      'Dimension 48',
+    );
+    expect(nodeLabel(el(`<circle ${NS} data-construction="" r="3"/>`))).toBe('Construction circle');
+    expect(nodeLabel(el(`<path ${NS} data-live-fill="{}"/>`))).toBe('Live fill');
+    // an id wins
+    expect(nodeLabel(el(`<path ${NS} id="sky" data-live-fill="{}"/>`))).toBe('sky');
+    const doc = treeDocument();
+    doc.node({ asset: 'a.svg', id: 'n9' })!.setAttribute('data-live-fill', '{}');
+    const tree = buildTree(doc, new Set(['a.svg:n9']));
+    const fill = allNodes(tree).find((n) => n.id === 'g0/l0/n9')!;
+    expect(fill.role).toBe('fill');
+    expect(fill.warning).toContain('open');
+    expect(treeIcon(fill)).toContain('M3 6l5');
   });
 
   it('labels nodes by id, else name and a short hint', () => {

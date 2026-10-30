@@ -143,6 +143,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               ConstraintSection (Properties)
   app/features/live-fill/     Flächen füllen, live (060): LiveFillService (Follower des UndoService), LiveFillTool (F),
                               LiveFillOverlay, live-fill-model (data-live-fill, Merkpunkte), live-fill-actions, Texte
+                              LiveFillSection (Properties, `stale`, 066)
   app/features/gradient/      Verlaufseditor (032): gradient-model (rein), GradientService, GradientSection (Panel),
                               GradientOverlay + gradient-handles (Griffe), gradient-actions (`gradient.*`), Texte
   app/features/clip/          Clip Paths (014): ClipEditStore (Bearbeitungsmodus), ClipEditLayer (Formen in der

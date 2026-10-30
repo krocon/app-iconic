@@ -77,6 +77,15 @@ export function registerLockActions(
             : false;
         },
       },
+      // guides (prompt 066): lock all, remove all
+      'guides.lock': {
+        run: () => guides.setLocked(!guides.locked()),
+        checked: () => guides.locked(),
+      },
+      'guides.clear': {
+        run: () => guides.clear(),
+        enabled: () => guides.all().length > 0,
+      },
       'sketch.toggleConstructionMode': {
         run: () => mode.on.update((v) => !v),
         checked: () => mode.on(),

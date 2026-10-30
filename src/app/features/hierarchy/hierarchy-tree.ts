@@ -35,6 +35,7 @@ import { HIERARCHY_TEXTS } from './hierarchy-texts';
 import { treeNavigation } from './tree-navigation';
 import { TreeDrag } from './tree-drag';
 import { treeIcon } from './tree-icons';
+import { LiveFillService } from '../live-fill/live-fill.service';
 import { selectable, selectSingle, selectRange, toggleRow } from './tree-selection';
 import { Swatch } from './swatch';
 
@@ -75,6 +76,8 @@ export class HierarchyTree {
   protected readonly viewHeight = signal(400);
   readonly rowHeight = signal(ROW_HEIGHT);
 
+  /** Live fills that no longer follow get a warning in their row (prompt 066). */
+  private readonly fills = inject(LiveFillService);
   private lastTree: { store: DocumentStore; tree: TreeNode } | null = null;
   /** The tree; while a gesture runs (drag, live field edit) the last one stays (prompt 031). */
   readonly tree = computed(() => {
@@ -82,7 +85,7 @@ export class HierarchyTree {
     const doc = store.document();
     const last = this.lastTree;
     if (store.gesture() && last?.store === store) return last.tree;
-    const tree = buildTree(doc);
+    const tree = buildTree(doc, this.fills.stale());
     this.lastTree = { store, tree };
     return tree;
   });

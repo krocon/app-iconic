@@ -1,7 +1,14 @@
 # Prompt 066: Hilfslinien, Bemaßungen und Live-Füllungen im Alltag
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 006, 048, 055, 056, 060 · Quelle:
-> [Analyse 30.10.2026](2026.10.30%20-%20analyse.md) §2.4 (P0/P1)
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 006, 048, 055, 056, 060 · Quelle:
+> [Analyse 30.10.2026](../2026.10.30%20-%20analyse.md) §2.4 (P0/P1)
+
+## Stand
+
+- ✅ 30.10.2026: Hilfslinien gesperrt (Standard), `guides.lock`, `guides.clear`, Alles auswählen ohne gesperrte;
+  Rollen-Labels und -Icons im Baum; Live-Füllung: Hinweis + `d` schreibgeschützt + „Füllung lösen“ im Panel, „offen“
+  in Baum, Panel und Werkzeug. `guides.show`: nicht nötig – `view.constructionLines` blendet Hilfslinien mit aus.
+  Design: [066-hilfslinien-fuellungen-alltag.design.md](066-hilfslinien-fuellungen-alltag.design.md).
 
 ## Ziel
 

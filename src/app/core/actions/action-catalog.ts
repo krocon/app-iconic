@@ -611,6 +611,8 @@ export const ACTIONS: readonly ActionDef[] = [
   VIEW('view.selectionMode.point', 'Selection Mode: Point'),
   VIEW('view.selectionMode.boxed', 'Selection Mode: Boxed'),
   VIEW('view.selectionMode.none', 'Selection Mode: None'),
+  VIEW('guides.lock', 'Lock Guides'),
+  VIEW('guides.clear', 'Clear Guides'),
   ADD('guide.add', 'Add Guide', {
     palette: false,
     args: {

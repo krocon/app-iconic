@@ -232,4 +232,14 @@ describe('HierarchyTree', () => {
     );
     expect(Math.min(...indices)).toBeGreaterThan(300);
   });
+
+  it('Select All leaves locked nodes out (guides are locked, prompt 066)', async () => {
+    const { store, actions } = await render();
+    store.document().node({ asset: 'a.svg', id: 'n9' })!.setAttribute('data-locked', 'true');
+    store.select([{ asset: 'a.svg', id: 'n10' }]);
+    actions.run('edit.selectAll');
+    const ids = store.selection().map((r) => r.id);
+    expect(ids).toContain('n10');
+    expect(ids).not.toContain('n9');
+  });
 });

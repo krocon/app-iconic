@@ -37,6 +37,8 @@ const FIXED: Record<string, string> = {
   'edit.selectAll': 'Alles auswählen',
   'edit.deselect': 'Auswahl aufheben',
   'tool.select': 'Auswahlwerkzeug',
+  'guides.lock': 'Hilfslinien sperren',
+  'guides.clear': 'Alle Hilfslinien entfernen',
   'tool.direct': 'Direktauswahl-Werkzeug',
   'edit.select': 'Auswählen',
   'edit.runCommand': 'Dokument-Befehl ausführen',

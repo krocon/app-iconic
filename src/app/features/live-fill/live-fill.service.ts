@@ -1,4 +1,4 @@
-import { effect, inject, Injectable } from '@angular/core';
+import { effect, inject, Injectable, signal } from '@angular/core';
 import { loadPaper, PaperScope } from '../../shared/geometry/pathops/boolean-ops';
 import { Arrangement, insidePoint, unionOf } from '../../shared/geometry/pathops/faces';
 import { nodeToDocument } from '../../shared/geometry/dom-geometry';
@@ -37,6 +37,11 @@ export class LiveFillService {
   private readonly view = inject(CanvasViewStore);
   private scope: PaperScope | null = null;
   private cache: { revision: number; asset: string; a: Arrangement }[] = [];
+  /**
+   * Fills whose face no longer closes (`asset:id`, prompt 066): they keep their last outline; the
+   * tree, the panel and the tool say so. Known after the first change since the start.
+   */
+  readonly stale = signal<ReadonlySet<string>>(new Set());
 
   constructor() {
     effect(() => {
@@ -213,6 +218,7 @@ export class LiveFillService {
     if (!store || !this.scope) return null;
     const doc = store.document();
     const changes: AttributeChange[] = [];
+    const stale = new Set<string>();
     for (const asset of doc.assets.values()) {
       const fills = asset.svg
         ? Array.from(asset.svg.root.querySelectorAll(`[${LIVE_FILL_ATTR}]`))
@@ -227,7 +233,10 @@ export class LiveFillService {
         const inv = m && invert(m);
         if (!ref || !seeds || !m || !inv) continue;
         const faces = seeds.map((s) => a.faceAt(apply(m, s)));
-        if (faces.some((f) => !f)) continue;
+        if (faces.some((f) => !f)) {
+          stale.add(`${ref.asset}:${ref.id}`);
+          continue;
+        }
         const unique = [...new Set(faces as string[])];
         const d = this.transformD(unionOf(this.scope, unique), inv);
         if (d === el.getAttribute('d')) continue;
@@ -239,6 +248,13 @@ export class LiveFillService {
         changes.push({ ref, name: LIVE_FILL_ATTR, value: seedsJson(moved) });
       }
     }
+    const before = this.stale();
+    if (stale.size !== before.size || [...stale].some((k) => !before.has(k))) this.stale.set(stale);
     return changes.length ? new SetAttributes(changes, 'fillRegion') : null;
+  }
+
+  /** The fill no longer follows: its face is open (prompt 066). */
+  isStale(ref: NodeRef): boolean {
+    return this.stale().has(`${ref.asset}:${ref.id}`);
   }
 }

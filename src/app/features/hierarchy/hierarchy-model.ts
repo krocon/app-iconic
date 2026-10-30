@@ -11,7 +11,7 @@ import { ID_ATTR } from '../document/svg/node-ids';
 import { clipIdOf, isClipGroup } from '../document/model/clip-model';
 import { CLIP_TEXTS as CT } from '../clip/clip-texts';
 import { HIERARCHY_TEXTS as T } from './hierarchy-texts';
-import { groupLabel, layerLabel, nodeLabel } from './node-label';
+import { groupLabel, layerLabel, nodeLabel, NodeRole, nodeRole } from './node-label';
 import { fillSwatch, Swatch, swatchOf } from './swatch';
 
 /**
@@ -51,6 +51,8 @@ export interface TreeNode {
   clip?: string;
   /** A node's paint order among its DOM siblings (0 = back, prompt 063). */
   z?: number;
+  /** A helper element (prompt 066): guide, dimension, construction line, live fill. */
+  role?: NodeRole;
   children: TreeNode[];
 }
 
@@ -74,8 +76,15 @@ export function isHiddenElement(el: Element): boolean {
   return style?.getPropertyValue('display')?.trim() === 'none';
 }
 
-function nodeOf(el: Element, asset: string, parentId: string, root: Element): TreeNode {
+function nodeOf(
+  el: Element,
+  asset: string,
+  parentId: string,
+  root: Element,
+  stale: ReadonlySet<string>,
+): TreeNode {
   const id = el.getAttribute(ID_ATTR) ?? '';
+  const role = nodeRole(el);
   const rowId = `${parentId}/${id}`;
   const clip = clipIdOf(el);
   const label =
@@ -90,6 +99,8 @@ function nodeOf(el: Element, asset: string, parentId: string, root: Element): Tr
     tag: el.localName,
     ref: { asset, id },
     z: el.parentElement ? Array.prototype.indexOf.call(el.parentElement.children, el) : 0,
+    ...(role ? { role } : {}),
+    ...(role === 'fill' && stale.has(`${asset}:${id}`) ? { warning: T.staleFill } : {}),
     fill: swatchOf(el, 'fill', root),
     stroke: swatchOf(el, 'stroke', root),
     hidden: isHiddenElement(el),
@@ -99,11 +110,11 @@ function nodeOf(el: Element, asset: string, parentId: string, root: Element): Tr
     // front-most first (prompt 063)
     children: Array.from(el.children)
       .reverse()
-      .map((c) => nodeOf(c, asset, rowId, root)),
+      .map((c) => nodeOf(c, asset, rowId, root, stale)),
   };
 }
 
-function layerNode(doc: IconDocument, g: number, l: number): TreeNode {
+function layerNode(doc: IconDocument, g: number, l: number, stale: ReadonlySet<string>): TreeNode {
   const layer = layers(groups(doc.iconJson)[g])[l];
   const id = `g${g}/l${l}`;
   const name = layer['image-name'];
@@ -124,7 +135,7 @@ function layerNode(doc: IconDocument, g: number, l: number): TreeNode {
         hidden: false,
         definition: true,
         container: false,
-        children: defs.map((d) => nodeOf(d, asset.name, defsId, root)),
+        children: defs.map((d) => nodeOf(d, asset.name, defsId, root, stale)),
       });
     }
     // front-most first (prompt 063); the definitions keep their order
@@ -132,7 +143,7 @@ function layerNode(doc: IconDocument, g: number, l: number): TreeNode {
       ...kids
         .filter((k) => !isDefinitionTag(k))
         .reverse()
-        .map((k) => nodeOf(k, asset.name, id, root)),
+        .map((k) => nodeOf(k, asset.name, id, root, stale)),
     );
   }
   return {
@@ -150,7 +161,8 @@ function layerNode(doc: IconDocument, g: number, l: number): TreeNode {
   };
 }
 
-export function buildTree(doc: IconDocument): TreeNode {
+/** `stale`: live fills that no longer follow (`asset:id`, prompt 066) get a warning. */
+export function buildTree(doc: IconDocument, stale: ReadonlySet<string> = new Set()): TreeNode {
   return {
     id: 'root',
     kind: 'root',
@@ -171,7 +183,7 @@ export function buildTree(doc: IconDocument): TreeNode {
       hidden: grp['hidden'] === true,
       definition: false,
       container: true,
-      children: layers(grp).map((_, l) => layerNode(doc, g, l)),
+      children: layers(grp).map((_, l) => layerNode(doc, g, l, stale)),
     })),
   };
 }

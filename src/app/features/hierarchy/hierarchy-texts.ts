@@ -28,6 +28,14 @@ const EN = {
   deleteMessageMany: (n: number) => `This removes ${n} items and their children. You can undo it.`,
   deleteButton: 'Delete',
   cancelButton: 'Cancel',
+  // what a helper element is (prompt 066)
+  roles: {
+    guide: 'Guide',
+    dimension: 'Dimension',
+    construction: 'Construction',
+    fill: 'Live fill',
+  },
+  staleFill: 'open – keeps its last shape',
   brokenRefs: (ids: string[]) =>
     `Moved to another image: references ${ids.map((i) => `#${i}`).join(', ')} no longer resolve.`,
   pasteFailed: 'The clipboard holds no SVG markup that could be pasted.',
@@ -36,6 +44,13 @@ const EN = {
 
 export const HIERARCHY_TEXTS = translatable('hierarchy', EN, {
   de: {
+    roles: {
+      guide: 'Hilfslinie',
+      dimension: 'Bemaßung',
+      construction: 'Konstruktion',
+      fill: 'Live-Füllung',
+    },
+    staleFill: 'offen – behält die letzte Form',
     tree: 'Dokumentbaum',
     icon: 'Icon',
     group: (n: number) => `Gruppe ${n}`,

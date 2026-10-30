@@ -96,3 +96,43 @@ test('icon grid templates: Material keylines and an even grid', async ({ page })
   await expect.poll(count).toBe(2 + 2 * 3);
   expect(apple).toBe(16);
 });
+
+test('guides are locked: Select All and a move leave them alone; lock off, clear all (066)', async ({
+  page,
+}) => {
+  await setup(page);
+  await page.evaluate(() => window.__appIconic!.run('guide.add', { axis: 'horizontal', at: 300 }));
+  await expect.poll(async () => (await guides(page)).length).toBe(1);
+  expect(
+    await page.evaluate(
+      () => window.__appIconic!.actions().find((a) => a.id === 'guides.lock')!.checked,
+    ),
+  ).toBe(true);
+  // ⌘A and an arrow key: only the rect moves
+  await page.locator('.viewport').focus();
+  await page.evaluate(() => window.__appIconic!.run('edit.selectAll'));
+  const tags = await page.evaluate(() => {
+    const h = window.__appIconic!;
+    return h
+      .store()!
+      .selection()
+      .map((r) => h.store()!.document().node(r)!.localName);
+  });
+  expect(tags).toEqual(['rect']);
+  await page.evaluate(() => window.__appIconic!.run('arrange.moveBy', { dx: 0, dy: 10 }));
+  expect(await guides(page)).toEqual([['horizontal', '300', '-4096']]);
+  // the tree names it
+  await expect(page.locator('[role="treeitem"]', { hasText: 'Guide y 300' })).toHaveCount(1);
+  // unlocked: Select All takes it too
+  await page.evaluate(() => window.__appIconic!.run('guides.lock'));
+  await page.evaluate(() => window.__appIconic!.run('edit.selectAll'));
+  expect(await page.evaluate(() => window.__appIconic!.store()!.selection().length)).toBe(2);
+  // clear all: one undo step
+  await page.evaluate(() => window.__appIconic!.run('guides.clear'));
+  expect(await guides(page)).toEqual([]);
+  expect(await page.evaluate(() => window.__appIconic!.store()!.undoLabel())).toBe(
+    'Undo Clear Guides',
+  );
+  await page.evaluate(() => window.__appIconic!.run('edit.undo'));
+  expect(await guides(page)).toHaveLength(1);
+});

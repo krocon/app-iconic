@@ -1,3 +1,4 @@
+import { isLocked } from '../lock/lock';
 import { inject, Injectable } from '@angular/core';
 import { ClipboardApi } from '../../core/clipboard/clipboard-api';
 import { AskService } from '../../shared/ask/ask.service';
@@ -352,7 +353,12 @@ export class EditService {
           if (!isDefinitionTag(el)) refs.push(doc.refOf(el)!);
         }
       }
-      s.select(paintedNodes(doc, refs).map((e) => doc.refOf(e)!));
+      // locked nodes (guides by default) stay out, like a click and the marquee (prompt 066)
+      s.select(
+        paintedNodes(doc, refs)
+          .filter((e) => !isLocked(e))
+          .map((e) => doc.refOf(e)!),
+      );
     }
   }
 }

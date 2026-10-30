@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { ActionService } from '../../core/actions/action.service';
 import { IDENTITY, Matrix } from '../../shared/geometry/matrix';
 import { LiveFillTool } from './live-fill-tool';
+import { LiveFillService } from './live-fill.service';
 import { LIVE_FILL_TEXTS as T } from './live-fill-texts';
 
 /** The Fill tool on the canvas (prompt 060): the area(s) under the pointer and the colour bar. */
@@ -31,6 +32,9 @@ import { LIVE_FILL_TEXTS as T } from './live-fill-texts';
           (input)="setColor($event)"
         />
         <span class="live">{{ t.live }}</span>
+        @if (service.stale().size) {
+          <span class="stale" data-testid="fill-stale" [title]="t.stale">⚠ {{ t.staleShort }}</span>
+        }
       </div>
     }
   `,
@@ -43,6 +47,10 @@ import { LIVE_FILL_TEXTS as T } from './live-fill-texts';
       height: 100%;
       overflow: visible;
       pointer-events: none;
+    }
+    .stale {
+      color: var(--color-warning);
+      font-size: var(--font-size-small);
     }
     .face {
       fill-opacity: 0.45;
@@ -76,6 +84,7 @@ export class LiveFillOverlay {
   /** Document → viewport pixels. */
   readonly toView = input<Matrix>(IDENTITY);
   protected readonly tool = inject(LiveFillTool);
+  protected readonly service = inject(LiveFillService);
   private readonly actions = inject(ActionService);
   protected readonly t = T;
   protected readonly matrix = computed(() => {

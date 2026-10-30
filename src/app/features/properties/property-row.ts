@@ -80,6 +80,7 @@ import { PROPERTIES_TEXTS, propertyLabel } from './properties-texts';
           [value]="value()"
           [placeholder]="placeholder()"
           [multiline]="true"
+          [readonly]="!r.editable"
           (edited)="edit($event)"
           (committed)="props.commit()"
           (reverted)="props.cancel()"
