@@ -102,40 +102,43 @@ import { PROPERTIES_TEXTS, propertyLabel } from './properties-texts';
         />
       }
     }
-    <span class="tools">
-      @if (lock(); as l) {
-        <button
-          type="button"
-          class="tool lock"
-          [class.on]="l()"
-          [attr.aria-pressed]="l()"
-          [title]="t.constrain"
-          [attr.aria-label]="t.constrain"
-          (click)="l.set(!l())"
-        >
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            @if (l()) {
-              <path d="M5 7V5a3 3 0 0 1 6 0v2M4 7h8v6H4z" />
-            } @else {
-              <path d="M5 7V5a3 3 0 0 1 6 0M4 7h8v6H4z" />
-            }
-          </svg>
-        </button>
-      }
-      @if (r.set) {
-        <button
-          type="button"
-          class="tool reset"
-          [title]="t.reset(label)"
-          [attr.aria-label]="t.reset(label)"
-          (click)="props.reset(d.name)"
-        >
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M3.5 8a4.5 4.5 0 1 0 1.3-3.2M3.5 2.5v2.8h2.8" />
-          </svg>
-        </button>
-      }
-    </span>
+    <!-- the text area (path data) takes the whole row: no empty tools cell after it -->
+    @if (d.type !== 'textarea' || r.set || lock()) {
+      <span class="tools">
+        @if (lock(); as l) {
+          <button
+            type="button"
+            class="tool lock"
+            [class.on]="l()"
+            [attr.aria-pressed]="l()"
+            [title]="t.constrain"
+            [attr.aria-label]="t.constrain"
+            (click)="l.set(!l())"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              @if (l()) {
+                <path d="M5 7V5a3 3 0 0 1 6 0v2M4 7h8v6H4z" />
+              } @else {
+                <path d="M5 7V5a3 3 0 0 1 6 0M4 7h8v6H4z" />
+              }
+            </svg>
+          </button>
+        }
+        @if (r.set) {
+          <button
+            type="button"
+            class="tool reset"
+            [title]="t.reset(label)"
+            [attr.aria-label]="t.reset(label)"
+            (click)="props.reset(d.name)"
+          >
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3.5 8a4.5 4.5 0 1 0 1.3-3.2M3.5 2.5v2.8h2.8" />
+            </svg>
+          </button>
+        }
+      </span>
+    }
   `,
   styles: `
     :host {

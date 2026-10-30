@@ -39,9 +39,9 @@
   }
 }
 
-/* a text area spans the label and editor cells (prompt 009; Marc 30.10.2026: bigger, no label) */
+/* a text area spans the whole row (prompt 009; Marc 30.10.2026: bigger, no label, full width) */
 .editor.wide {
-  grid-column: 1 / span 2;
+  grid-column: 1 / -1;
 }
 
 textarea.input {
