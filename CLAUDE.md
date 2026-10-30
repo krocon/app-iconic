@@ -50,6 +50,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/icon-file/         IconFileApi (open/save/new/close .icon, read SVG/Bild, Dialoge), DTOs, findAsset (002, 008)
   app/core/window/            WindowApi (Titel, Fenster, Schließen-Frage, 003)
   app/core/recent/            RecentFilesApi („Open Recent“, 003)
+  app/core/recovery/          RecoveryApi (write/list/open/discard der Wiederherstellungs-Schnappschüsse), DTOs (083)
   app/core/actions/           Aktionskatalog (+ action-catalog.de.ts: deutsche Namen, 015; Teile je Bereich in
                               catalog/ + action-def: Typen/Helfer, 033), Keymaps
                               (base/mac/other.json), ActionService (run(id, args?)),
@@ -80,7 +81,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               während einer Geste, 033)
   app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster/Quit), Recent,
                               file-actions (Aktionen der Datei-Funktionen), Texte (003, 005); file-drop (rein:
-                              Typ-Weiche), FileDropService + DropHint (abgelegte Dateien, 071)
+                              Typ-Weiche), FileDropService + DropHint (abgelegte Dateien, 071); file-questions
+                              (Fragen: Änderungen sichern?, Format, Hinweis – 083)
   app/features/menus/         Menümodell (rein), MenuService (nativ/HTML), MenuBar (Windows/Linux), Befehlspalette,
                               Kürzel-Dialog, app-actions (005); context-menu-model (Kontextmenüs Baum + Canvas, 070)
   app/features/hierarchy/     Ebenenbaum (006): hierarchy-model (Baum rein aus dem Dokument, vorderste oben +
@@ -161,6 +163,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               (sichtbar bis zum Dokumentwechsel, Vorlage/Recent/Leer/Öffnen), StartScreen (APG-Grids),
                               ThumbnailService (Vorschaubild nach Öffnen/Speichern, Mockup-Nachbarn), start-actions
                               (`file.newFromTemplate`, `file.startScreen`), Texte
+  app/features/recovery/      Wiederherstellung (083): RecoveryService (Schnappschuss je Fenster nach `recovery.interval`,
+                              Aufräumen, Angebot beim Start, Wiederherstellen/Verwerfen), RecoveryDialog (`recovery`),
+                              recovery-actions (`file.recover`), Texte
   app/features/about/         About-Dialog + Texte
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile) + canvas-measure (Auswahl
                               messen je Änderung, Viewport, 033), CanvasViewStore (Zoom/Pan/
@@ -219,14 +224,15 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,
                               command-cases.ts, tree-documents.ts, fake-clipboard-api.ts, fake-export-api.ts,
                               fake-font-api.ts (Kästchen-Schrift, gleiche Fehlercodes), fake-drop-api.ts, fake-settings-api.ts
-                              (Regeln wie Rust, im Browser-Modus in localStorage),
+                              (Regeln wie Rust, im Browser-Modus in localStorage), fake-recovery-api.ts (Regeln wie
+                              Rust, im Browser-Modus in localStorage: Reload = Absturz),
                               browser-hook.ts = `window.__appIconic` für Playwright)
   testing/fixtures/           generiert aus testdata/ (camscanner.icon, all-fields.icon, svg/, unique-names.json;
                               `pnpm fixtures`)
 e2e/                          Playwright-Tests gegen den Dev-Server (hardening: großes/tiefes SVG, a11y: Tab-Weg,
                               Fokus, Dialoge – 031; composited-shadow: Schatten pixelgleich – 033; export-packages – 078;
                               export-android-web: Favicon hell/dunkel, sichere Zone – 079; png-layer – 080;
-                              mockups: Szenen folgen dem Dokument, Dark-Szene – 081; start-screen – 082)
+                              mockups: Szenen folgen dem Dokument, Dark-Szene – 081; start-screen – 082; recovery – 083)
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
@@ -249,6 +255,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/open_files.rs           `.icon` aus argv, Zweitstart (single-instance) und Finder (`RunEvent::Opened`) → Fenster (030)
   src/reveal.rs               „Im Ordner zeigen“ nur für exportierte Dateien (030)
   src/thumbnail_commands.rs   save_thumbnail, recent_entries (Startbildschirm, 082)
+  src/recovery_commands.rs    write_recovery, list_recovery, open_recovery, discard_recovery; RecoveryState (Instanz,
+                              Angebot einmal je Prozess), release beim regulären Beenden (083)
   src/drop_files.rs           DragDrop → `file-drop` ans Fenster, Drop-Pfade in UserPaths, `read_clipboard_image` (071),
                               `copy_png` (078), `copy_scene_png` (081)
   Info.plist, entitlements.plist  macOS: `.icon` als Package-Dokument (Alternate), Hardened-Runtime-Rechte (030)
@@ -262,6 +270,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
                               image_file (Bild als Data-URL, Magic Bytes, Größe aus dem Kopf, 008)
     src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
     src/thumbnails.rs         Vorschaubilder der Recent-Einträge (256 px PNG, FNV-Name, atomar, prune, Data-URL, 082)
+    src/recovery/             Wiederherstellungs-Schnappschüsse (083): write (Temp + Tausch, meta.json zuletzt), list,
+                              read, adopt, discard, prune; instance (Sperrdatei je Prozess, `try_lock`, Ids)
     src/clipboard_image.rs    Bild der Zwischenablage prüfen + als PNG-Data-URL (071), copy_svg (078); src/user_paths.rs: vertraute
                               Pfade (033: Dialoge, Recent, System, Drop, KI; allow_tree für interne Ordner; checked →
                               not_allowed), Art einer abgelegten Datei

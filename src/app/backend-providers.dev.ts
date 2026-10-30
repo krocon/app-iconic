@@ -1,4 +1,4 @@
-import { EnvironmentProviders, provideAppInitializer, Provider } from '@angular/core';
+import { EnvironmentProviders, inject, provideAppInitializer, Provider } from '@angular/core';
 import { isTauri } from '@tauri-apps/api/core';
 import { AboutApi, TauriAboutApi } from './core/about/about-api';
 import { IconFileApi, TauriIconFileApi } from './core/icon-file/icon-file-api';
@@ -11,6 +11,8 @@ import { SettingsApi, TauriSettingsApi } from './core/settings/settings-api';
 import { FakeSettingsApi } from '../testing/fake-settings-api';
 import { McpApi, TauriMcpApi } from './core/mcp/mcp-api';
 import { DropApi, TauriDropApi } from './core/drop/drop-api';
+import { RecoveryApi, TauriRecoveryApi } from './core/recovery/recovery-api';
+import { FakeRecoveryApi } from '../testing/fake-recovery-api';
 import { FakeDropApi } from '../testing/fake-drop-api';
 import { FakeMcpApi } from '../testing/fake-mcp-api';
 import { FakeKeymapApi, FakeMenuApi } from '../testing/fake-menu-api';
@@ -67,6 +69,7 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
       { provide: SettingsApi, useClass: TauriSettingsApi },
       { provide: McpApi, useClass: TauriMcpApi },
       { provide: DropApi, useClass: TauriDropApi },
+      { provide: RecoveryApi, useClass: TauriRecoveryApi },
     ]
   : [
       // About keeps the real facade: it shows "desktop backend not available" (e2e/shell)
@@ -82,9 +85,20 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
       // without stored settings an empty document, as the e2e tests expect (design 082 E9)
       {
         provide: SettingsApi,
-        useFactory: () => new FakeSettingsApi(browserStorage(), { startup: 'emptyDocument' }),
+        useFactory: () =>
+          new FakeSettingsApi(browserStorage(), {
+            startup: 'emptyDocument',
+            // no snapshots unless a test asks for them (prompt 083)
+            recovery: { interval: 0 },
+          }),
       },
       { provide: McpApi, useClass: FakeMcpApi },
       { provide: DropApi, useFactory: () => new FakeDropApi() },
+      // snapshots in localStorage: a reload is the "crash" of the e2e test (prompt 083)
+      {
+        provide: RecoveryApi,
+        useFactory: () =>
+          new FakeRecoveryApi(inject(IconFileApi) as FakeIconFileApi, browserStorage()),
+      },
       provideAppInitializer(installTestHook),
     ];

@@ -205,3 +205,30 @@ mod tests {
         );
     }
 }
+
+// ---- prompt 083: recovery snapshots (`src/app/core/recovery/recovery.models.ts`) ----
+
+/// A snapshot of an unsaved document left by an instance that is gone. The WebView gets its id –
+/// never a path inside the recovery folder.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RecoveryEntryDto {
+    pub id: String,
+    /// The document's file; `None` for one never saved.
+    pub path: Option<String>,
+    /// File name for the list; `None` = untitled.
+    pub name: Option<String>,
+    /// The folder of `path`.
+    pub location: Option<String>,
+    /// When the snapshot was written (ms since 1970, UTC).
+    pub saved_at: u64,
+}
+
+/// A restored snapshot: the document (with its original path) and the id the snapshot has now –
+/// it belongs to this instance until the document is saved or discarded.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RecoveredDto {
+    pub id: String,
+    pub document: IconDocumentDto,
+}

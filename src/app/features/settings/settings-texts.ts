@@ -17,6 +17,8 @@ const EN = {
   languages: { system: 'Like the system', en: 'English', de: 'Deutsch' },
   startup: 'On start',
   startups: { startScreen: 'Start screen', emptyDocument: 'Empty document' },
+  recoveryInterval: 'Recovery copy after changes (seconds)',
+  recoveryHint: '0 = off. Unsaved changes are kept for a crash; the file itself is not touched.',
   panels: 'Side panels',
   panelWidth: (name: string) => `Width of ${name}`,
   px: 'px',
@@ -96,6 +98,9 @@ export const SETTINGS_TEXTS = translatable('settings', EN, {
     languages: { system: 'Wie das System', en: 'English', de: 'Deutsch' },
     startup: 'Beim Start',
     startups: { startScreen: 'Startbildschirm', emptyDocument: 'Leeres Dokument' },
+    recoveryInterval: 'Wiederherstellungskopie nach Änderungen (Sekunden)',
+    recoveryHint:
+      '0 = aus. Ungesicherte Änderungen bleiben für einen Absturz erhalten; die Datei selbst bleibt unberührt.',
     panels: 'Seitenleisten',
     panelWidth: (name: string) => `Breite von ${name}`,
     px: 'px',

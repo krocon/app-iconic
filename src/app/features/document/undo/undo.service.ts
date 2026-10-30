@@ -257,6 +257,12 @@ export class UndoService {
     return true;
   }
 
+  /** The state now is not what is on disk (a restored snapshot, prompt 083): dirty until saved. */
+  markUnsaved(): void {
+    this.savePoint = -1;
+    this.publish();
+  }
+
   /** The document was saved in its current state. */
   markSaved(): void {
     this.commit();

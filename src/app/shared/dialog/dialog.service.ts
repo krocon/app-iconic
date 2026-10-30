@@ -19,7 +19,8 @@ export type DialogKind =
   | 'fillet'
   | 'offset'
   | 'transform'
-  | 'mockups';
+  | 'mockups'
+  | 'recovery';
 
 /**
  * Geometric fine tuning with a live preview (prompt 073 E3): a non-modal popover beside what opened

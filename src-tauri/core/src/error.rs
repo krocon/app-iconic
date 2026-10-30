@@ -54,6 +54,9 @@ pub enum FsErrorCode {
     /// bridge, an internal folder of the app) – defence in depth against a compromised WebView
     /// (prompt 033 E1).
     NotAllowed,
+    /// A recovery snapshot that is gone, taken by another window, or still belongs to a running
+    /// instance (prompt 083).
+    RecoveryUnavailable,
 }
 
 /// The one error type every command returns.
@@ -139,6 +142,7 @@ mod tests {
             (FsErrorCode::Denied, "denied"),
             (FsErrorCode::Unavailable, "unavailable"),
             (FsErrorCode::NotAllowed, "not_allowed"),
+            (FsErrorCode::RecoveryUnavailable, "recovery_unavailable"),
         ] {
             assert_eq!(serde_json::to_value(code).unwrap(), text);
         }

@@ -14,6 +14,7 @@ const FIXED: Record<string, string> = {
   'file.newWindow': 'Neues Fenster',
   'file.new': 'Neues Dokument',
   'file.newFromTemplate': 'Neu aus Vorlage…',
+  'file.recover': 'Ungesicherte Dokumente wiederherstellen…',
   'file.startScreen': 'Startbildschirm zeigen',
   'file.open': 'Öffnen …',
   'file.noRecent': 'Keine zuletzt benutzten Dateien',

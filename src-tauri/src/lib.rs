@@ -20,6 +20,7 @@
 //! - [`open_files`]    `.icon` files from the command line, a second start and the Finder (030)
 //! - [`reveal`]        "Show in Finder" for files this process exported (030)
 //! - [`drop_files`]    files dragged onto a window, images from the system clipboard (071)
+//! - [`recovery_commands`] recovery snapshots of unsaved documents: write, offer, restore (083)
 //! - [`thumbnail_commands`] preview images of the recent files for the start screen (082)
 //!
 //! The engine (icon documents, file I/O, export, fonts) lives in the Tauri-free crate
@@ -37,6 +38,7 @@ pub mod mcp_commands;
 pub mod menu_commands;
 pub mod model;
 pub mod open_files;
+pub mod recovery_commands;
 pub mod reveal;
 pub mod sessions;
 pub mod settings_commands;
@@ -74,6 +76,7 @@ pub fn run() {
         .manage(mcp_commands::McpState::default())
         .manage(reveal::Exported::default())
         .manage(ai_core::user_paths::UserPaths::default())
+        .manage(recovery_commands::RecoveryState::default())
         .setup(|app| {
             // system fonts for text to path and the PNG export, scanned in the background
             font_commands::warm_up();
@@ -140,6 +143,10 @@ pub fn run() {
             commands::clear_recent_files,
             thumbnail_commands::save_thumbnail,
             thumbnail_commands::recent_entries,
+            recovery_commands::write_recovery,
+            recovery_commands::list_recovery,
+            recovery_commands::open_recovery,
+            recovery_commands::discard_recovery,
             window_commands::set_window_title,
             window_commands::open_document_window,
             window_commands::focus_document_window,
@@ -174,6 +181,10 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|_app, _event| {
+            // a regular exit: the snapshots of this process are not needed (design 083 E8)
+            if let tauri::RunEvent::Exit = _event {
+                recovery_commands::release(_app);
+            }
             // macOS: files from the Finder (double click, "Open with", drop on the Dock icon) –
             // also while the app runs (design 030 E5)
             #[cfg(any(target_os = "macos", target_os = "ios"))]

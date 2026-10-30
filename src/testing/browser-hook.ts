@@ -30,6 +30,8 @@ import { FakeRecentFilesApi } from './fake-recent-files-api';
 import { FakeWindowApi } from './fake-window-api';
 import { FakeExportApi } from './fake-export-api';
 import { ExportApi } from '../app/core/export/export-api';
+import { RecoveryApi } from '../app/core/recovery/recovery-api';
+import { FakeRecoveryApi } from './fake-recovery-api';
 import { SettingsApi } from '../app/core/settings/settings-api';
 import { Settings } from '../app/core/settings/settings.models';
 import { SettingsStore } from '../app/features/settings/settings.store';
@@ -51,6 +53,8 @@ export interface AppIconicHook {
   recent: FakeRecentFilesApi;
   /** The export backend in memory (design 012). */
   exporter: FakeExportApi;
+  /** Recovery snapshots in memory + localStorage (prompt 083; a reload = a crash). */
+  recovery: FakeRecoveryApi;
   store(): DocumentStore | null;
   /** `data-ai-id` of the root element of an asset. */
   rootId(asset: string): string | null;
@@ -118,6 +122,7 @@ export function installTestHook(): void {
   const win = inject(WindowApi) as FakeWindowApi;
   const recent = inject(RecentFilesApi) as FakeRecentFilesApi;
   const exporter = inject(ExportApi) as FakeExportApi;
+  const recovery = inject(RecoveryApi) as FakeRecoveryApi;
   const service = inject(FilesService);
   const store = () => service.store();
   const svgOf = (asset: string) => store()?.document().assets.get(asset)?.svg ?? null;
@@ -135,6 +140,7 @@ export function installTestHook(): void {
     window: win,
     recent,
     exporter,
+    recovery,
     store,
     rootId: (asset) => svgOf(asset)?.root.getAttribute('data-ai-id') ?? null,
     setAttribute: (asset, id, name, value) =>

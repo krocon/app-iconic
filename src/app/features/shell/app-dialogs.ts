@@ -18,6 +18,7 @@ import { CornersDialog } from '../../features/corners/corners-dialog';
 import { ShapeSizeDialog } from '../../features/sketch/shape-size-dialog';
 import { SettingsDialog } from '../../features/settings/settings-dialog';
 import { MockupsDialog } from '../../features/mockups/mockups-dialog';
+import { RecoveryDialog } from '../../features/recovery/recovery-dialog';
 
 /** The modal dialogs of the window, one at a time (`DialogService.open`). */
 @Component({
@@ -41,6 +42,7 @@ import { MockupsDialog } from '../../features/mockups/mockups-dialog';
     ShapeSizeDialog,
     SettingsDialog,
     MockupsDialog,
+    RecoveryDialog,
   ],
   template: `
     @switch (dialogs.open()) {
@@ -97,6 +99,9 @@ import { MockupsDialog } from '../../features/mockups/mockups-dialog';
       }
       @case ('mockups') {
         <app-mockups-dialog />
+      }
+      @case ('recovery') {
+        <app-recovery-dialog />
       }
     }
   `,

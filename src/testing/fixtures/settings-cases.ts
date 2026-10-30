@@ -49,6 +49,7 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
     debug: { logUndoGrouping: false },
     mcp: { enabled: false, confirmFiles: true },
     constraints: { autoSolve: false },
+    recovery: { interval: 30 },
     sidebar: { constructionOpen: false },
     drawing: {
       styles: {
@@ -229,6 +230,34 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
         ['export.mask', 'squircle'],
         ['export.platforms', ['ios', 'watchos']],
       ],
+    },
+    {
+      name: 'recovery interval (prompt 083): seconds, 0 = off',
+      input: { recovery: { interval: 0 } },
+      expect: [['recovery.interval', 0]],
+    },
+    {
+      name: 'recovery interval: at most an hour',
+      input: { recovery: { interval: 99999 } },
+      expect: [['recovery.interval', 3600]],
+    },
+    {
+      name: 'recovery interval: a fraction is the default',
+      input: { recovery: { interval: 12.5 } },
+      expect: [['recovery.interval', 30]],
+    },
+    {
+      name: 'recovery interval: a negative number or a text is the default',
+      input: { recovery: { interval: -5 }, theme: 'light' },
+      expect: [
+        ['recovery.interval', 30],
+        ['theme', 'light'],
+      ],
+    },
+    {
+      name: 'recovery interval: a text is the default',
+      input: { recovery: { interval: '10' } },
+      expect: [['recovery.interval', 30]],
     },
     {
       name: 'startup (prompt 082): start screen or an empty document; anything else falls back',

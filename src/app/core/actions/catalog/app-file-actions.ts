@@ -37,6 +37,8 @@ export const APP_FILE_ACTIONS: readonly ActionDef[] = [
     },
   }),
   FILE('file.startScreen', 'Show Start Screen'),
+  // prompt 083: snapshots of unsaved documents an app that is gone left behind
+  FILE('file.recover', 'Recover Unsaved Documents…'),
   FILE('file.open', 'Open…'),
   ...Array.from({ length: MAX_RECENT_ACTIONS }, (_, i) =>
     FILE(`file.recent.${i + 1}`, `Open Recent File ${i + 1}`),

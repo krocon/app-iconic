@@ -196,6 +196,11 @@ export class IconDocument {
     return { path, format, iconJson: this.iconJson, assets, from };
   }
 
+  /** Nothing is known to be on disk (a restored snapshot, prompt 083): save sends every asset. */
+  forgetSaved(): void {
+    for (const a of this.assets.values()) delete a.saved;
+  }
+
   /** After a successful save: new path/format, every asset is now known to the backend. */
   markSaved(result: SaveResult): void {
     this.path = result.path;

@@ -69,6 +69,21 @@
               }
             </select>
           </label>
+          <label class="field">
+            <span>{{ t.recoveryInterval }}</span>
+            <input
+              class="input num"
+              type="number"
+              min="0"
+              max="3600"
+              step="5"
+              data-testid="settings-recovery-interval"
+              [attr.aria-describedby]="'settings-recovery-hint'"
+              [value]="v.recovery.interval"
+              (change)="number('recovery.interval', $event)"
+            />
+            <span id="settings-recovery-hint" class="hint">{{ t.recoveryHint }}</span>
+          </label>
           <fieldset class="group">
             <legend>{{ t.panels }}</legend>
             @for (p of panelKeys; track p) {

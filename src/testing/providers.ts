@@ -19,6 +19,8 @@ import { McpApi } from '../app/core/mcp/mcp-api';
 import { FakeMcpApi } from './fake-mcp-api';
 import { DropApi } from '../app/core/drop/drop-api';
 import { FakeDropApi } from './fake-drop-api';
+import { RecoveryApi } from '../app/core/recovery/recovery-api';
+import { FakeRecoveryApi } from './fake-recovery-api';
 
 /** Every backend facade replaced by its fake (unit tests). */
 export function fakeBackend(): {
@@ -33,6 +35,7 @@ export function fakeBackend(): {
   settings: FakeSettingsApi;
   mcp: FakeMcpApi;
   drop: FakeDropApi;
+  recovery: FakeRecoveryApi;
 } {
   const files = new FakeIconFileApi();
   const window = new FakeWindowApi();
@@ -44,6 +47,7 @@ export function fakeBackend(): {
   const settings = new FakeSettingsApi();
   const mcp = new FakeMcpApi();
   const drop = new FakeDropApi();
+  const recovery = new FakeRecoveryApi(files);
   return {
     files,
     window,
@@ -55,6 +59,7 @@ export function fakeBackend(): {
     settings,
     mcp,
     drop,
+    recovery,
     providers: [
       { provide: AboutApi, useClass: FakeAboutApi },
       { provide: IconFileApi, useValue: files },
@@ -67,6 +72,7 @@ export function fakeBackend(): {
       { provide: SettingsApi, useValue: settings },
       { provide: McpApi, useValue: mcp },
       { provide: DropApi, useValue: drop },
+      { provide: RecoveryApi, useValue: recovery },
     ],
   };
 }

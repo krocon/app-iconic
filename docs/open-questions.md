@@ -240,3 +240,12 @@
 3. Die Vorlagen sind bewusst schlicht (eigene Formen). Mehr/andere gewünscht (Monogramm als Pfad, Tinted-Variante)?
 4. **Mac**: Startbildschirm mit VoiceOver (Grid-Ansage „Zeile/Spalte“, Vorschaubild ohne Alt-Text, Name + Ort als
    Label) und die Vorschaubilder im Cache (`~/Library/Application Support/<id>/thumbnails`) prüfen.
+
+## Prompt 083
+
+1. Wiederherstellungskopie standardmäßig 30 s nach der ersten Änderung – passt das, oder kürzer (z. B. 10 s)?
+2. Mehrere Dokumente nach einem Absturz: „Wiederherstellen“ öffnet im aktuellen Fenster, weitere über ein neues Fenster
+   und File › Recover…. Lieber „Alle wiederherstellen“ (je ein Fenster)?
+3. Schnappschüsse bleiben, bis man sie verwirft – sollen sie nach einer Frist (z. B. 30 Tage) von selbst gehen?
+4. **Mac/Windows**: Absturz mit „Sofort beenden“ (Aktivitätsanzeige/Task-Manager) testen – Angebot beim Neustart, Ordner
+   `~/Library/Application Support/io.github.krocon.appiconic/recovery` bzw. `%APPDATA%\…\recovery`.

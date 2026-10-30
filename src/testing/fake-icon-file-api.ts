@@ -171,6 +171,17 @@ export class FakeIconFileApi extends IconFileApi {
   async saveIcon(r: SaveIconRequest): Promise<SaveResult> {
     this.fail();
     this.saved.push(structuredClone(r));
+    const file = this.assemble(r);
+    this.files.set(r.path, file);
+    this.sessions.set(r.path, file);
+    return { path: r.path, name: fakeName(r.path), format: r.format };
+  }
+
+  /**
+   * The file a save request describes (Rust `assemble`): unchanged assets from the session of
+   * `from` / `path`. Also the recovery fake (prompt 083) – `path` may be empty there.
+   */
+  assemble(r: SaveIconRequest): FakeIconFile {
     const base = this.sessions.get(r.from ?? r.path);
     const seen = new Set<string>();
     const assets = r.assets.map((a): IconAssetDto => {
@@ -203,10 +214,12 @@ export class FakeIconFileApi extends IconFileApi {
       base && jsonEqual(JSON.parse(base.iconJson), r.iconJson)
         ? base.iconJson
         : JSON.stringify(r.iconJson, null, 2);
-    const file: FakeIconFile = { format: r.format, iconJson, assets };
-    this.files.set(r.path, file);
-    this.sessions.set(r.path, file);
-    return { path: r.path, name: fakeName(r.path), format: r.format };
+    return { format: r.format, iconJson, assets };
+  }
+
+  /** Keeps `file` as the session of `path` unless there is one (restored snapshot, 083). */
+  adoptSession(path: string, file: FakeIconFile): void {
+    if (!this.sessions.has(path)) this.sessions.set(path, file);
   }
 
   async closeIcon(path: string): Promise<void> {

@@ -46,6 +46,7 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
       sep,
       a('file.clearRecent', t.clearRecent),
     ]),
+    a('file.recover'),
     sep,
     a('file.importSvg'),
     a('file.importImageLayer'),

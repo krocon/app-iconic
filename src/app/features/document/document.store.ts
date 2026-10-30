@@ -54,7 +54,8 @@ export class DocumentStore {
     this.redoLabel = computed(() => s().redoLabel);
     this.pristine = computed(() => {
       this.rev();
-      return doc.path === null && !s().canUndo && !s().canRedo;
+      // a restored snapshot without a file is dirty from the start – not pristine (083)
+      return doc.path === null && !s().canUndo && !s().canRedo && !s().dirty;
     });
     this.title = computed(() => {
       this.rev();
@@ -171,6 +172,15 @@ export class DocumentStore {
     this.undoService.cancel();
     this.gesture.set(false);
     this.pruneSelection();
+  }
+
+  /**
+   * A restored snapshot (prompt 083): dirty from the start, and every asset is sent in full on the
+   * next save – the file on disk may differ from what the snapshot holds.
+   */
+  markUnsaved(): void {
+    this.doc.forgetSaved();
+    this.undoService.markUnsaved();
   }
 
   markSaved(result: SaveResult): void {

@@ -7,6 +7,7 @@ import { AskService } from '../../shared/ask/ask.service';
 import { DocumentStore } from '../document/document.store';
 import { IconDocument } from '../document/icon-document';
 import { describeNotices, FILES_TEXTS as T } from './files-texts';
+import { askFormat, askSaveChanges, inform } from './file-questions';
 import { RecentFilesService } from './recent-files.service';
 import { importSvg } from './svg-import';
 
@@ -73,16 +74,50 @@ export class FilesService {
     return () => this.recordedHooks.delete(fn);
   }
 
+  /** Awaited before the window closes after the question (recovery cleanup, prompt 083). */
+  private readonly closingHooks = new Set<() => Promise<void>>();
+
+  /** `fn()` right before the window closes (its document saved or discarded); unsubscribes. */
+  onClosing(fn: () => Promise<void>): () => void {
+    this.closingHooks.add(fn);
+    return () => this.closingHooks.delete(fn);
+  }
+
   /**
    * A new, untitled document from a template (design 082 E7) – asks about unsaved changes like
    * "New". `false` when cancelled.
    */
   newFromTemplate(dto: IconDocumentDto): Promise<boolean> {
+    return this.replaceAsked(
+      new DocumentStore(IconDocument.fromDto({ ...dto, path: null, name: null })),
+    );
+  }
+
+  /**
+   * A recovery snapshot (prompt 083 E6): asks like "New", then `load`s it and opens it with its
+   * original path (or untitled) as a changed document – saving writes the original file.
+   * `false` when cancelled or loading failed (the user is told).
+   */
+  restore(load: () => Promise<IconDocumentDto>): Promise<boolean> {
     return this.exclusive(async () => {
       if (!(await this.confirmDiscard())) return false;
-      await this.replace(
-        new DocumentStore(IconDocument.fromDto({ ...dto, path: null, name: null })),
-      );
+      try {
+        const store = new DocumentStore(IconDocument.fromDto(await load()));
+        store.markUnsaved();
+        await this.replace(store);
+      } catch (e) {
+        await this.showError(T.recoverFailed, e);
+        return false;
+      }
+      this.notice.set(null);
+      return true;
+    }, false);
+  }
+
+  private replaceAsked(next: DocumentStore): Promise<boolean> {
+    return this.exclusive(async () => {
+      if (!(await this.confirmDiscard())) return false;
+      await this.replace(next);
       this.notice.set(null);
       return true;
     }, false);
@@ -165,6 +200,7 @@ export class FilesService {
   close(): Promise<boolean> {
     return this.exclusive(async () => {
       if (!(await this.confirmDiscard())) return false;
+      for (const fn of this.closingHooks) await fn().catch(() => undefined);
       const path = this.store()?.document().path;
       if (path) await this.api.closeIcon(path).catch(() => undefined);
       await this.win.closeWindow().catch(() => undefined);
@@ -339,46 +375,21 @@ export class FilesService {
 
   /** `true`: go on (saved or discarded); `false`: the user cancelled or saving failed. */
   private async confirmDiscard(): Promise<boolean> {
-    const s = this.store();
-    if (!s?.dirty()) return true;
-    const answer = await this.ask.ask({
-      title: T.saveChangesTitle(this.title()),
-      message: T.saveChangesMessage,
-      buttons: [
-        { id: 'discard', label: T.dontSaveButton },
-        { id: 'cancel', label: T.cancelButton },
-        { id: 'save', label: T.saveButton, primary: true },
-      ],
-      cancel: 'cancel',
-    });
+    if (!this.store()?.dirty()) return true;
+    const answer = await askSaveChanges(this.ask, this.title());
     if (answer === 'save') return this.saveNow();
     return answer === 'discard';
   }
 
-  private async askFormat(current: IconFormat): Promise<IconFormat | null> {
-    const answer = await this.ask.ask({
-      title: T.formatTitle,
-      message: T.formatMessage,
-      buttons: [
-        { id: 'cancel', label: T.cancelButton },
-        { id: 'zip', label: T.formatZip, primary: current === 'zip' },
-        { id: 'bundle', label: T.formatBundle, primary: current === 'bundle' },
-      ],
-      cancel: 'cancel',
-    });
-    return answer === 'bundle' || answer === 'zip' ? answer : null;
+  private askFormat(current: IconFormat): Promise<IconFormat | null> {
+    return askFormat(this.ask, current);
   }
 
   private async showError(title: string, e: unknown): Promise<void> {
     await this.inform(title, describeFsError(toFsError(e)));
   }
 
-  private async inform(title: string, message: string): Promise<void> {
-    await this.ask.ask({
-      title,
-      message,
-      buttons: [{ id: 'ok', label: T.okButton, primary: true }],
-      cancel: 'ok',
-    });
+  private inform(title: string, message: string): Promise<void> {
+    return inform(this.ask, title, message);
   }
 }

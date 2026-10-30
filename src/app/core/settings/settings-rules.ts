@@ -118,6 +118,9 @@ function sanitizeStyle(st: DrawStyle): DrawStyle {
   return out;
 }
 
+/** Longest recovery interval in seconds (Rust `MAX_RECOVERY_INTERVAL`, prompt 083). */
+export const MAX_RECOVERY_INTERVAL = 3600;
+
 /** Clamps and checks every field (Rust `sanitize`). */
 export function sanitizeSettings(s: Settings): Settings {
   const d = DEFAULT_SETTINGS;
@@ -179,6 +182,7 @@ export function sanitizeSettings(s: Settings): Settings {
     debug: { logUndoGrouping: s.debug.logUndoGrouping },
     mcp: { enabled: s.mcp.enabled, confirmFiles: s.mcp.confirmFiles },
     constraints: { autoSolve: s.constraints.autoSolve },
+    recovery: { interval: Math.min(s.recovery.interval, MAX_RECOVERY_INTERVAL) },
     sidebar: { constructionOpen: s.sidebar.constructionOpen },
     drawing: {
       styles: Object.fromEntries(

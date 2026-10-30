@@ -105,6 +105,8 @@ export interface Settings {
   mcp: { enabled: boolean; confirmFiles: boolean };
   /** Constraints (prompt 065): solve again after free changes. */
   constraints: { autoSolve: boolean };
+  /** Recovery snapshots (prompt 083): seconds after a change, `0` = off, at most an hour. */
+  recovery: { interval: number };
   /** The command sidebar (prompt 068): the construction section is open. */
   sidebar: { constructionOpen: boolean };
   /** Paint of new shapes, remembered per kind (design 019 E12). */
@@ -165,6 +167,7 @@ export const DEFAULT_SETTINGS: Settings = {
   debug: { logUndoGrouping: false },
   mcp: { enabled: false, confirmFiles: true },
   constraints: { autoSolve: false },
+  recovery: { interval: 30 },
   sidebar: { constructionOpen: false },
   drawing: {
     styles: Object.fromEntries(STYLE_KINDS.map((k) => [k, { ...THIN_LINE }])) as Record<

@@ -135,6 +135,10 @@
 - [x] Startbildschirm und Vorlagen _(neu)_ (082): im Fenster beim Start ohne Datei (Einstellung „Beim Start“),
       zuletzt benutzte Icons mit Vorschaubild, Name und Ort, Vorlagen iOS (Keylines), macOS, watchOS, Hell & Dunkel,
       „Leeres Icon“, „Öffnen…“; File › New from Template…; Tastatur und Screenreader (Grid)
+- [x] Automatische Sicherung und Wiederherstellung nach Absturz _(neu)_ (083): Schnappschuss ungesicherter Änderungen
+      im Konfig-Ordner (Einstellung „Wiederherstellungskopie nach Änderungen“, 0 = aus), Angebot beim nächsten Start
+      (Wiederherstellen mit Originalpfad als geändertes Dokument, Verwerfen, Später), File › Recover Unsaved Documents…;
+      Original wird nie überschrieben; aufgeräumt nach Speichern, „Nicht speichern“, regulärem Beenden
 - [x] Direkt als Konstruktion zeichnen _(neu)_ (058): Schalter Konstruktion (⇧X) in der Canvas-Werkzeugleiste.
 - [x] Abhängigkeiten und treibende Maße wie Fusion 360 (059): deckungsgleich, horizontal, vertikal, parallel,
       senkrecht, tangential, gleich, konzentrisch, Mittelpunkt, symmetrisch, fixiert; Abstand, Länge, Radius, Durchmesser,

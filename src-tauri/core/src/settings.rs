@@ -222,6 +222,7 @@ pub fn sanitize(mut s: Settings) -> Settings {
     {
         e.target_dir = None;
     }
+    s.recovery.interval = s.recovery.interval.min(MAX_RECOVERY_INTERVAL);
     let f = &mut s.freehand;
     f.epsilon = clamp_f(f.epsilon, 0.0, 20.0, d.freehand.epsilon);
     f.stroke_width = f.stroke_width.clamp(1, 64);

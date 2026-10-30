@@ -88,16 +88,7 @@ pub async fn save_icon(
 ) -> Result<SaveResult, FsError> {
     let p = allowed(&paths, &path)?;
     let base = sessions.get(from.as_deref().unwrap_or(&path));
-    let inputs = assets
-        .into_iter()
-        .map(|a| AssetInput {
-            name: a.name,
-            text: a.text,
-            data_url: a.data_url,
-            unchanged: a.unchanged,
-            source: a.source,
-        })
-        .collect();
+    let inputs = asset_inputs(assets);
     let file = blocking(move || {
         let file = assemble(base.as_deref(), format, icon_json, inputs, &p)?;
         icon::write_icon(&p, &file)?;
@@ -110,6 +101,20 @@ pub async fn save_icon(
         path,
         format,
     })
+}
+
+/// The assets of a save request for `assemble` (also the recovery snapshots, prompt 083).
+pub(crate) fn asset_inputs(assets: Vec<SaveAssetDto>) -> Vec<AssetInput> {
+    assets
+        .into_iter()
+        .map(|a| AssetInput {
+            name: a.name,
+            text: a.text,
+            data_url: a.data_url,
+            unchanged: a.unchanged,
+            source: a.source,
+        })
+        .collect()
 }
 
 /// Forgets the session of a closed document.
@@ -361,6 +366,10 @@ mod path_rules {
             (
                 include_str!("thumbnail_commands.rs"),
                 &["save_thumbnail"][..],
+            ),
+            (
+                include_str!("recovery_commands.rs"),
+                &["write_recovery"][..],
             ),
         ] {
             for name in names {

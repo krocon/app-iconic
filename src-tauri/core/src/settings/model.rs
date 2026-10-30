@@ -114,6 +114,17 @@ pub struct ConstraintSettings {
     pub auto_solve: bool,
 }
 
+/// Recovery snapshots of unsaved documents (prompt 083).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RecoverySettings {
+    /// Seconds after a change until a snapshot is written; `0` = off. At most [`MAX_RECOVERY_INTERVAL`].
+    pub interval: u32,
+}
+
+/// Longest recovery interval in seconds (one hour).
+pub const MAX_RECOVERY_INTERVAL: u32 = 3600;
+
 /// The command sidebar (prompt 068).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -248,6 +259,7 @@ pub struct Settings {
     pub debug: DebugSettings,
     pub mcp: McpSettings,
     pub constraints: ConstraintSettings,
+    pub recovery: RecoverySettings,
     pub sidebar: SidebarSettings,
     pub drawing: DrawingSettings,
     pub colors: ColorSettings,
@@ -310,6 +322,7 @@ impl Default for Settings {
                 confirm_files: true,
             },
             constraints: ConstraintSettings { auto_solve: false },
+            recovery: RecoverySettings { interval: 30 },
             sidebar: SidebarSettings {
                 construction_open: false,
             },

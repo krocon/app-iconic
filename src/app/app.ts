@@ -77,6 +77,8 @@ import { StartScreen } from './features/start/start-screen';
 import { StartService } from './features/start/start.service';
 import { registerStartActions } from './features/start/start-actions';
 import { ThumbnailService } from './features/start/thumbnail.service';
+import { RecoveryService } from './features/recovery/recovery.service';
+import { registerRecoveryActions } from './features/recovery/recovery-actions';
 import { keyContexts } from './features/shell/key-contexts';
 import { MCP_TEXTS } from './features/mcp/mcp-texts';
 
@@ -279,12 +281,14 @@ export class App implements OnInit {
   protected readonly mac = this.actions.os === 'mac';
   protected readonly start = inject(StartService);
   private readonly settings = inject(SettingsStore);
+  private readonly recovery = inject(RecoveryService);
 
   constructor() {
     registerFileActions(this.actions, this.files, this.recent, this.destroyRef);
     registerStartActions(this.actions, this.start, this.files, this.destroyRef);
-    // previews of opened/saved files for the start screen (prompt 082)
-    inject(ThumbnailService);
+    inject(ThumbnailService); // previews of opened/saved files (prompt 082)
+    // recovery snapshots of unsaved changes, the offer at start (prompt 083)
+    registerRecoveryActions(this.actions, this.recovery, this.files, this.destroyRef);
     registerAppActions(
       this.actions,
       this.dialogs,
@@ -403,6 +407,7 @@ export class App implements OnInit {
     // loaded by the app initializer; a bare component (tests) loads them here
     if (!this.settings.loaded()) await this.settings.load();
     await this.start.begin(action, this.settings.settings().startup);
+    await this.recovery.offerAtStart();
     await this.mcp.ready();
     if (action) this.actions.run(action);
   }

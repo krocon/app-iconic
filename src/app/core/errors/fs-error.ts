@@ -48,6 +48,8 @@ export type FsErrorCode =
    * internal folder) – prompt 033 E1.
    */
   | 'not_allowed'
+  /** A recovery snapshot that is gone, taken elsewhere or still in use by a running app (083). */
+  | 'recovery_unavailable'
   /** Frontend only: no Tauri backend (e.g. `pnpm start` in a browser). */
   | 'backend_unavailable'
   /** Frontend only: something that is no `FsError` was thrown. */
@@ -83,6 +85,7 @@ const KNOWN: readonly FsErrorCode[] = [
   'denied',
   'unavailable',
   'not_allowed',
+  'recovery_unavailable',
   'backend_unavailable',
   'unknown',
 ];
@@ -127,6 +130,8 @@ const EN = {
   unavailable: 'This function is not available now.',
   not_allowed:
     'The app may not use this file. Choose it with Open or Import, or drop it on the window.',
+  recovery_unavailable:
+    'This recovered document is no longer available. Another window may have restored it.',
   backend_unavailable: 'The desktop backend is not available (running in a browser?).',
   unknown: 'Something went wrong.',
 } as const satisfies Record<FsErrorCode, string>;
@@ -159,6 +164,8 @@ const TEXTS = translatable('errors', EN, {
     unavailable: 'Diese Funktion ist gerade nicht verfügbar.',
     not_allowed:
       'Die App darf diese Datei nicht verwenden. Wähle sie mit Öffnen oder Importieren oder lege sie auf dem Fenster ab.',
+    recovery_unavailable:
+      'Dieses wiederhergestellte Dokument ist nicht mehr verfügbar. Vielleicht hat ein anderes Fenster es schon wiederhergestellt.',
     backend_unavailable: 'Das Desktop-Backend ist nicht verfügbar (läuft es im Browser?).',
     unknown: 'Etwas ist schiefgegangen.',
   },
