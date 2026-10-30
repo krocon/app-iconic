@@ -73,7 +73,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               ReorderNode/GroupNodes/Ungroup, 006; set-attributes: Ergebnis einer Geste, 007),
                               model/ (icon-json, unique-names, selection, reorder-rules, specializations 010),
                               svg/ (node-ids, sanitize-svg, resolve-styles, svg-references, style-props,
-                              svg-format 011) (003–011); commands/replace-node (011); model/clip-model +
+                              svg-format 011) (003–011); commands/replace-node (011); commands/replace-color (074); model/clip-model +
                               clip-units, commands/clip-commands (014)
   app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster/Quit), Recent,
                               file-actions (Aktionen der Datei-Funktionen), Texte (003, 005); file-drop (rein:
@@ -125,6 +125,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/mcp/           KI-Steuerung (018): McpStore (mcp-call → ausführen → mcp_reply, Status, mcp.disconnect),
                               McpTools (Tools im Fenster: Revision, Undo-Gruppe, Rückfrage), mcp-read (rein: Dokument,
                               Baum, Node + BBox, Asset-SVG), mcp-policy (Sperrliste), Texte
+  app/features/color/         Farb-Workflow (074): document-colors (rein: sammeln, replaceColorCommand), ColorLibrary
+                              (Swatches: Dokument/Zuletzt/Palette), Eyedropper (Werkzeug ⇧I, resvg-Pixel), color-actions
+                              (`color.*`), ColorsSection (Dokumentfarben im Panel), Texte
   app/features/about/         About-Dialog + Texte
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
@@ -171,7 +174,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               sketch-tools (Schritte, Maße), apollonius (Tangentenkreise), svg-arc (Bogen-Mittelpunkt)
   app/shared/controls/        Generische Editoren (009): DraftField (Basis: live/commit/cancel), NumberField (Stepped
                               Slider), ColorField + color-value (rein), SelectField, TextField, ToggleField, step-value,
-                              SegmentedField (Icon-Umschalter, 073)
+                              SegmentedField (Icon-Umschalter, 073); ColorPicker (Farb-Popover) + ColorButton,
+                              ColorSwatches (abstrakt, 074)
+  app/shared/color/           color-spaces (rein: HSL/HSB/OKLCH, Formate, writeLike, 074)
   app/shared/dialog/          Modal (Fokusfalle, Esc; als Popover ohne Backdrop, 073), DialogService (aus
                               files-and-folders; popover/anchor), popover-position (rein)
   app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)

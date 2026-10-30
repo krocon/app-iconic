@@ -1,3 +1,4 @@
+import { ColorButton } from '../../shared/controls/color-button';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -36,6 +37,7 @@ export function colorInputValue(v: unknown): string {
  */
 @Component({
   selector: 'app-context-bar',
+  imports: [ColorButton],
   template: `
     @if (bar(); as b) {
       <div
@@ -76,15 +78,15 @@ export function colorInputValue(v: unknown): string {
                 </label>
               }
               @case ('color') {
-                <label class="opt">
+                <span class="opt">
                   {{ o.label }}
-                  <input
-                    class="swatch"
-                    type="color"
-                    [attr.data-testid]="o.testId ?? null"
+                  <!-- the colour popover (prompt 074) -->
+                  <app-color-button
                     [attr.data-option]="o.key"
-                    [value]="hex(o.value())"
-                    (input)="setFrom(o, $event)"
+                    [testId]="o.testId ?? null"
+                    [value]="colorText(o.value())"
+                    [label]="o.label"
+                    (edited)="o.set($event)"
                   />
                   @if (o.key !== 'color') {
                     <input
@@ -97,7 +99,7 @@ export function colorInputValue(v: unknown): string {
                       (change)="setFrom(o, $event)"
                     />
                   }
-                </label>
+                </span>
               }
               @case ('toggle') {
                 <label class="opt">
@@ -225,8 +227,8 @@ export class ContextBar {
     );
   }
 
-  protected hex(v: unknown): string {
-    return colorInputValue(v);
+  protected colorText(v: unknown): string | null {
+    return typeof v === 'string' ? v : null;
   }
 
   protected setFrom(o: ToolOption, e: Event): void {

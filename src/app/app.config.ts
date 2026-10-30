@@ -7,6 +7,8 @@ import {
 import { BACKEND_PROVIDERS } from './backend-providers';
 import { SettingsStore } from './features/settings/settings.store';
 import { SettingsSync } from './features/settings/settings-sync';
+import { ColorSwatches } from './shared/controls/color-swatches';
+import { ColorLibrary } from './features/color/color-library';
 
 /**
  * Zoneless (Angular 22 default, no zone.js). The backend facades come from
@@ -18,6 +20,8 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     ...BACKEND_PROVIDERS,
+    // the swatches of the colour popover come from the document and the settings (prompt 074)
+    { provide: ColorSwatches, useExisting: ColorLibrary },
     provideAppInitializer(async () => {
       const settings = inject(SettingsStore);
       const sync = inject(SettingsSync);

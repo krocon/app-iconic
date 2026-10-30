@@ -5,9 +5,18 @@
     "theme": "system",
     "language": "system",
     "panels": {
-      "commands": { "visible": true, "width": 260 },
-      "hierarchy": { "visible": true, "width": 260 },
-      "properties": { "visible": true, "width": 300 }
+      "commands": {
+        "visible": true,
+        "width": 260
+      },
+      "hierarchy": {
+        "visible": true,
+        "width": 260
+      },
+      "properties": {
+        "visible": true,
+        "width": 300
+      }
     },
     "canvas": {
       "rulers": true,
@@ -36,11 +45,24 @@
       "effects": false,
       "targetDir": null
     },
-    "freehand": { "epsilon": 2.5, "strokeWidth": 8, "closed": false },
-    "debug": { "logUndoGrouping": false },
-    "mcp": { "enabled": false, "confirmFiles": true },
-    "constraints": { "autoSolve": false },
-    "sidebar": { "constructionOpen": false },
+    "freehand": {
+      "epsilon": 2.5,
+      "strokeWidth": 8,
+      "closed": false
+    },
+    "debug": {
+      "logUndoGrouping": false
+    },
+    "mcp": {
+      "enabled": false,
+      "confirmFiles": true
+    },
+    "constraints": {
+      "autoSolve": false
+    },
+    "sidebar": {
+      "constructionOpen": false
+    },
     "drawing": {
       "styles": {
         "rect": {
@@ -132,6 +154,10 @@
           "opacity": ""
         }
       }
+    },
+    "colors": {
+      "recent": [],
+      "palette": []
     }
   },
   "cases": [
@@ -147,9 +173,16 @@
       "name": "panel widths are clamped to 160…480",
       "input": {
         "panels": {
-          "commands": { "width": 20 },
-          "hierarchy": { "width": 9000 },
-          "properties": { "width": 333, "visible": false }
+          "commands": {
+            "width": 20
+          },
+          "hierarchy": {
+            "width": 9000
+          },
+          "properties": {
+            "width": 333,
+            "visible": false
+          }
         }
       },
       "expect": [
@@ -163,7 +196,12 @@
     {
       "name": "a wrong kind falls back field by field",
       "input": {
-        "canvas": { "rulers": "yes", "guides": false, "gridSize": 12.5, "zoom": "big" },
+        "canvas": {
+          "rulers": "yes",
+          "guides": false,
+          "gridSize": 12.5,
+          "zoom": "big"
+        },
         "theme": 3
       },
       "expect": [
@@ -185,7 +223,10 @@
           "appearance": "tinted",
           "mask": "star"
         },
-        "export": { "format": "pdf", "mask": "x" }
+        "export": {
+          "format": "pdf",
+          "mask": "x"
+        }
       },
       "expect": [
         ["theme", "system"],
@@ -209,7 +250,10 @@
           "appearance": "light",
           "mask": "circle"
         },
-        "export": { "format": "svg", "mask": "squircle" }
+        "export": {
+          "format": "svg",
+          "mask": "squircle"
+        }
       },
       "expect": [
         ["theme", "dark"],
@@ -224,23 +268,38 @@
     },
     {
       "name": "zoom: 0 = fit, else 0.25…2",
-      "input": { "canvas": { "zoom": 5 } },
+      "input": {
+        "canvas": {
+          "zoom": 5
+        }
+      },
       "expect": [["canvas.zoom", 2]]
     },
     {
       "name": "zoom below the range",
-      "input": { "canvas": { "zoom": 0.1 } },
+      "input": {
+        "canvas": {
+          "zoom": 0.1
+        }
+      },
       "expect": [["canvas.zoom", 0.25]]
     },
     {
       "name": "grid size 1…256",
-      "input": { "canvas": { "gridSize": 0 } },
+      "input": {
+        "canvas": {
+          "gridSize": 0
+        }
+      },
       "expect": [["canvas.gridSize", 1]]
     },
     {
       "name": "export lists: allowed values in their order, no duplicates",
       "input": {
-        "export": { "appearances": ["dark", "tinted", "dark"], "sizes": [16, 1024, 1000, 16, "x"] }
+        "export": {
+          "appearances": ["dark", "tinted", "dark"],
+          "sizes": [16, 1024, 1000, 16, "x"]
+        }
       },
       "expect": [
         ["export.appearances", ["dark"]],
@@ -249,7 +308,12 @@
     },
     {
       "name": "empty export lists fall back",
-      "input": { "export": { "appearances": [], "sizes": [3] } },
+      "input": {
+        "export": {
+          "appearances": [],
+          "sizes": [3]
+        }
+      },
       "expect": [
         ["export.appearances", ["light", "dark"]],
         ["export.sizes", [1024]]
@@ -257,17 +321,31 @@
     },
     {
       "name": "export target folder: a text or null",
-      "input": { "export": { "targetDir": "/Users/marc/Icons" } },
+      "input": {
+        "export": {
+          "targetDir": "/Users/marc/Icons"
+        }
+      },
       "expect": [["export.targetDir", "/Users/marc/Icons"]]
     },
     {
       "name": "export target folder: anything else is null",
-      "input": { "export": { "targetDir": 42 } },
+      "input": {
+        "export": {
+          "targetDir": 42
+        }
+      },
       "expect": [["export.targetDir", null]]
     },
     {
       "name": "freehand options are clamped",
-      "input": { "freehand": { "epsilon": 99, "strokeWidth": 0, "closed": true } },
+      "input": {
+        "freehand": {
+          "epsilon": 99,
+          "strokeWidth": 0,
+          "closed": true
+        }
+      },
       "expect": [
         ["freehand.epsilon", 20],
         ["freehand.strokeWidth", 1],
@@ -276,12 +354,21 @@
     },
     {
       "name": "debug flag",
-      "input": { "debug": { "logUndoGrouping": true } },
+      "input": {
+        "debug": {
+          "logUndoGrouping": true
+        }
+      },
       "expect": [["debug.logUndoGrouping", true]]
     },
     {
       "name": "AI control (MCP) is off by default and asks before file access; wrong kinds fall back",
-      "input": { "mcp": { "enabled": true, "confirmFiles": "no" } },
+      "input": {
+        "mcp": {
+          "enabled": true,
+          "confirmFiles": "no"
+        }
+      },
       "expect": [
         ["mcp.enabled", true],
         ["mcp.confirmFiles", true]
@@ -298,7 +385,10 @@
               "strokeDasharray": "4 2",
               "opacity": "0.5"
             },
-            "arc": { "stroke": "rgb(0, 128, 255)", "fill": "" }
+            "arc": {
+              "stroke": "rgb(0, 128, 255)",
+              "fill": ""
+            }
           }
         }
       },
@@ -342,12 +432,25 @@
     },
     {
       "name": "unknown fields are ignored",
-      "input": { "future": { "x": 1 }, "canvas": { "laser": true, "rulers": false } },
+      "input": {
+        "future": {
+          "x": 1
+        },
+        "canvas": {
+          "laser": true,
+          "rulers": false
+        }
+      },
       "expect": [["canvas.rulers", false]]
     },
     {
       "name": "a newer schema version is read leniently and written as the current one",
-      "input": { "schemaVersion": 7, "canvas": { "guides": false } },
+      "input": {
+        "schemaVersion": 7,
+        "canvas": {
+          "guides": false
+        }
+      },
       "expect": [
         ["schemaVersion", 1],
         ["canvas.guides", false]
@@ -355,10 +458,26 @@
     },
     {
       "name": "a section of the wrong kind is the default section",
-      "input": { "panels": [1, 2], "canvas": true },
+      "input": {
+        "panels": [1, 2],
+        "canvas": true
+      },
       "expect": [
         ["panels.hierarchy.width", 260],
         ["canvas.rulers", true]
+      ]
+    },
+    {
+      "name": "colours (prompt 074): only hex colours, normalised, no duplicates",
+      "input": {
+        "colors": {
+          "recent": ["#f00", "#FF0000", "red", 3, "#00ff0080", "#0000FFFF", "url(#x)"],
+          "palette": ["#abc"]
+        }
+      },
+      "expect": [
+        ["colors.recent", ["#FF0000", "#00FF0080", "#0000FF"]],
+        ["colors.palette", ["#AABBCC"]]
       ]
     }
   ]

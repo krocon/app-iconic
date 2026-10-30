@@ -57,6 +57,7 @@ export const ADD_LAYOUT: readonly AddSection[] = [
       group('path', ['pen.tool', 'curvature.tool']),
       act('add.freehand'),
       act('fill.tool'),
+      act('color.eyedropper'),
       act('shapeBuilder.tool'),
       group('editPath', [
         'trim.tool',

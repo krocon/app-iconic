@@ -17,6 +17,7 @@ import { itemTitle } from '../inspector/inspector-title';
 import { ClipPathSection } from '../clip/clip-path-section';
 import { AlignSection } from '../align/align-section';
 import { GradientSection } from '../gradient/gradient-section';
+import { ColorsSection } from '../color/colors-section';
 
 /**
  * The properties panel (design 009 E9): header with the kind of the selection and "Reset All…"
@@ -33,6 +34,7 @@ import { GradientSection } from '../gradient/gradient-section';
     LiveFillSection,
     GradientSection,
     ClipPathSection,
+    ColorsSection,
     IconInspector,
     PropertyRow,
     TransformEditor,
@@ -122,6 +124,7 @@ import { GradientSection } from '../gradient/gradient-section';
       <app-align-section />
       <app-gradient-section />
       <app-clip-path-section />
+      <app-colors-section />
       @if (actions.enabled('edit.editSvg') || actions.enabled('path.optimize')) {
         <div class="source-tools">
           @for (id of sourceActions; track id) {

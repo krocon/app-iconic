@@ -1,23 +1,19 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import {
-  browserColor,
-  COLOR_KEYWORDS,
-  colorKind,
-  nativeValue,
-  normalizeHex,
-  withPicked,
-} from './color-value';
+import { ColorButton } from './color-button';
+import { browserColor, COLOR_KEYWORDS, colorKind, normalizeHex } from './color-value';
 import { CONTROLS_TEXTS } from './controls-texts';
 import { DraftField } from './draft-field';
 
 /**
- * Colour editor (design 009 E10, legacy colour picker): the native colour picker as swatch, a hex
+ * Colour editor (design 009 E10, legacy colour picker): a chip opening the colour popover
+ * (prompt 074: area, hue, alpha, formats, swatches, the system picker inside), a hex
  * field (`#RGB`, `#RRGGBB`, `#RRGGBBAA` – other CSS colours and `url(#…)` stay as typed) and a menu
  * of keywords (`none`, `inherit`, `currentColor`). Gradient references show their stops
  * (`swatch` from the caller, e.g. the tree's `swatchOf`). "mixed": hatched swatch.
  */
 @Component({
   selector: 'app-color-field',
+  imports: [ColorButton],
   template: `
     <label class="label" [for]="fieldId()">{{ label() }}</label>
     <span class="editor">
@@ -33,14 +29,14 @@ import { DraftField } from './draft-field';
       } @else if (kind() === 'none') {
         <span class="chip none" aria-hidden="true"></span>
       } @else {
-        <input
-          class="swatch"
-          type="color"
-          [attr.aria-label]="t.pickColor + ': ' + label()"
-          [value]="native()"
+        <app-color-button
+          [value]="value()"
+          [fallback]="placeholder()"
+          [label]="label()"
           [disabled]="disabled()"
-          (input)="onPick($event)"
-          (change)="confirm()"
+          (edited)="onPicked($event)"
+          (committed)="confirm()"
+          (reverted)="revert()"
         />
       }
       <input
@@ -82,7 +78,6 @@ export class ColorField extends DraftField {
   /** The colour shown: the value, else the inherited one (placeholder). */
   private readonly effective = computed(() => this.shown() || this.placeholder());
   protected readonly kind = computed(() => colorKind(this.effective()));
-  protected readonly native = computed(() => nativeValue(this.effective(), browserColor));
 
   protected accepts(text: string): boolean {
     const t = text.trim();
@@ -97,9 +92,9 @@ export class ColorField extends DraftField {
     return t.startsWith('#') ? normalizeHex(t)! : t;
   }
 
-  protected onPick(e: Event): void {
+  /** A live value from the colour popover (prompt 074). */
+  protected onPicked(v: string): void {
     this.editing.set(true);
-    const v = withPicked(this.value() ?? this.placeholder(), (e.target as HTMLInputElement).value);
     this.draft.set(v);
     this.edited.emit(v);
   }

@@ -1,0 +1,156 @@
+/* The colour popover (prompt 074). Tokens from styles.css only. */
+.picker {
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 248px;
+  box-sizing: border-box;
+  padding: var(--space-2);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-popup);
+  font-size: var(--font-size-small);
+}
+
+.sv {
+  position: relative;
+  height: 140px;
+  border-radius: 4px;
+  background-image:
+    linear-gradient(to top, #000, rgb(0 0 0 / 0%)),
+    linear-gradient(to right, #fff, rgb(255 255 255 / 0%));
+  cursor: crosshair;
+  touch-action: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.knob {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 60%);
+  pointer-events: none;
+}
+
+.range {
+  width: 100%;
+  height: 12px;
+  margin: 0;
+  appearance: none;
+  border-radius: 6px;
+
+  &.hue {
+    background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+  }
+  &.alpha {
+    background:
+      linear-gradient(to right, rgb(0 0 0 / 0%), var(--c)),
+      repeating-conic-gradient(#ccc 0 25%, #fff 0 50%) 0 0 / 8px 8px;
+  }
+  &::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    appearance: none;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 60%);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+.row {
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.input {
+  height: 24px;
+  font-size: var(--font-size-small);
+}
+
+.fmt {
+  flex: none;
+  width: 5.5rem;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.glabel {
+  color: var(--color-text-muted);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.sw {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 1px;
+  }
+}
+
+.actions .btn {
+  height: 24px;
+  padding: 0 var(--space-2);
+}
+
+.system {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.native {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}

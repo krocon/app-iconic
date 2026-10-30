@@ -2,6 +2,8 @@ import { PNG_SIZES } from '../export/export.models';
 import {
   DEFAULT_SETTINGS,
   DrawStyle,
+  MAX_PALETTE_COLORS,
+  MAX_RECENT_COLORS,
   PANEL_MAX,
   PANEL_MIN,
   SCHEMA_VERSION,
@@ -57,7 +59,10 @@ export function mergeShaped(shape: Json, base: Json, input: Json, path = ''): Js
   if (Array.isArray(shape)) {
     if (!Array.isArray(input)) return base;
     const first = shape[0];
-    return first === undefined ? base : input.filter((x) => sameKind(first, x, `${path}[]`));
+    // an empty default list holds texts (the colours of prompt 074; Rust the same)
+    return first === undefined
+      ? input.filter((x) => typeof x === 'string')
+      : input.filter((x) => sameKind(first, x, `${path}[]`));
   }
   if (shape === null) return input === null || typeof input === 'string' ? input : base;
   return sameKind(shape, input, path) ? input : base;
@@ -84,6 +89,25 @@ export function styleValueOk(v: string): boolean {
     !/[\u0000-\u001f\u007f-\u009f<>"'`;{}\\]/.test(v) &&
     !v.toLowerCase().includes('url(')
   );
+}
+
+/** `#RGB…` → `#RRGGBB(AA)` upper case, opaque alpha left out (Rust `hex_color`); else `null`. */
+export function hexColor(v: string): string | null {
+  const m = /^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(v);
+  if (!m) return null;
+  let h = m[1].toUpperCase();
+  if (h.length <= 4) h = [...h].map((c) => c + c).join('');
+  return `#${h.length === 8 && h.endsWith('FF') ? h.slice(0, 6) : h}`;
+}
+
+function colorList(list: readonly string[], max: number): string[] {
+  const out: string[] = [];
+  for (const v of list) {
+    const c = hexColor(v);
+    if (c && !out.includes(c)) out.push(c);
+    if (out.length === max) break;
+  }
+  return out;
 }
 
 function sanitizeStyle(st: DrawStyle): DrawStyle {
@@ -149,6 +173,10 @@ export function sanitizeSettings(s: Settings): Settings {
       styles: Object.fromEntries(
         STYLE_KINDS.map((k) => [k, sanitizeStyle(s.drawing.styles[k])]),
       ) as Record<StyleKind, DrawStyle>,
+    },
+    colors: {
+      recent: colorList(s.colors.recent, MAX_RECENT_COLORS),
+      palette: colorList(s.colors.palette, MAX_PALETTE_COLORS),
     },
   };
 }

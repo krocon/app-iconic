@@ -116,6 +116,41 @@ pub fn preview_base64(
     ))
 }
 
+/// The colour of `svg` at the user-space point (`x`, `y`) as `#RRGGBBAA` (prompt 074 E3: the
+/// eyedropper on images and gradients) – one pixel rendered by resvg, straight alpha.
+pub fn pick_pixel(svg: &str, x: f64, y: f64, fonts: Arc<Database>) -> Result<String, FsError> {
+    if !x.is_finite() || !y.is_finite() {
+        return Err(FsError::new(
+            FsErrorCode::InvalidRequest,
+            "point must be finite",
+            None,
+        ));
+    }
+    let tree = parse(svg, fonts)?;
+    let mut pixmap = Pixmap::new(1, 1)
+        .ok_or_else(|| FsError::new(FsErrorCode::InvalidPath, "invalid size", None))?;
+    let (tx, ty) = (-(x.floor() as f32), -(y.floor() as f32));
+    deep(|| {
+        resvg::render(
+            &tree,
+            Transform::from_translate(tx, ty),
+            &mut pixmap.as_mut(),
+        );
+        Ok(())
+    })?;
+    let c = pixmap
+        .pixel(0, 0)
+        .ok_or_else(|| FsError::new(FsErrorCode::Io, "no pixel", None))?
+        .demultiply();
+    Ok(format!(
+        "#{:02X}{:02X}{:02X}{:02X}",
+        c.red(),
+        c.green(),
+        c.blue(),
+        c.alpha()
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -234,6 +269,46 @@ mod tests {
         .unwrap();
         assert!(close(rgba(&p, 32, 32), [0, 255, 0, 128]));
         assert!(has_transparency(&p));
+    }
+
+    #[test]
+    fn eight_digit_hex_alpha_is_half_transparent() {
+        // the colour popover writes alpha as #RRGGBBAA (prompt 074 E1)
+        let p = render_png(
+            &icon(r##"<rect width="1024" height="1024" fill="#FF000080"/>"##),
+            64,
+            empty_fonts(),
+        )
+        .unwrap();
+        assert!(
+            close(rgba(&p, 32, 32), [255, 0, 0, 128]),
+            "{:?}",
+            rgba(&p, 32, 32)
+        );
+    }
+
+    #[test]
+    fn a_pixel_is_picked_from_a_gradient() {
+        let svg = icon(
+            r##"<defs><linearGradient id="g"><stop offset="0" stop-color="#ff0000"/><stop offset="1" stop-color="#0000ff"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#g)"/>"##,
+        );
+        let left = pick_pixel(&svg, 2.0, 500.0, empty_fonts()).unwrap();
+        let right = pick_pixel(&svg, 1021.0, 500.0, empty_fonts()).unwrap();
+        assert!(left.starts_with("#FE") || left.starts_with("#FF"), "{left}");
+        assert!(
+            right.ends_with("FFFF") || right.ends_with("FEFF"),
+            "{right}"
+        );
+        assert_eq!(
+            pick_pixel(&svg, 2000.0, 2000.0, empty_fonts()).unwrap(),
+            "#00000000"
+        );
+        assert_eq!(
+            pick_pixel(&svg, f64::NAN, 0.0, empty_fonts())
+                .unwrap_err()
+                .code,
+            FsErrorCode::InvalidRequest
+        );
     }
 
     #[test]

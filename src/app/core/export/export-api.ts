@@ -33,6 +33,8 @@ export abstract class ExportApi {
   abstract cancelExport(): Promise<void>;
   /** Shows a file this app exported in the file manager (design 030 E6). */
   abstract revealExport(path: string): Promise<void>;
+  /** The colour of `svg` at a point as `#RRGGBBAA` (resvg, the eyedropper – prompt 074 E3). */
+  abstract pickColor(svg: string, x: number, y: number): Promise<string>;
 }
 
 @Injectable()
@@ -75,5 +77,9 @@ export class TauriExportApi extends ExportApi {
 
   revealExport(path: string): Promise<void> {
     return call<void>('reveal_export', { path });
+  }
+
+  pickColor(svg: string, x: number, y: number): Promise<string> {
+    return call<string>('pick_color', { svg, x, y });
   }
 }

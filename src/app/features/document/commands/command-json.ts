@@ -56,6 +56,8 @@ export type CommandJson =
   | { type: 'removeAsset'; name: string }
   /** Asset file renamed in place (design 010 E9); references change separately. */
   | { type: 'renameAsset'; from: string; to: string }
+  /** "Replace Color" in the SVG assets (prompt 074 E4); `assets` limits it. */
+  | { type: 'replaceColor'; from: string; to: string; assets?: string[] }
   /** Clip paths (design 014 E5): a definition into the root `<defs>`, a node's / layer's clip, delete. */
   | { type: 'insertDefinition'; asset: string; markup: string; label?: UndoLabel }
   | { type: 'assignClip'; ref: NodeRef; mode: 'own' | 'none' | 'inherit'; clip?: string }

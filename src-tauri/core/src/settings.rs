@@ -132,6 +132,55 @@ pub struct SidebarSettings {
     pub construction_open: bool,
 }
 
+/// Colours of the colour popover (prompt 074 E5): recently used and the user's palette, each as
+/// `#RRGGBB` / `#RRGGBBAA` (upper case, no duplicates).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ColorSettings {
+    pub recent: Vec<String>,
+    pub palette: Vec<String>,
+}
+
+/// Most recently used colours.
+pub const MAX_RECENT_COLORS: usize = 16;
+/// Most colours of the palette.
+pub const MAX_PALETTE_COLORS: usize = 64;
+
+/// `#RGB…` normalised to `#RRGGBB(AA)` upper case; `None` for anything else.
+fn hex_color(v: &str) -> Option<String> {
+    let h = v.strip_prefix('#')?;
+    if !h.chars().all(|c| c.is_ascii_hexdigit()) {
+        return None;
+    }
+    let full: String = match h.len() {
+        3 | 4 => h.chars().flat_map(|c| [c, c]).collect(),
+        6 | 8 => h.to_owned(),
+        _ => return None,
+    };
+    let full = full.to_ascii_uppercase();
+    // opaque alpha is left out
+    Some(format!(
+        "#{}",
+        full.strip_suffix("FF")
+            .filter(|f| f.len() == 6)
+            .unwrap_or(&full)
+    ))
+}
+
+/// Valid colours only, normalised, the first of duplicates kept, at most `max`.
+fn color_list(list: &[String], max: usize) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    for c in list.iter().filter_map(|v| hex_color(v)) {
+        if !out.contains(&c) {
+            out.push(c);
+        }
+        if out.len() == max {
+            break;
+        }
+    }
+    out
+}
+
 /// The remembered paint of one kind of shape (design 019 E12): attribute values as written, `""`
 /// = not set.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -244,6 +293,7 @@ pub struct Settings {
     pub constraints: ConstraintSettings,
     pub sidebar: SidebarSettings,
     pub drawing: DrawingSettings,
+    pub colors: ColorSettings,
 }
 
 impl Default for Settings {
@@ -316,6 +366,10 @@ impl Default for Settings {
                     arc: DrawStyle::thin_line(),
                 },
             },
+            colors: ColorSettings {
+                recent: Vec::new(),
+                palette: Vec::new(),
+            },
         }
     }
 }
@@ -359,7 +413,8 @@ fn merge_shaped(shape: &Value, base: &Value, input: &Value) -> Value {
             Some(first) => {
                 Value::Array(i.iter().filter(|x| same_kind(first, x)).cloned().collect())
             }
-            None => base.clone(),
+            // an empty default list holds texts (the colours of prompt 074)
+            None => Value::Array(i.iter().filter(|x| x.is_string()).cloned().collect()),
         },
         (Value::Null, Value::String(_) | Value::Null) => input.clone(),
         _ if same_kind(shape, input) => input.clone(),
@@ -472,6 +527,8 @@ pub fn sanitize(mut s: Settings) -> Settings {
     let f = &mut s.freehand;
     f.epsilon = clamp_f(f.epsilon, 0.0, 20.0, d.freehand.epsilon);
     f.stroke_width = f.stroke_width.clamp(1, 64);
+    s.colors.recent = color_list(&s.colors.recent, MAX_RECENT_COLORS);
+    s.colors.palette = color_list(&s.colors.palette, MAX_PALETTE_COLORS);
     let fallback = DrawStyle::thin_line();
     for style in s.drawing.styles.all_mut() {
         let mut d = fallback.clone();

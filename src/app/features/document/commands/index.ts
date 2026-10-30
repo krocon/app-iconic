@@ -5,6 +5,7 @@ export * from './set-attributes';
 export * from './set-text';
 export * from './asset-commands';
 export * from './replace-node';
+export * from './replace-color';
 export * from './tree-commands';
 export * from './clip-commands';
 export * from './command-json';

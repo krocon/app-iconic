@@ -87,7 +87,7 @@ Code bestätigen (roter Test) – sie stammen aus einer Fremdanalyse und können
 | 071 | [071-dateien-ziehen-bilder-einfuegen.md](done/071-dateien-ziehen-bilder-einfuegen.md) | `.icon`/`.svg`/Bilder ins Fenster ziehen, Bilder aus der Zwischenablage einfügen | 003, 008, 030 | M | ✅ 30.10.2026 |
 | 072 | [072-ebenenbaum-komfort.md](done/072-ebenenbaum-komfort.md) | Inline-Umbenennen (id + Verweise), Suche/Filter, alle zu-/aufklappen, + Gruppe/Layer, Schloss an Gruppen/Layern | 055, 063, 066 | M | ✅ 30.10.2026 |
 | 073 | [073-properties-kompakt-popovers.md](done/073-properties-kompakt-popovers.md) | Paare zweispaltig, Icon-Toggles, nicht-modale Popovers, Live-Vorschau auch für Corners/Optimize Path | 062, 067 | M | ✅ 30.10.2026 |
-| 074 | [074-farb-workflow.md](074-farb-workflow.md) | Farb-Popover (Alpha, HSL/HSB/OKLCH), Pipette, Dokumentfarben, Farbe ersetzen, Paletten | 009, 015, 064, 067 | M–L | offen |
+| 074 | [074-farb-workflow.md](done/074-farb-workflow.md) | Farb-Popover (Alpha, HSL/HSB/OKLCH), Pipette, Dokumentfarben, Farbe ersetzen, Paletten | 009, 015, 064, 067 | M–L | ✅ 30.10.2026 |
 | 075 | [075-live-typografie.md](075-live-typografie.md) | Schriftwahl für `<text>`, Text-Werkzeug, Bearbeiten auf dem Canvas, mehrzeilig, Text → Pfad | 009, 013, 067 | M–L | offen |
 | 076 | [076-effekte-masken.md](076-effekte-masken.md) | Effekte je Element (Schatten, Unschärfe, Blend) und Masken wie Clip Paths | 009, 012, 014, 032, 064 | L | offen |
 | 077 | [077-icon-format-vollstaendig.md](077-icon-format-vollstaendig.md) | Layer-Fill, Tinted-Vorschau/-Export, `plus-darker`, Radialverlauf anlegen, Glas/Licht angenähert | 004, 010, 012, 069 | M–L | offen |

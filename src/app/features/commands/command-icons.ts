@@ -88,6 +88,7 @@ export const COMMAND_ICONS: Record<string, string> = {
   'constraint.tool': 'M4 13L9 3 M8 13l5-10 M2.5 8h11',
   'constraint.solve': 'M3 8a5 5 0 0 1 9-3 M13 8a5 5 0 0 1-9 3 M12 2v3H9 M4 14v-3h3',
   // live fill (prompt 060): a paint bucket
+  'color.eyedropper': 'M10.5 2.5l3 3-1.5 1.5-3-3z M9 4l3 3-6.5 6.5H2.5v-3z',
   'fill.tool':
     'M3 8l5-5 5 5-5 5z M3 8h10 M13.5 10.5c.8 1.2 1 2 .3 2.6-.7.5-1.5 0-1.3-.9.1-.6.5-1.1 1-1.7z',
   'add.image': 'M2.5 3.5h11v9h-11z M5.5 6.5h0.01 M2.5 11l4-4 3 3 1.5-1.5 2.5 2.5',

@@ -25,6 +25,7 @@ import {
   ReorderNode,
   ReplaceAssetMarkup,
   ReplaceNode,
+  ReplaceColor,
   SetAttribute,
   SetAttributes,
   SetIconJsonValue,
@@ -67,6 +68,7 @@ export const CASES: [string, (doc: IconDocument) => DocCommand][] = [
       ),
   ],
   ['RemoveAttribute', () => new RemoveAttribute(a('n3'), 'fill')],
+  ['ReplaceColor (prompt 074)', () => new ReplaceColor('#FF0000', '#0000FF')],
   ['InsertNode', () => new InsertNode(a('n2'), '<ellipse rx="1" onclick="x()"/>', 0)],
   [
     'SetAttributes (remove + set, design 009 E3)',

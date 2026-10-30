@@ -101,6 +101,8 @@ export interface Settings {
   sidebar: { constructionOpen: boolean };
   /** Paint of new shapes, remembered per kind (design 019 E12). */
   drawing: { styles: Record<StyleKind, DrawStyle> };
+  /** Colours of the colour popover (prompt 074 E5): recently used, the user's palette. */
+  colors: { recent: string[]; palette: string[] };
 }
 
 /** A part of the settings (what a window sends, design 015 E4); lists are sent whole. */
@@ -160,7 +162,11 @@ export const DEFAULT_SETTINGS: Settings = {
       DrawStyle
     >,
   },
+  colors: { recent: [], palette: [] },
 };
+
+export const MAX_RECENT_COLORS = 16;
+export const MAX_PALETTE_COLORS = 64;
 
 /** `load_settings` (Rust `LoadedSettings`). */
 export interface LoadedSettings {

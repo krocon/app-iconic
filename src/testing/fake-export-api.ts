@@ -117,4 +117,13 @@ export class FakeExportApi extends ExportApi {
     this.revealed.push(path);
     return Promise.resolve();
   }
+
+  /** The colour `pickColor` answers (tests set it; default transparent like an empty spot). */
+  pickedColor = '#00000000';
+  readonly picks2: { x: number; y: number }[] = [];
+
+  pickColor(_svg: string, x: number, y: number): Promise<string> {
+    this.picks2.push({ x, y });
+    return Promise.resolve(this.pickedColor);
+  }
 }

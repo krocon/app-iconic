@@ -17,6 +17,7 @@ import {
 } from './json-commands';
 import { InsertNode, MoveNode, RemoveAttribute, RemoveNode, SetAttribute } from './node-commands';
 import { ReplaceNode } from './replace-node';
+import { ReplaceColor } from './replace-color';
 import { MAX_CHANGES, SetAttributes } from './set-attributes';
 import { SetText } from './set-text';
 import { GroupNodes, ReorderNode, Ungroup } from './tree-commands';
@@ -315,6 +316,12 @@ const PARSERS: Record<CommandType, Parser> = {
   removeClipPath: (o) => {
     keys(o, ['ref']);
     return new RemoveClipPath(ref(o['ref'], 'ref'));
+  },
+  replaceColor: (o) => {
+    keys(o, ['from', 'to', 'assets']);
+    const assets =
+      o['assets'] === undefined ? undefined : list(o['assets'], 'assets', (a) => name(a, 'assets'));
+    return new ReplaceColor(str(o['from'], 'from', 9), str(o['to'], 'to', 9), assets);
   },
   composite: (o, depth, count) => {
     keys(o, ['label', 'commands']);

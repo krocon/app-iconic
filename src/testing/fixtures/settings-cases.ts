@@ -140,6 +140,7 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
         },
       },
     },
+    colors: { recent: [], palette: [] },
   },
   cases: [
     {
@@ -359,6 +360,19 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
       expect: [
         ['panels.hierarchy.width', 260],
         ['canvas.rulers', true],
+      ],
+    },
+    {
+      name: 'colours (prompt 074): only hex colours, normalised, no duplicates',
+      input: {
+        colors: {
+          recent: ['#f00', '#FF0000', 'red', 3, '#00ff0080', '#0000FFFF', 'url(#x)'],
+          palette: ['#abc'],
+        },
+      },
+      expect: [
+        ['colors.recent', ['#FF0000', '#00FF0080', '#0000FF']],
+        ['colors.palette', ['#AABBCC']],
       ],
     },
   ],

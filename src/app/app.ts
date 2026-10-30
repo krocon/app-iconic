@@ -1,3 +1,5 @@
+import { registerColorActions } from './features/color/color-actions';
+import { Eyedropper } from './features/color/eyedropper';
 import { registerRenameActions, RenameService } from './features/hierarchy/rename.service';
 import { DropHint } from './features/files/drop-hint';
 import { FileDropService } from './features/files/file-drop.service';
@@ -270,6 +272,14 @@ export class App implements OnInit {
     registerEditActions(this.actions, inject(EditService), this.dialogs, this.destroyRef);
     registerRenameActions(this.actions, inject(RenameService), this.files, this.destroyRef);
     registerAddActions(this.actions, inject(AddService), this.destroyRef);
+    registerColorActions(
+      this.actions,
+      inject(Eyedropper),
+      inject(CanvasTools),
+      inject(FreehandStore),
+      this.files,
+      this.destroyRef,
+    );
     // files from Finder/Explorer (design 071)
     inject(FileDropService).start(this.destroyRef);
     const canvasTools = inject(CanvasTools);

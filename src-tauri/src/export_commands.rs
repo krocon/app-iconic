@@ -109,6 +109,13 @@ pub async fn export_png(
     result
 }
 
+/// The colour of the composed icon at a document point (prompt 074 E3: the eyedropper on images
+/// and gradients), `#RRGGBBAA`.
+#[tauri::command]
+pub async fn pick_color(svg: String, x: f64, y: f64) -> Result<String, FsError> {
+    blocking(move || ai_core::export::png::pick_pixel(&svg, x, y, system_fonts())).await
+}
+
 /// Stops the PNG export of the calling window after the current file.
 #[tauri::command]
 pub async fn cancel_export(
@@ -159,6 +166,6 @@ mod tests {
                 count += 1;
             }
         }
-        assert_eq!(count, 4);
+        assert_eq!(count, 5);
     }
 }

@@ -463,6 +463,31 @@ export const ACTIONS: readonly ActionDef[] = [
   ADD('sketch.toggleConstructionMode', 'Draw as Construction'),
   // live fills (prompt 060)
   ADD('fill.tool', 'Fill Tool'),
+  // the colour workflow (prompt 074)
+  ADD('color.eyedropper', 'Eyedropper'),
+  EDIT('color.pick', 'Pick Colour', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['x', 'y'],
+      properties: {
+        x: { type: 'number', minimum: -100000, maximum: 100000 },
+        y: { type: 'number', minimum: -100000, maximum: 100000 },
+        target: { type: 'string', enum: ['fill', 'stroke'] },
+      },
+    },
+  }),
+  EDIT('color.replace', 'Replace Colour', {
+    palette: false,
+    args: {
+      type: 'object',
+      required: ['from', 'to'],
+      properties: {
+        from: { type: 'string', maxLength: 64 },
+        to: { type: 'string', maxLength: 64 },
+      },
+    },
+  }),
   ADD('fill.at', 'Fill Area at Point', {
     palette: false,
     args: {

@@ -152,3 +152,10 @@
    Fake-Ereignis geprüft.)
 2. **Mac**: Screenshot mit `⌘⇧4` + `Ctrl` in die Zwischenablage, dann `⌘V` im Fenster – kommt ein `<image>`? Und ein
    in Vorschau/Safari kopiertes Bild?
+
+## Prompt 074
+
+1. Eine eigene Palette reicht vorerst? Mehrere benannte Paletten bräuchten Objekte in Listen in `settings.json`
+   (das nachsichtige Lesen kennt nur Listen von Texten/Zahlen) – lieber eine Datei `palettes.json` daneben?
+2. **Mac**: Pipette auf einem PNG-Layer und auf einem Verlauf – stimmt die Farbe mit dem Bildschirm überein
+   (resvg rendert sRGB; Display-P3-Farben aus `icon.json` erscheinen umgerechnet)?

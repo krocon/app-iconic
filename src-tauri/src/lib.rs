@@ -141,6 +141,7 @@ pub fn run() {
             export_commands::pick_export_dir,
             export_commands::export_svg,
             export_commands::export_png,
+            export_commands::pick_color,
             export_commands::cancel_export,
             reveal::reveal_export,
             commands::third_party_notices,
