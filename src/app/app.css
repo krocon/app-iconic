@@ -109,6 +109,16 @@
   flex: 1;
   min-height: 0;
   display: flex;
+
+  /* the start screen in its place (prompt 082): the canvas keeps its state */
+  &.covered {
+    display: none;
+  }
+}
+
+.start-screen {
+  flex: 1;
+  min-height: 0;
 }
 
 /* widths from the LayoutStore (design 015 E10) */

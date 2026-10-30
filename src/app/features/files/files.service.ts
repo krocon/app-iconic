@@ -1,7 +1,7 @@
 import { computed, effect, Injectable, inject, signal } from '@angular/core';
 import { describeFsError, toFsError } from '../../core/errors/fs-error';
 import { IconFileApi } from '../../core/icon-file/icon-file-api';
-import { IconFormat, SaveResult } from '../../core/icon-file/icon-file.models';
+import { IconDocumentDto, IconFormat, SaveResult } from '../../core/icon-file/icon-file.models';
 import { WindowApi } from '../../core/window/window-api';
 import { AskService } from '../../shared/ask/ask.service';
 import { DocumentStore } from '../document/document.store';
@@ -50,13 +50,42 @@ export class FilesService {
     });
   }
 
-  /** Window start: take over the close button, then the start file or a new document. */
-  async start(): Promise<void> {
+  /** Called with the path after it was opened or saved and put into "Open Recent" (prompt 082). */
+  private readonly recordedHooks = new Set<(path: string) => void>();
+
+  /**
+   * Window start: take over the close button, then the start file (argv, Finder, second start –
+   * design 030) or – with `blank` – a new document. `true` if the window has a document now;
+   * without one the app shows the start screen (design 082 E1).
+   */
+  async start(blank = true): Promise<boolean> {
     await this.win.takeOverClose().catch(() => undefined);
     await this.win.onCloseRequested(() => void this.closeRequested()).catch(() => undefined);
     const path = await this.win.startPath().catch(() => null);
-    if (path && (await this.load(path))) return;
-    await this.replaceWithNew();
+    if (path && (await this.load(path))) return true;
+    if (blank) await this.replaceWithNew();
+    return this.store() !== null;
+  }
+
+  /** `fn(path)` after a file was opened or saved here (previews, design 082 E5); unsubscribes. */
+  onRecorded(fn: (path: string) => void): () => void {
+    this.recordedHooks.add(fn);
+    return () => this.recordedHooks.delete(fn);
+  }
+
+  /**
+   * A new, untitled document from a template (design 082 E7) – asks about unsaved changes like
+   * "New". `false` when cancelled.
+   */
+  newFromTemplate(dto: IconDocumentDto): Promise<boolean> {
+    return this.exclusive(async () => {
+      if (!(await this.confirmDiscard())) return false;
+      await this.replace(
+        new DocumentStore(IconDocument.fromDto({ ...dto, path: null, name: null })),
+      );
+      this.notice.set(null);
+      return true;
+    }, false);
   }
 
   // ---- actions (registered in `file-actions.ts`, design 005 E17) ----
@@ -166,7 +195,7 @@ export class FilesService {
       const doc = IconDocument.fromDto(dto);
       await this.replace(new DocumentStore(doc));
       this.notice.set(describeNotices(doc.notices));
-      await this.recent.add(path).catch(() => undefined);
+      await this.recorded(path);
     });
   }
 
@@ -191,7 +220,7 @@ export class FilesService {
       const result = await this.api.saveIcon(doc.saveRequest(target, format ?? doc.format));
       s.markSaved(result);
       if (old && old !== result.path) await this.api.closeIcon(old).catch(() => undefined);
-      await this.recent.add(result.path).catch(() => undefined);
+      await this.recorded(result.path);
       return result;
     });
   }
@@ -235,11 +264,23 @@ export class FilesService {
       const doc = IconDocument.fromDto(dto);
       await this.replace(new DocumentStore(doc));
       this.notice.set(describeNotices(doc.notices));
-      await this.recent.add(path);
+      await this.recorded(path);
       return true;
     } catch (e) {
       await this.showError(T.openFailed(path), e);
       return false;
+    }
+  }
+
+  /** Into "Open Recent", then the hooks (their errors stay theirs). */
+  private async recorded(path: string): Promise<void> {
+    await this.recent.add(path).catch(() => undefined);
+    for (const fn of this.recordedHooks) {
+      try {
+        fn(path);
+      } catch {
+        // a preview is never worth a failed open/save
+      }
     }
   }
 
@@ -288,7 +329,7 @@ export class FilesService {
       const result = await this.api.saveIcon(doc.saveRequest(path, format));
       s.markSaved(result);
       if (old && old !== result.path) await this.api.closeIcon(old).catch(() => undefined);
-      await this.recent.add(result.path);
+      await this.recorded(result.path);
       return true;
     } catch (e) {
       await this.showError(T.saveFailed, e);

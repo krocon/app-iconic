@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { call } from '../backend/call';
-import { RecentFile } from './recent.models';
+import { RecentEntry, RecentFile } from './recent.models';
 
 /**
  * "Open Recent" (design 003 E12): `recent.json` in Rust, at most 10, newest first. `list()`
@@ -11,6 +11,13 @@ export abstract class RecentFilesApi {
   /** After open/save: `path` to the front; returns the new list. */
   abstract add(path: string): Promise<RecentFile[]>;
   abstract clear(): Promise<void>;
+  /** The start screen's entries (prompt 082): existing files with folder and preview image. */
+  abstract entries(): Promise<RecentEntry[]>;
+  /**
+   * Renders `svg` (the icon as the canvas shows it) as preview of `path`; `false` when `path` is
+   * not in the list. The previews live in Rust's cache, never in the `.icon`.
+   */
+  abstract saveThumbnail(path: string, svg: string): Promise<boolean>;
 }
 
 @Injectable()
@@ -28,5 +35,13 @@ export class TauriRecentFilesApi extends RecentFilesApi {
 
   clear(): Promise<void> {
     return this.backend<void>('clear_recent_files');
+  }
+
+  entries(): Promise<RecentEntry[]> {
+    return this.backend<RecentEntry[]>('recent_entries');
+  }
+
+  saveThumbnail(path: string, svg: string): Promise<boolean> {
+    return this.backend<boolean>('save_thumbnail', { path, svg });
   }
 }

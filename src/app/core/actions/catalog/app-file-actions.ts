@@ -27,6 +27,16 @@ export const APP_FILE_ACTIONS: readonly ActionDef[] = [
   // file (legacy §4)
   FILE('file.newWindow', 'New Window'),
   FILE('file.new', 'New Document'),
+  // prompt 082: the start screen; `template` opens one at once (ids of `start-templates.ts`)
+  FILE('file.newFromTemplate', 'New from Template…', {
+    args: {
+      type: 'object',
+      properties: {
+        template: { type: 'string', enum: ['ios', 'macos', 'watchos', 'lightDark'] },
+      },
+    },
+  }),
+  FILE('file.startScreen', 'Show Start Screen'),
   FILE('file.open', 'Open…'),
   ...Array.from({ length: MAX_RECENT_ACTIONS }, (_, i) =>
     FILE(`file.recent.${i + 1}`, `Open Recent File ${i + 1}`),

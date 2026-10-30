@@ -131,7 +131,10 @@
       Fangen, Am Pixelraster ausrichten.
 - [x] Icon im Kontext _(neu)_ (081): Popover „Im Kontext“ mit macOS-Dock, iOS-Home-Bildschirm hell/dunkel,
       Spotlight/Mitteilung und Windows-Taskleiste in echten Größen, Erscheinungsbild je Szene, eigene neutrale Grafik,
-      optional eigenes Hintergrundbild; Szene als PNG kopieren/sichern (1×–3×)
+      optional eigenes Hintergrundbild; Szene als PNG kopieren/sichern (1×–3×); Nachbar-Icons = zuletzt benutzte Icons (082)
+- [x] Startbildschirm und Vorlagen _(neu)_ (082): im Fenster beim Start ohne Datei (Einstellung „Beim Start“),
+      zuletzt benutzte Icons mit Vorschaubild, Name und Ort, Vorlagen iOS (Keylines), macOS, watchOS, Hell & Dunkel,
+      „Leeres Icon“, „Öffnen…“; File › New from Template…; Tastatur und Screenreader (Grid)
 - [x] Direkt als Konstruktion zeichnen _(neu)_ (058): Schalter Konstruktion (⇧X) in der Canvas-Werkzeugleiste.
 - [x] Abhängigkeiten und treibende Maße wie Fusion 360 (059): deckungsgleich, horizontal, vertikal, parallel,
       senkrecht, tangential, gleich, konzentrisch, Mittelpunkt, symmetrisch, fixiert; Abstand, Länge, Radius, Durchmesser,

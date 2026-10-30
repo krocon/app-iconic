@@ -20,6 +20,7 @@ import { registerAddActions } from './features/commands/add-actions';
 import { AddService } from './features/commands/add.service';
 import { CommandSidebar } from './features/commands/command-sidebar';
 import { CornersService } from './features/corners/corners.service';
+import { registerCornersActions } from './features/corners/corners-actions';
 import { SymbolService } from './features/symbols/symbol.service';
 import { FreehandService } from './features/tools/freehand.service';
 import { TextPathService } from './features/tools/text-path.service';
@@ -72,6 +73,11 @@ import { ImageLayerService } from './features/image-layer/image-layer.service';
 import { ExportService } from './features/export/export.service';
 import { SvgSourceService } from './features/svg-source/svg-source.service';
 import { McpStore } from './features/mcp/mcp.store';
+import { StartScreen } from './features/start/start-screen';
+import { StartService } from './features/start/start.service';
+import { registerStartActions } from './features/start/start-actions';
+import { ThumbnailService } from './features/start/thumbnail.service';
+import { keyContexts } from './features/shell/key-contexts';
 import { MCP_TEXTS } from './features/mcp/mcp-texts';
 
 /**
@@ -94,6 +100,7 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
     SidePanel,
     PanelStrip,
     Splitter,
+    StartScreen,
   ],
   template: `
     <header class="toolbar">
@@ -174,7 +181,10 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
         {{ t.redo }}
       </button>
     </header>
-    <div class="workspace">
+    @if (start.visible()) {
+      <app-start-screen class="start-screen" />
+    }
+    <div class="workspace" [class.covered]="start.visible()">
       @if (panels().commands) {
         <app-side-panel
           class="commands"
@@ -267,9 +277,14 @@ export class App implements OnInit {
   protected readonly panels = inject(LayoutStore).panels;
   protected readonly widths = inject(LayoutStore).widths;
   protected readonly mac = this.actions.os === 'mac';
+  protected readonly start = inject(StartService);
+  private readonly settings = inject(SettingsStore);
 
   constructor() {
     registerFileActions(this.actions, this.files, this.recent, this.destroyRef);
+    registerStartActions(this.actions, this.start, this.files, this.destroyRef);
+    // previews of opened/saved files for the start screen (prompt 082)
+    inject(ThumbnailService);
     registerAppActions(
       this.actions,
       this.dialogs,
@@ -321,25 +336,7 @@ export class App implements OnInit {
       this.destroyRef,
       penService.pen,
     );
-    const corners = inject(CornersService);
-    this.actions.registerAll(
-      {
-        // Live Corners (prompt 045): with `radius` / `kind` at once, else the dialog
-        'corners.set': {
-          run: (a) => {
-            const args = a as
-              { radius?: number; kind?: 'round' | 'inverted' | 'chamfer' } | undefined;
-            if (args?.radius === undefined) {
-              this.dialogs.show('corners');
-              return true;
-            }
-            return corners.apply(args.radius, args.kind ?? 'round');
-          },
-          enabled: () => corners.canApply(),
-        },
-      },
-      this.destroyRef,
-    );
+    registerCornersActions(this.actions, inject(CornersService), this.dialogs, this.destroyRef);
     registerPathTools(this.actions, canvasTools, this.destroyRef);
     // the context bar of the active tool (prompt 067)
     registerToolContexts(
@@ -381,17 +378,8 @@ export class App implements OnInit {
     );
     // AI control (design 018): calls of the MCP sidecar for this window's document
     this.mcp.start(this.destroyRef);
-    // where the keyboard is (design 005 E4): a dialog owns it; else hierarchy or canvas first
-    this.dispatcher.setContextProvider((target) => {
-      if (this.dialogs.modal()) return ['dialog'];
-      // a popover (prompt 073) owns the keys inside it; the canvas keeps its own
-      if (this.dialogs.popover() && target?.closest('[data-popover]')) return ['dialog'];
-      if (target?.closest('app-side-panel.hierarchy')) return ['hierarchy', 'global'];
-      // the panel's sliders and buttons keep their arrow keys (no canvas nudge, design 009 E12)
-      if (target?.closest('app-side-panel.properties')) return ['global'];
-      // while a shape is dragged its keys (↑/↓ sides, Space moves) come first (prompt 041)
-      return ['drawing', 'canvas', 'global'];
-    });
+    // where the keyboard is (design 005 E4)
+    this.dispatcher.setContextProvider(keyContexts(this.dialogs));
   }
 
   ngOnInit(): void {
@@ -403,14 +391,19 @@ export class App implements OnInit {
     const refresh = () => void this.recent.refresh();
     window.addEventListener('focus', refresh);
     this.destroyRef.onDestroy(() => window.removeEventListener('focus', refresh));
-    void this.start();
+    void this.begin();
   }
 
-  /** Document first, then the action this window was opened for (design 005 E6). */
-  private async start(): Promise<void> {
-    await this.files.start();
-    await this.mcp.ready();
+  /**
+   * Document (or start screen, design 082 E1) first, then the action this window was opened for
+   * (design 005 E6).
+   */
+  private async begin(): Promise<void> {
     const action = await this.win.startAction().catch(() => null);
+    // loaded by the app initializer; a bare component (tests) loads them here
+    if (!this.settings.loaded()) await this.settings.load();
+    await this.start.begin(action, this.settings.settings().startup);
+    await this.mcp.ready();
     if (action) this.actions.run(action);
   }
 }

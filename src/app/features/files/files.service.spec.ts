@@ -51,6 +51,51 @@ describe('FilesService', () => {
     expect(backend.window.titles.at(-1)).toEqual(['Untitled', false, null]);
   });
 
+  it('starts without a document when the start screen comes (design 082 E1)', async () => {
+    backend.window.start = null;
+    expect(await files.start(false)).toBe(false);
+    expect(files.store()).toBeNull();
+    expect(backend.window.tookOverClose).toBe(true);
+    // a start file still opens
+    backend.window.start = CAM;
+    expect(await files.start(false)).toBe(true);
+    expect(files.title()).toBe('camscanner.icon');
+  });
+
+  it('a template becomes an untitled, untouched document; unsaved changes are asked first', async () => {
+    await started(CAM);
+    edit();
+    const dto = {
+      path: '/ignored.icon',
+      name: 'x',
+      format: 'bundle' as const,
+      iconJson: { groups: [] },
+      assets: [],
+      warnings: [],
+    };
+    expect(await files.newFromTemplate(dto)).toBe(false);
+    expect(asked).toHaveLength(1);
+    answers.push('discard');
+    expect(await files.newFromTemplate(dto)).toBe(true);
+    expect(files.title()).toBe('Untitled');
+    expect(files.store()!.document().path).toBeNull();
+    expect(files.store()!.pristine()).toBe(true);
+  });
+
+  it('tells its listeners about every opened or saved path', async () => {
+    const seen: string[] = [];
+    const off = files.onRecorded((p) => seen.push(p));
+    files.onRecorded(() => {
+      throw new Error('a broken listener does not break opening');
+    });
+    await started(CAM);
+    edit();
+    await files.saveQuietly('/b/x.icon');
+    off();
+    await files.openQuietly(CAM);
+    expect(seen).toEqual([CAM, '/b/x.icon']);
+  });
+
   it('starts with the window start path; a failing one ends in a new document', async () => {
     await started(CAM);
     expect(files.title()).toBe('camscanner.icon');

@@ -239,6 +239,8 @@ pub struct Settings {
     pub theme: String,
     /// `system` | `en` | `de`.
     pub language: String,
+    /// What a window without a file starts with (prompt 082): `startScreen` | `emptyDocument`.
+    pub startup: String,
     pub panels: Panels,
     pub canvas: CanvasSettings,
     pub export: ExportSettings,
@@ -261,6 +263,7 @@ impl Default for Settings {
             schema_version: SCHEMA_VERSION,
             theme: "system".into(),
             language: "system".into(),
+            startup: "startScreen".into(),
             panels: Panels {
                 commands: panel(260),
                 hierarchy: panel(260),

@@ -10,6 +10,8 @@ describe('App', () => {
 
   beforeEach(() => {
     backend = fakeBackend();
+    // the tests below start on an empty document; the start screen has its own (prompt 082)
+    backend.settings.stored = { ...backend.settings.stored, startup: 'emptyDocument' };
     TestBed.configureTestingModule({
       imports: [App],
       providers: [...backend.providers, { provide: OS, useValue: 'other' }],

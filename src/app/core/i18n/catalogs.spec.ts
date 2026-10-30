@@ -27,6 +27,7 @@ import '../../features/shell/shell-texts';
 import '../../features/svg-source/svg-source-texts';
 import '../../features/tools/tools-texts';
 import '../../features/image-layer/image-layer-texts';
+import '../../features/start/start-texts';
 
 /** Shape of a catalog: keys and value kinds (functions by arity). */
 function shape(v: unknown): unknown {

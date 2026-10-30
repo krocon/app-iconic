@@ -20,6 +20,7 @@
 //! - [`open_files`]    `.icon` files from the command line, a second start and the Finder (030)
 //! - [`reveal`]        "Show in Finder" for files this process exported (030)
 //! - [`drop_files`]    files dragged onto a window, images from the system clipboard (071)
+//! - [`thumbnail_commands`] preview images of the recent files for the start screen (082)
 //!
 //! The engine (icon documents, file I/O, export, fonts) lives in the Tauri-free crate
 //! `ai-core` (`src-tauri/core`); `error` is re-exported from there.
@@ -39,6 +40,7 @@ pub mod open_files;
 pub mod reveal;
 pub mod sessions;
 pub mod settings_commands;
+pub mod thumbnail_commands;
 pub mod window_commands;
 pub mod windows;
 
@@ -136,6 +138,8 @@ pub fn run() {
             commands::recent_files,
             commands::add_recent_file,
             commands::clear_recent_files,
+            thumbnail_commands::save_thumbnail,
+            thumbnail_commands::recent_entries,
             window_commands::set_window_title,
             window_commands::open_document_window,
             window_commands::focus_document_window,

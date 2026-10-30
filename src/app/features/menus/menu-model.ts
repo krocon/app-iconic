@@ -39,6 +39,7 @@ export function buildMenuModel(os: Os, input: MenuInputs): TopMenuNode[] {
   const file: MenuNode[] = [
     a('file.newWindow'),
     a('file.new'),
+    a('file.newFromTemplate'),
     a('file.open'),
     sub(t.openRecent, [
       ...(recent.length ? recent : [a('file.noRecent')]),

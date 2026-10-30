@@ -105,6 +105,19 @@ pub struct RecentFileDto {
     pub name: String,
 }
 
+/// One entry of the start screen (prompt 082): name, folder and preview image as data URL – the
+/// WebView never sees a path of the preview cache.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RecentEntryDto {
+    pub path: String,
+    pub name: String,
+    /// The folder the file lies in (shown beside the name).
+    pub location: String,
+    /// `data:image/png;base64,…`; `None` = no preview yet.
+    pub thumbnail: Option<String>,
+}
+
 impl RecentFileDto {
     pub fn list(paths: &[String]) -> Vec<Self> {
         paths
@@ -176,5 +189,19 @@ mod tests {
         assert_eq!(v["name"], "Mein Icon.icon");
         let r = serde_json::to_value(RecentFileDto::list(std::slice::from_ref(&path))).unwrap();
         assert_eq!(r, json!([{ "path": path, "name": "Mein Icon.icon" }]));
+    }
+
+    #[test]
+    fn start_screen_entries_are_camel_case_with_null_preview() {
+        let e = RecentEntryDto {
+            path: "/a/b.icon".into(),
+            name: "b.icon".into(),
+            location: "/a".into(),
+            thumbnail: None,
+        };
+        assert_eq!(
+            serde_json::to_value(e).unwrap(),
+            json!({ "path": "/a/b.icon", "name": "b.icon", "location": "/a", "thumbnail": null })
+        );
     }
 }

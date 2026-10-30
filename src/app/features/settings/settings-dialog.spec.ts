@@ -59,6 +59,21 @@ describe('settings in the window (design 015 E11–E14)', () => {
     expect(document.activeElement?.id).toBe('settings-tab-canvas');
   });
 
+  it('"On start": start screen by default, empty document as the other choice (prompt 082)', async () => {
+    const { fixture, el } = await app();
+    TestBed.inject(ActionService).run('app.settings');
+    await fixture.whenStable();
+    const select = el.querySelector<HTMLSelectElement>('[data-testid="settings-startup"]')!;
+    expect(select.value).toBe('startScreen');
+    expect([...select.options].map((o) => o.textContent!.trim())).toEqual([
+      'Start screen',
+      'Empty document',
+    ]);
+    select.value = 'emptyDocument';
+    select.dispatchEvent(new Event('change'));
+    expect(TestBed.inject(SettingsStore).settings().startup).toBe('emptyDocument');
+  });
+
   it('AI control: off by default, the switch opens the bridge, the line for Claude Code (design 018 E16)', async () => {
     const { fixture, el } = await app();
     TestBed.inject(ActionService).run('app.settings');

@@ -139,6 +139,7 @@ export function sanitizeSettings(s: Settings): Settings {
     schemaVersion: SCHEMA_VERSION,
     theme: oneOf(s.theme, CHOICES, d.theme),
     language: oneOf(s.language, ['system', 'en', 'de'], d.language),
+    startup: oneOf(s.startup, ['startScreen', 'emptyDocument'], d.startup),
     panels: {
       commands: panel(s.panels.commands),
       hierarchy: panel(s.panels.hierarchy),

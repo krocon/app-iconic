@@ -11,6 +11,7 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
     schemaVersion: 1,
     theme: 'system',
     language: 'system',
+    startup: 'startScreen',
     panels: {
       commands: { visible: true, width: 260 },
       hierarchy: { visible: true, width: 260 },
@@ -228,6 +229,24 @@ export const SETTINGS_CASES: { defaults: unknown; cases: SettingsCase[] } = {
         ['export.mask', 'squircle'],
         ['export.platforms', ['ios', 'watchos']],
       ],
+    },
+    {
+      name: 'startup (prompt 082): start screen or an empty document; anything else falls back',
+      input: { startup: 'emptyDocument' },
+      expect: [['startup', 'emptyDocument']],
+    },
+    {
+      name: 'startup: unknown values and wrong kinds fall back to the start screen',
+      input: { startup: 'welcome', theme: 'dark' },
+      expect: [
+        ['startup', 'startScreen'],
+        ['theme', 'dark'],
+      ],
+    },
+    {
+      name: 'startup: a number is the default',
+      input: { startup: 1 },
+      expect: [['startup', 'startScreen']],
     },
     {
       name: 'export formats of prompt 079: android and web',

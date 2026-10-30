@@ -3,6 +3,8 @@ import { ConfigWarning } from '../menu/menu.models';
 /** Mirror of Rust `ai-core::settings::Settings` (design 015; defaults: legacy §9). */
 export type ThemeChoice = 'system' | 'light' | 'dark';
 export type LanguageChoice = 'system' | 'en' | 'de';
+/** What a window without a file starts with (prompt 082). */
+export type StartupChoice = 'startScreen' | 'emptyDocument';
 export type PanelKey = 'commands' | 'hierarchy' | 'properties';
 
 export interface PanelSettings {
@@ -92,6 +94,8 @@ export interface Settings {
   schemaVersion: number;
   theme: ThemeChoice;
   language: LanguageChoice;
+  /** Start screen or an empty document (prompt 082). */
+  startup: StartupChoice;
   panels: Record<PanelKey, PanelSettings>;
   canvas: CanvasSettings;
   export: ExportSettings;
@@ -123,6 +127,7 @@ export const DEFAULT_SETTINGS: Settings = {
   schemaVersion: SCHEMA_VERSION,
   theme: 'system',
   language: 'system',
+  startup: 'startScreen',
   panels: {
     commands: { visible: true, width: 260 },
     hierarchy: { visible: true, width: 260 },

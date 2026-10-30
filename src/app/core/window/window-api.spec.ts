@@ -35,6 +35,8 @@ describe('TauriWindowApi / TauriRecentFilesApi', () => {
     await recent.list();
     await recent.add('/a.icon');
     await recent.clear();
+    await recent.entries();
+    await recent.saveThumbnail('/a.icon', '<svg/>');
     expect(calls).toEqual([
       ['set_window_title', { title: 'a.icon', edited: true, path: '/a.icon' }],
       ['open_document_window', { path: null }],
@@ -48,6 +50,8 @@ describe('TauriWindowApi / TauriRecentFilesApi', () => {
       ['recent_files', undefined],
       ['add_recent_file', { path: '/a.icon' }],
       ['clear_recent_files', undefined],
+      ['recent_entries', undefined],
+      ['save_thumbnail', { path: '/a.icon', svg: '<svg/>' }],
     ]);
   });
 

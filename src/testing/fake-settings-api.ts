@@ -28,8 +28,13 @@ export class FakeSettingsApi extends SettingsApi {
   failSave = false;
   private readonly listeners = new Set<(e: SettingsChanged) => void>();
 
-  constructor(private readonly storage: Storage | null = null) {
+  /** `first`: laid over the defaults while nothing is stored (browser mode, design 082 E9). */
+  constructor(
+    private readonly storage: Storage | null = null,
+    first: SettingsPatch | null = null,
+  ) {
     super();
+    if (first) this.stored = applyPatch(DEFAULT_SETTINGS, first);
     try {
       const text = storage?.getItem(FAKE_SETTINGS_KEY);
       if (text) this.stored = settingsFromJson(JSON.parse(text));

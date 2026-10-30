@@ -5,6 +5,7 @@
 //! - [`fs_atomic`]     atomic writes, keeping broken files aside (from files-and-folders)
 //! - [`config_file`]   loader of small config files (from files-and-folders)
 //! - [`recent`]        recently used `.icon` files, `recent.json` (prompt 003)
+//! - [`thumbnails`]    preview images of the recent files in the config directory (prompt 082)
 //! - [`icon`]          `.icon` files: icon.json with lossless round trip, bundle + ZIP I/O (prompt 002)
 //! - [`settings`]      workspace settings `settings.json`: lenient per field, migration, patches (prompt 015)
 //! - [`menu_spec`]     the frontend's menu model for the native macOS menu, checked (prompt 005)
@@ -25,4 +26,5 @@ pub mod keymap_file;
 pub mod menu_spec;
 pub mod recent;
 pub mod settings;
+pub mod thumbnails;
 pub mod user_paths;

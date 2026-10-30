@@ -219,18 +219,29 @@ pub async fn pick_image_file(app: AppHandle) -> Result<Option<String>, FsError> 
 
 // ---- prompt 003: recent files, windows ----
 
-/// Serialises read-modify-write of `recent.json` across windows (design 003 E12).
+/// Serialises read-modify-write of `recent.json` (and its previews, prompt 082) across windows
+/// (design 003 E12).
 #[derive(Default)]
 pub struct RecentLock(Mutex<()>);
 
-fn recent_file(app: &AppHandle) -> Result<PathBuf, FsError> {
+impl RecentLock {
+    pub(crate) fn lock(&self) -> std::sync::MutexGuard<'_, ()> {
+        self.0.lock().unwrap_or_else(|e| e.into_inner())
+    }
+}
+
+/// The app config directory (`recent.json`, `settings.json`, `thumbnails/`).
+pub(crate) fn config_dir(app: &AppHandle) -> Result<PathBuf, FsError> {
     app.path()
         .app_config_dir()
-        .map(|d| d.join(recent::FILE_NAME))
         .map_err(|e| FsError::new(FsErrorCode::Io, e.to_string(), None))
 }
 
-fn exists(p: &str) -> bool {
+fn recent_file(app: &AppHandle) -> Result<PathBuf, FsError> {
+    config_dir(app).map(|d| d.join(recent::FILE_NAME))
+}
+
+pub(crate) fn exists(p: &str) -> bool {
     Path::new(p).exists()
 }
 
@@ -257,16 +268,25 @@ pub async fn add_recent_file(app: AppHandle, path: String) -> Result<Vec<RecentF
     let file = recent_file(&app)?;
     blocking(move || {
         let lock = app.state::<RecentLock>();
-        let _guard = lock.0.lock().unwrap_or_else(|e| e.into_inner());
+        let _guard = lock.lock();
         let loaded = recent::load(&file);
         let list = recent::add(&loaded.value, &path, exists);
         // a file we could not read stays untouched (config_file `persist`)
         if loaded.persist {
             recent::save(&file, &list)?;
+            // previews leave with their entry (prompt 082 E4)
+            prune_thumbnails(&file, &list);
         }
         Ok(RecentFileDto::list(&list))
     })
     .await
+}
+
+/// Removes the previews whose file left `recent.json` (next to it in the config directory).
+fn prune_thumbnails(recent_json: &Path, list: &[String]) {
+    if let Some(dir) = recent_json.parent() {
+        ai_core::thumbnails::prune(&dir.join(ai_core::thumbnails::DIR_NAME), list);
+    }
 }
 
 /// "Clear Menu".
@@ -275,8 +295,10 @@ pub async fn clear_recent_files(app: AppHandle) -> Result<(), FsError> {
     let file = recent_file(&app)?;
     blocking(move || {
         let lock = app.state::<RecentLock>();
-        let _guard = lock.0.lock().unwrap_or_else(|e| e.into_inner());
-        recent::save(&file, &[])
+        let _guard = lock.lock();
+        recent::save(&file, &[])?;
+        prune_thumbnails(&file, &[]);
+        Ok(())
     })
     .await
 }
@@ -335,6 +357,10 @@ mod path_rules {
             (
                 include_str!("window_commands.rs"),
                 &["open_document_window"][..],
+            ),
+            (
+                include_str!("thumbnail_commands.rs"),
+                &["save_thumbnail"][..],
             ),
         ] {
             for name in names {

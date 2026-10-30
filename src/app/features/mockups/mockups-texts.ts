@@ -21,7 +21,8 @@ const EN = {
   save: 'Save as PNG…',
   background: 'Background Image…',
   clearBackground: 'Remove Background Image',
-  backgroundHint: 'Own scenery only – neighbouring icons are neutral placeholders.',
+  backgroundHint:
+    'Own scenery only – neighbouring icons are your recently used icons or neutral placeholders.',
   close: 'Close',
   noDocument: 'No document is open.',
   badArguments: 'Unknown scene or scale.',
@@ -53,7 +54,8 @@ export const MOCKUPS_TEXTS = translatable('mockups', EN, {
     save: 'Als PNG sichern…',
     background: 'Hintergrundbild…',
     clearBackground: 'Hintergrundbild entfernen',
-    backgroundHint: 'Nur eigene Grafik – Nachbar-Icons sind neutrale Platzhalter.',
+    backgroundHint:
+      'Nur eigene Grafik – Nachbar-Icons sind Ihre zuletzt benutzten Icons oder neutrale Platzhalter.',
     close: 'Schließen',
     noDocument: 'Kein Dokument geöffnet.',
     badArguments: 'Unbekannte Szene oder unbekannter Maßstab.',

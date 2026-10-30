@@ -8,6 +8,7 @@ import { CanvasOptions, CanvasViewStore } from '../canvas/canvas-view.store';
 import { settledComputed } from '../document/settled';
 import { exportSvg, ExportSvgOptions } from '../export/export-svg';
 import { rasterSizes } from '../export/export.service';
+import { ThumbnailService } from '../start/thumbnail.service';
 import { FilesService } from '../files/files.service';
 import { IconDocument } from '../document/icon-document';
 import {
@@ -72,6 +73,7 @@ export class MockupsService {
   private readonly exporter = inject(ExportApi);
   private readonly iconFiles = inject(IconFileApi);
   private readonly dialogs = inject(DialogService);
+  private readonly thumbnails = inject(ThumbnailService);
 
   /** The panel is open. */
   readonly visible = computed(() => this.dialogs.open() === 'mockups');
@@ -85,6 +87,8 @@ export class MockupsService {
   readonly background = signal<SceneBackground | null>(null);
   /** Icon data URLs per look and appearance (drawn while the panel is open). */
   private readonly icons = signal<ReadonlyMap<string, string>>(new Map());
+  /** Previews of the recently used icons for the placeholder slots (prompt 082 E10). */
+  private readonly neighbours = signal<readonly string[]>([]);
   private readonly settled = settledComputed(
     () => this.files.store(),
     () => this.files.store()?.revision(),
@@ -99,6 +103,7 @@ export class MockupsService {
     const appearances = this.appearances();
     const background = this.background();
     const name = this.name();
+    const neighbours = this.neighbours();
     return SCENES.map((spec) => {
       const appearance = appearances[spec.id];
       const icon = icons.get(iconKey(spec.look, appearance)) ?? null;
@@ -112,7 +117,15 @@ export class MockupsService {
         title,
         url: icon
           ? svgDataUrl(
-              sceneSvg({ layout: sceneLayout(spec.id), appearance, icon, name, background, title }),
+              sceneSvg({
+                layout: sceneLayout(spec.id),
+                appearance,
+                icon,
+                name,
+                background,
+                title,
+                neighbours,
+              }),
             )
           : null,
       };
@@ -151,7 +164,9 @@ export class MockupsService {
       return;
     }
     const raster = await rasterSizes(doc);
+    const neighbours = await this.thumbnails.neighbours(doc.path);
     if (seq !== this.seq) return;
+    this.neighbours.set(neighbours);
     const icons = new Map<string, string>();
     for (const spec of SCENES) {
       const a = appearances[spec.id];
@@ -191,6 +206,7 @@ export class MockupsService {
       name,
       background: this.background(),
       title: this.title(id, appearance, name),
+      neighbours: await this.thumbnails.neighbours(doc.path),
     });
   }
 

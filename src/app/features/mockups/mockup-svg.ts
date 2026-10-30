@@ -24,6 +24,11 @@ export interface SceneInput {
   background: SceneBackground | null;
   /** Accessible title of the image. */
   title: string;
+  /**
+   * Previews of the user's recently used icons (data URLs, prompt 082 E10): they take the
+   * placeholder slots in order; missing ones stay abstract placeholders.
+   */
+  neighbours?: readonly string[];
 }
 
 interface Palette {
@@ -140,8 +145,13 @@ function glyph(kind: number, cx: number, cy: number, s: number, color: string): 
   }
 }
 
-/** A placeholder icon in the look of its scene. */
-function placeholder(p: Placeholder, layout: SceneLayout, appearance: Appearance): string {
+/** A placeholder icon in the look of its scene – or a recently used icon's preview (082 E10). */
+function placeholder(
+  p: Placeholder,
+  layout: SceneLayout,
+  appearance: Appearance,
+  neighbour?: string,
+): string {
   const tone = TONES[p.tone % TONES.length];
   const [fill, mark] =
     appearance === 'light'
@@ -154,6 +164,10 @@ function placeholder(p: Placeholder, layout: SceneLayout, appearance: Appearance
   const body = p.size - 2 * inset;
   const radius = body * (layout.spec.look === 'view' ? 0.2 : 0.225);
   const box = { x: p.x + inset, y: p.y + inset, width: body, height: body, radius };
+  // the tinted scene stays grey: a coloured preview would not be tinted
+  if (neighbour && appearance !== 'tinted') {
+    return `<image data-neighbour="${p.tone}" x="${r(box.x)}" y="${r(box.y)}" width="${r(body)}" height="${r(body)}" href="${escapeXml(neighbour)}"/>`;
+  }
   return (
     `<g data-placeholder="${p.tone}">` +
     rect(box, `fill="${fill}"`) +
@@ -212,7 +226,9 @@ export function sceneSvg(input: SceneInput): string {
   }
   if (layout.highlight)
     parts.push(rect(layout.highlight, `fill="${pal.text}" fill-opacity="0.08"`));
-  for (const p of layout.placeholders) parts.push(placeholder(p, layout, appearance));
+  layout.placeholders.forEach((p, i) =>
+    parts.push(placeholder(p, layout, appearance, input.neighbours?.[i])),
+  );
   if (input.icon) {
     for (const s of layout.own) {
       parts.push(

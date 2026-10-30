@@ -55,6 +55,20 @@
               }
             </select>
           </label>
+          <label class="field">
+            <span>{{ t.startup }}</span>
+            <select
+              class="input"
+              data-testid="settings-startup"
+              (change)="set('startup', value($event))"
+            >
+              @for (o of ['startScreen', 'emptyDocument']; track o) {
+                <option [value]="o" [selected]="v.startup === o">
+                  {{ $any(t.startups)[o] }}
+                </option>
+              }
+            </select>
+          </label>
           <fieldset class="group">
             <legend>{{ t.panels }}</legend>
             @for (p of panelKeys; track p) {

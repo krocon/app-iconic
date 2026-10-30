@@ -83,6 +83,15 @@ pub fn display_name(path: &str) -> String {
         .unwrap_or_else(|| path.to_owned())
 }
 
+/// Where a recent file lies, to show beside its name (prompt 082 E6): its parent folder (empty for
+/// a path without one) – the frontend never splits paths.
+pub fn display_dir(path: &str) -> String {
+    Path::new(path)
+        .parent()
+        .map(|d| d.to_string_lossy().into_owned())
+        .unwrap_or_default()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -175,5 +184,12 @@ mod tests {
     fn display_names() {
         assert_eq!(display_name(&abs("Mein Icon.icon")), "Mein Icon.icon");
         assert_eq!(display_name("/"), "/");
+    }
+
+    #[test]
+    fn display_dirs() {
+        let p = abs("Mein Icon.icon");
+        assert_eq!(display_dir(&p), std::env::temp_dir().to_string_lossy());
+        assert_eq!(display_dir("/"), "");
     }
 }

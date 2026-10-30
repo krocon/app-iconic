@@ -127,7 +127,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               lucide-provider (Daten lazy aus lucide-static), symbol-search, symbol-grid (rein),
                               SymbolService (placeSymbol, Einfügen), SymbolPickerDialog
   app/features/shell/         SidePanel, LayoutStore (Seitenleisten ⌘1/⌘2/⌘3, Breiten), Splitter (APG Window
-                              Splitter) + panel-width (rein), Texte der Fensterhülle (015)
+                              Splitter) + panel-width (rein), Texte der Fensterhülle (015); key-contexts (wo die
+                              Tastatur ist, aus app.ts, 082)
   app/features/settings/      Einstellungen (015): SettingsStore (sofort anwenden, gebündelt speichern, andere
                               Fenster), SettingsSync (Stores ↔ Einstellungen, Theme, Sprache, Undo-Log),
                               SettingsDialog (⌘,, Tabs) + settings-view, settings-actions (app.settings,
@@ -155,6 +156,11 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               (rein: Szene als SVG aus eigener Grafik + Icon als Data-URL), MockupsService (gedrosselt,
                               Erscheinungsbild je Szene, PNG kopieren/sichern, Hintergrundbild), MockupsDialog (Popover),
                               mockups-actions (`view.mockups`, `mockups.*`), Texte; mockup-assets.spec (keine fremden Assets)
+  app/features/start/         Startbildschirm (082): start-mode (rein: Datei/Aktion/Einstellung), start-templates +
+                              template-art (rein: Vorlagen als IconDocumentDto, Keylines aus 056), StartService
+                              (sichtbar bis zum Dokumentwechsel, Vorlage/Recent/Leer/Öffnen), StartScreen (APG-Grids),
+                              ThumbnailService (Vorschaubild nach Öffnen/Speichern, Mockup-Nachbarn), start-actions
+                              (`file.newFromTemplate`, `file.startScreen`), Texte
   app/features/about/         About-Dialog + Texte
   app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile) + canvas-measure (Auswahl
                               messen je Änderung, Viewport, 033), CanvasViewStore (Zoom/Pan/
@@ -220,7 +226,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
 e2e/                          Playwright-Tests gegen den Dev-Server (hardening: großes/tiefes SVG, a11y: Tab-Weg,
                               Fokus, Dialoge – 031; composited-shadow: Schatten pixelgleich – 033; export-packages – 078;
                               export-android-web: Favicon hell/dunkel, sichere Zone – 079; png-layer – 080;
-                              mockups: Szenen folgen dem Dokument, Dark-Szene – 081)
+                              mockups: Szenen folgen dem Dokument, Dark-Szene – 081; start-screen – 082)
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
@@ -242,6 +248,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/mcp_commands.rs         Brücke an/aus nach settings.mcp, TauriHost (mcp-call → mcp_reply), mcp_* Commands (018)
   src/open_files.rs           `.icon` aus argv, Zweitstart (single-instance) und Finder (`RunEvent::Opened`) → Fenster (030)
   src/reveal.rs               „Im Ordner zeigen“ nur für exportierte Dateien (030)
+  src/thumbnail_commands.rs   save_thumbnail, recent_entries (Startbildschirm, 082)
   src/drop_files.rs           DragDrop → `file-drop` ans Fenster, Drop-Pfade in UserPaths, `read_clipboard_image` (071),
                               `copy_png` (078), `copy_scene_png` (081)
   Info.plist, entitlements.plist  macOS: `.icon` als Package-Dokument (Alternate), Hardened-Runtime-Rechte (030)
@@ -254,6 +261,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
                               svg_file (002),
                               image_file (Bild als Data-URL, Magic Bytes, Größe aus dem Kopf, 008)
     src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
+    src/thumbnails.rs         Vorschaubilder der Recent-Einträge (256 px PNG, FNV-Name, atomar, prune, Data-URL, 082)
     src/clipboard_image.rs    Bild der Zwischenablage prüfen + als PNG-Data-URL (071), copy_svg (078); src/user_paths.rs: vertraute
                               Pfade (033: Dialoge, Recent, System, Drop, KI; allow_tree für interne Ordner; checked →
                               not_allowed), Art einer abgelegten Datei

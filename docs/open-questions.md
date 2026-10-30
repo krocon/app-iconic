@@ -231,3 +231,12 @@
 2. **Mac**: Dock-Standardgröße 64 pt (Dock-Payload `tilesize`) – auf einem frischen Mac mit
    `defaults read com.apple.dock tilesize` bestätigen.
 3. **Mac**: „Szene als PNG kopieren“ (2×) in Keynote/Vorschau einfügen – kommt das Bild in Szenengröße an?
+
+## Prompt 082
+
+1. Standard „Beim Start: Startbildschirm“ – oder lieber wie bisher ein leeres Dokument und den Startbildschirm nur auf
+   Wunsch (File › New from Template…)?
+2. Vorschaubilder entstehen beim Speichern **und beim Öffnen** (sonst hätten nur geöffnete Icons keins) – so lassen?
+3. Die Vorlagen sind bewusst schlicht (eigene Formen). Mehr/andere gewünscht (Monogramm als Pfad, Tinted-Variante)?
+4. **Mac**: Startbildschirm mit VoiceOver (Grid-Ansage „Zeile/Spalte“, Vorschaubild ohne Alt-Text, Name + Ort als
+   Label) und die Vorschaubilder im Cache (`~/Library/Application Support/<id>/thumbnails`) prüfen.

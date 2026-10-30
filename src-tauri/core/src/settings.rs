@@ -142,6 +142,11 @@ pub fn sanitize(mut s: Settings) -> Settings {
     s.schema_version = SCHEMA_VERSION;
     one_of(&mut s.theme, &["system", "light", "dark"], &d.theme);
     one_of(&mut s.language, &["system", "en", "de"], &d.language);
+    one_of(
+        &mut s.startup,
+        &["startScreen", "emptyDocument"],
+        &d.startup,
+    );
     for p in [
         &mut s.panels.commands,
         &mut s.panels.hierarchy,

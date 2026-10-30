@@ -87,4 +87,18 @@ describe('scene SVG (prompt 081)', () => {
     const bytes = Uint8Array.from(atob(url.split(',')[1]), (c) => c.charCodeAt(0));
     expect(new TextDecoder().decode(bytes)).toBe('<svg>ä€</svg>');
   });
+
+  it('recently used icons take the placeholder slots in order (prompt 082 E10)', () => {
+    const recent = ['data:image/png;base64,AAAA', 'data:image/png;base64,BBBB'];
+    const d = parse(sceneSvg(input({ neighbours: recent })));
+    const shown = [...d.querySelectorAll('image[data-neighbour]')];
+    expect(shown.map((i) => i.getAttribute('href'))).toEqual(recent);
+    expect(shown[0].getAttribute('width')).toBe('60');
+    // the others stay abstract placeholders; the own icon is untouched
+    expect(d.querySelectorAll('[data-placeholder]')).toHaveLength(9);
+    expect(d.querySelectorAll('image[data-own]')).toHaveLength(1);
+    // the tinted scene stays grey
+    const tinted = parse(sceneSvg(input({ neighbours: recent, appearance: 'tinted' })));
+    expect(tinted.querySelectorAll('image[data-neighbour]')).toHaveLength(0);
+  });
 });

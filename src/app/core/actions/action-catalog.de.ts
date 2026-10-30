@@ -13,6 +13,8 @@ const FIXED: Record<string, string> = {
   'app.focusMenu': 'Menüleiste fokussieren',
   'file.newWindow': 'Neues Fenster',
   'file.new': 'Neues Dokument',
+  'file.newFromTemplate': 'Neu aus Vorlage…',
+  'file.startScreen': 'Startbildschirm zeigen',
   'file.open': 'Öffnen …',
   'file.noRecent': 'Keine zuletzt benutzten Dateien',
   'file.clearRecent': 'Menü „Zuletzt benutzt“ leeren',
