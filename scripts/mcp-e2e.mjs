@@ -59,7 +59,7 @@ const init = await rpc('initialize', {
 check(init.result.serverInfo.name === 'app-iconic', 'initialize');
 child.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
 const list = await rpc('tools/list', {});
-check(list.result.tools.length === 19, `tools/list: ${list.result.tools.length} tools`);
+check(list.result.tools.length === 20, `tools/list: ${list.result.tools.length} tools`);
 
 if (out === '--expect-off') {
   const r = (await rpc('tools/call', { name: 'list_documents', arguments: {} })).result;

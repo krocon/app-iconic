@@ -378,20 +378,7 @@
               {{ actions.label('mcp.disconnect') }}
             </button>
           }
-          @if (mcp.command(); as line) {
-            <fieldset class="group">
-              <legend>{{ t.mcpCommand }}</legend>
-              <div class="panel-row">
-                <code class="command" data-testid="settings-mcp-command">{{ line }}</code>
-                <button type="button" class="btn" (click)="copyCommand(line)">
-                  {{ copied() ? t.mcpCopied : t.mcpCopy }}
-                </button>
-              </div>
-              <p class="hint">{{ t.mcpDesktop }}</p>
-            </fieldset>
-          } @else {
-            <p class="hint">{{ t.mcpNoSidecar }}</p>
-          }
+          <app-mcp-setup />
         }
         @case ('advanced') {
           <label class="check">

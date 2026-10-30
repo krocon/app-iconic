@@ -39,6 +39,8 @@ export class DocumentStore {
   readonly canRedo: Signal<boolean>;
   readonly undoLabel: Signal<string>;
   readonly redoLabel: Signal<string>;
+  /** Id of the step undo would take back (0 = none; prompt 086 E10). */
+  readonly undoTopId: Signal<number>;
   /** A new document nobody touched – Open may replace it (design 003 E8). */
   readonly pristine: Signal<boolean>;
   /** Title of the window: file name or "Untitled". */
@@ -52,6 +54,7 @@ export class DocumentStore {
     this.canRedo = computed(() => s().canRedo);
     this.undoLabel = computed(() => s().undoLabel);
     this.redoLabel = computed(() => s().redoLabel);
+    this.undoTopId = computed(() => s().topId);
     this.pristine = computed(() => {
       this.rev();
       // a restored snapshot without a file is dirty from the start – not pristine (083)

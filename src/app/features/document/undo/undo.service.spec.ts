@@ -163,6 +163,21 @@ describe('UndoService', () => {
     }
   });
 
+  it('gives every step its own top id; an AI group gets a new one (prompt 086)', () => {
+    const { undo } = setup();
+    undo.execute(new SetAttribute(rect, 'fill', 'blue', 'changeFill'));
+    const a = undo.state().topId;
+    const mark = undo.mark();
+    undo.execute(new SetAttribute(rect, 'fill', 'green', 'changeFill'));
+    undo.groupSince(mark);
+    const b = undo.state().topId;
+    expect(b).toBeGreaterThan(a);
+    undo.undo();
+    expect(undo.state().topId).toBe(a);
+    undo.redo();
+    expect(undo.state().topId).toBe(b);
+  });
+
   it('names the steps and moves between undo and redo', () => {
     const { undo, fill, changes } = setup();
     expect(undo.state()).toEqual({
@@ -171,8 +186,11 @@ describe('UndoService', () => {
       undoLabel: 'Undo',
       redoLabel: 'Redo',
       dirty: false,
+      topId: 0,
     });
     undo.execute(new SetAttribute(rect, 'fill', 'blue', 'changeFill'));
+    const first = undo.state().topId;
+    expect(first).toBeGreaterThan(0);
     expect(fill()).toBe('blue');
     expect(undo.state().undoLabel).toBe('Undo Change Fill');
     expect(undo.state().dirty).toBe(true);

@@ -12,6 +12,7 @@
 //! - [`settings`]      workspace settings `settings.json`: lenient per field, migration, patches (prompt 015)
 //! - [`menu_spec`]     the frontend's menu model for the native macOS menu, checked (prompt 005)
 //! - [`keymap_file`]   the user's shortcut overrides `keymap.json` (prompt 005)
+//! - [`mcp_clients`]   MCP client configurations (Claude Desktop, Cursor): paths, merge, backup (prompt 086)
 //! - [`export`]        export: SVG files, PNG with resvg in a size set (prompt 012)
 //! - [`fonts`]         system fonts (once per process), font list, text to path (prompts 012, 013)
 //! - [`clipboard_image`] a clipboard image checked and encoded as PNG data URL (prompt 071)
@@ -25,6 +26,7 @@ pub mod fonts;
 pub mod fs_atomic;
 pub mod icon;
 pub mod keymap_file;
+pub mod mcp_clients;
 pub mod menu_spec;
 pub mod recent;
 pub mod recovery;

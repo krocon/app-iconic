@@ -13,6 +13,11 @@ export interface UndoState {
   redoLabel: string;
   /** Not at the save point. */
   dirty: boolean;
+  /**
+   * Id of the step `undo` would take back (0 = none) – unique per step, so the AI history can
+   * tell whether its step is still the last one (prompt 086 E10).
+   */
+  topId: number;
 }
 
 /** The state with the names as keys – translated when read (design 015 E17). */
@@ -25,6 +30,7 @@ interface RawState {
   undoAi: boolean;
   redoAi: boolean;
   dirty: boolean;
+  topId: number;
 }
 
 interface Entry {
@@ -291,6 +297,7 @@ export class UndoService {
       undoAi: top?.command instanceof AiCommand,
       redoAi: next?.command instanceof AiCommand,
       dirty: (top?.id ?? 0) !== (this.savePoint ?? 0),
+      topId: top?.id ?? 0,
     };
   }
 

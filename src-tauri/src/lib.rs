@@ -17,6 +17,7 @@
 //! - [`mcp`]           AI control: the tool router over the windows (design 018)
 //! - [`mcp_args`]      argument checks, bounds and file paths of the AI tools (018, 033)
 //! - [`mcp_commands`]  the bridge for the `app-iconic-mcp` sidecar, calls to the windows (018)
+//! - [`mcp_setup_commands`] set up Claude Desktop / Cursor, connection test of the sidecar (086)
 //! - [`open_files`]    `.icon` files from the command line, a second start and the Finder (030)
 //! - [`reveal`]        "Show in Finder" for files this process exported (030)
 //! - [`drop_files`]    files dragged onto a window, images from the system clipboard (071)
@@ -36,6 +37,7 @@ pub mod font_commands;
 pub mod mcp;
 pub mod mcp_args;
 pub mod mcp_commands;
+pub mod mcp_setup_commands;
 pub mod menu_commands;
 pub mod model;
 pub mod open_files;
@@ -188,6 +190,11 @@ pub fn run() {
             mcp_commands::mcp_ready,
             mcp_commands::mcp_reply,
             mcp_commands::mcp_disconnect,
+            mcp_setup_commands::mcp_clients,
+            mcp_setup_commands::mcp_setup_preview,
+            mcp_setup_commands::mcp_install,
+            mcp_setup_commands::mcp_uninstall,
+            mcp_setup_commands::mcp_test,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

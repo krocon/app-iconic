@@ -76,7 +76,7 @@ import { StartScreen } from './features/start/start-screen';
 import { StartService } from './features/start/start.service';
 import { RecoveryService } from './features/recovery/recovery.service';
 import { keyContexts } from './features/shell/key-contexts';
-import { MCP_TEXTS } from './features/mcp/mcp-texts';
+import { McpBadge } from './features/mcp/mcp-badge';
 
 /**
  * Root (design 005 E11): one header row – the HTML menu bar (Windows/Linux; macOS has the native
@@ -99,6 +99,7 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
     PanelStrip,
     Splitter,
     StartScreen,
+    McpBadge,
   ],
   template: `
     <header class="toolbar">
@@ -117,20 +118,7 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
           >
         }
       </span>
-      @if (mcp.connected()) {
-        <button
-          type="button"
-          class="btn quiet ai-badge"
-          data-testid="ai-badge"
-          [title]="m.badgeTitle(mcp.info().connections) + ' – ' + actions.label('mcp.disconnect')"
-          [attr.aria-label]="
-            m.badgeTitle(mcp.info().connections) + ' – ' + actions.label('mcp.disconnect')
-          "
-          (click)="actions.run('mcp.disconnect')"
-        >
-          {{ m.badge }}
-        </button>
-      }
+      <app-mcp-badge />
       <span class="sep" aria-hidden="true"></span>
       <!-- Save and Export at one click (prompt 069); Undo / Redo only here -->
       <button
@@ -269,7 +257,6 @@ export class App implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   protected readonly t = SHELL_TEXTS;
   protected readonly f = FILES_TEXTS;
-  protected readonly m = MCP_TEXTS;
   protected readonly mcp = inject(McpStore);
   protected readonly store = this.files.store;
   protected readonly panels = inject(LayoutStore).panels;

@@ -240,6 +240,9 @@
 - [x] Tools: Dokumente, Lesen (icon.json, Baum, Node mit BBox, Asset-SVG, Auswahl), Schreiben (Commands, Aktionen, SVG, Auswahl), Vorschau als PNG, Export, Speichern (018); `export_package` (appiconset/icns/ico, 078; android/web, 079)
 - [x] Jeder KI-Aufruf ein Undo-Schritt („Undo AI: …“), erwartete Revision, Rückfrage vor Speichern an neuem Ort/Export, Sperrliste (018)
 - [x] Sidecar in den Paketen, signiert wie die App (030: Release-Workflow baut ihn und bündelt ihn über `tauri.sidecar.conf.json`)
+- [x] Claude Desktop / Cursor per Klick einrichten oder entfernen: Vorschau als Diff, andere Server bleiben, Sicherungskopie, atomar; Konfiguration mit Kommentaren wird nicht angefasst _(neu)_ (086)
+- [x] Verbindung testen: Sidecar starten, MCP-Handshake, App erreichbar? _(neu)_ (086)
+- [x] KI-Verlauf am „AI“-Badge: letzte Aufrufe mit Zeit, Werkzeug, Ergebnis; „Widerrufen“ für den letzten KI-Schritt _(neu)_ (086)
 
 ## 12. Undo/Redo
 

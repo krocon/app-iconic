@@ -11,7 +11,7 @@ import { SHELL_TEXTS } from '../shell/shell-texts';
 import { confirmReset } from './settings-actions';
 import { SETTINGS_TEXTS } from './settings-texts';
 import { SettingsStore } from './settings.store';
-import { ClipboardApi } from '../../core/clipboard/clipboard-api';
+import { McpSetup } from '../mcp/mcp-setup';
 import { McpStore } from '../mcp/mcp.store';
 import { ACTION_TOGGLES, SECTIONS, SectionId, ZOOM_CHOICES } from './settings-view';
 
@@ -22,7 +22,7 @@ import { ACTION_TOGGLES, SECTIONS, SectionId, ZOOM_CHOICES } from './settings-vi
  */
 @Component({
   selector: 'app-settings-dialog',
-  imports: [Modal],
+  imports: [Modal, McpSetup],
   templateUrl: './settings-dialog.html',
   styleUrl: './settings-dialog.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,17 +44,9 @@ export class SettingsDialog {
   protected readonly min = PANEL_MIN;
   protected readonly max = PANEL_MAX;
   protected readonly mcp = inject(McpStore);
-  private readonly clipboard = inject(ClipboardApi);
-  protected readonly copied = signal(false);
 
   constructor() {
     void this.mcp.refresh();
-  }
-
-  /** The Claude Code line to the clipboard (design 018 E16). */
-  protected async copyCommand(line: string): Promise<void> {
-    await this.clipboard.writeText(line).catch(() => undefined);
-    this.copied.set(true);
   }
 
   protected set(key: string, value: unknown): void {

@@ -20,6 +20,7 @@ import { ShapeSizeDialog } from '../../features/sketch/shape-size-dialog';
 import { SettingsDialog } from '../../features/settings/settings-dialog';
 import { MockupsDialog } from '../../features/mockups/mockups-dialog';
 import { RecoveryDialog } from '../../features/recovery/recovery-dialog';
+import { McpHistoryPopover } from '../../features/mcp/mcp-history-popover';
 
 /** The modal dialogs of the window, one at a time (`DialogService.open`). */
 @Component({
@@ -45,6 +46,7 @@ import { RecoveryDialog } from '../../features/recovery/recovery-dialog';
     SettingsDialog,
     MockupsDialog,
     RecoveryDialog,
+    McpHistoryPopover,
   ],
   template: `
     @switch (dialogs.open()) {
@@ -107,6 +109,9 @@ import { RecoveryDialog } from '../../features/recovery/recovery-dialog';
       }
       @case ('recovery') {
         <app-recovery-dialog />
+      }
+      @case ('aiHistory') {
+        <app-mcp-history-popover />
       }
     }
   `,

@@ -59,6 +59,13 @@ pub enum FsErrorCode {
     RecoveryUnavailable,
     /// Shortcut changes (`save_keymap`) with bad action ids, chords or too many entries (prompt 085).
     InvalidKeymap,
+    /// An MCP client configuration (Claude Desktop, Cursor) that is not plain JSON – comments,
+    /// a syntax error – or not the expected shape; nothing is written (prompt 086 E3).
+    InvalidConfig,
+    /// The MCP client configuration changed between the preview and “Apply” (prompt 086 E4).
+    ConfigChanged,
+    /// The sidecar `app-iconic-mcp` is not next to the app program (prompt 086 E6).
+    SidecarMissing,
 }
 
 /// The one error type every command returns.
@@ -146,6 +153,9 @@ mod tests {
             (FsErrorCode::NotAllowed, "not_allowed"),
             (FsErrorCode::RecoveryUnavailable, "recovery_unavailable"),
             (FsErrorCode::InvalidKeymap, "invalid_keymap"),
+            (FsErrorCode::InvalidConfig, "invalid_config"),
+            (FsErrorCode::ConfigChanged, "config_changed"),
+            (FsErrorCode::SidecarMissing, "sidecar_missing"),
         ] {
             assert_eq!(serde_json::to_value(code).unwrap(), text);
         }

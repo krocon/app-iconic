@@ -7,9 +7,11 @@
 //! - [`server`]    JSON-RPC 2.0 / MCP over lines (initialize, ping, tools/list, tools/call)
 //! - [`client`]    the bridge client of the sidecar (TCP to 127.0.0.1)
 //! - [`host`]      the bridge server of the app (token, line limit, connections)
+//! - [`probe`]     connection test: start the sidecar, MCP handshake, one call to the app (prompt 086)
 
 pub mod bridge;
 pub mod client;
 pub mod host;
+pub mod probe;
 pub mod server;
 pub mod tools;

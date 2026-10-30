@@ -201,7 +201,12 @@ impl<H: WindowHost> Router<H> {
     }
 
     fn describe(&self, label: &str, timeout: Duration) -> CallResult {
-        let mut d = self.host.call(label, "describe", json!({}), timeout)?;
+        self.answer_with_id(label, "describe", timeout)
+    }
+
+    /// `tool` of a window (`describe`, `ensure_document`) with its id and whether it is active.
+    fn answer_with_id(&self, label: &str, tool: &str, timeout: Duration) -> CallResult {
+        let mut d = self.host.call(label, tool, json!({}), timeout)?;
         if let Some(o) = d.as_object_mut() {
             o.insert("id".into(), json!(label));
             o.insert(
@@ -212,11 +217,14 @@ impl<H: WindowHost> Router<H> {
         Ok(d)
     }
 
+    /// A window with an untouched document – or with no document at all (the start screen,
+    /// prompt 082; found in the end to end run of prompt 086).
     fn pristine_window(&self) -> Option<String> {
         self.host.labels().into_iter().find(|l| {
-            self.host
-                .call(l, "describe", json!({}), DESCRIBE_TIMEOUT)
-                .is_ok_and(|d| d["pristine"] == true)
+            match self.host.call(l, "describe", json!({}), DESCRIBE_TIMEOUT) {
+                Ok(d) => d["pristine"] == true,
+                Err(e) => e.code == "unknown_document",
+            }
         })
     }
 
@@ -245,7 +253,8 @@ impl<H: WindowHost> Router<H> {
                     None => self.host.open_window()?,
                 };
                 self.host.focus(&label);
-                self.describe(&label, CALL_TIMEOUT)
+                // a window on its start screen gets its empty document now
+                self.answer_with_id(&label, "ensure_document", CALL_TIMEOUT)
             }
             "open_document" => {
                 let path = a["path"].as_str().unwrap_or("").to_owned();
@@ -371,10 +380,18 @@ mod tests {
                 .lock()
                 .unwrap()
                 .push(format!("{label}:{tool}:{args}"));
-            let w = self.windows.lock().unwrap();
-            let d = &w.iter().find(|(l, _)| l == label).expect("window").1;
+            let mut w = self.windows.lock().unwrap();
+            let d = &mut w.iter_mut().find(|(l, _)| l == label).expect("window").1;
             match tool {
+                // `null` = a window on its start screen, without a document (prompt 082)
+                "describe" if d.is_null() => Err(err("unknown_document", "no document")),
                 "describe" => Ok(d.clone()),
+                "ensure_document" => {
+                    if d.is_null() {
+                        *d = json!({"pristine": true, "name": "Untitled"});
+                    }
+                    Ok(d.clone())
+                }
                 "open" if self.fail_open => Err(err("not_found", "no such file")),
                 "preview_svg" => Ok(json!({
                     "svg": r##"<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024"><rect width="1024" height="1024" fill="#f00"/></svg>"##,
@@ -534,6 +551,35 @@ mod tests {
         let d = r.call("new_document", &json!({})).unwrap();
         assert_eq!(d["id"], "doc-1");
         assert!(r.host.log().contains(&"open_window:doc-1".to_string()));
+    }
+
+    /// Prompt 086 (found in the end to end run): a window on its start screen (no document,
+    /// prompt 082) is reused, and `new_document` gives it its empty document.
+    #[test]
+    fn new_document_uses_a_window_on_its_start_screen() {
+        let r = Router::new(Fake::with(&[("main", Value::Null)]));
+        assert_eq!(
+            r.call("list_documents", &json!({})).unwrap()["documents"],
+            json!([])
+        );
+        let d = r.call("new_document", &json!({})).unwrap();
+        assert_eq!(
+            (d["id"].clone(), d["pristine"].clone()),
+            (json!("main"), json!(true))
+        );
+        assert!(
+            r.host
+                .log()
+                .contains(&"main:ensure_document:{}".to_string())
+        );
+        assert!(!r.host.log().iter().any(|l| l.starts_with("open_window")));
+        assert_eq!(
+            r.call("list_documents", &json!({})).unwrap()["documents"]
+                .as_array()
+                .unwrap()
+                .len(),
+            1
+        );
     }
 
     #[test]

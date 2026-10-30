@@ -271,7 +271,12 @@ describe('McpStore (design 018)', () => {
     expect((r2['revision'] as number) > (r1['revision'] as number)).toBe(true);
     store.undo();
     expect(store.undoLabel()).toBe('Undo AI: Add Rectangle');
-    backend.mcp.setStatus({ enabled: true, connections: 2, sidecar: '/opt/app-iconic-mcp' });
+    backend.mcp.setStatus({
+      enabled: true,
+      connections: 2,
+      sidecar: '/opt/app-iconic-mcp',
+      debug: false,
+    });
     expect(mcp.connected()).toBe(true);
     expect(mcp.command()).toBe('claude mcp add app-iconic -- "/opt/app-iconic-mcp"');
     expect(TestBed.inject(ActionService).run('mcp.disconnect')).toBe(true);
@@ -283,5 +288,16 @@ describe('McpStore (design 018)', () => {
   it('a document of an empty window answers unknown_document', async () => {
     files.store.set(null);
     expect(await call('get_tree')).toMatchObject({ error: { code: 'unknown_document' } });
+  });
+
+  it('ensure_document gives a window on its start screen an empty document (prompt 086)', async () => {
+    files.store.set(null);
+    expect(await call('describe')).toMatchObject({ error: { code: 'unknown_document' } });
+    expect(await call('ensure_document')).toMatchObject({ pristine: true, dirty: false });
+    const s = files.store();
+    expect(s).not.toBeNull();
+    // a document that is there stays
+    expect(await call('ensure_document')).toMatchObject({ pristine: true });
+    expect(files.store()).toBe(s);
   });
 });

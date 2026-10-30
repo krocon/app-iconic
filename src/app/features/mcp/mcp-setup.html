@@ -1,0 +1,136 @@
+<fieldset class="group" data-testid="mcp-setup">
+  <legend>{{ t.setupTitle }}</legend>
+  @if (!sidecar()) {
+    <p class="hint" data-testid="mcp-no-sidecar">
+      {{ mcp.info().debug ? t.noSidecarDev : t.noSidecar }}
+    </p>
+  } @else {
+    <div class="targets" role="radiogroup" [attr.aria-label]="t.target">
+      @for (k of targets; track k) {
+        <label class="check">
+          <input
+            type="radio"
+            name="mcp-target"
+            [attr.data-testid]="'mcp-target-' + k"
+            [value]="k"
+            [checked]="setup.target() === k"
+            (change)="choose(k)"
+          />
+          {{ t.targets[k] }}
+        </label>
+      }
+    </div>
+    @if (setup.status(); as st) {
+      <p class="hint" role="status" data-testid="mcp-client-state">{{ t.state[st.state] }}</p>
+      <p class="file">
+        <span class="hint">{{ t.file }}</span>
+        <code class="path" [title]="st.path" data-testid="mcp-client-path">{{ st.path }}</code>
+      </p>
+      <div class="buttons">
+        <button
+          type="button"
+          class="btn"
+          data-testid="mcp-setup-install"
+          [disabled]="setup.busy() || st.state === 'invalid'"
+          (click)="setup.preview(false)"
+        >
+          {{ st.state === 'installed' || st.state === 'other' ? t.update : t.install }}
+        </button>
+        @if (st.state === 'installed' || st.state === 'other') {
+          <button
+            type="button"
+            class="btn"
+            data-testid="mcp-setup-remove"
+            [disabled]="setup.busy()"
+            (click)="setup.preview(true)"
+          >
+            {{ t.remove }}
+          </button>
+        }
+      </div>
+    }
+    @if (setup.plan(); as p) {
+      <div class="preview" data-testid="mcp-setup-preview">
+        @if (p.plan.after === null) {
+          <p class="hint">{{ t.nothing }}</p>
+          <button type="button" class="btn" (click)="setup.cancel()">{{ t.cancel }}</button>
+        } @else {
+          <p class="hint">{{ p.remove ? t.previewRemove : t.previewInstall }}</p>
+          <pre
+            class="diff"
+            tabindex="0"
+            data-testid="mcp-setup-diff"
+            [attr.aria-label]="p.remove ? t.previewRemove : t.previewInstall"
+          ><code>@for (l of setup.diff(); track $index) {<span [class]="'line ' + l.kind">{{ sign(l.kind) }} {{ l.text }}
+</span>}</code></pre>
+          @if (p.plan.before !== null) {
+            <p class="hint">{{ t.backupHint }}</p>
+          }
+          <div class="buttons">
+            <button type="button" class="btn" (click)="setup.cancel()">{{ t.cancel }}</button>
+            <button
+              type="button"
+              class="btn primary"
+              data-testid="mcp-setup-apply"
+              [disabled]="setup.busy()"
+              (click)="setup.apply()"
+            >
+              {{ t.apply }}
+            </button>
+          </div>
+        }
+      </div>
+    }
+    @if (setup.result(); as r) {
+      <p
+        class="hint result"
+        [class.error]="r.kind === 'error'"
+        role="status"
+        data-testid="mcp-setup-result"
+      >
+        {{ resultText(r) }}
+        @if (r.kind !== 'error' && r.done.backup; as b) {
+          <br />{{ t.backup(b) }}
+        }
+      </p>
+    }
+  }
+</fieldset>
+
+@if (mcp.command(); as line) {
+  <fieldset class="group">
+    <legend>{{ s.mcpCommand }}</legend>
+    <div class="panel-row">
+      <code class="command" data-testid="settings-mcp-command">{{ line }}</code>
+      <button type="button" class="btn" (click)="copyCommand(line)">
+        {{ copied() ? s.mcpCopied : s.mcpCopy }}
+      </button>
+    </div>
+  </fieldset>
+}
+
+@if (sidecar()) {
+  <fieldset class="group">
+    <legend>{{ t.testTitle }}</legend>
+    <div class="buttons">
+      <button
+        type="button"
+        class="btn"
+        data-testid="mcp-test"
+        [disabled]="!actions.enabled('mcp.test')"
+        (click)="actions.run('mcp.test')"
+      >
+        {{ mcp.testing() ? t.testing : t.test }}
+      </button>
+    </div>
+    @if (mcp.probe(); as p) {
+      <p class="hint result" [class.error]="!p.ok" role="status" data-testid="mcp-test-result">
+        {{ probeText(p) }}
+      </p>
+    } @else if (mcp.probeError(); as e) {
+      <p class="hint result error" role="status" data-testid="mcp-test-result">
+        {{ errorText(e) }}
+      </p>
+    }
+  </fieldset>
+}

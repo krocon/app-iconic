@@ -21,7 +21,8 @@ export type DialogKind =
   | 'offset'
   | 'transform'
   | 'mockups'
-  | 'recovery';
+  | 'recovery'
+  | 'aiHistory';
 
 /**
  * Geometric fine tuning with a live preview (prompt 073 E3): a non-modal popover beside what opened
@@ -36,6 +37,8 @@ export const POPOVER_KINDS: ReadonlySet<DialogKind> = new Set([
   'optimizePath',
   // "In Context" (prompt 081): the scenes follow the canvas while it is edited
   'mockups',
+  // the AI history at the header badge (prompt 086): work goes on while it is open
+  'aiHistory',
 ]);
 
 /** Where a popover is anchored (client pixels of the opener). */

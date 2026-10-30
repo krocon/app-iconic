@@ -70,7 +70,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/fonts/             FontApi (list_fonts, text_to_path), DTOs + Grenzen (013)
   app/core/i18n/              translatable() (tiefer Proxy), phrasebook(), Sprach-Signal, systemLanguage,
                               catalogs.spec (Vollständigkeit aller Kataloge + Aktionsnamen, 015)
-  app/core/mcp/               McpApi (mcp_info/ready/reply/disconnect, Ereignisse mcp-call/mcp-status), DTOs (018)
+  app/core/mcp/               McpApi (mcp_info/ready/reply/disconnect, Ereignisse mcp-call/mcp-status), DTOs (018);
+                              clients/preview/install/uninstall/test (KI-Apps einrichten, Verbindungstest, 086)
   app/core/settings/          SettingsApi (load/save(patch)/reset, settings-changed, Fenster-Theme), DTOs,
                               settings-rules (TS-Spiegel von Rust merge/sanitize, SETTING_KEYS), theme (015)
   app/backend-providers.ts    Bindung der Fassaden; Dev-Build: backend-providers.dev.ts (Fakes im Browser, 003 E14)
@@ -147,7 +148,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               settings.set/reset), Texte
   app/features/mcp/           KI-Steuerung (018): McpStore (mcp-call → ausführen → mcp_reply, Status, mcp.disconnect),
                               McpTools (Tools im Fenster: Revision, Undo-Gruppe, Rückfrage), mcp-read (rein: Dokument,
-                              Baum, Node + BBox, Asset-SVG), mcp-policy (Sperrliste), Texte
+                              Baum, Node + BBox, Asset-SVG), mcp-policy (Sperrliste), Texte; 086: mcp-history (rein:
+                              Verlauf, Undo nur oben), McpBadge + McpHistoryPopover (`aiHistory`), McpSetup +
+                              McpSetupStore (Claude Desktop/Cursor einrichten, Diff, Test), line-diff (rein)
   app/features/color/         Farb-Workflow (074): document-colors (rein: sammeln, replaceColorCommand), ColorLibrary
                               (Swatches: Dokument/Zuletzt/Palette), Eyedropper (Werkzeug ⇧I, resvg-Pixel), color-actions
                               (`color.*`), ColorsSection (Dokumentfarben im Panel), Texte
@@ -244,7 +247,7 @@ e2e/                          Playwright-Tests gegen den Dev-Server (hardening: 
                               export-android-web: Favicon hell/dunkel, sichere Zone – 079; png-layer – 080;
                               mockups: Szenen folgen dem Dokument, Dark-Szene – 081; start-screen – 082; recovery – 083;
                               symbol-library – 084;
-                              shortcut-editor – 085)
+                              shortcut-editor – 085; mcp-history: Verlauf, Einrichten – 086)
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
@@ -264,6 +267,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/mcp.rs                  KI-Router (018, rein über WindowHost): Zielfenster, Calls, Pfade der KI erlauben (033);
                               mcp_args.rs: Argumente prüfen/begrenzen, Timeouts, file_paths (033)
   src/mcp_commands.rs         Brücke an/aus nach settings.mcp, TauriHost (mcp-call → mcp_reply), mcp_* Commands (018)
+  src/mcp_setup_commands.rs   mcp_clients, mcp_setup_preview, mcp_install, mcp_uninstall, mcp_test (086)
   src/open_files.rs           `.icon` aus argv, Zweitstart (single-instance) und Finder (`RunEvent::Opened`) → Fenster (030)
   src/reveal.rs               „Im Ordner zeigen“ nur für exportierte Dateien (030)
   src/thumbnail_commands.rs   save_thumbnail, recent_entries (Startbildschirm, 082)
@@ -292,6 +296,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
                               not_allowed), Art einer abgelegten Datei
     src/menu_spec.rs          MenuSpec prüfen, Accelerators, Menü ohne Fenster (005)
     src/keymap_file.rs        keymap.json laden (005), Patch atomar schreiben, Unbekanntes bleibt (085)
+    src/mcp_clients.rs        Konfig von Claude Desktop/Cursor: Pfade je OS (feste Liste), zusammenführen/entfernen,
+                              Sicherung, atomar (086)
     src/settings.rs           settings.json: je Feld nachsichtig (merge), sanitize, migrate, apply_patch (015);
                               settings/model.rs: Typen + Standardwerte (033)
     src/export/               Export (012): png (resvg, sichere usvg-Optionen), files (Namen, Überschreiben, atomar,
@@ -303,7 +309,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
     src/fonts/                Schriften (012, 013): system (fontdb einmal je Prozess, generische Familien), FontCatalog
                               (Familien/Stile/Ids), outline (Text → Pfad: harfrust-Shaping, skrifa-Umrisse, BBox)
   mcp/                        Crate `ai-mcp` + Binary `app-iconic-mcp` (018, aus editlicious ed-mcp): server (MCP über
-                              stdio), tools (Schemas, Schnappschuss tools.snapshot.json), bridge, client, host
+                              stdio), tools (Schemas, Schnappschuss tools.snapshot.json), bridge, client, host;
+                              probe (Verbindungstest: Handshake + list_documents, 086; Test gegen das echte Binary)
   tauri.sidecar.conf.json     bundle.externalBin für das Sidecar (nur Release, 030)
   icons/source/app-icon.svg   Quelle des App-Icons
 testdata/fixtures/            SVGs und camscanner.icon aus der Vorlage (unverändert); all-fields.icon (010: alle

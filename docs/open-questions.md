@@ -266,3 +266,14 @@
 2. Gesperrt vs. gewarnt: ⌘Q/⌘H/⌘M gesperrt, ⌘W/⌘, und andere Standardkürzel nur gewarnt – passt das?
 3. Esc beendet die Aufnahme; Esc selbst lässt sich daher nicht als neues Kürzel aufnehmen (nur über `keymap.json` bzw.
    Zurücksetzen). Ok?
+
+## Prompt 086
+
+1. **Windows/Claude Desktop aus dem Microsoft Store (MSIX)**: solche Installationen lesen die Konfiguration
+   möglicherweise aus einem virtualisierten Ordner statt `%APPDATA%\Claude`. Die App schreibt nach der offiziellen
+   Doku (`%APPDATA%`) – bitte auf Windows prüfen, ob Claude Desktop den Eintrag sieht.
+2. **macOS**: „Einrichten…“ für Claude Desktop und Cursor einmal echt durchspielen (Eintrag
+   `/Applications/AppIconic.app/Contents/MacOS/app-iconic-mcp`, Neustart von Claude Desktop, „Verbindung testen“).
+3. Cursor nur global (`~/.cursor/mcp.json`) – auch je Projekt (`.cursor/mcp.json`, Ordner per Dialog) gewünscht?
+4. Weitere Ziele (z. B. Windsurf, VS Code `mcp.json` mit `servers` statt `mcpServers`)? Claude Code bleibt bei der
+   kopierbaren Zeile `claude mcp add …`.

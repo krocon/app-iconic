@@ -2,7 +2,16 @@ import { Injectable } from '@angular/core';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { call } from '../backend/call';
-import { McpCall, McpError, McpInfo } from './mcp.models';
+import {
+  McpCall,
+  McpClientStatus,
+  McpError,
+  McpInfo,
+  McpProbe,
+  McpSetupDone,
+  McpSetupPlan,
+  McpTarget,
+} from './mcp.models';
 
 const MCP_CALL = 'mcp-call';
 const MCP_STATUS = 'mcp-status';
@@ -24,6 +33,15 @@ export abstract class McpApi {
   abstract onCall(fn: (c: McpCall) => void): Promise<() => void>;
   /** Bridge on/off, connections. */
   abstract onStatus(fn: (i: McpInfo) => void): Promise<() => void>;
+  /** The AI clients with their configuration (design 086 E7). */
+  abstract clients(): Promise<McpClientStatus[]>;
+  /** What setting up (`remove: false`) or removing would write (design 086 E4). */
+  abstract preview(target: McpTarget, remove: boolean): Promise<McpSetupPlan>;
+  /** Writes the entry; `expected` = `before` of the preview the user confirmed. */
+  abstract install(target: McpTarget, expected: string | null): Promise<McpSetupDone>;
+  abstract uninstall(target: McpTarget, expected: string | null): Promise<McpSetupDone>;
+  /** Starts the sidecar, MCP handshake, one call to the app (design 086 E8). */
+  abstract test(): Promise<McpProbe>;
 }
 
 @Injectable()
@@ -50,5 +68,25 @@ export class TauriMcpApi extends McpApi {
 
   onStatus(fn: (i: McpInfo) => void): Promise<() => void> {
     return listen<McpInfo>(MCP_STATUS, (e) => fn(e.payload));
+  }
+
+  clients(): Promise<McpClientStatus[]> {
+    return call<McpClientStatus[]>('mcp_clients');
+  }
+
+  preview(target: McpTarget, remove: boolean): Promise<McpSetupPlan> {
+    return call<McpSetupPlan>('mcp_setup_preview', { target, remove });
+  }
+
+  install(target: McpTarget, expected: string | null): Promise<McpSetupDone> {
+    return call<McpSetupDone>('mcp_install', { target, expected });
+  }
+
+  uninstall(target: McpTarget, expected: string | null): Promise<McpSetupDone> {
+    return call<McpSetupDone>('mcp_uninstall', { target, expected });
+  }
+
+  test(): Promise<McpProbe> {
+    return call<McpProbe>('mcp_test');
   }
 }

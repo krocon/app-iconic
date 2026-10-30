@@ -57,8 +57,6 @@ const EN = {
   mcpCommand: 'Set up Claude Code',
   mcpCopy: 'Copy',
   mcpCopied: 'Copied',
-  mcpDesktop: 'Claude Desktop and other clients: start this program as an MCP server over stdio.',
-  mcpNoSidecar: 'The program app-iconic-mcp is not next to the app (development build?).',
   mcpOff: 'Off – no connection is possible.',
   mcpListening: 'On – no AI is connected.',
   mcpConnected: (n: number) => (n === 1 ? 'AI connected.' : `${n} AI clients connected.`),
@@ -139,9 +137,6 @@ export const SETTINGS_TEXTS = translatable('settings', EN, {
     mcpCommand: 'Claude Code einrichten',
     mcpCopy: 'Kopieren',
     mcpCopied: 'Kopiert',
-    mcpDesktop:
-      'Claude Desktop und andere Clients: dieses Programm als MCP-Server über stdio starten.',
-    mcpNoSidecar: 'Das Programm app-iconic-mcp liegt nicht neben der App (Entwicklungs-Build?).',
     mcpOff: 'Aus – keine Verbindung möglich.',
     mcpListening: 'An – keine KI verbunden.',
     mcpConnected: (n: number) => (n === 1 ? 'KI verbunden.' : `${n} KI-Clients verbunden.`),

@@ -10,22 +10,18 @@ undo step** (“Undo AI: Add Circle”).
 
 1. **Settings → AI control → “Allow AI control (MCP)”.** It is off by default; while it is off, AppIconic opens no
    port at all.
-2. Copy the line shown there into a terminal (Claude Code), for example:
+2. **Claude Desktop or Cursor – one click (prompt 086):** in the same tab under “Connect an AI app” choose the app
+   and press **Set Up…**. AppIconic shows the change of the app's configuration file as a diff and writes it only
+   after **Apply** – the other servers and settings in the file stay, the old file is kept as a backup copy next to
+   it (`<name>.app-iconic-<time>.bak`), and the file is replaced atomically. **Remove…** takes the entry out the same
+   way. Quit and restart Claude Desktop afterwards (Cursor reloads `mcp.json` by itself or after a restart).
 
-   ```bash
-   # macOS
-   claude mcp add app-iconic -- "/Applications/AppIconic.app/Contents/MacOS/app-iconic-mcp"
-   # Linux (deb/rpm)
-   claude mcp add app-iconic -- "/usr/bin/app-iconic-mcp"
-   # Windows
-   claude mcp add app-iconic -- "C:\Users\<you>\AppData\Local\AppIconic\app-iconic-mcp.exe"
-   ```
+   | App            | Configuration file (from the official docs)                                                                    |
+   | -------------- | -------------------------------------------------------------------------------------------------------------- |
+   | Claude Desktop | macOS `~/Library/Application Support/Claude/claude_desktop_config.json`, Windows `%APPDATA%\Claude\claude_desktop_config.json`, Linux `~/.config/Claude/claude_desktop_config.json` |
+   | Cursor         | `~/.cursor/mcp.json` (all systems; the global file, not the one of a project)                                  |
 
-   The settings show the exact path of your installation. `claude mcp add --scope user …` makes it available in
-   every project.
-
-3. **Claude Desktop** (and other MCP clients): add the program as a local (stdio) server in
-   `claude_desktop_config.json` (Claude Desktop: Settings → Developer → Edit Config):
+   The entry is
 
    ```json
    {
@@ -37,10 +33,33 @@ undo step** (“Undo AI: Add Circle”).
    }
    ```
 
-   and restart Claude Desktop.
+   (Cursor additionally `"type": "stdio"`). A configuration file with **comments** or a syntax error is not plain
+   JSON: AppIconic reports it and does not touch it – fix it by hand or add the entry yourself. The paths are fixed
+   in the app; nothing from the window can choose another file.
 
-AppIconic must be running. The header shows **AI** while an assistant is connected – click it (or run _Disconnect
-AI_, also in the settings) to cut every connection. A client that calls while AppIconic is closed or the setting is
+3. **Claude Code:** copy the line shown there into a terminal, for example:
+
+   ```bash
+   # macOS
+   claude mcp add app-iconic -- "/Applications/AppIconic.app/Contents/MacOS/app-iconic-mcp"
+   # Linux (deb/rpm)
+   claude mcp add app-iconic -- "/usr/bin/app-iconic-mcp"
+   # Windows
+   claude mcp add app-iconic -- "C:\Users\<you>\AppData\Local\AppIconic\app-iconic-mcp.exe"
+   ```
+
+   The settings show the exact path of your installation. `claude mcp add --scope user …` makes it available in
+   every project. Other MCP clients: start that program as a local (stdio) server.
+
+4. **Test Connection** starts the helper program like an AI app does, runs the MCP handshake (`initialize`,
+   `tools/list`) and asks the app for its documents – with a time limit of 5 s per step. It tells you whether the
+   helper program is missing, does not answer, or works but AI control is off.
+
+AppIconic must be running. The header shows **AI** while an assistant is connected. Click it (_AI History_) for the
+last AI calls of this window – time, tool, what (action id, command type, format – never contents), result or error
+code. While the step of a call is the last one in the undo history, **Undo** takes exactly that call back. The
+history is kept only in memory (50 calls per window); _Clear AI History_ empties it. _Disconnect AI_ (in that
+popover and in the settings) cuts every connection; the badge stays, dimmed, as long as there is a history. A client that calls while AppIconic is closed or the setting is
 off gets the clear error `not_running: AppIconic is not running, or AI control is off …`.
 
 “Ask before the AI saves to a new place or exports” (on by default) shows a question in the window before the AI
@@ -95,9 +114,12 @@ was edited in between: the call fails with `revision_conflict` and the current s
 ## For developers
 
 - Code: crate `ai-mcp` (`src-tauri/mcp`: stdio server, bridge, tool schemas with the snapshot
-  `tools.snapshot.json`), `src-tauri/src/mcp.rs` (router over the windows), `mcp_commands.rs` (Tauri),
-  `src/app/features/mcp/` (tools in the window). Design: `prompts/done/018-mcp-server.design.md`.
-- Development: `pnpm mcp:sidecar:dev` builds `src-tauri/target/debug/app-iconic-mcp` next to the debug app.
+  `tools.snapshot.json`, `probe` = connection test), `src-tauri/src/mcp.rs` (router over the windows),
+  `mcp_commands.rs` (Tauri), `mcp_setup_commands.rs` + `ai-core` `mcp_clients` (setting up Claude Desktop/Cursor),
+  `src/app/features/mcp/` (tools in the window, history, setup). Design: `prompts/done/018-mcp-server.design.md`,
+  `prompts/done/086-ki-einrichtung-verlauf.design.md`.
+- Development: `pnpm mcp:sidecar:dev` builds `src-tauri/target/debug/app-iconic-mcp` next to the debug app (also the
+  one `pnpm tauri dev` runs) – setting up and the connection test use exactly that program; without it they say so.
   Releases: `node scripts/mcp-sidecar.mjs [<target triple>]` puts the sidecar into `src-tauri/binaries/`, and
   `tauri build --config src-tauri/tauri.sidecar.conf.json` bundles it (`bundle.externalBin`, prompt 030).
 - End to end: `node scripts/mcp-e2e.mjs <sidecar> <out-dir>` drives a running AppIconic (AI control on) through the

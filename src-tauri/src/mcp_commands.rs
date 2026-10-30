@@ -39,6 +39,8 @@ pub struct McpInfo {
     pub connections: usize,
     /// The sidecar next to the app program, `None` = missing (design 018 E17).
     pub sidecar: Option<String>,
+    /// A debug build: a missing sidecar is built with `pnpm mcp:sidecar:dev` (design 086 E6).
+    pub debug: bool,
 }
 
 /// The bridge of the process and the calls in flight.
@@ -196,6 +198,7 @@ fn info(app: &AppHandle, connections: Option<usize>) -> McpInfo {
         enabled: now.is_some(),
         connections: connections.or(now).unwrap_or(0),
         sidecar: sidecar_path().map(|p| p.to_string_lossy().into_owned()),
+        debug: cfg!(debug_assertions),
     }
 }
 

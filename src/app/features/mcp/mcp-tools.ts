@@ -82,6 +82,10 @@ export class McpTools {
     switch (tool) {
       case 'describe':
         return summary(this.store(), this.untitled());
+      // new_document (prompt 086): a window on its start screen (082) gets its empty document
+      case 'ensure_document':
+        if (!this.files.store()) await this.files.newDocument();
+        return summary(this.store(), this.untitled());
       case 'open': {
         // reading a file is a file access too: the user decides (prompt 031)
         const path = String(a['path']);

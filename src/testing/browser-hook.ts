@@ -36,6 +36,8 @@ import { SettingsApi } from '../app/core/settings/settings-api';
 import { Settings } from '../app/core/settings/settings.models';
 import { SettingsStore } from '../app/features/settings/settings.store';
 import { FakeSettingsApi } from './fake-settings-api';
+import { FakeMcpApi } from './fake-mcp-api';
+import { McpApi } from '../app/core/mcp/mcp-api';
 import { McpStore } from '../app/features/mcp/mcp.store';
 import { DropApi } from '../app/core/drop/drop-api';
 import { DroppedFile, FileDropEvent } from '../app/core/drop/drop.models';
@@ -105,6 +107,8 @@ export interface AppIconicHook {
    * result, or `{ error: { code, message } }`.
    */
   mcp(tool: string, args?: Record<string, unknown>): Promise<unknown>;
+  /** The AI backend in memory: sidecar, client configurations, connection test (prompt 086). */
+  mcpApi: FakeMcpApi;
   /** Plays a drag of files from the system onto the window (design 071): enter, over, drop. */
   dropFiles(files: DroppedFile[], clientX: number, clientY: number, phases?: string[]): void;
   /** An image file `readImageFile` returns (design 008, 071). */
@@ -132,6 +136,7 @@ export function installTestHook(): void {
   const settings = inject(SettingsStore);
   const settingsApi = inject(SettingsApi) as FakeSettingsApi;
   const mcp = inject(McpStore);
+  const mcpApi = inject(McpApi) as FakeMcpApi;
   const drop = inject(DropApi) as FakeDropApi;
   const node = (asset: string, id: string) =>
     (store()?.document().node({ asset, id }) as SVGGraphicsElement | null) ?? null;
@@ -207,6 +212,7 @@ export function installTestHook(): void {
     },
     settings: () => settings.settings(),
     settingsApi,
+    mcpApi,
     flushSettings: () => settings.flush(),
     mcp: (tool, args) => mcp.execute(tool, args ?? {}).catch((error: unknown) => ({ error })),
   };

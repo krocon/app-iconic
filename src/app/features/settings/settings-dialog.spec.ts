@@ -90,7 +90,7 @@ describe('settings in the window (design 015 E11–E14)', () => {
     expect(TestBed.inject(SettingsStore).settings().mcp.enabled).toBe(true);
     // the backend reports the open bridge and a sidecar next to the app
     const mcp = TestBed.inject(McpApi) as FakeMcpApi;
-    mcp.setStatus({ enabled: true, connections: 1, sidecar: '/Apps/app-iconic-mcp' });
+    mcp.setStatus({ enabled: true, connections: 1, sidecar: '/Apps/app-iconic-mcp', debug: false });
     await fixture.whenStable();
     expect(el.querySelector('[data-testid="settings-mcp-status"]')!.textContent).toContain(
       'AI connected',

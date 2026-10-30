@@ -9,6 +9,10 @@ export const APP_FILE_ACTIONS: readonly ActionDef[] = [
   APP('app.settings', 'Settings…'),
   // AI control (design 018 E16): closes every connection of AI assistants (MCP)
   APP('mcp.disconnect', 'Disconnect AI'),
+  // prompt 086: the AI history at the header badge (popover), clearing it, the connection test
+  APP('mcp.history', 'AI History'),
+  APP('mcp.clearHistory', 'Clear AI History'),
+  APP('mcp.test', 'Test AI Connection'),
   // settings (design 015 E11): `key` is a path of `SETTING_KEYS` (`canvas.rulers`, `theme` …)
   APP('settings.set', 'Change a Setting', {
     palette: false,
