@@ -10,6 +10,8 @@ import { FontApi, TauriFontApi } from './core/fonts/font-api';
 import { SettingsApi, TauriSettingsApi } from './core/settings/settings-api';
 import { FakeSettingsApi } from '../testing/fake-settings-api';
 import { McpApi, TauriMcpApi } from './core/mcp/mcp-api';
+import { DropApi, TauriDropApi } from './core/drop/drop-api';
+import { FakeDropApi } from '../testing/fake-drop-api';
 import { FakeMcpApi } from '../testing/fake-mcp-api';
 import { FakeKeymapApi, FakeMenuApi } from '../testing/fake-menu-api';
 import { FakeIconFileApi } from '../testing/fake-icon-file-api';
@@ -64,6 +66,7 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
       { provide: FontApi, useClass: TauriFontApi },
       { provide: SettingsApi, useClass: TauriSettingsApi },
       { provide: McpApi, useClass: TauriMcpApi },
+      { provide: DropApi, useClass: TauriDropApi },
     ]
   : [
       // About keeps the real facade: it shows "desktop backend not available" (e2e/shell)
@@ -78,5 +81,6 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
       // "settings.json" in localStorage: a reload is the restart of the e2e tests (design 015 E18)
       { provide: SettingsApi, useFactory: () => new FakeSettingsApi(browserStorage()) },
       { provide: McpApi, useClass: FakeMcpApi },
+      { provide: DropApi, useFactory: () => new FakeDropApi() },
       provideAppInitializer(installTestHook),
     ];

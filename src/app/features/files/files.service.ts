@@ -86,25 +86,41 @@ export class FilesService {
 
   importSvg(): Promise<void> {
     return this.exclusive(async () => {
-      const s = this.store();
-      if (!s) return;
+      if (!this.store()) return;
       try {
         const path = await this.api.pickSvgFile();
-        if (!path) return;
-        const file = await this.api.readSvgFile(path);
-        const result = importSvg(s.document(), file);
-        if (!result) {
-          await this.inform(T.importFailed, T.invalidSvg);
-          return;
-        }
-        s.execute(result.command);
-        this.notice.set(
-          describeNotices(result.removed.map((code) => ({ code, name: result.assetName }))),
-        );
+        if (path) await this.importSvgNow(path);
       } catch (e) {
         await this.showError(T.importFailed, e);
       }
     });
+  }
+
+  /** "Import SVG" of a file dropped onto the window (design 071 E3), without a dialog. */
+  importSvgFile(path: string): Promise<void> {
+    return this.exclusive(async () => {
+      if (!this.store()) await this.replaceWithNew();
+      try {
+        await this.importSvgNow(path);
+      } catch (e) {
+        await this.showError(T.importFailed, e);
+      }
+    });
+  }
+
+  private async importSvgNow(path: string): Promise<void> {
+    const s = this.store();
+    if (!s) return;
+    const file = await this.api.readSvgFile(path);
+    const result = importSvg(s.document(), file);
+    if (!result) {
+      await this.inform(T.importFailed, T.invalidSvg);
+      return;
+    }
+    s.execute(result.command);
+    this.notice.set(
+      describeNotices(result.removed.map((code) => ({ code, name: result.assetName }))),
+    );
   }
 
   /** Save (only when there is something to save); a new document asks for a path. */

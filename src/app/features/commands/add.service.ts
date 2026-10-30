@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { describeFsError, toFsError } from '../../core/errors/fs-error';
 import { IconFileApi } from '../../core/icon-file/icon-file-api';
+import { ImageFileDto } from '../../core/icon-file/icon-file.models';
 import { DialogService } from '../../shared/dialog/dialog.service';
 import { Point } from '../../shared/geometry/view-transform';
 import { CanvasEditStore } from '../canvas/canvas-edit.store';
@@ -101,6 +102,15 @@ function withoutNs(markup: string): string {
     .replace(' xmlns:xlink="http://www.w3.org/1999/xlink"', '');
 }
 
+/** `centerX` / `centerY` of the arguments: the centre in document coordinates (design 071 E3). */
+function argCenter(args: Args): Point | null {
+  const x = args?.['centerX'];
+  const y = args?.['centerY'];
+  return typeof x === 'number' && typeof y === 'number' && Number.isFinite(x) && Number.isFinite(y)
+    ? { x, y }
+    : null;
+}
+
 /**
  * The "Add" functions of the window (design 008): builds the markup with the defaults (or the
  * caller's arguments), finds the place (`insert-target.ts`) and the centre (`insert-center.ts`),
@@ -118,6 +128,11 @@ export class AddService {
   private readonly clipEdit = inject(ClipEditStore);
   private readonly memory = inject(StyleMemory);
   private readonly construction = inject(ConstructionMode);
+
+  constructor() {
+    // a pasted image is added like "Add › Image" (design 071 E5)
+    this.edit.imagePaster = (image) => this.addImageFile(image);
+  }
 
   /** Adding works when no file action is running. */
   canAdd(): boolean {
@@ -146,11 +161,11 @@ export class AddService {
         index: typeof index === 'number' ? index : el.children.length,
       };
     } else if (this.clipEdit.scope(doc)) {
-      return this.clipPlace(doc.refOf(this.clipEdit.scope(doc)!)!, this.clipEdit.scope(doc)!);
+      return this.clipPlace(doc.refOf(this.clipEdit.scope(doc)!)!, this.clipEdit.scope(doc)!, args);
     } else {
       target = insertTarget(doc, this.edit.selection(), this.canvasEdit.context());
     }
-    const docCenter = visibleCenter(this.canvas.view(), this.canvas.viewport());
+    const docCenter = argCenter(args) ?? visibleCenter(this.canvas.view(), this.canvas.viewport());
     const parentEl = target.kind === 'node' ? doc.node(target.parent) : null;
     const host = this.canvas.host;
     return {
@@ -165,8 +180,8 @@ export class AddService {
    * The clip path edit mode (design 014 E7): new shapes go into the clip, around the visible centre
    * in clip space. In bounding-box units the defaults are document sized: a `transform` maps them.
    */
-  private clipPlace(ref: NodeRef, clip: Element): Place {
-    const docCenter = visibleCenter(this.canvas.view(), this.canvas.viewport());
+  private clipPlace(ref: NodeRef, clip: Element, args: Args): Place {
+    const docCenter = argCenter(args) ?? visibleCenter(this.canvas.view(), this.canvas.viewport());
     const target: InsertTarget = { kind: 'node', parent: ref, index: clip.children.length };
     const host = this.canvas.host;
     const m = host ? clipSpaceToDocument(host, clip) : null;
@@ -276,34 +291,42 @@ export class AddService {
    * natural size, made smaller to at most 512, centred.
    */
   async addImage(args?: Args): Promise<boolean> {
-    let href = typeof args?.['href'] === 'string' ? args['href'] : null;
-    let natural: { width: number; height: number } | null;
+    const href = typeof args?.['href'] === 'string' ? args['href'] : null;
     if (href !== null) {
       if (!isImageDataUrl(href)) {
         this.files.notice.set(T.imageFailed);
         return false;
       }
-      natural = svgDataUrlSize(href);
-    } else {
-      try {
-        const path = await this.api.pickImageFile();
-        if (!path) return false;
-        const file = await this.api.readImageFile(path);
-        href = file.dataUrl;
-        natural =
-          file.width && file.height
-            ? { width: file.width, height: file.height }
-            : svgDataUrlSize(file.dataUrl);
-      } catch (e) {
-        this.files.notice.set(`${T.imageFailed} ${describeFsError(toFsError(e))}`);
-        return false;
-      }
+      return this.placeImage(href, svgDataUrlSize(href), args);
     }
+    try {
+      const path = await this.api.pickImageFile();
+      if (!path) return false;
+      return this.addImageFile(await this.api.readImageFile(path), args);
+    } catch (e) {
+      this.files.notice.set(`${T.imageFailed} ${describeFsError(toFsError(e))}`);
+      return false;
+    }
+  }
+
+  /** An image file read by the backend (dialog, dropped file, clipboard – design 071). */
+  addImageFile(file: ImageFileDto, args?: Args): Promise<boolean> {
+    const natural =
+      file.width && file.height
+        ? { width: file.width, height: file.height }
+        : svgDataUrlSize(file.dataUrl);
+    return this.placeImage(file.dataUrl, natural, args);
+  }
+
+  private placeImage(
+    url: string,
+    natural: { width: number; height: number } | null,
+    args?: Args,
+  ): Promise<boolean> {
     const fitted = fitImage(natural?.width ?? 0, natural?.height ?? 0);
     const num = (k: string) => (typeof args?.[k] === 'number' ? (args[k] as number) : undefined);
     const w = num('width') ?? fitted.width;
     const h = num('height') ?? fitted.height;
-    const url = href;
     return this.insertBuilt('addImage', args, (c) => {
       const spec: ElementSpec = imageSpec(url, c, w, h);
       const x = num('x');

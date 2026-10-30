@@ -1,6 +1,8 @@
 import { isLocked } from '../lock/lock';
 import { inject, Injectable } from '@angular/core';
-import { ClipboardApi } from '../../core/clipboard/clipboard-api';
+import { ClipboardApi, imageFromBlob } from '../../core/clipboard/clipboard-api';
+import { describeFsError, toFsError } from '../../core/errors/fs-error';
+import { ImageFileDto } from '../../core/icon-file/icon-file.models';
 import { AskService } from '../../shared/ask/ask.service';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { CommandError, CompositeCommand, DocCommand, ReorderNode } from '../document/commands';
@@ -35,7 +37,7 @@ import { usersOutside } from '../document/commands/clip-commands';
 import { EMPTY_SELECTION, followUpSelection, Selection } from './follow-up';
 import { HIERARCHY_TEXTS as T } from './hierarchy-texts';
 import { buildTree, nodeLabelOf } from './hierarchy-model';
-import { pasteCommand } from './paste';
+import { parseClipboard, pasteCommand } from './paste';
 import { visibilityCommand } from './visibility';
 
 /**
@@ -219,22 +221,53 @@ export class EditService {
     return (await this.copy()) && this.delete(undefined, 'cut');
   }
 
-  /** Paste markup (`text`) or the clipboard's. */
-  async paste(text?: string): Promise<boolean> {
-    const s = this.store();
-    if (!s) return false;
+  /**
+   * Inserts a pasted image (design 071 E5) – set by `AddService` ("Add › Image"), which depends on
+   * this service; without it only markup is pasted.
+   */
+  imagePaster: ((image: ImageFileDto) => Promise<boolean>) | null = null;
+
+  /**
+   * Paste markup (`text`) or the clipboard's (design 006 E12). Without SVG markup an image is
+   * pasted (design 071 E5): `image` from a paste event, else the clipboard's (`readImage`) – but
+   * only when no `text` was given by a caller (the AI pastes markup only).
+   */
+  async paste(text?: string, image?: Blob | null): Promise<boolean> {
+    const allowImage = text === undefined || image !== undefined;
     let t = text;
+    let failed = false;
     if (t === undefined) {
       try {
         t = await this.clipboard.readText();
       } catch {
-        this.files.notice.set(T.clipboardFailed);
+        failed = true;
+        t = '';
+      }
+    }
+    const s = this.store();
+    if (s && parseClipboard(t)) {
+      const ok = this.runPlanned(pasteCommand(s.document(), t, this.selection()));
+      if (!ok) this.files.notice.set(T.pasteFailed);
+      return ok;
+    }
+    const paster = this.imagePaster;
+    if (allowImage && paster) {
+      try {
+        const img = image ? await imageFromBlob(image) : await this.clipboard.readImage();
+        if (img) return paster(img);
+      } catch (e) {
+        const err = toFsError(e);
+        this.files.notice.set(
+          err.code === 'too_large' || err.code === 'invalid_image'
+            ? `${T.imagePasteFailed} ${describeFsError(err)}`
+            : T.clipboardFailed,
+        );
         return false;
       }
     }
-    const ok = this.runPlanned(pasteCommand(s.document(), t, this.selection()));
-    if (!ok) this.files.notice.set(T.pasteFailed);
-    return ok;
+    if (!s) return false;
+    this.files.notice.set(failed ? T.clipboardFailed : T.pasteFailed);
+    return false;
   }
 
   // ---- arrange ----

@@ -1,3 +1,5 @@
+import { DropHint } from './features/files/drop-hint';
+import { FileDropService } from './features/files/file-drop.service';
 import { registerClipActions } from './features/clip/clip-actions';
 import { ClipService } from './features/clip/clip.service';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
@@ -71,6 +73,7 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
 @Component({
   selector: 'app-root',
   imports: [
+    DropHint,
     AppDialogs,
     CanvasView,
     CommandSidebar,
@@ -231,6 +234,7 @@ import { MCP_TEXTS } from './features/mcp/mcp-texts';
       </div>
     }
     <app-dialogs />
+    <app-drop-hint />
   `,
   styleUrl: './app.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -264,6 +268,8 @@ export class App implements OnInit {
     );
     registerEditActions(this.actions, inject(EditService), this.dialogs, this.destroyRef);
     registerAddActions(this.actions, inject(AddService), this.destroyRef);
+    // files from Finder/Explorer (design 071)
+    inject(FileDropService).start(this.destroyRef);
     const canvasTools = inject(CanvasTools);
     registerToolActions(
       this.actions,

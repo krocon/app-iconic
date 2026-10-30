@@ -30,6 +30,10 @@ import { Settings } from '../app/core/settings/settings.models';
 import { SettingsStore } from '../app/features/settings/settings.store';
 import { FakeSettingsApi } from './fake-settings-api';
 import { McpStore } from '../app/features/mcp/mcp.store';
+import { DropApi } from '../app/core/drop/drop-api';
+import { DroppedFile, FileDropEvent } from '../app/core/drop/drop.models';
+import { ImageFileDto } from '../app/core/icon-file/icon-file.models';
+import { FakeDropApi } from './fake-drop-api';
 
 /**
  * `window.__appIconic` – the test hook of the browser mode (design 003 E14): Playwright reaches
@@ -90,6 +94,10 @@ export interface AppIconicHook {
    * result, or `{ error: { code, message } }`.
    */
   mcp(tool: string, args?: Record<string, unknown>): Promise<unknown>;
+  /** Plays a drag of files from the system onto the window (design 071): enter, over, drop. */
+  dropFiles(files: DroppedFile[], clientX: number, clientY: number, phases?: string[]): void;
+  /** An image file `readImageFile` returns (design 008, 071). */
+  addImageFile(path: string, image: ImageFileDto): void;
 }
 
 declare global {
@@ -112,6 +120,7 @@ export function installTestHook(): void {
   const settings = inject(SettingsStore);
   const settingsApi = inject(SettingsApi) as FakeSettingsApi;
   const mcp = inject(McpStore);
+  const drop = inject(DropApi) as FakeDropApi;
   const node = (asset: string, id: string) =>
     (store()?.document().node({ asset, id }) as SVGGraphicsElement | null) ?? null;
   window.__appIconic = {
@@ -135,6 +144,17 @@ export function installTestHook(): void {
     },
     pick: (...paths) => files.picks.push(...paths),
     requestClose: () => win.requestClose(),
+    dropFiles: (dropped, x, y, phases = ['enter', 'over', 'drop']) => {
+      for (const phase of phases) {
+        drop.emit({
+          phase,
+          files: phase === 'enter' || phase === 'drop' ? dropped : [],
+          x,
+          y,
+        } as FileDropEvent);
+      }
+    },
+    addImageFile: (path, image) => files.imageFiles.set(path, image),
     canvas,
     clientToDocument: (clientX, clientY) =>
       canvas.host ? clientToDocument(canvas.host, { clientX, clientY }) : null,

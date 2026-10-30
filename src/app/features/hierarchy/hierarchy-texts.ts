@@ -40,6 +40,7 @@ const EN = {
     `Moved to another image: references ${ids.map((i) => `#${i}`).join(', ')} no longer resolve.`,
   pasteFailed: 'The clipboard holds no SVG markup that could be pasted.',
   clipboardFailed: 'The clipboard could not be used.',
+  imagePasteFailed: 'The image could not be pasted.',
 } as const;
 
 export const HIERARCHY_TEXTS = translatable('hierarchy', EN, {
@@ -82,5 +83,6 @@ export const HIERARCHY_TEXTS = translatable('hierarchy', EN, {
       `In ein anderes Bild verschoben: die Verweise ${ids.map((i) => `#${i}`).join(', ')} zeigen ins Leere.`,
     pasteFailed: 'Die Zwischenablage enthält kein SVG, das eingefügt werden kann.',
     clipboardFailed: 'Die Zwischenablage konnte nicht benutzt werden.',
+    imagePasteFailed: 'Das Bild konnte nicht eingefügt werden.',
   },
 });

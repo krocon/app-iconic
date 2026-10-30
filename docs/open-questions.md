@@ -144,3 +144,11 @@
    (danach ändert jede Bearbeitung nur ihre Stelle) – akzeptabel, oder ein formerhaltender Serializer?
 3. Verlaufseditor (Prompt 032) und Review-Folgen (Prompt 033) – Reihenfolge/Umfang so recht?
 
+
+## Prompt 071
+
+1. **Mac/Windows**: eine `.svg`, ein `.png` und ein `.icon` aus Finder/Explorer ins Fenster ziehen – erscheint der
+   Hinweis am Zeiger an der richtigen Stelle (Retina/HiDPI) und landet das Element dort? (Im Container nur mit
+   Fake-Ereignis geprüft.)
+2. **Mac**: Screenshot mit `⌘⇧4` + `Ctrl` in die Zwischenablage, dann `⌘V` im Fenster – kommt ein `<image>`? Und ein
+   in Vorschau/Safari kopiertes Bild?

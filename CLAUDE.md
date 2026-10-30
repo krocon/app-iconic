@@ -57,7 +57,9 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               tool-action-args (Freehand/Text to Path/Symbol, 013), clip-action-args (014),
                               sketch-action-args (019)
   app/core/menu/              MenuApi (natives Menü, menu-action), KeymapApi (keymap.json), MenuSpec (005)
-  app/core/clipboard/         ClipboardApi (Text der System-Zwischenablage über navigator.clipboard, 006)
+  app/core/clipboard/         ClipboardApi (Text der System-Zwischenablage über navigator.clipboard, 006; Bild:
+                              readImage über Rust/arboard, imageFromBlob, 071)
+  app/core/drop/              DropApi (`file-drop`: Dateien aus Finder/Explorer, 071), DTOs
   app/core/export/            ExportApi (Ordner-Dialog, export_svg, export_png mit Channel, cancel), DTOs (012)
   app/core/fonts/             FontApi (list_fonts, text_to_path), DTOs + Grenzen (013)
   app/core/i18n/              translatable() (tiefer Proxy), phrasebook(), Sprach-Signal, systemLanguage,
@@ -74,7 +76,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               svg-format 011) (003–011); commands/replace-node (011); model/clip-model +
                               clip-units, commands/clip-commands (014)
   app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster/Quit), Recent,
-                              file-actions (Aktionen der Datei-Funktionen), Texte (003, 005)
+                              file-actions (Aktionen der Datei-Funktionen), Texte (003, 005); file-drop (rein:
+                              Typ-Weiche), FileDropService + DropHint (abgelegte Dateien, 071)
   app/features/menus/         Menümodell (rein), MenuService (nativ/HTML), MenuBar (Windows/Linux), Befehlspalette,
                               Kürzel-Dialog, app-actions (005); context-menu-model (Kontextmenüs Baum + Canvas, 070)
   app/features/hierarchy/     Ebenenbaum (006): hierarchy-model (Baum rein aus dem Dokument, vorderste oben +
@@ -169,7 +172,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,
                               command-cases.ts, tree-documents.ts, fake-clipboard-api.ts, fake-export-api.ts,
-                              fake-font-api.ts (Kästchen-Schrift, gleiche Fehlercodes), fake-settings-api.ts
+                              fake-font-api.ts (Kästchen-Schrift, gleiche Fehlercodes), fake-drop-api.ts, fake-settings-api.ts
                               (Regeln wie Rust, im Browser-Modus in localStorage),
                               browser-hook.ts = `window.__appIconic` für Playwright)
   testing/fixtures/           generiert aus testdata/ (camscanner.icon, all-fields.icon, svg/, unique-names.json;
@@ -192,6 +195,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/mcp_commands.rs         Brücke an/aus nach settings.mcp, TauriHost (mcp-call → mcp_reply), mcp_* Commands (018)
   src/open_files.rs           `.icon` aus argv, Zweitstart (single-instance) und Finder (`RunEvent::Opened`) → Fenster (030)
   src/reveal.rs               „Im Ordner zeigen“ nur für exportierte Dateien (030)
+  src/drop_files.rs           DragDrop → `file-drop` ans Fenster, Drop-Pfade in UserPaths, `read_clipboard_image` (071)
   Info.plist, entitlements.plist  macOS: `.icon` als Package-Dokument (Alternate), Hardened-Runtime-Rechte (030)
   tauri.linux.conf.json, tauri.windows.conf.json, linux/  Dateizuordnung je OS, Mime-XML + postinst/postrm (030)
   src/about.rs, model.rs      AppInfo, DTOs (serde camelCase)
@@ -201,6 +205,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
     src/icon/                 .icon: model (Sicht), json_format, names, bundle, zip_io, save, svg_file (002),
                               image_file (Bild als Data-URL, Magic Bytes, Größe aus dem Kopf, 008)
     src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
+    src/clipboard_image.rs    Bild der Zwischenablage prüfen + als PNG-Data-URL (071); src/user_paths.rs: vom Nutzer
+                              übergebene Pfade (Drop, Vorbereitung 033), Art einer abgelegten Datei
     src/menu_spec.rs          MenuSpec prüfen, Accelerators, Menü ohne Fenster (005)
     src/keymap_file.rs        keymap.json laden (005)
     src/settings.rs           settings.json: je Feld nachsichtig (merge), sanitize, migrate, apply_patch (015)

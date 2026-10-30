@@ -134,7 +134,9 @@ function installClipboardEvents(
   const paste = (e: ClipboardEvent) => {
     if (!ours(e) || !e.clipboardData) return;
     e.preventDefault();
-    void edit.paste(e.clipboardData.getData('text/plain'));
+    // an image of the event (screenshot, copied image – design 071 E5); `null`: ask the clipboard
+    const file = Array.from(e.clipboardData.files ?? []).find((f) => f.type.startsWith('image/'));
+    void edit.paste(e.clipboardData.getData('text/plain'), file ?? null);
   };
   doc.addEventListener('copy', copy);
   doc.addEventListener('cut', copy);

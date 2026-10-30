@@ -26,6 +26,12 @@ export const PLACE: Record<string, ArgSpec> = {
   index: { type: 'integer', minimum: 0, maximum: 1_000_000 },
 };
 
+/**
+ * The centre of an image or snippet in DOCUMENT coordinates (default: the visible centre) – a
+ * dropped file lands where it was dropped (design 071 E3).
+ */
+export const CENTER: Record<string, ArgSpec> = { centerX: COORD, centerY: COORD };
+
 /** Paint and free attributes of every shape. */
 export const PAINT: Record<string, ArgSpec> = {
   fill: TEXT,
@@ -81,6 +87,7 @@ export const IMAGE_ARGS: ArgsSpec = {
     y: COORD,
     width: LENGTH,
     height: LENGTH,
+    ...CENTER,
     ...PLACE,
   },
 };
@@ -90,6 +97,7 @@ export const SNIPPET_ARGS: ArgsSpec = {
   properties: {
     /** SVG markup; without it the dialog opens. */
     markup: { type: 'string', maxLength: MARKUP },
+    ...CENTER,
     ...PLACE,
   },
 };

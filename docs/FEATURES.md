@@ -9,6 +9,7 @@
 - [x] Open… ⌘O für `.icon` (Bundle und ZIP) (002, 003)
 - [x] Open Recent mit Validierung und „Clear Menu“ (003, Menü 005; natives macOS-Menü auf dem Mac prüfen)
 - [x] Import SVG… ⇧⌘I als neue Gruppe/Layer/Asset (003)
+- [x] Dateien ins Fenster ziehen: `.icon` öffnen, SVG am Ablagepunkt (über dem Baum als neue Ebene), PNG/JPEG/WebP als Bild; Hinweis am Zeiger; Bilder/Screenshots mit ⌘V einfügen _(neu)_ (071)
 - [x] Save ⌘S (nur wenn dirty), Save As… ⇧⌘S (Format Bundle/ZIP), Close ⌘W mit Dirty-Abfrage (003)
 - [x] Speichern im gelesenen Format (Bundle bleibt Bundle, ZIP bleibt ZIP), atomar _(neu)_ (002, 003)
 - [x] Verlustfreier Roundtrip von `icon.json` inkl. unbekannter Felder und Layer-`opacity` _(neu)_ (002, 003)

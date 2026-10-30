@@ -11,7 +11,10 @@
 //! - [`keymap_file`]   the user's shortcut overrides `keymap.json` (prompt 005)
 //! - [`export`]        export: SVG files, PNG with resvg in a size set (prompt 012)
 //! - [`fonts`]         system fonts (once per process), font list, text to path (prompts 012, 013)
+//! - [`clipboard_image`] a clipboard image checked and encoded as PNG data URL (prompt 071)
+//! - [`user_paths`]    paths the user handed over (dropped files), kind of a dropped file (prompt 071)
 
+pub mod clipboard_image;
 pub mod config_file;
 pub mod error;
 pub mod export;
@@ -22,3 +25,4 @@ pub mod keymap_file;
 pub mod menu_spec;
 pub mod recent;
 pub mod settings;
+pub mod user_paths;

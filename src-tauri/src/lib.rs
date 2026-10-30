@@ -15,6 +15,7 @@
 //! - [`mcp_commands`]  the bridge for the `app-iconic-mcp` sidecar, calls to the windows (018)
 //! - [`open_files`]    `.icon` files from the command line, a second start and the Finder (030)
 //! - [`reveal`]        "Show in Finder" for files this process exported (030)
+//! - [`drop_files`]    files dragged onto a window, images from the system clipboard (071)
 //!
 //! The engine (icon documents, file I/O, export, fonts) lives in the Tauri-free crate
 //! `ai-core` (`src-tauri/core`); `error` is re-exported from there.
@@ -22,6 +23,7 @@
 pub mod about;
 pub mod app_menu;
 pub mod commands;
+pub mod drop_files;
 pub mod export_commands;
 pub mod font_commands;
 pub mod mcp;
@@ -62,6 +64,7 @@ pub fn run() {
         .manage(settings_commands::SettingsState::default())
         .manage(mcp_commands::McpState::default())
         .manage(reveal::Exported::default())
+        .manage(ai_core::user_paths::UserPaths::default())
         .setup(|app| {
             // system fonts for text to path and the PNG export, scanned in the background
             font_commands::warm_up();
@@ -103,6 +106,8 @@ pub fn run() {
                         commands::advance_quit(app);
                     }
                 }
+                // files from Finder/Explorer (design 071 E1)
+                tauri::WindowEvent::DragDrop(e) => drop_files::on_drag_drop(window, e),
                 _ => {}
             }
         })
@@ -118,6 +123,7 @@ pub fn run() {
             commands::pick_svg_file,
             commands::read_image_file,
             commands::pick_image_file,
+            drop_files::read_clipboard_image,
             commands::recent_files,
             commands::add_recent_file,
             commands::clear_recent_files,
@@ -178,6 +184,8 @@ pub fn run() {
                     let label = _app.state::<windows::DocWindows>().new_label(None);
                     let _ = commands::build_document_window(_app, &label);
                 }
+                // files from Finder/Explorer (design 071 E1)
+                tauri::WindowEvent::DragDrop(e) => drop_files::on_drag_drop(window, e),
                 _ => {}
             }
         });

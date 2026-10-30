@@ -17,6 +17,8 @@ import { SettingsApi } from '../app/core/settings/settings-api';
 import { FakeSettingsApi } from './fake-settings-api';
 import { McpApi } from '../app/core/mcp/mcp-api';
 import { FakeMcpApi } from './fake-mcp-api';
+import { DropApi } from '../app/core/drop/drop-api';
+import { FakeDropApi } from './fake-drop-api';
 
 /** Every backend facade replaced by its fake (unit tests). */
 export function fakeBackend(): {
@@ -30,6 +32,7 @@ export function fakeBackend(): {
   fonts: FakeFontApi;
   settings: FakeSettingsApi;
   mcp: FakeMcpApi;
+  drop: FakeDropApi;
 } {
   const files = new FakeIconFileApi();
   const window = new FakeWindowApi();
@@ -40,6 +43,7 @@ export function fakeBackend(): {
   const fonts = new FakeFontApi();
   const settings = new FakeSettingsApi();
   const mcp = new FakeMcpApi();
+  const drop = new FakeDropApi();
   return {
     files,
     window,
@@ -50,6 +54,7 @@ export function fakeBackend(): {
     fonts,
     settings,
     mcp,
+    drop,
     providers: [
       { provide: AboutApi, useClass: FakeAboutApi },
       { provide: IconFileApi, useValue: files },
@@ -61,6 +66,7 @@ export function fakeBackend(): {
       { provide: FontApi, useValue: fonts },
       { provide: SettingsApi, useValue: settings },
       { provide: McpApi, useValue: mcp },
+      { provide: DropApi, useValue: drop },
     ],
   };
 }

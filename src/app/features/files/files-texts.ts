@@ -25,6 +25,16 @@ const EN = {
   importFailed: 'The SVG could not be imported.',
   invalidSvg: 'The file is not a valid SVG.',
   dismiss: 'Dismiss',
+  dropHint: {
+    insert: 'Insert here',
+    layer: 'Add as new layer',
+    open: 'Open',
+    none: 'Only .icon, .svg, .png, .jpg and .webp files',
+  },
+  dropUnsupported: (n: number) =>
+    n === 1
+      ? 'One file was not added: only .icon, .svg, .png, .jpg and .webp are supported.'
+      : `${n} files were not added: only .icon, .svg, .png, .jpg and .webp are supported.`,
   notices: {
     missing_asset: 'missing image',
     ignored_entry: 'ignored entry',
@@ -59,6 +69,16 @@ export const FILES_TEXTS = translatable('files', EN, {
     importFailed: 'Das SVG konnte nicht importiert werden.',
     invalidSvg: 'Die Datei ist kein gültiges SVG.',
     dismiss: 'Ausblenden',
+    dropHint: {
+      insert: 'Hier einfügen',
+      layer: 'Als neue Ebene hinzufügen',
+      open: 'Öffnen',
+      none: 'Nur .icon-, .svg-, .png-, .jpg- und .webp-Dateien',
+    },
+    dropUnsupported: (n: number) =>
+      n === 1
+        ? 'Eine Datei wurde nicht hinzugefügt: nur .icon, .svg, .png, .jpg und .webp werden unterstützt.'
+        : `${n} Dateien wurden nicht hinzugefügt: nur .icon, .svg, .png, .jpg und .webp werden unterstützt.`,
     notices: {
       missing_asset: 'Bild fehlt',
       ignored_entry: 'Eintrag ignoriert',
