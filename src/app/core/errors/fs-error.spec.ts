@@ -31,6 +31,13 @@ describe('fs-error', () => {
     }
   });
 
+  it('knows not_allowed of the path rule (prompt 033 E1), in English and German', () => {
+    const e = toFsError({ code: 'not_allowed', message: 'the path did not come from a dialog' });
+    expect(e.code).toBe('not_allowed');
+    expect(describeFsError(e)).toContain('Open');
+    expect(describeFsError(e)).not.toContain('dialog');
+  });
+
   it('describes every code without Rust messages', () => {
     const text = describeFsError({ code: 'io', message: 'os error 5' });
     expect(text).not.toContain('os error');

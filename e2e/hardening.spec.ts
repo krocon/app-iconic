@@ -75,10 +75,14 @@ for (const plain of [false, true]) {
     const t2 = Date.now();
     await page.mouse.move(c.clientX, c.clientY);
     await page.mouse.down();
+    // the first step collects the snap candidates once per gesture (prompt 033): logged apart
+    let firstStepMs = 0;
     for (let i = 1; i <= 20; i++) {
       await page.mouse.move(c.clientX + i * 3, c.clientY + i * 2);
       await frames(page, 1);
+      if (i === 1) firstStepMs = Date.now() - t2;
     }
+    const restMs = (Date.now() - t2 - firstStepMs) / 19;
     await page.mouse.up();
     await frames(page);
     const dragFrameMs = (Date.now() - t2) / 20;
@@ -86,7 +90,8 @@ for (const plain of [false, true]) {
     console.log(
       `big.svg ${variant} ${(text.length / 1024 / 1024).toFixed(1)} MB: import ${importMs} ms, zoom/pan ` +
         `${frameMs.toFixed(1)} ms/frame, tree rows ${rows}, click ${clickMs.toFixed(0)} ms, ` +
-        `drag with snap ${dragFrameMs.toFixed(1)} ms/step (selected ${selected})`,
+        `drag with snap ${dragFrameMs.toFixed(1)} ms/step (first ${firstStepMs} ms, then ` +
+        `${restMs.toFixed(1)} ms/step; selected ${selected})`,
     );
     // regression guards: headless Chromium rasters in software – the numbers of a real machine
     // with a GPU are in docs/architecture.md "Performance"

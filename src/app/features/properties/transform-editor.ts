@@ -25,6 +25,7 @@ import {
   STEP_KINDS,
   TransformStep,
 } from './transform-list';
+import { stepsMatrix } from './transform-matrix';
 
 /**
  * The transform list of the panel (design 009 E7, legacy `TransformSection`): the steps of the
@@ -200,7 +201,9 @@ export class TransformEditor {
   protected pivot(i: number, on: boolean): void {
     const list = this.steps();
     if (!list) return;
-    this.apply(setPivot(list, i, on ? bboxCenter(this.elements()[0]) : null));
+    this.apply(
+      setPivot(list, i, on ? bboxCenter(this.elements()[0]) : null, (s) => stepsMatrix(s)),
+    );
   }
 
   // raw attribute

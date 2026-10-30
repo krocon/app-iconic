@@ -1,10 +1,12 @@
 //! Files handed to the app by the system (design 030 E5): the command line of the first start,
 //! a second start on Windows/Linux (`tauri-plugin-single-instance`) and the Finder on macOS
 //! (`RunEvent::Opened`). After editlicious `commands::paths_from_args` / `files_opened` (design
-//! 012 E3, MIT, same author), here for `.icon` documents that open in document windows.
+//! 012 E3, MIT, same author), here for `.icon` documents that open in document windows. The paths
+//! count as chosen by the user (`UserPaths`, prompt 033 E1).
 
-use crate::commands::{build_document_window, focus};
+use crate::window_commands::{build_document_window, focus};
 use crate::windows::DocWindows;
+use ai_core::user_paths::UserPaths;
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager};
 
@@ -34,6 +36,9 @@ pub fn paths_from_args(args: impl IntoIterator<Item = String>, cwd: Option<&Path
 /// Opens `paths`: the first window takes the first one while it is still starting, a file shown
 /// somewhere comes to the front, every other one gets a new document window.
 pub fn open_paths(app: &AppHandle, paths: Vec<String>) {
+    // the system handed them over: trusted sources (prompt 033 E1)
+    app.state::<UserPaths>()
+        .allow_str(paths.iter().map(String::as_str));
     let windows = app.state::<DocWindows>();
     for path in paths {
         if let Some(label) = windows.showing(&path, None)

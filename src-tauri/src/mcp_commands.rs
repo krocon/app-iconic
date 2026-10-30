@@ -4,9 +4,9 @@
 //! `mcp-call` and waits for `mcp_reply`. Thin – the rules are in `mcp.rs` and `ai-mcp`.
 //! After editlicious `commands.rs` (`mcp_enable`, `mcp_info`, `TauriUi`, design 016).
 
-use crate::commands::{build_document_window, focus};
 use crate::error::{FsError, FsErrorCode};
 use crate::mcp::{CallResult, Calls, READY_TIMEOUT, Router, WindowHost, err};
+use crate::window_commands::{build_document_window, focus};
 use crate::windows::DocWindows;
 use ai_core::settings::Settings;
 use ai_mcp::bridge::{BridgeError, ENDPOINT_ENV, ENDPOINT_FILE};
@@ -141,6 +141,12 @@ impl WindowHost for TauriHost {
 
     fn showing(&self, path: &str) -> Option<String> {
         self.app.state::<DocWindows>().showing(path, None)
+    }
+
+    fn allow_path(&self, path: &str) {
+        self.app
+            .state::<ai_core::user_paths::UserPaths>()
+            .allow_str([path]);
     }
 
     fn render(&self, svg: &str, size: u32) -> Result<(String, bool), BridgeError> {

@@ -50,7 +50,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/icon-file/         IconFileApi (open/save/new/close .icon, read SVG/Bild, Dialoge), DTOs, findAsset (002, 008)
   app/core/window/            WindowApi (Titel, Fenster, Schließen-Frage, 003)
   app/core/recent/            RecentFilesApi („Open Recent“, 003)
-  app/core/actions/           Aktionskatalog (+ action-catalog.de.ts: deutsche Namen, 015), Keymaps
+  app/core/actions/           Aktionskatalog (+ action-catalog.de.ts: deutsche Namen, 015; Teile je Bereich in
+                              catalog/ + action-def: Typen/Helfer, 033), Keymaps
                               (base/mac/other.json), ActionService (run(id, args?)),
                               KeyboardDispatcher (einziger keydown-Listener), shortcut, action-args (005),
                               add-action-args (Schema der Add-Argumente, 008), export-action-args (012),
@@ -74,7 +75,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               model/ (icon-json, unique-names, selection, reorder-rules, specializations 010),
                               svg/ (node-ids, sanitize-svg, resolve-styles, svg-references, style-props,
                               svg-format 011) (003–011); commands/replace-node (011); commands/replace-color (074); model/clip-model +
-                              clip-units, commands/clip-commands (014)
+                              clip-units, commands/clip-commands (014); settled (settledComputed: Wert ruht
+                              während einer Geste, 033)
   app/features/files/         FilesService (Neu/Öffnen/Import/Speichern/Schließen/Fenster/Quit), Recent,
                               file-actions (Aktionen der Datei-Funktionen), Texte (003, 005); file-drop (rein:
                               Typ-Weiche), FileDropService + DropHint (abgelegte Dateien, 071)
@@ -85,7 +87,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               Tree, virtualisiert), tree-navigation/-selection/-drag, context-menu, swatch,
                               node-label, tree-icons; EditService + edit-actions (Cut/Copy/Paste/Duplicate/
                               Delete/Sichtbarkeit/Arrange/Align), edit-/arrange-operations, paste, align, visibility,
-                              follow-up (Folge-Auswahl); rename (rein: id + Verweise) + RenameService, tree-filter
+                              follow-up (Folge-Auswahl), edit-items (rein: Select All, Drop-Ziel, 033);
+                              rename (rein: id + Verweise) + RenameService, tree-filter
                               (rein), TreeToolbar (Filter, Schnellaktionen), TreeRename (inline, 072)
   app/features/commands/      „Add“ (008): CommandSidebar (Liste + Suche; Abschnitte und Modify-Menü aus
                               add-layout, 068), AddService, add-actions, insert-target
@@ -93,7 +96,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               (Legacy-Defaults, rein), add-args, icon-group, svg-snippet (+ Dialog), image-size
   app/features/properties/    Properties-Panel (009): property-spec (rein: Specs je Node-Typ), property-values (lesen:
                               style/Attribut/berechnet/Default), property-edit (setAttributes/setText, PropertySession
-                              = Geste je Feld, Reset), panel-model, mixed, constrain, transform-list (rein) +
+                              = Geste je Feld, Reset), panel-model, mixed, constrain, transform-list (rein: Text) +
+                              transform-matrix (Matrix über transform.baseVal, 033) +
                               transform-editor/-step-row, PropertiesService + properties-actions (properties.*)
                               BoxSection + BoxService + box-actions (Kopf Position & Größe, `properties.box`, 062);
                               row-pairs (rein: X/Y, W/H … nebeneinander, 073)
@@ -135,7 +139,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               TextEditOverlay (Bearbeiten auf der Zeichenfläche), TextTool (⇧T), text-to-path (rein) +
                               TextToPathService (`text.toPath`), text-actions (`text.*`), Texte
   app/features/about/         About-Dialog + Texte
-  app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile), CanvasViewStore (Zoom/Pan/
+  app/features/canvas/        CanvasView (Toolbar, Lineale, Zeichenfläche, Statuszeile) + canvas-measure (Auswahl
+                              messen je Änderung, Viewport, 033), CanvasViewStore (Zoom/Pan/
                               Optionen je Fenster), LayerStack (lebende Assets je Shadow Root), fill-preview,
                               icon-color, asset-placement (004), effects (Vorschau-Annäherung, 010),
                               canvas-actions, View-Options-Menü (005); CanvasTools (ein Werkzeug zur Zeit, Modi
@@ -144,7 +149,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
                               tools/tool-context-providers, 067); CanvasContextMenu (Rechtsklick, `canvas.menu`, 070);
                               Auswahl/Handles (007): CanvasEditStore (Kontext, Punkt, Rahmen, Snap), canvas-pointer
                               (Klick/Rahmen/Ziehen), canvas-gesture (Geste je Ziehen), hit-test, selection-measure
-                              (Rahmen + Handle-Sets über CTM), selection-overlay, magic-points, edit-ops (rein),
+                              (Rahmen + Handle-Sets über CTM), selection-overlay, magic-points (nodeIndex, 033), edit-ops (rein),
                               canvas-edit-actions (Esc, Punkt löschen, Pfeiltasten, moveBy); handles/ (rein:
                               node-geometry, node-handles, handle-edit, handle-types)
                               grid-hint-overlay (Rasterpunkte um den Zeiger bei Snap to Grid); path-preview
@@ -194,11 +199,13 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   testing/fixtures/           generiert aus testdata/ (camscanner.icon, all-fields.icon, svg/, unique-names.json;
                               `pnpm fixtures`)
 e2e/                          Playwright-Tests gegen den Dev-Server (hardening: großes/tiefes SVG, a11y: Tab-Weg,
-                              Fokus, Dialoge – 031)
+                              Fokus, Dialoge – 031; composited-shadow: Schatten pixelgleich – 033)
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/lib.rs                  Modulübersicht, Builder (dialog, window-state), Commands
-  src/commands.rs             dünne Command-Schicht, Test command_rules
+  src/commands.rs             dünne Command-Schicht für Dateien/Recent, Pfadprüfung `allowed`/`grant` (033), Test
+                              command_rules; window_commands.rs (Fenster, Titel, Startpfade), menu_commands.rs
+                              (Menü, Keymap, Quit) – geteilt in 033
   src/sessions.rs             IconSessions: zuletzt geöffnete/gespeicherte .icon je Pfad (002 E5)
   src/windows.rs              DocWindows: Labels doc-<n>, Startpfade/-aktionen, Pfad je Fenster, Schließen-Übernahme
                               (003), QuitQueue (005)
@@ -207,7 +214,8 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/font_commands.rs        list_fonts, text_to_path, Vorladen der Schriften beim Start (013)
   src/settings_commands.rs    load_settings, save_settings(patch), reset_settings, set_window_theme; SettingsState,
                               Ereignis settings-changed an alle Fenster (015)
-  src/mcp.rs                  KI-Router (018, rein über WindowHost): Argumente prüfen/begrenzen, Zielfenster, Calls
+  src/mcp.rs                  KI-Router (018, rein über WindowHost): Zielfenster, Calls, Pfade der KI erlauben (033);
+                              mcp_args.rs: Argumente prüfen/begrenzen, Timeouts, file_paths (033)
   src/mcp_commands.rs         Brücke an/aus nach settings.mcp, TauriHost (mcp-call → mcp_reply), mcp_* Commands (018)
   src/open_files.rs           `.icon` aus argv, Zweitstart (single-instance) und Finder (`RunEvent::Opened`) → Fenster (030)
   src/reveal.rs               „Im Ordner zeigen“ nur für exportierte Dateien (030)
@@ -221,11 +229,13 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
     src/icon/                 .icon: model (Sicht), json_format, names, bundle, zip_io, save, svg_file (002),
                               image_file (Bild als Data-URL, Magic Bytes, Größe aus dem Kopf, 008)
     src/recent.rs             recent.json (zuletzt benutzt, max. 10, 003)
-    src/clipboard_image.rs    Bild der Zwischenablage prüfen + als PNG-Data-URL (071); src/user_paths.rs: vom Nutzer
-                              übergebene Pfade (Drop, Vorbereitung 033), Art einer abgelegten Datei
+    src/clipboard_image.rs    Bild der Zwischenablage prüfen + als PNG-Data-URL (071); src/user_paths.rs: vertraute
+                              Pfade (033: Dialoge, Recent, System, Drop, KI; allow_tree für interne Ordner; checked →
+                              not_allowed), Art einer abgelegten Datei
     src/menu_spec.rs          MenuSpec prüfen, Accelerators, Menü ohne Fenster (005)
     src/keymap_file.rs        keymap.json laden (005)
-    src/settings.rs           settings.json: je Feld nachsichtig (merge), sanitize, migrate, apply_patch (015)
+    src/settings.rs           settings.json: je Feld nachsichtig (merge), sanitize, migrate, apply_patch (015);
+                              settings/model.rs: Typen + Standardwerte (033)
     src/export/               Export (012): png (resvg, sichere usvg-Optionen), files (Namen, Überschreiben, atomar,
                               Fortschritt, Abbruch); `export::fonts` = Re-Export von `fonts::system`
     src/fonts/                Schriften (012, 013): system (fontdb einmal je Prozess, generische Familien), FontCatalog

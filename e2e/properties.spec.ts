@@ -164,33 +164,52 @@ test('rotate with pivot from the panel puts the pivot handle on the pivot', asyn
   expect(await attr(page, A, r1, 'transform')).toBe('rotate(30 120 150) translate(10,0)');
 });
 
-test('the transform list equals the browser matrix (transform.baseVal)', async ({ page }) => {
+test('transform list: the browser computes the matrices (design 009 E7, prompt 033 E3)', async ({
+  page,
+}) => {
   await page.goto('/');
   await waitForCanvas(page);
-  const lists = [
-    'translate(10 20) rotate(30 5 5) scale(2 3)',
-    'skewX(20) matrix(1 0.2 -0.3 1 4 5) skewY(-10)',
-    'rotate(45) translate(3) scale(0.5)',
-  ];
-  const result = await page.evaluate((lists) => {
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    svg.appendChild(g);
-    document.body.appendChild(svg);
-    const out = lists.map((t) => {
-      g.setAttribute('transform', t);
-      const m = g.transform.baseVal.consolidate()!.matrix;
-      return {
-        dom: [m.a, m.b, m.c, m.d, m.e, m.f],
-        ours: window.__appIconic!.transformListMatrix(t),
-      };
-    });
-    svg.remove();
-    return out;
-  }, lists);
-  for (const r of result) {
-    r.dom.forEach((v, i) => expect(r.ours![i]).toBeCloseTo(v, 5));
-  }
+  const r = await page.evaluate(() => {
+    const h = window.__appIconic!;
+    const at = (m: number[], x: number, y: number) => [
+      m[0] * x + m[2] * y + m[4],
+      m[1] * x + m[3] * y + m[5],
+    ];
+    const pivot = h.transformPivot('rotate(30) translate(50 0)', 0, 10, 10)!;
+    return {
+      // a point goes through scale, then rotate about (5,5), then translate (left first, like SVG)
+      product: at(h.transformListMatrix('translate(10 20) rotate(90 5 5) scale(2 3)')!, 1, 1),
+      skewX: h.transformListMatrix('skewX(45)')!,
+      skewY: h.transformListMatrix('skewY(45)')!,
+      matrix: h.transformListMatrix('matrix(1 2 3 4 5 6)')!,
+      empty: h.transformListMatrix('')!,
+      invalid: h.transformListMatrix('rotate(1,)'),
+      neutral: h.transformListMatrix(
+        'translate(1,2) translate(0 0) scale(1 1) rotate(0) skewX(0) skewY(0) matrix(1 0 0 1 0 0)',
+      )!,
+      plain: h.transformListMatrix('translate(1 2)')!,
+      pivot,
+      // the centre stays where it was without rotation: it is the fixed point
+      fixed: at(h.transformListMatrix(pivot)!, 10, 10),
+      noRot: at(h.transformListMatrix('translate(50 0)')!, 10, 10),
+      // T(c)·R·T(−c)
+      around: h.transformListMatrix('rotate(90 1 0)')!,
+      parts: h.transformListMatrix('translate(1 0) rotate(90) translate(-1 0)')!,
+    };
+  });
+  // scale (2, 3), rotate 90° about (5, 5): (5 − (3 − 5), 5 + (2 − 5)) = (7, 2), translate (10, 20)
+  expect(r.product[0]).toBeCloseTo(17, 9);
+  expect(r.product[1]).toBeCloseTo(22, 9);
+  expect(r.skewX[2]).toBeCloseTo(1, 9);
+  expect(r.skewY[1]).toBeCloseTo(1, 9);
+  expect(r.matrix).toEqual([1, 2, 3, 4, 5, 6]);
+  expect(r.empty).toEqual([1, 0, 0, 1, 0, 0]);
+  expect(r.invalid).toBeNull();
+  r.neutral.forEach((v, i) => expect(v).toBeCloseTo(r.plain[i], 9));
+  expect(r.pivot).toBe('rotate(30 60 10) translate(50 0)');
+  expect(r.fixed[0]).toBeCloseTo(r.noRot[0], 9);
+  expect(r.fixed[1]).toBeCloseTo(r.noRot[1], 9);
+  r.around.forEach((v, i) => expect(v).toBeCloseTo(r.parts[i], 9));
 });
 
 test('multiple selection: mixed, one change for all as one step; reset drops the style', async ({

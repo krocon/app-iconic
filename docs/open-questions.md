@@ -171,3 +171,13 @@
 1. Masken bearbeiten: reicht „lösen – ändern – wieder maskieren“ (plus Auswahl im Baum unter „Definitionen“), oder
    soll es einen Bearbeitungsmodus wie bei Clip Paths geben?
 2. `mix-blend-mode` an einzelnen SVG-Elementen (nur als CSS-Stil möglich, Icon Composer ignoriert es) – gewünscht?
+
+## Prompt 033
+
+1. **Mac**: Leistung neu messen – `pnpm e2e e2e/hardening.spec.ts` (Playwright-Chromium) und das Ziehen in der echten
+   App (WKWebView) mit `node scripts/big-svg.mjs > big.svg`. Reicht es, oder soll der erste Zieh-Schritt (Snap-Kandidaten
+   sammeln, im Container 2,4 s bei 20 000 Formen) im Leerlauf vorbereitet werden?
+2. **Mac**: Der Gruppenschatten auf der Zeichenfläche ist jetzt ein komponierter CSS-Filter (in Chromium pixelgleich).
+   Sieht er in WKWebView bei Zoom 50/100/200 % genauso aus wie vorher?
+3. Pfadschutz: Pfade werden nach ihren Komponenten verglichen, Symlinks nicht aufgelöst. Ein Eintrag aus „Open Recent“
+   gilt als vertraut, sobald die Liste gelesen wurde – so recht?

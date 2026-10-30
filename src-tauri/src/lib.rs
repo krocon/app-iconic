@@ -3,7 +3,10 @@
 //! Module overview:
 //! - [`model`]         DTOs of the app shared with the frontend (serde camelCase)
 //! - [`about`]         data for the About dialog (version, platform)
-//! - [`commands`]      thin Tauri command layer (validate, `spawn_blocking`, never synchronous)
+//! - [`commands`]      thin Tauri command layer for files and recent files (validate, trusted
+//!   paths only – prompt 033, `spawn_blocking`, never synchronous)
+//! - [`window_commands`] document windows: titles, close takeover, start paths/actions (003)
+//! - [`menu_commands`] menu model per window, shortcut overrides, the quit sequence (005)
 //! - [`sessions`]      last opened/saved `.icon` per path (unchanged assets stay in Rust, 002 E5)
 //! - [`windows`]       document windows: labels, start paths, close takeover, titles (003),
 //!   start actions and the quit sequence (005)
@@ -12,6 +15,7 @@
 //! - [`font_commands`] font list and text to path (013)
 //! - [`settings_commands`] `settings.json` for every window: load, patches, reset, theme (015)
 //! - [`mcp`]           AI control: the tool router over the windows (design 018)
+//! - [`mcp_args`]      argument checks, bounds and file paths of the AI tools (018, 033)
 //! - [`mcp_commands`]  the bridge for the `app-iconic-mcp` sidecar, calls to the windows (018)
 //! - [`open_files`]    `.icon` files from the command line, a second start and the Finder (030)
 //! - [`reveal`]        "Show in Finder" for files this process exported (030)
@@ -27,12 +31,15 @@ pub mod drop_files;
 pub mod export_commands;
 pub mod font_commands;
 pub mod mcp;
+pub mod mcp_args;
 pub mod mcp_commands;
+pub mod menu_commands;
 pub mod model;
 pub mod open_files;
 pub mod reveal;
 pub mod sessions;
 pub mod settings_commands;
+pub mod window_commands;
 pub mod windows;
 
 pub use ai_core::error;
@@ -103,7 +110,7 @@ pub fn run() {
                         .window_gone(window.label());
                     app_menu::on_destroyed(app, window.label());
                     if docs.quit(|q| q.closed(window.label())) {
-                        commands::advance_quit(app);
+                        menu_commands::advance_quit(app);
                     }
                 }
                 // files from Finder/Explorer (design 071 E1)
@@ -127,17 +134,17 @@ pub fn run() {
             commands::recent_files,
             commands::add_recent_file,
             commands::clear_recent_files,
-            commands::set_window_title,
-            commands::open_document_window,
-            commands::focus_document_window,
-            commands::window_start_path,
-            commands::take_over_close,
-            commands::close_window,
-            commands::window_start_action,
-            commands::set_app_menu,
-            commands::load_keymap_overrides,
-            commands::quit_app,
-            commands::cancel_quit,
+            window_commands::set_window_title,
+            window_commands::open_document_window,
+            window_commands::focus_document_window,
+            window_commands::window_start_path,
+            window_commands::take_over_close,
+            window_commands::close_window,
+            window_commands::window_start_action,
+            menu_commands::set_app_menu,
+            menu_commands::load_keymap_overrides,
+            menu_commands::quit_app,
+            menu_commands::cancel_quit,
             export_commands::pick_export_dir,
             export_commands::export_svg,
             export_commands::export_png,
@@ -183,10 +190,8 @@ pub fn run() {
                 } => {
                     use tauri::Manager;
                     let label = _app.state::<windows::DocWindows>().new_label(None);
-                    let _ = commands::build_document_window(_app, &label);
+                    let _ = window_commands::build_document_window(_app, &label);
                 }
-                // files from Finder/Explorer (design 071 E1)
-                tauri::WindowEvent::DragDrop(e) => drop_files::on_drag_drop(window, e),
                 _ => {}
             }
         });

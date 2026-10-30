@@ -1,12 +1,13 @@
 //! Export commands (prompt 012): thin layer over `ai_core::export`, every command `async`, the
 //! work in `spawn_blocking`. One cancel flag per window (design 012 E12).
 
-use crate::commands::{blocking, file_path, to_string};
+use crate::commands::{allowed, blocking, grant, to_string};
 use crate::error::FsError;
 use crate::reveal::Exported;
 use ai_core::export::{
     ExportOptions, ExportProgress, ExportReport, Variant, files, fonts::system_fonts,
 };
+use ai_core::user_paths::UserPaths;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
@@ -45,25 +46,28 @@ impl ExportJobs {
 /// Native folder dialog for the export target; `None` = cancelled.
 #[tauri::command]
 pub async fn pick_export_dir(app: AppHandle) -> Result<Option<String>, FsError> {
-    blocking(move || {
+    let handle = app.clone();
+    let picked = blocking(move || {
         Ok(app
             .dialog()
             .file()
             .blocking_pick_folder()
             .and_then(to_string))
     })
-    .await
+    .await?;
+    Ok(grant(&handle, picked))
 }
 
 /// Writes the SVG of every appearance as `<name>-<appearance>.svg` into `target_dir`.
 #[tauri::command]
 pub async fn export_svg(
     exported: State<'_, Exported>,
+    paths: State<'_, UserPaths>,
     variants: Vec<Variant>,
     target_dir: String,
     options: ExportOptions,
 ) -> Result<ExportReport, FsError> {
-    let dir = file_path(&target_dir)?;
+    let dir = allowed(&paths, &target_dir)?;
     let report = blocking(move || files::export_svg(&variants, &dir, &options)).await?;
     exported.remember(report.files.iter().map(|f| f.path.clone()));
     Ok(report)
@@ -80,7 +84,8 @@ pub async fn export_png(
     options: ExportOptions,
     on_progress: Channel<ExportProgress>,
 ) -> Result<ExportReport, FsError> {
-    let dir = file_path(&target_dir)?;
+    use tauri::Manager;
+    let dir = allowed(&window.app_handle().state::<UserPaths>(), &target_dir)?;
     let label = window.label().to_string();
     let flag = jobs.start(&label);
     let cancel = flag.clone();
@@ -100,7 +105,6 @@ pub async fn export_png(
     .await;
     jobs.finish(&label, &flag);
     if let Ok(report) = &result {
-        use tauri::Manager;
         window
             .app_handle()
             .state::<Exported>()

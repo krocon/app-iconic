@@ -36,6 +36,14 @@ export function assetPlacement(root: Element, size = CANVAS_SIZE): Rect {
   return { x: (size - width) / 2, y: (size - height) / 2, width, height };
 }
 
+/** The `scale` of Icon Composer's layer `position` (1 without one). */
+export function layerScale(layer: IconLayer): number {
+  const pos = layer['position'];
+  if (typeof pos !== 'object' || pos === null) return 1;
+  const { scale } = pos as Record<string, unknown>;
+  return typeof scale === 'number' && Number.isFinite(scale) ? scale : 1;
+}
+
 /**
  * Icon Composer's layer `position` (`scale`, `translation-in-points`) as SVG transform around the
  * canvas centre; `null` without one (design 004 E4, y down assumed – question 2).

@@ -11,6 +11,7 @@
 - [x] Import SVG… ⇧⌘I als neue Gruppe/Layer/Asset (003)
 - [x] Dateien ins Fenster ziehen: `.icon` öffnen, SVG am Ablagepunkt (über dem Baum als neue Ebene), PNG/JPEG/WebP als Bild; Hinweis am Zeiger; Bilder/Screenshots mit ⌘V einfügen _(neu)_ (071)
 - [x] Save ⌘S (nur wenn dirty), Save As… ⇧⌘S (Format Bundle/ZIP), Close ⌘W mit Dirty-Abfrage (003)
+- [x] Dateizugriff nur auf Pfade aus vertrauten Quellen (Dialoge, Open Recent, System, Ablegen, KI-Brücke), sonst Fehler `not_allowed` _(neu)_ (033)
 - [x] Speichern im gelesenen Format (Bundle bleibt Bundle, ZIP bleibt ZIP), atomar _(neu)_ (002, 003)
 - [x] Verlustfreier Roundtrip von `icon.json` inkl. unbekannter Felder und Layer-`opacity` _(neu)_ (002, 003)
 - [x] Dirty-Tracking, Fenstertitel = Dateiname + Marker (003; macOS-Punkt im Schließknopf auf dem Mac prüfen)
@@ -52,6 +53,7 @@
 - [x] Plattform-Vorschau Squircle / Kreis als Maske (004)
 - [x] Assets lebendig im DOM, Reihenfolge wie Icon Composer (erste Gruppe oben), Layer-/Gruppen-Opacity, hidden, eindeutige IDs je Layer _(neu)_ (004)
 - [x] Gruppen-Schatten und Transluzenz als Vorschau-Annäherung _(neu)_ (010: „Effects Preview“, Schatten je Layer)
+- [x] Große SVGs ziehen: Schatten komponiert (pixelgleich), Menüs/Add-Leiste/Dokumentfarben ruhen während einer Geste, Snap-Kandidaten ohne Suche je Element _(neu)_ (033; Messung in `docs/architecture.md` „Performance“, Mac offen)
 - [x] BoundsGuard (Punkte, Pfade, Translationen klemmen) (007)
 
 ## 4. Auswahl & Manipulation

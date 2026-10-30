@@ -5,11 +5,12 @@
 //! Pure apart from the [`WindowHost`] – the Tauri one is in `mcp_commands.rs`, tests use a fake.
 //! The idea of the tool layer comes from editlicious `src-tauri/src/mcp.rs` (design 016).
 
+pub use crate::mcp_args::{absolute, check_args};
+use crate::mcp_args::{bound, file_paths, timeout_of};
 use ai_mcp::bridge::BridgeError;
 use ai_mcp::tools;
 use serde_json::{Map, Value, json};
 use std::collections::{HashMap, HashSet};
-use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc::{Receiver, Sender, channel};
 use std::sync::{Condvar, Mutex};
@@ -32,10 +33,6 @@ pub fn err(code: &str, message: impl Into<String>) -> BridgeError {
     BridgeError::new(code, message)
 }
 
-fn bad(message: impl Into<String>) -> BridgeError {
-    err("invalid_request", message)
-}
-
 /// What the router needs from the app: the windows and their frontends.
 pub trait WindowHost: Send + Sync + 'static {
     /// Labels of the document windows (`main`, `doc-<n>`).
@@ -50,6 +47,8 @@ pub trait WindowHost: Send + Sync + 'static {
     fn focus(&self, label: &str) -> bool;
     /// The window that shows `path`.
     fn showing(&self, path: &str) -> Option<String>;
+    /// A path the AI hands over counts as trusted from now on (prompt 033 E1, `UserPaths`).
+    fn allow_path(&self, path: &str);
     /// `svg` as a base64 PNG of `size` px (+ transparency), design 018 E8.
     fn render(&self, svg: &str, size: u32) -> Result<(String, bool), BridgeError>;
 }
@@ -172,143 +171,6 @@ impl Calls {
     }
 }
 
-// ------------------------------------------------------------------ argument checks
-
-fn type_ok(schema: &Value, v: &Value) -> bool {
-    let ty = schema["type"].as_str().unwrap_or("");
-    let ok = match ty {
-        "string" => v.is_string(),
-        "integer" => v.is_u64() || v.is_i64(),
-        "number" => v.is_number(),
-        "boolean" => v.is_boolean(),
-        "object" => v.is_object(),
-        "array" => v.as_array().is_some_and(|a| {
-            let items = &schema["items"];
-            items.is_null() || a.iter().all(|x| type_ok(items, x))
-        }),
-        _ => true,
-    };
-    if !ok {
-        return false;
-    }
-    if let Some(allowed) = schema["enum"].as_array()
-        && !allowed.contains(v)
-    {
-        return false;
-    }
-    if let Some(n) = v.as_f64()
-        && (schema["minimum"].as_f64().is_some_and(|m| n < m)
-            || schema["maximum"].as_f64().is_some_and(|m| n > m))
-    {
-        return false;
-    }
-    if ty == "object"
-        && let (Some(props), Some(o)) = (schema["properties"].as_object(), v.as_object())
-    {
-        if schema["additionalProperties"] == false && o.keys().any(|k| !props.contains_key(k)) {
-            return false;
-        }
-        for r in schema["required"].as_array().into_iter().flatten() {
-            if r.as_str().is_some_and(|k| !o.contains_key(k)) {
-                return false;
-            }
-        }
-        return o
-            .iter()
-            .all(|(k, x)| props.get(k).is_none_or(|s| type_ok(s, x)));
-    }
-    true
-}
-
-/// `args` fit the tool's schema (design 018 E7): an object with the required keys, no others,
-/// each of its type and range. Returns the arguments as an object (`null` = `{}`).
-pub fn check_args(tool: &str, args: &Value) -> Result<Map<String, Value>, BridgeError> {
-    let schema = tools::schema(tool).ok_or_else(|| bad(format!("unknown tool {tool}")))?;
-    let args = if args.is_null() {
-        json!({})
-    } else {
-        args.clone()
-    };
-    let Value::Object(map) = &args else {
-        return Err(bad("the arguments must be an object"));
-    };
-    let props = schema["properties"]
-        .as_object()
-        .cloned()
-        .unwrap_or_default();
-    if let Some(k) = map.keys().find(|k| !props.contains_key(*k)) {
-        return Err(bad(format!("unknown argument {k}")));
-    }
-    for r in schema["required"].as_array().into_iter().flatten() {
-        if let Some(k) = r.as_str()
-            && !map.contains_key(k)
-        {
-            return Err(bad(format!("{k} is missing")));
-        }
-    }
-    for (k, v) in map {
-        if !type_ok(&props[k], v) {
-            return Err(bad(format!("{k} does not fit its schema: {}", props[k])));
-        }
-    }
-    Ok(map.clone())
-}
-
-/// An absolute path without NUL (like `commands::file_path`, design 018 E13).
-pub fn absolute(path: &str) -> Result<(), BridgeError> {
-    if path.is_empty() || path.contains('\0') || !Path::new(path).is_absolute() {
-        return Err(err("invalid_path", "the path must be absolute"));
-    }
-    Ok(())
-}
-
-/// Defaults and bounds that Rust sets before the window sees the call (E15).
-fn bound(tool: &str, a: &mut Map<String, Value>) -> Result<(), BridgeError> {
-    match tool {
-        "get_asset_svg" if !a.contains_key("max_chars") => {
-            a.insert("max_chars".into(), json!(tools::SVG_CHARS_DEFAULT));
-        }
-        "get_tree" if !a.contains_key("max_nodes") => {
-            a.insert("max_nodes".into(), json!(tools::TREE_NODES_DEFAULT));
-        }
-        "insert_svg" => {
-            let n = a["markup"].as_str().map_or(0, str::len);
-            if n > tools::MARKUP_MAX {
-                return Err(err(
-                    "too_large",
-                    format!("markup has {n} bytes, limit {}", tools::MARKUP_MAX),
-                ));
-            }
-        }
-        "run_command" => {
-            let n = serde_json::to_string(&a["command"]).map_or(0, |s| s.len());
-            if n > tools::COMMAND_MAX {
-                return Err(err(
-                    "too_large",
-                    format!("command has {n} bytes, limit {}", tools::COMMAND_MAX),
-                ));
-            }
-        }
-        "export_png" | "export_svg" => {
-            absolute(a["dir"].as_str().unwrap_or(""))?;
-        }
-        "save_document" => {
-            if let Some(p) = a.get("path").and_then(Value::as_str) {
-                absolute(p)?;
-            }
-        }
-        _ => {}
-    }
-    Ok(())
-}
-
-fn timeout_of(tool: &str) -> Duration {
-    match tool {
-        "save_document" | "export_png" | "export_svg" | "open" => FILE_TIMEOUT,
-        _ => CALL_TIMEOUT,
-    }
-}
-
 // ------------------------------------------------------------------ router
 
 /// The tools, run on the windows of the app.
@@ -362,6 +224,11 @@ impl<H: WindowHost> Router<H> {
     pub fn call(&self, tool: &str, args: &Value) -> CallResult {
         let mut a = check_args(tool, args)?;
         bound(tool, &mut a)?;
+        // the user switched the bridge on (and is asked before file access, 018 E13): the paths
+        // of the AI may reach the file commands (prompt 033 E1)
+        for p in file_paths(tool, &a) {
+            self.host.allow_path(&p);
+        }
         match tool {
             "list_documents" => {
                 let docs: Vec<Value> = self
@@ -467,6 +334,7 @@ mod tests {
         windows: Mutex<Vec<(String, Value)>>,
         active: Mutex<Option<String>>,
         log: Mutex<Vec<String>>,
+        allowed: Mutex<Vec<String>>,
         fail_open: bool,
     }
 
@@ -534,6 +402,9 @@ mod tests {
                 .iter()
                 .find(|(_, d)| d["path"] == path)
                 .map(|(l, _)| l.clone())
+        }
+        fn allow_path(&self, path: &str) {
+            self.allowed.lock().unwrap().push(path.to_owned());
         }
         fn render(&self, svg: &str, size: u32) -> Result<(String, bool), BridgeError> {
             let fonts = ai_core::export::fonts::system_fonts();
@@ -681,6 +552,21 @@ mod tests {
         assert_eq!(d["id"], "doc-1");
         let opened = format!("doc-1:open:{}", json!({ "path": pb }));
         assert!(r.host.log().contains(&opened));
+        // the paths of the AI count as trusted for the file commands (prompt 033 E1)
+        assert_eq!(
+            *r.host.allowed.lock().unwrap(),
+            vec![pa.clone(), pb.clone()]
+        );
+        r.call("save_document", &json!({ "path": pc })).unwrap();
+        r.call("get_tree", &json!({})).unwrap();
+        assert_eq!(r.host.allowed.lock().unwrap().last(), Some(&pc));
+        assert_eq!(r.host.allowed.lock().unwrap().len(), 3);
+        // a relative path is refused before it is granted
+        assert!(
+            r.call("save_document", &json!({ "path": "rel.icon" }))
+                .is_err()
+        );
+        assert_eq!(r.host.allowed.lock().unwrap().len(), 3);
         // none untouched: a new window; a failure there closes it again
         let mut f = Fake::with(&[("main", doc(Some(&pa), false))]);
         f.fail_open = true;

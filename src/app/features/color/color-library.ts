@@ -5,6 +5,7 @@ import { ColorSwatches, SwatchGroup } from '../../shared/controls/color-swatches
 import { FilesService } from '../files/files.service';
 import { SettingsStore } from '../settings/settings.store';
 import { COLOR_TEXTS as T } from './color-texts';
+import { settledComputed } from '../document/settled';
 import { documentColors } from './document-colors';
 
 /** Most document colours in the popover. */
@@ -20,12 +21,16 @@ export class ColorLibrary extends ColorSwatches {
   private readonly files = inject(FilesService);
   private readonly settings = inject(SettingsStore);
 
-  readonly documentColors = computed(() => {
-    const s = this.files.store();
-    if (!s) return [];
-    s.revision();
-    return documentColors(s.document());
-  });
+  /** The document's colours; while a gesture runs the last ones stay (prompt 033 E4). */
+  readonly documentColors = settledComputed(
+    () => this.files.store(),
+    () => {
+      const s = this.files.store();
+      if (!s) return [];
+      s.revision();
+      return documentColors(s.document());
+    },
+  );
 
   private readonly all = computed((): SwatchGroup[] => {
     const c = this.settings.settings().colors;

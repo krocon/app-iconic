@@ -11,11 +11,10 @@ import {
   inject,
   input,
   signal,
-  untracked,
   viewChild,
 } from '@angular/core';
 import { clientToDocument } from '../../shared/geometry/dom-geometry';
-import { fromDom, IDENTITY, Matrix, multiply, translation } from '../../shared/geometry/matrix';
+import { IDENTITY, Matrix } from '../../shared/geometry/matrix';
 import { CANVAS_SIZE, guidesOf } from '../../shared/geometry/icon-guides';
 import { squirclePath } from '../../shared/geometry/squircle';
 import { documentToView, Point } from '../../shared/geometry/view-transform';
@@ -33,7 +32,7 @@ import { LayerStack } from './layer-stack';
 import { CanvasEditStore } from './canvas-edit.store';
 import { registerCanvasEditActions } from './canvas-edit-actions';
 import { CanvasInteraction } from './canvas-pointer';
-import { EMPTY_MODEL, measureSelection } from './selection-measure';
+import { connectCanvas, measureEachChange } from './canvas-measure';
 import { SelectionOverlay } from './selection-overlay';
 import { GridHintInput, GridHintOverlay } from './grid-hint-overlay';
 import { gridOriginPoint } from '../../shared/geometry/snapping';
@@ -42,7 +41,6 @@ import { FreehandStore } from '../tools/freehand.store';
 import { FreehandService } from '../tools/freehand.service';
 import { TOOLS_TEXTS } from '../tools/tools-texts';
 import { ClipEditStore } from '../clip/clip-edit.store';
-import { ClipEditLayer } from '../clip/clip-edit-layer';
 import { SketchTool } from '../sketch/sketch-tool';
 import { PenTool } from '../pen/pen-tool';
 import { CurvatureTool } from '../pen/curvature-tool';
@@ -165,7 +163,6 @@ export class CanvasView {
     const el = this.clipEdit.scope(this.store()?.document());
     return el ? (el.getAttribute('id') ?? '') : null;
   });
-  private clipLayer: ClipEditLayer | null = null;
   /** Document → viewport pixels, measured with the host's screen CTM (design 007 E5). */
   protected readonly toView = signal<Matrix>(IDENTITY);
 
@@ -185,27 +182,16 @@ export class CanvasView {
       this.stack.update(this.store()?.document() ?? null, o.appearance, o.effects);
     });
     // the selection (frames, handles): measured after the layers are painted (needs layout)
-    let frame = 0;
-    effect(() => {
-      const s = this.store();
-      const refs = s?.selection() ?? [];
-      // re-measure after changes, zoom/pan, options and the viewport size
-      s?.revision();
-      this.view();
-      this.viewport();
-      const o = this.opt();
-      this.clipEdit.target();
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const doc = s?.document();
-        const host = this.hostEl().nativeElement;
-        const scope = untracked(() => this.clipEdit.scope(doc));
-        this.toView.set(this.measureView());
-        this.edit.model.set(
-          doc ? measureSelection(doc, host, refs, o.selectionMode, o.handles, scope) : EMPTY_MODEL,
-        );
-        (this.clipLayer ??= new ClipEditLayer(host)).update(scope);
-      });
+    measureEachChange({
+      store: this.store,
+      view: this.view,
+      viewport: this.viewport,
+      options: this.opt,
+      clipEdit: this.clipEdit,
+      host: () => this.hostEl().nativeElement,
+      viewportEl: () => this.viewportEl().nativeElement,
+      toView: this.toView,
+      edit: this.edit,
     });
     followSelection(this.store, this.edit, this.clipEdit);
     // the pointer stays on the same screen spot while zooming/panning: recompute its document point
@@ -258,20 +244,15 @@ export class CanvasView {
       },
       destroy,
     );
-    afterNextRender(() => {
-      const el = this.viewportEl().nativeElement;
-      this.canvas.host = this.hostEl().nativeElement;
-      this.canvas.layers = this.layersEl().nativeElement;
-      const ro = new ResizeObserver(([e]) =>
-        this.canvas.setViewport(e.contentRect.width, e.contentRect.height),
-      );
-      ro.observe(el);
-      destroy.onDestroy(() => {
-        ro.disconnect();
-        if (this.canvas.host === this.hostEl().nativeElement) this.canvas.host = null;
-        if (this.canvas.layers === this.layersEl().nativeElement) this.canvas.layers = null;
-      });
-    });
+    afterNextRender(() =>
+      connectCanvas(
+        this.canvas,
+        this.viewportEl().nativeElement,
+        this.hostEl().nativeElement,
+        this.layersEl().nativeElement,
+        destroy,
+      ),
+    );
   }
 
   protected coord(v: number | undefined): string {
@@ -364,14 +345,6 @@ export class CanvasView {
     const text = this.textEdit.textAt(e);
     if (text && this.textEdit.start(text)) return;
     this.interaction.dblclick({ ...pointerOf(e), pointerId: 0 });
-  }
-
-  /** Document → viewport pixels from the browser's matrix of the host. */
-  private measureView(): Matrix {
-    const m = this.hostEl().nativeElement.getScreenCTM?.();
-    if (!m) return IDENTITY;
-    const r = this.viewportEl().nativeElement.getBoundingClientRect();
-    return multiply(translation(-r.left, -r.top), fromDom(m));
   }
 
   protected onPointerMove(e: PointerEvent): void {

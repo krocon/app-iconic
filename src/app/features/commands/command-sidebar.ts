@@ -17,6 +17,8 @@ import { ADD_LAYOUT, AddGroupKey, AddSectionKey, entryIds } from './add-layout';
 import { COMMAND_ICONS } from './command-icons';
 import { COMMANDS_TEXTS } from './commands-texts';
 import { SettingsStore } from '../settings/settings.store';
+import { settledComputed } from '../document/settled';
+import { FilesService } from '../files/files.service';
 
 interface Leaf {
   kind: 'action';
@@ -92,6 +94,7 @@ export class CommandSidebar {
   private readonly lastUsed = signal<Partial<Record<AddGroupKey, string>>>({});
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
   private readonly settings = inject(SettingsStore);
+  private readonly files = inject(FilesService);
   private timer: ReturnType<typeof setTimeout> | undefined;
 
   private leaf(id: string): Leaf {
@@ -116,7 +119,13 @@ export class CommandSidebar {
     this.settings.set('sidebar.constructionOpen', !this.constructionOpen());
   }
 
-  protected readonly sections = computed(() => {
+  /** While a gesture runs the rows (and their enabled states) stay (prompt 033 E4). */
+  protected readonly sections = settledComputed(
+    () => this.files.store(),
+    () => this.buildSections(),
+  );
+
+  private buildSections() {
     const q = this.query();
     const open = this.constructionOpen();
     let index = 0;
@@ -147,7 +156,7 @@ export class CommandSidebar {
             : s.entries.map((e) => this.entryRow(e, row)),
       }))
       .filter((s) => s.rows.length > 0);
-  });
+  }
 
   private entryRow(
     e: (typeof ADD_LAYOUT)[number]['entries'][number],

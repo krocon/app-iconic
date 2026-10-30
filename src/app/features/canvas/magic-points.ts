@@ -42,17 +42,12 @@ export function magicPoints(
     false,
   );
   if (!host) return out;
-  const moving = exclude.flatMap((r) => {
-    const el = doc.node(r);
-    return el ? [{ asset: r.asset, el }] : [];
-  });
+  const nodes = nodeIndex(doc, exclude);
   for (const { asset, root } of paintedRoots(box)) {
     for (const el of root.querySelectorAll('*')) {
       if (out.length >= MAX_MAGIC_POINTS) return out;
       if (!(el instanceof SVGGraphicsElement) || el.children.length > 0) continue;
-      const id = el.getAttribute(ID_ATTR);
-      const live = id ? doc.node({ asset, id }) : null;
-      if (!live || moving.some((m) => m.asset === asset && m.el.contains(live))) continue;
+      if (!nodes.counts(asset, el)) continue;
       if (!isRendered(el, root, scope)) continue;
       const m = nodeToDocument(host, el);
       if (!m) continue;
@@ -78,6 +73,56 @@ export function magicPoints(
   return out.slice(0, MAX_MAGIC_POINTS);
 }
 
+/**
+ * Which painted elements count for snapping (prompt 033 E4): a painted element (the live node or
+ * a copy of it, `LayerStack`) is a node of the document if its id is one, and moves if it is one
+ * of `exclude` or inside one. The ids are gathered once per call – before, every element asked the
+ * document with `querySelector` (seconds for 20 000 shapes at the start of a drag).
+ */
+export function nodeIndex(
+  doc: IconDocument,
+  exclude: readonly NodeRef[],
+): { counts(asset: string, el: Element): boolean; moving(asset: string, el: Element): boolean } {
+  const known = new Map<string, Set<string>>();
+  const moving = new Map<string, Set<string>>();
+  for (const r of exclude) {
+    const el = doc.node(r);
+    if (!el) continue;
+    const set = moving.get(r.asset) ?? new Set<string>();
+    for (const e of [el, ...el.querySelectorAll(`[${ID_ATTR}]`)]) {
+      const id = e.getAttribute(ID_ATTR);
+      if (id) set.add(id);
+    }
+    moving.set(r.asset, set);
+  }
+  const idsOf = (asset: string): Set<string> => {
+    let set = known.get(asset);
+    if (!set) {
+      set = new Set();
+      const root = doc.asset(asset)?.svg?.root;
+      if (root) {
+        for (const e of [root, ...root.querySelectorAll(`[${ID_ATTR}]`)]) {
+          const id = e.getAttribute(ID_ATTR);
+          if (id) set.add(id);
+        }
+      }
+      known.set(asset, set);
+    }
+    return set;
+  };
+  const isMoving = (asset: string, id: string) => !!moving.get(asset)?.has(id);
+  return {
+    counts: (asset, el) => {
+      const id = el.getAttribute(ID_ATTR);
+      return !!id && idsOf(asset).has(id) && !isMoving(asset, id);
+    },
+    moving: (asset, el) => {
+      const id = el.getAttribute(ID_ATTR);
+      return !!id && idsOf(asset).has(id) && isMoving(asset, id);
+    },
+  };
+}
+
 /** What a drag snaps to: marked points (with crossings) and outlines. */
 export interface SnapSources {
   points: SnapCandidate[];
@@ -99,15 +144,8 @@ export function snapCandidates(
 ): SnapSources {
   const points: SnapCandidate[] = magicPoints(box, host, doc, exclude, scope);
   if (scope || !smart || !host) return { points, outlines: [] };
-  const moving = exclude.flatMap((r) => {
-    const el = doc.node(r);
-    return el ? [{ asset: r.asset, el }] : [];
-  });
-  const skip = (asset: string, el: Element) => {
-    const id = el.getAttribute(ID_ATTR);
-    const live = id ? doc.node({ asset, id }) : null;
-    return !!live && moving.some((m) => m.asset === asset && m.el.contains(live));
-  };
+  const nodes = nodeIndex(doc, exclude);
+  const skip = (asset: string, el: Element) => nodes.moving(asset, el);
   const targets = collectSketchTargets(box, host, skip);
   return { points: [...points, ...crossingPoints(targets)], outlines: sceneOutlines(targets) };
 }

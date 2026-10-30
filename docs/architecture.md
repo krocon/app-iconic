@@ -149,6 +149,7 @@ Browser nicht kann oder nicht darf: Dateisystem, `.icon`-Bundles und ZIP, verlus
 | 074 E1–E6          | Farb-Popover (`ColorPicker`/`ColorButton`, Farbräume rein in `shared/color`), Alpha als `#RRGGBBAA` (resvg rendert es), Format des alten Werts bleibt; Swatches über `ColorSwatches` (shared) ← `ColorLibrary` (features); Pipette als Werkzeug, Bilder/Verläufe per resvg-Pixel (`pick_color`); Command `replaceColor` + `setIconJsonValue` als ein Schritt; `colors.recent/palette` in `settings.json` (leere Standardliste nimmt Texte) | kein Browser-Canvas für Pixel (Tainting), eine Quelle für Farben in Panel, Kontextleiste und KI |
 | 075 E1–E5          | Live-Typografie: `FontField` (Combobox mit `<datalist>`), Text-Werkzeug ⇧T, `<textarea>`-Overlay über dem Text (Screen-CTM; Enter = Zeile, ⌘Enter/Verlassen = fertig, Esc = ab), Zeilen als `tspan x dy`, Ergebnis `setText` bzw. `replaceNode` als „Change Text“; `text.toPath` mit berechneter Schrift und Browser-Zeilenpositionen, Rust `text_to_path` je Zeile | der Browser misst, Rust zeichnet die Umrisse; kein eigener Text-Layouter |
 | 076 E1–E3          | Effekte als ein verwalteter `<filter>` je Element (`data-effects`-JSON → Primitive, rein in `effect-model.ts`; geteilt → Kopie, fremd → unberührt), Panel-Abschnitt mit Live-Geste; Masken: vorderstes Element → `<mask>`, die übrigen in eine Gruppe mit `mask=…`; `clip-references` nimmt `mask`/`filter` mit; resvg: `feDropShadow` braucht `stdDeviation` > 0 | eine Quelle (die Liste) statt Primitive zu parsen; der Maskenraum bleibt der Raum der Gruppe |
+| 033 E1–E6          | Pfade nur aus vertrauten Quellen: `ai_core::user_paths::UserPaths` (exakte Pfade aus `pick_*`-Dialogen, „Open Recent“, argv/Zweitstart/Finder, Drops, KI-Brücke; `allow_tree` für interne App-Ordner, Vorlage für 083/084/086), Datei-Commands prüfen mit `checked` → `not_allowed`; Matrizen der Transform-Liste aus `transform.baseVal` (`transform-matrix.ts`); Dateien geteilt (`window_commands`, `menu_commands`, `mcp_args`, `settings/model`, `actions/catalog/`, `canvas-measure`, `edit-items`); Leistung: Snap-Kandidaten ohne Suche je Element (`nodeIndex`), Menüs/Add-Leiste/Dokumentfarben ruhen während einer Geste (`settledComputed`), Gruppenschatten als komponierter CSS-Filter am Ebenen-Kasten (pixelgleich) | Tiefenverteidigung gegen eine kompromittierte WebView ohne DTO-Änderung; Browser rechnet Transformationen (CLAUDE.md §4); SVG-Filter am Inhalt zeichnete je Zieh-Schritt die ganze Ebene neu (~240 ms) |
 
 ## Schichten
 
@@ -234,6 +235,11 @@ Aktion `mcp.disconnect`; kein neuer Dokument-Command (`AiCommand` hüllt vorhand
 074: `pick_color(svg, x, y)` → `#RRGGBBAA` (resvg, `export_commands.rs`); Dokument-Command `replaceColor { from, to, assets? }`;
 Aktionen `color.eyedropper`, `color.pick { x, y, target? }`, `color.replace { from, to }`; Einstellung `colors { recent, palette }`;
 keine neue Abhängigkeit.
+033: keine neuen Commands; Fehlercode `not_allowed` (Pfad aus keiner vertrauten Quelle) für `open_icon`, `save_icon`,
+`read_svg_file`, `read_image_file`, `add_recent_file`, `export_svg`, `export_png`, `open_document_window`; die
+`pick_*`-Commands und `recent_files` erlauben, was sie zurückgeben. Module geteilt: `window_commands.rs`
+(Fenster-Commands), `menu_commands.rs` (Menü, Keymap, Quit), `mcp_args.rs` (Argumente der KI-Tools). Keine neue
+Abhängigkeit.
 071 (Modul `drop_files.rs`, `ai-core` `clipboard_image`, `user_paths`): `read_clipboard_image()` → `ImageFile | null`;
 Ereignis `file-drop { phase, files: [{ path, kind }], x, y }` an das Fenster; Fassaden `DropApi`, `ClipboardApi.readImage()`;
 Argumente `centerX`/`centerY` (Dokument-Koordinaten) für `add.image` und `add.svgSnippet`; keine neuen Fehlercodes
@@ -282,14 +288,36 @@ an jedem dritten Element. Gemessen am 27.10.2026, Fenster 1440 × 900, in Playwr
 
 Ein Schritt beim Ziehen enthält die Rundreise Playwright → Browser und das Warten auf das nächste Bild (≥ 16 ms).
 
-- **Was die Zeit kostet** (Chromium-Trace): Rastern und „Layerize“ der ganzen Zeichenfläche bei jeder Änderung; jedes
-  Element mit eigener `opacity` ist eine eigene Ebene, deshalb ist die Variante mit `opacity` beim Ziehen ~4× langsamer.
 - **Maßnahmen in 031:** Zeichenfläche als eigene Ebene (`will-change: transform`), Schatten als Geschwister-Ebene
   statt `filter` über der Fläche, der Treffertest verwirft Elemente über `getBoundingClientRect` (± 64 px für
   Striche), bevor `isPointInFill`/`isPointInStroke` laufen, der Ebenenbaum wird während einer Geste nicht neu gebaut
   (`DocumentStore.gesture`), virtualisierter Baum ab 500 Zeilen (006 E1).
 - **Verworfen:** Zoom per CSS-Skalierung eines fertigen Bildes – Chromium rastert trotzdem neu.
-- **Ziel ≥ 50 fps beim Ziehen** ist auch auf dem Mac nicht erreicht: ohne `opacity` ~12 Bilder/s, mit `opacity`
-  ~3 Bilder/s. Die Ursache (die ganze Fläche wird je Schritt neu gerastert, Elemente mit `opacity` je als isolierte
-  Gruppe) und die Messung in der echten App (WKWebView) sind Teil von Prompt 033. Die Schwellen im Test sind Regressionswächter (Import < 30 s, Bild < 2 s, Schritt < 3 s, Baum < 500
-  Zeilen), keine Zielwerte.
+
+### Prompt 033 (30.10.2026, Container wie oben)
+
+Bis zum 30.10. war das Ziehen im Container deutlich langsamer geworden (neue Panels und Effekte seit 031). Ursachen aus
+CPU-Profil und Trace (design 033 E4/E5): (1) beim ersten Schritt fragten Magic Snap und Smart Guides das Dokument
+je Element per `querySelector` (4 s); (2) Menüs, Add-Leiste und Dokumentfarben rechneten bei jedem Schritt neu;
+(3) der Gruppenschatten war ein SVG-Filter am Inhalt jeder Ebene – jede Änderung zeichnete die ganze Ebene samt aller
+`opacity`-Gruppen neu („Layerize“ ~240 ms je Bild). Maßnahmen: `nodeIndex` (Ids einmal je Geste), `settledComputed`
+(Ansichten ruhen während einer Geste), Schatten als komponierter CSS-Filter am Ebenen-Kasten (pixelgleich,
+`composited-shadow.spec.ts`). Undo und Ergebnis unverändert (eine Geste = ein `setAttributes`).
+
+| Schritt                                     | vor 033 mit `opacity` | nach 033 mit `opacity` | vor 033 ohne | nach 033 ohne |
+| ------------------------------------------- | --------------------- | ---------------------- | ------------ | ------------- |
+| Import                                      | 5,3 s                 | 3,8 s                  | 4,2 s        | 4,2 s         |
+| Zoom/Pan je Bild                            | 570 ms                | 327 ms                 | 495 ms       | 321 ms        |
+| Klick-Auswahl                               | 2,5 s                 | 0,95 s                 | 1,4 s        | 1,1 s         |
+| Ziehen mit Snap, Schnitt über 20 Schritte   | 1 473 ms              | 360 ms                 | 701 ms       | 380 ms        |
+| – erster Schritt (Snap-Kandidaten sammeln)  | 6,2 s                 | 2,4 s                  | 6,7 s        | 2,7 s         |
+| – danach je Schritt                         | 1 160 ms              | 227 ms                 | 361 ms       | 231 ms        |
+
+- **Ziel ≥ 50 fps beim Ziehen**: im Container nicht erreichbar (Software-Rasterung und -Komposition auf 2 vCPU,
+  dazu GC); mit `opacity` ist das Ziehen jetzt so schnell wie ohne. **Offen (Mac):** neu messen in
+  Playwright-Chromium und in der echten App (WKWebView) – `docs/open-questions.md` „Prompt 033“.
+- **Verworfen (033):** bewegte Elemente in eigener Ebene über einem festen Bild des Rests – in einer Testseite mit
+  Schatten langsamer (der Filterbereich hängt am ganzen Inhalt), als `<img>` noch langsamer, dazu falsche
+  Stapelreihenfolge während der Geste. Ohne Filter dauerte ein Schritt dort nur 25–50 ms.
+- Die Schwellen im Test sind Regressionswächter (Import < 30 s, Bild < 2 s, Schritt < 3 s, Baum < 500 Zeilen), keine
+  Zielwerte.

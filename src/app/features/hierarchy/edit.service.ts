@@ -1,4 +1,3 @@
-import { isLocked } from '../lock/lock';
 import { inject, Injectable } from '@angular/core';
 import { ClipboardApi, imageFromBlob } from '../../core/clipboard/clipboard-api';
 import { describeFsError, toFsError } from '../../core/errors/fs-error';
@@ -7,9 +6,8 @@ import { AskService } from '../../shared/ask/ask.service';
 import { CanvasViewStore } from '../canvas/canvas-view.store';
 import { CommandError, CompositeCommand, DocCommand, ReorderNode } from '../document/commands';
 import { DocumentStore } from '../document/document.store';
-import { IconDocument, NodeRef } from '../document/icon-document';
+import { IconDocument } from '../document/icon-document';
 import { groups, layers } from '../document/model/icon-json';
-import { isDefinitionTag } from '../document/model/reorder-rules';
 import { DropPosition, IconItem, TreeTarget } from '../document/model/selection';
 import { parseFragment, serializeAsset, serializeElement, SvgText } from '../document/svg/node-ids';
 import { clipDefsMarkup } from '../clip/clip-references';
@@ -22,7 +20,6 @@ import {
   groupCommand,
   MoveDirection,
   moveCommand,
-  paintedNodes,
   ungroupCommand,
 } from './arrange-operations';
 import {
@@ -39,6 +36,7 @@ import { HIERARCHY_TEXTS as T } from './hierarchy-texts';
 import { buildTree, nodeLabelOf } from './hierarchy-model';
 import { parseClipboard, pasteCommand } from './paste';
 import { visibilityCommand } from './visibility';
+import { destinationAsset, findItem, itemObject, selectAllOf } from './edit-items';
 
 /**
  * Editing the selection of the window's document (design 006 E8–E13): the functions behind the
@@ -368,58 +366,8 @@ export class EditService {
   selectAll(): void {
     const s = this.store();
     if (!s) return;
-    const doc = s.document();
-    const items = s.items();
-    const gs = groups(doc.iconJson);
-    if (items.some((i) => i.kind === 'group')) {
-      s.selectItems(gs.map((_, group) => ({ kind: 'group', group })));
-    } else if (items.some((i) => i.kind === 'layer')) {
-      s.selectItems(
-        gs.flatMap((g, group) =>
-          layers(g).map((_, layer) => ({ kind: 'layer' as const, group, layer })),
-        ),
-      );
-    } else {
-      const refs: NodeRef[] = [];
-      for (const a of doc.assets.values()) {
-        for (const el of Array.from(a.svg?.root.children ?? [])) {
-          if (!isDefinitionTag(el)) refs.push(doc.refOf(el)!);
-        }
-      }
-      // locked nodes (guides by default) stay out, like a click and the marquee (prompt 066)
-      s.select(
-        paintedNodes(doc, refs)
-          .filter((e) => !isLocked(e))
-          .map((e) => doc.refOf(e)!),
-      );
-    }
+    const all = selectAllOf(s.document(), s.items());
+    if ('items' in all) s.selectItems(all.items);
+    else s.select(all.nodes);
   }
-}
-
-type GroupOrLayer = object;
-
-function itemObject(json: Parameters<typeof groups>[0], i: IconItem): GroupOrLayer | null {
-  if (i.kind === 'root') return null;
-  const g = groups(json)[i.group];
-  return (i.kind === 'group' ? g : layers(g)[i.layer]) ?? null;
-}
-
-function findItem(json: Parameters<typeof groups>[0], o: GroupOrLayer): IconItem[] {
-  const gs = groups(json);
-  for (let g = 0; g < gs.length; g++) {
-    if (gs[g] === o) return [{ kind: 'group', group: g }];
-    const l = layers(gs[g]).indexOf(o as never);
-    if (l >= 0) return [{ kind: 'layer', group: g, layer: l }];
-  }
-  return [];
-}
-
-/** The asset nodes land in (for the broken-reference check). */
-function destinationAsset(s: DocumentStore, t: TreeTarget, pos: DropPosition): string | null {
-  if (t.kind === 'node') return t.ref.asset;
-  if (t.kind === 'layer' && pos === 'into') {
-    const name = layers(groups(s.document().iconJson)[t.group])[t.layer]?.['image-name'];
-    return typeof name === 'string' ? (s.document().asset(name)?.name ?? null) : null;
-  }
-  return null;
 }

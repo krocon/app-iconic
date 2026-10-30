@@ -1,12 +1,13 @@
 import { IconGroup, IconLayer } from '../../core/icon-file/icon-file.models';
 import { Appearance, fieldFor } from './appearance';
-import { layerTransform } from './asset-placement';
+import { layerScale, layerTransform } from './asset-placement';
 import { SVG_NS } from '../document/svg/node-ids';
+import { CANVAS_SIZE } from '../../shared/geometry/icon-guides';
 
 /**
  * The preview approximation of Icon Composer's group effects (design 010 E13) – Apple's Liquid
- * Glass is not rebuilt: shadow as an SVG filter per layer, translucency as an opacity gradient,
- * blend modes as CSS `mix-blend-mode`. Values per appearance (specializations first). Pure.
+ * Glass is not rebuilt: shadow as an SVG filter per layer (on the canvas composited on the layer's
+ * box, prompt 033 E5), translucency as an opacity gradient, blend modes as CSS `mix-blend-mode`. Values per appearance (specializations first). Pure.
  */
 
 export interface ShadowEffect {
@@ -84,6 +85,16 @@ export function stackTransform(
   return [g, l].filter((t) => t !== null).join(' ') || null;
 }
 
+/**
+ * The scale of `stackTransform` (group × layer; both are uniform scales about the canvas centre
+ * plus translations) – the composited shadow of the canvas scales with it (prompt 033 E5).
+ */
+export function stackScale(group: IconGroup, layer: IconLayer, appearance: Appearance): number {
+  const g = layerScale({ position: fieldFor(group, 'position', appearance, undefined) });
+  const l = layerScale({ position: fieldFor(layer, 'position', appearance, undefined) });
+  return g * l;
+}
+
 /** The colour matrix that darkens the blurred layer for a chromatic shadow. */
 export function chromaticMatrix(opacity: number): string {
   const d = 0.6;
@@ -95,7 +106,15 @@ export function chromaticMatrix(opacity: number): string {
  * `feDropShadow` in black (`neutral`), or the blurred layer itself, darkened (`layer-color`). In
  * canvas units (1024 = icon), so it scales with the zoom.
  */
-export function shadowFilter(d: Document, id: string, s: ShadowEffect): Element {
+export function shadowFilter(
+  d: Document,
+  id: string,
+  s: ShadowEffect,
+  box: { scale: number } | null = null,
+): Element {
+  // composited on the canvas (prompt 033 E5): the filter sits on the layer's `<svg>` box (the
+  // canvas, 1024 units at any zoom) – offset and blur as fractions of it, times the layer's scale
+  const u = (v: number) => (box ? (v * box.scale) / CANVAS_SIZE : v);
   const el = (name: string, attrs: Record<string, string | number>) => {
     const e = d.createElementNS(SVG_NS, name);
     for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, String(v));
@@ -110,12 +129,13 @@ export function shadowFilter(d: Document, id: string, s: ShadowEffect): Element 
     'color-interpolation-filters': 'sRGB',
     'data-kind': s.kind,
   });
+  if (box) filter.setAttribute('primitiveUnits', 'objectBoundingBox');
   if (s.kind === 'neutral') {
     filter.append(
       el('feDropShadow', {
         dx: 0,
-        dy: SHADOW_OFFSET,
-        stdDeviation: SHADOW_BLUR,
+        dy: u(SHADOW_OFFSET),
+        stdDeviation: u(SHADOW_BLUR),
         'flood-color': '#000',
         'flood-opacity': s.opacity,
       }),
@@ -124,8 +144,8 @@ export function shadowFilter(d: Document, id: string, s: ShadowEffect): Element 
     const merge = el('feMerge', {});
     merge.append(el('feMergeNode', { in: 'shadow' }), el('feMergeNode', { in: 'SourceGraphic' }));
     filter.append(
-      el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: SHADOW_BLUR, result: 'blur' }),
-      el('feOffset', { in: 'blur', dy: SHADOW_OFFSET, result: 'moved' }),
+      el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: u(SHADOW_BLUR), result: 'blur' }),
+      el('feOffset', { in: 'blur', dy: u(SHADOW_OFFSET), result: 'moved' }),
       el('feColorMatrix', {
         in: 'moved',
         type: 'matrix',

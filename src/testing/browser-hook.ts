@@ -9,7 +9,12 @@ import { MenuService } from '../app/features/menus/menu.service';
 import { DocumentStore } from '../app/features/document/document.store';
 import { serializeAsset } from '../app/features/document/svg/node-ids';
 import { FilesService } from '../app/features/files/files.service';
-import { listMatrix, parseTransformList } from '../app/features/properties/transform-list';
+import {
+  parseTransformList,
+  serializeSteps,
+  setPivot,
+} from '../app/features/properties/transform-list';
+import { stepsMatrix } from '../app/features/properties/transform-matrix';
 import { CanvasViewStore } from '../app/features/canvas/canvas-view.store';
 import { Hit, hitTest } from '../app/features/canvas/hit-test';
 import {
@@ -81,8 +86,10 @@ export interface AppIconicHook {
   lastCommand(): CommandJson | null;
   /** The spec the native menu would get. */
   menuSpec(): MenuSpec;
-  /** `listMatrix(parseTransformList(text))` as `[a, b, c, d, e, f]` (design 009 E7). */
+  /** `stepsMatrix(parseTransformList(text))` as `[a, b, c, d, e, f]` (design 009 E7, 033 E3). */
   transformListMatrix(text: string): number[] | null;
+  /** "Use pivot" of step `index` around (x, y) with the browser's matrices (033 E3). */
+  transformPivot(text: string, index: number, x: number, y: number): string | null;
   /** The settings of this window now (design 015). */
   settings(): Settings;
   /** The settings backend in memory + localStorage ("settings.json" of the browser mode). */
@@ -185,8 +192,12 @@ export function installTestHook(): void {
     transformListMatrix: (text) => {
       const steps = parseTransformList(text);
       if (!steps) return null;
-      const m = listMatrix(steps);
+      const m = stepsMatrix(steps);
       return [m.a, m.b, m.c, m.d, m.e, m.f];
+    },
+    transformPivot: (text, index, x, y) => {
+      const steps = parseTransformList(text);
+      return steps ? serializeSteps(setPivot(steps, index, { x, y }, (s) => stepsMatrix(s))) : null;
     },
     settings: () => settings.settings(),
     settingsApi,

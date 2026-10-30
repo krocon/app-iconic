@@ -2,6 +2,8 @@ import { computed, effect, inject, Injectable, Injector, signal, untracked } fro
 import { ActionService } from '../../core/actions/action.service';
 import { MenuApi } from '../../core/menu/menu-api';
 import { DialogService } from '../../shared/dialog/dialog.service';
+import { settledComputed } from '../document/settled';
+import { FilesService } from '../files/files.service';
 import { RecentFilesService } from '../files/recent-files.service';
 import {
   appMenuSpec,
@@ -26,6 +28,7 @@ export class MenuService {
   private readonly actions = inject(ActionService);
   private readonly api = inject(MenuApi);
   private readonly recent = inject(RecentFilesService);
+  private readonly files = inject(FilesService);
   private readonly dialogs = inject(DialogService);
   private readonly injector = inject(Injector);
   /** Bumped after every native click: the native menu toggles a check item itself. */
@@ -33,7 +36,16 @@ export class MenuService {
   private started = false;
   private timer: ReturnType<typeof setTimeout> | undefined;
 
-  readonly menus = computed<ResolvedMenu[]>(() => {
+  /**
+   * The resolved menus. While a gesture runs (drag, live field edit) the last ones stay: enabled
+   * and checked states are asked again when it ends, not on every step (prompt 033 E4).
+   */
+  readonly menus = settledComputed(
+    () => this.files.store(),
+    () => this.resolve(),
+  );
+
+  private resolve(): ResolvedMenu[] {
     const os = this.actions.os;
     const model = buildMenuModel(os, { recent: this.recent.files().map((f) => f.name) });
     return resolveMenu(
@@ -47,7 +59,7 @@ export class MenuService {
       },
       os,
     );
-  });
+  }
 
   /** The spec the native menu gets (also for tests and the browser hook). */
   readonly spec = computed(() => ({

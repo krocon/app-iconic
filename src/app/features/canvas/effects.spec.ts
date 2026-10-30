@@ -3,6 +3,10 @@ import {
   blendCss,
   chromaticMatrix,
   groupEffects,
+  SHADOW_BLUR,
+  SHADOW_OFFSET,
+  shadowFilter,
+  stackScale,
   stackTransform,
   translucencyMask,
 } from './effects';
@@ -55,6 +59,34 @@ describe('effects preview (design 010 E13)', () => {
       ),
     ).toBe(
       'translate(522 512) scale(1) translate(-512 -512) translate(512 512) scale(2) translate(-512 -512)',
+    );
+  });
+
+  it('the composited shadow of the canvas: canvas-box units times the layer scale (033 E5)', () => {
+    expect(stackScale({}, {}, 'light')).toBe(1);
+    expect(
+      stackScale(
+        { position: { scale: 0.5, 'translation-in-points': [10, 0] } },
+        { position: { scale: 3, 'translation-in-points': [0, 0] } },
+        'light',
+      ),
+    ).toBe(1.5);
+    // the export keeps user space units
+    const plain = shadowFilter(document, 'a', { kind: 'neutral', opacity: 0.5 });
+    expect(plain.getAttribute('primitiveUnits')).toBeNull();
+    expect(plain.firstElementChild!.getAttribute('dy')).toBe(String(SHADOW_OFFSET));
+    // the canvas: fractions of the 1024 units, scaled like the layer
+    const box = shadowFilter(document, 'b', { kind: 'neutral', opacity: 0.5 }, { scale: 2 });
+    expect(box.getAttribute('primitiveUnits')).toBe('objectBoundingBox');
+    expect(Number(box.firstElementChild!.getAttribute('dy'))).toBeCloseTo(
+      (SHADOW_OFFSET * 2) / 1024,
+    );
+    expect(Number(box.firstElementChild!.getAttribute('stdDeviation'))).toBeCloseTo(
+      (SHADOW_BLUR * 2) / 1024,
+    );
+    const color = shadowFilter(document, 'c', { kind: 'layer-color', opacity: 0.5 }, { scale: 1 });
+    expect(Number(color.querySelector('feOffset')!.getAttribute('dy'))).toBeCloseTo(
+      SHADOW_OFFSET / 1024,
     );
   });
 });

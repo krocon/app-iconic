@@ -1,12 +1,13 @@
 import { fmt } from '../../shared/geometry/align';
-import { apply, IDENTITY, Matrix, multiply } from '../../shared/geometry/matrix';
+import { apply, Matrix } from '../../shared/geometry/matrix';
 import { Point } from '../../shared/geometry/view-transform';
 
 /**
  * The transform list of the properties panel (design 009 E7, legacy §7.5 `TransformSection`):
  * the steps of a `transform` attribute – parse strictly, edit, write back. Unchanged steps keep
- * their text. The browser stays the judge of what a transform means (`transform.baseVal`, checked
- * against `listMatrix` in Playwright); here only the attribute text is edited. Pure.
+ * their text. The browser is the judge of what a transform means: the matrices come from
+ * `transform.baseVal` (`transform-matrix.ts`, prompt 033 E3 – no own transform arithmetic here);
+ * this file only edits the attribute text. Pure.
  */
 
 export type StepKind = 'translate' | 'scale' | 'rotate' | 'skewX' | 'skewY' | 'matrix';
@@ -108,38 +109,6 @@ export function hasPivot(step: TransformStep): boolean {
   return step.kind === 'rotate' && step.args.length === 3;
 }
 
-const rad = (deg: number) => (deg * Math.PI) / 180;
-
-export function stepMatrix(step: TransformStep): Matrix {
-  const n = normalizedArgs(step);
-  switch (step.kind) {
-    case 'translate':
-      return { ...IDENTITY, e: n[0], f: n[1] };
-    case 'scale':
-      return { ...IDENTITY, a: n[0], d: n[1] };
-    case 'rotate': {
-      const c = Math.cos(rad(n[0]));
-      const s = Math.sin(rad(n[0]));
-      const r: Matrix = { a: c, b: s, c: -s, d: c, e: 0, f: 0 };
-      const [, cx, cy] = n;
-      return multiply({ ...IDENTITY, e: cx, f: cy }, multiply(r, { ...IDENTITY, e: -cx, f: -cy }));
-    }
-    case 'skewX':
-      return { ...IDENTITY, c: Math.tan(rad(n[0])) };
-    case 'skewY':
-      return { ...IDENTITY, b: Math.tan(rad(n[0])) };
-    case 'matrix': {
-      const [a, b, c, d, e, f] = n;
-      return { a, b, c, d, e, f };
-    }
-  }
-}
-
-/** The matrix of the whole list (left to right, like `transform.baseVal.consolidate()`). */
-export function listMatrix(steps: readonly TransformStep[]): Matrix {
-  return steps.reduce((m, s) => multiply(m, stepMatrix(s)), IDENTITY);
-}
-
 export function addStep(steps: readonly TransformStep[], kind: StepKind): TransformStep[] {
   return [...steps, { kind, args: [...NEUTRAL[kind]] }];
 }
@@ -170,21 +139,25 @@ export function setStepArgs(
   return steps.map((s, i) => (i === index ? { kind: s.kind, args: [...args] } : s));
 }
 
+/** The matrix of a list of steps – the browser's (`stepsMatrix` in `transform-matrix.ts`). */
+export type StepsMatrix = (steps: readonly TransformStep[]) => Matrix;
+
 /**
  * "Use pivot" of the rotate step `index`: on = `rotate(a cx cy)` around `center` (a point in the
  * element's own user space, e.g. its bbox centre), mapped through the steps after the rotate into
- * the space the rotate works in; off (`null`) = `rotate(a)`.
+ * the space the rotate works in (`matrixOf`, the browser's matrix); off (`null`) = `rotate(a)`.
  */
 export function setPivot(
   steps: readonly TransformStep[],
   index: number,
   center: Point | null,
+  matrixOf: StepsMatrix,
 ): TransformStep[] {
   const s = steps[index];
   if (!s || s.kind !== 'rotate') return [...steps];
   const angle = normalizedArgs(s)[0];
   if (!center) return setStepArgs(steps, index, [angle]);
-  const p = apply(listMatrix(steps.slice(index + 1)), center);
+  const p = apply(matrixOf(steps.slice(index + 1)), center);
   return setStepArgs(steps, index, [angle, p.x, p.y]);
 }
 

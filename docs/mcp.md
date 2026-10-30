@@ -83,7 +83,9 @@ was edited in between: the call fails with `revision_conflict` and the current s
   app over **127.0.0.1** with a random 256-bit key that changes at every start; port and key are in `mcp.json` in the
   app's config folder, readable only by your user. With the setting off there is neither a port nor that file.
 - No shell and no file access of its own: opening, saving and exporting go through the same checked paths as the
-  dialogs (absolute paths only). Quitting, the system clipboard, dialogs of the window and changing AI control itself
+  dialogs (absolute paths only). The app's file commands only take paths from trusted sources (dialogs, Open Recent,
+  the system, drops – prompt 033); a path the AI names in `open_document`, `save_document` or `export_*` becomes one
+  after the bridge checked it. Quitting, the system clipboard, dialogs of the window and changing AI control itself
   are not available to the AI.
 - Everything the AI inserts is cleaned like any foreign SVG (no scripts, event handlers or external references).
   Answers are bounded (characters, rows, 8 MiB per answer). Document contents are never logged.

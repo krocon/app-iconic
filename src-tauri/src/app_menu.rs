@@ -92,7 +92,7 @@ fn target_window(app: &AppHandle) -> Option<String> {
 /// A click in the native menu (design 005 E6, E13).
 pub fn route(app: &AppHandle, id: String) {
     if id == "app.quit" {
-        crate::commands::begin_quit(app);
+        crate::menu_commands::begin_quit(app);
         return;
     }
     if !menu_spec::valid_id(&id) {
@@ -108,7 +108,7 @@ pub fn route(app: &AppHandle, id: String) {
         NoWindow::OpenWindowThen(action) => docs.new_label_with_action(action),
         NoWindow::Ignore => return,
     };
-    let _ = crate::commands::build_document_window(app, &label);
+    let _ = crate::window_commands::build_document_window(app, &label);
 }
 
 /// Window events that change the menu (macOS: rebuild on the main thread – window events are

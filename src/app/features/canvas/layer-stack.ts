@@ -11,6 +11,7 @@ import {
   groupEffects,
   ShadowEffect,
   shadowFilter,
+  stackScale,
   stackTransform,
   translucencyMask,
 } from './effects';
@@ -22,6 +23,7 @@ const SHADOW_ID = 'ai-fx-shadow';
 const LAYER_CSS =
   ':host{position:absolute;inset:0;pointer-events:none}' +
   '.layer-host{display:block;position:absolute;inset:0;width:100%;height:100%}' +
+  '.layer-host.shadowed{will-change:transform}' +
   CONSTRUCTION_CSS;
 
 /** One layer to paint. */
@@ -35,6 +37,8 @@ export interface StackLayer {
   blend: string | null;
   /** The group's shadow, drawn per layer (preview approximation, design 010 E13). */
   shadow: ShadowEffect | null;
+  /** The scale of `transform` (group × layer) – for the composited shadow (prompt 033 E5). */
+  scale: number;
   /** This layer shows the live root; others of the same asset get a copy (design 004 E5). */
   live: boolean;
 }
@@ -89,6 +93,7 @@ export function stackOf(doc: IconDocument, appearance: Appearance, effects = tru
               transform: stackTransform(g, l, appearance),
               blend: effects ? blendCss(fieldFor(l, 'blend-mode', appearance, 'normal')) : null,
               shadow: fx?.shadow ?? null,
+              scale: stackScale(g, l, appearance),
               live,
             },
           ];
@@ -206,8 +211,12 @@ export class LayerStack {
     if (l.opacity !== null) g.setAttribute('opacity', String(l.opacity));
     if (l.transform) g.setAttribute('transform', l.transform);
     if (l.shadow) {
-      svg.append(this.shadowFilter(l.shadow));
-      g.setAttribute('filter', `url(#${SHADOW_ID})`);
+      // composited (prompt 033 E5): a CSS filter on the layer's own compositor layer – a change
+      // re-rasters only the changed tiles, the shadow is applied when compositing. An SVG filter
+      // on the content re-rendered the whole layer on every drag step (~240 ms with 20 000 shapes).
+      svg.append(this.shadowFilter(l.shadow, l.scale));
+      svg.classList.add('shadowed');
+      svg.style.filter = `url(#${SHADOW_ID})`;
     }
     g.append(l.asset.svg ? this.svgContent(l) : this.imageContent(l.asset.dataUrl ?? ''));
     svg.append(g);
@@ -216,10 +225,10 @@ export class LayerStack {
   }
 
   /** The group's shadow for one layer (design 010 E13) in the layer's own shadow root. */
-  private shadowFilter(s: ShadowEffect): Element {
+  private shadowFilter(s: ShadowEffect, scale: number): Element {
     const d = this.box.ownerDocument;
     const defs = d.createElementNS(SVG_NS, 'defs');
-    defs.append(shadowFilter(d, SHADOW_ID, s));
+    defs.append(shadowFilter(d, SHADOW_ID, s, { scale }));
     return defs;
   }
 

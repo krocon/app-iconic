@@ -43,6 +43,11 @@ export type FsErrorCode =
   | 'denied'
   /** AI control: the action is not allowed for the AI, not enabled, or its arguments do not fit. */
   | 'unavailable'
+  /**
+   * A path from no trusted source (dialog, Open Recent, the system, a drop, the AI bridge, an
+   * internal folder) – prompt 033 E1.
+   */
+  | 'not_allowed'
   /** Frontend only: no Tauri backend (e.g. `pnpm start` in a browser). */
   | 'backend_unavailable'
   /** Frontend only: something that is no `FsError` was thrown. */
@@ -77,6 +82,7 @@ const KNOWN: readonly FsErrorCode[] = [
   'timeout',
   'denied',
   'unavailable',
+  'not_allowed',
   'backend_unavailable',
   'unknown',
 ];
@@ -119,6 +125,8 @@ const EN = {
   timeout: 'The window did not answer in time.',
   denied: 'Not allowed.',
   unavailable: 'This function is not available now.',
+  not_allowed:
+    'The app may not use this file. Choose it with Open or Import, or drop it on the window.',
   backend_unavailable: 'The desktop backend is not available (running in a browser?).',
   unknown: 'Something went wrong.',
 } as const satisfies Record<FsErrorCode, string>;
@@ -149,6 +157,8 @@ const TEXTS = translatable('errors', EN, {
     timeout: 'Das Fenster hat nicht rechtzeitig geantwortet.',
     denied: 'Nicht erlaubt.',
     unavailable: 'Diese Funktion ist gerade nicht verfügbar.',
+    not_allowed:
+      'Die App darf diese Datei nicht verwenden. Wähle sie mit Öffnen oder Importieren oder lege sie auf dem Fenster ab.',
     backend_unavailable: 'Das Desktop-Backend ist nicht verfügbar (läuft es im Browser?).',
     unknown: 'Etwas ist schiefgegangen.',
   },

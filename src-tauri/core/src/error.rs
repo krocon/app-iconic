@@ -50,6 +50,10 @@ pub enum FsErrorCode {
     /// AI control: the action is not allowed for the AI, not enabled now, or its arguments do
     /// not fit.
     Unavailable,
+    /// A path that came from no trusted source (dialog, Open Recent, the system, a drop, the AI
+    /// bridge, an internal folder of the app) – defence in depth against a compromised WebView
+    /// (prompt 033 E1).
+    NotAllowed,
 }
 
 /// The one error type every command returns.
@@ -134,6 +138,7 @@ mod tests {
             (FsErrorCode::Timeout, "timeout"),
             (FsErrorCode::Denied, "denied"),
             (FsErrorCode::Unavailable, "unavailable"),
+            (FsErrorCode::NotAllowed, "not_allowed"),
         ] {
             assert_eq!(serde_json::to_value(code).unwrap(), text);
         }

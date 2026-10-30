@@ -254,7 +254,7 @@ Keine Punkte mehr offen (Verlaufseditor erledigt mit Prompt [032](../prompts/don
     [architecture.md › Performance](architecture.md#performance)); ≥ 50 fps beim Ziehen mit Snap ist in
     Headless-Chromium ohne GPU nicht erreichbar – Messung auf dem Mac in Prompt 033.
 12. **Review-Befunde 6, 11, 14** (Pfade nur aus vertrauten Quellen, eigene Transform-Rechnung in
-    `transform-list.ts`, Dateien über ~400 Zeilen) → Prompt [033](../prompts/033-haertung-folgen.md).
+    `transform-list.ts`, Dateien über ~400 Zeilen) → Prompt [033](../prompts/done/033-haertung-folgen.md).
 
 ### Ohne automatischen Test
 

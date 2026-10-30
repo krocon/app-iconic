@@ -1,9 +1,7 @@
-import { apply, multiply } from '../../shared/geometry/matrix';
 import {
   addStep,
   displayNumber,
   hasPivot,
-  listMatrix,
   moveStep,
   normalizedArgs,
   parseTransformList,
@@ -11,11 +9,25 @@ import {
   serializeSteps,
   setPivot,
   setStepArgs,
-  stepMatrix,
   STEP_KINDS,
+  StepsMatrix,
 } from './transform-list';
 
-const close = (a: number, b: number) => expect(Math.abs(a - b)).toBeLessThan(1e-9);
+/**
+ * A stand-in for the browser's matrix (jsdom has no `SVGTransformList`): translations only. The
+ * real matrices – products, skews, the pivot as fixed point – are checked in Playwright
+ * (`e2e/properties.spec.ts`, prompt 033 E3).
+ */
+const translations: StepsMatrix = (steps) => {
+  let e = 0;
+  let f = 0;
+  for (const s of steps) {
+    if (s.kind !== 'translate') throw new Error(`stub: ${s.kind}`);
+    e += s.args[0];
+    f += s.args[1] ?? 0;
+  }
+  return { a: 1, b: 0, c: 0, d: 1, e, f };
+};
 
 describe('transform list (design 009 E7)', () => {
   it('parses every function and writes unchanged steps back as written', () => {
@@ -61,39 +73,12 @@ describe('transform list (design 009 E7)', () => {
     expect(hasPivot(parseTransformList('rotate(9 1 2)')![0])).toBe(true);
   });
 
-  it('matrix of the list = product of the steps (left first, like SVG)', () => {
-    const steps = parseTransformList('translate(10 20) rotate(90 5 5) scale(2 3)')!;
-    const m = listMatrix(steps);
-    // a point goes through scale, then rotate about (5,5), then translate
-    const p = { x: 1, y: 1 };
-    const s = { x: 2, y: 3 };
-    const r = { x: 5 - (s.y - 5), y: 5 + (s.x - 5) };
-    const q = apply(m, p);
-    close(q.x, r.x + 10);
-    close(q.y, r.y + 20);
-    const sk = stepMatrix({ kind: 'skewX', args: [45] });
-    close(sk.c, 1);
-    const sy = stepMatrix({ kind: 'skewY', args: [45] });
-    close(sy.b, 1);
-    expect(stepMatrix({ kind: 'matrix', args: [1, 2, 3, 4, 5, 6] })).toEqual({
-      a: 1,
-      b: 2,
-      c: 3,
-      d: 4,
-      e: 5,
-      f: 6,
-    });
-    expect(listMatrix([])).toEqual({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 });
-  });
-
   it('adds neutral steps, removes and reorders', () => {
     let steps = parseTransformList('translate(1,2)')!;
     for (const k of STEP_KINDS) steps = addStep(steps, k);
     expect(serializeSteps(steps)).toBe(
       'translate(1,2) translate(0 0) scale(1 1) rotate(0) skewX(0) skewY(0) matrix(1 0 0 1 0 0)',
     );
-    // neutral steps change nothing
-    expect(listMatrix(steps)).toEqual(listMatrix(parseTransformList('translate(1 2)')!));
     steps = removeStep(steps, 1);
     expect(serializeSteps(steps).startsWith('translate(1,2) scale(1 1)')).toBe(true);
     const moved = moveStep(parseTransformList('translate(1) scale(2) rotate(3)')!, 0, 2);
@@ -114,23 +99,10 @@ describe('transform list (design 009 E7)', () => {
   it('Use pivot puts the centre of the element into the space of the rotate', () => {
     // rotate first, then a translate: the centre (10, 10) of the element is (60, 10) for the rotate
     const steps = parseTransformList('rotate(30) translate(50 0)')!;
-    const on = setPivot(steps, 0, { x: 10, y: 10 });
+    const on = setPivot(steps, 0, { x: 10, y: 10 }, translations);
     expect(serializeSteps(on)).toBe('rotate(30 60 10) translate(50 0)');
-    // the centre stays where it was without rotation: it is the fixed point
-    const m = listMatrix(on);
-    const c = apply(m, { x: 10, y: 10 });
-    const noRot = apply(listMatrix(parseTransformList('translate(50 0)')!), { x: 10, y: 10 });
-    close(c.x, noRot.x);
-    close(c.y, noRot.y);
-    expect(serializeSteps(setPivot(on, 0, null))).toBe('rotate(30) translate(50 0)');
+    expect(serializeSteps(setPivot(on, 0, null, translations))).toBe('rotate(30) translate(50 0)');
     // not a rotate: unchanged
-    expect(setPivot(steps, 1, { x: 0, y: 0 })).toEqual(steps);
-    // composition check: T(c)·R·T(−c)
-    const r = stepMatrix({ kind: 'rotate', args: [90, 1, 0] });
-    const viaParts = multiply(
-      { a: 1, b: 0, c: 0, d: 1, e: 1, f: 0 },
-      multiply(stepMatrix({ kind: 'rotate', args: [90] }), { a: 1, b: 0, c: 0, d: 1, e: -1, f: 0 }),
-    );
-    for (const k of ['a', 'b', 'c', 'd', 'e', 'f'] as const) close(r[k], viaParts[k]);
+    expect(setPivot(steps, 1, { x: 0, y: 0 }, translations)).toEqual(steps);
   });
 });

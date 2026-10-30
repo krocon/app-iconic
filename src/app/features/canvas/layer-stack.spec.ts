@@ -92,6 +92,21 @@ describe('LayerStack', () => {
     expect(host.querySelector('svg.placement > svg')).toBe(d.assets.get(A3)!.svg!.root);
   });
 
+  it('puts the group shadow as composited CSS filter on the layer box (prompt 033 E5)', () => {
+    const d = doc([{ layers: [L('a.svg', { position: { scale: 2 } })] }]);
+    new LayerStack(box).update(d, 'light');
+    const host = box
+      .querySelector('.layer')!
+      .shadowRoot!.querySelector<SVGSVGElement>('svg.layer-host')!;
+    expect(host.style.filter).toBe('url("#ai-fx-shadow")');
+    expect(host.classList.contains('shadowed')).toBe(true);
+    // not on the content: a change there no longer redraws the whole filtered layer
+    expect(host.querySelector('g[filter]')).toBeNull();
+    const f = host.querySelector('filter#ai-fx-shadow')!;
+    expect(f.getAttribute('primitiveUnits')).toBe('objectBoundingBox');
+    expect(Number(f.firstElementChild!.getAttribute('dy'))).toBeCloseTo((12 * 2) / 1024);
+  });
+
   it('does not rebuild on attribute changes, but on structure changes', () => {
     const d = camscannerDocument();
     const store = new DocumentStore(d);
