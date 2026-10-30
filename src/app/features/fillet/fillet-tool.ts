@@ -72,7 +72,8 @@ export class FilletTool implements CanvasTool {
     const q = new scope.Point(p.x, p.y);
     const out: Near[] = [];
     for (const shape of this.shapes()) {
-      if (!boxesMeet(shape.box, probe, tol)) continue;
+      // both shapes of a fillet change: locked ones are never candidates (prompt 064)
+      if (shape.locked || !boxesMeet(shape.box, probe, tol)) continue;
       const c = new scope.CompoundPath({ pathData: shape.d, insert: false });
       let best: { path: paper.Path; at: number; d: number } | null = null;
       for (const s of c.children as paper.Path[]) {

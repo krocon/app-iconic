@@ -103,7 +103,8 @@ export class TrimTool implements CanvasTool {
     let best: { shape: SceneShape; keep: string; piece: string; dist: number } | null = null;
     for (const s of all) {
       const d = this.dOf(s);
-      if (!d || !boxesMeet(s.box, probe, tol)) continue;
+      // locked shapes cut the others but are never cut (prompt 064)
+      if (s.locked || !d || !boxesMeet(s.box, probe, tol)) continue;
       const others = all
         .filter((o) => o !== s && boxesMeet(o.box, s.box, 1))
         .map((o) => this.dOf(o))
@@ -201,7 +202,7 @@ export class TrimTool implements CanvasTool {
     const tol = this.tol() * 1.5;
     const all = this.shapes();
     for (const s of all) {
-      if (!boxesMeet(s.box, { x0: p.x, y0: p.y, x1: p.x, y1: p.y }, tol)) continue;
+      if (s.locked || !boxesMeet(s.box, { x0: p.x, y0: p.y, x1: p.x, y1: p.y }, tol)) continue;
       const r = extendAt(
         this.scope,
         s.d,

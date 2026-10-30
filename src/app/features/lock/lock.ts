@@ -16,6 +16,17 @@ export function isLocked(el: Element, root?: Element | null): boolean {
   return false;
 }
 
+/**
+ * The nodes a tool may change (prompt 064): locked ones may still be a boundary (cut against,
+ * snapped to), never a target. One helper for every tool that changes geometry.
+ */
+export function editableRefs(doc: IconDocument, refs: readonly NodeRef[]): NodeRef[] {
+  return refs.filter((r) => {
+    const el = doc.node(r);
+    return !!el && !isLocked(el);
+  });
+}
+
 /** Toggle of the nodes: all locked → unlocked, else the others are locked. */
 export function lockCommand(doc: IconDocument, refs: readonly NodeRef[]): DocCommand | null {
   const els = refs.flatMap((ref) => {

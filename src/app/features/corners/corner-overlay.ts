@@ -1,3 +1,4 @@
+import { isLocked } from '../lock/lock';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { clientToDocument, nodeToDocument } from '../../shared/geometry/dom-geometry';
 import { apply, fromDom, IDENTITY, invert, Matrix } from '../../shared/geometry/matrix';
@@ -86,7 +87,8 @@ export class CornerOverlay {
     const host = this.view.host;
     if (refs.length !== 1 || !host || store.gesture()) return null;
     const el = store.document().node(refs[0]);
-    const src = el ? cornerSource(el) : null;
+    // no corner widgets on a locked node (prompt 064)
+    const src = el && !isLocked(el) ? cornerSource(el) : null;
     const m = el instanceof SVGGraphicsElement ? nodeToDocument(host, el) : null;
     return src && m ? { ref: refs[0], src, toDoc: fromDom(m) } : null;
   });

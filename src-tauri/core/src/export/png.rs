@@ -196,6 +196,34 @@ mod tests {
         }
     }
 
+    /// Prompt 064: the export SVG writes group / layer blend modes as `style="mix-blend-mode:…"`
+    /// on a `<g>` (and a nested `<svg>` for a layer) – the analysis said resvg drops it. It does
+    /// not: multiply of cyan over yellow is green.
+    #[test]
+    fn blend_modes_in_a_style_attribute_are_rendered() {
+        for wrap in ["g", "svg"] {
+            let svg = icon(&format!(
+                r##"<rect width="1024" height="1024" fill="#ffff00"/><{wrap} style="mix-blend-mode:multiply"><rect width="1024" height="1024" fill="#00ffff"/></{wrap}>"##
+            ));
+            let p = render_png(&svg, 32, empty_fonts()).unwrap();
+            assert!(
+                close(rgba(&p, 16, 16), [0, 255, 0, 255]),
+                "{wrap}: {:?}",
+                rgba(&p, 16, 16)
+            );
+        }
+        // and screen
+        let svg = icon(
+            r##"<rect width="1024" height="1024" fill="#ff0000"/><g style="mix-blend-mode:screen"><rect width="1024" height="1024" fill="#0000ff"/></g>"##,
+        );
+        let p = render_png(&svg, 32, empty_fonts()).unwrap();
+        assert!(
+            close(rgba(&p, 16, 16), [255, 0, 255, 255]),
+            "{:?}",
+            rgba(&p, 16, 16)
+        );
+    }
+
     #[test]
     fn solid_fill_with_opacity() {
         let p = render_png(

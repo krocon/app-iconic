@@ -96,3 +96,29 @@ test('a circle cut by a line keeps the arc; a line extends to the circle', async
   expect(t[2]).toEqual(['path', 100, 300, 300, 0]);
   expect(await page.evaluate(() => window.__appIconic!.store()!.undoLabel())).toBe('Undo Extend');
 });
+
+test('a locked line is never trimmed but still cuts the others (prompt 064)', async ({ page }) => {
+  await setup(
+    page,
+    '<line x1="200" y1="400" x2="600" y2="400" stroke="#000" stroke-width="2" data-locked="true"/>' +
+      '<line x1="400" y1="200" x2="400" y2="600" stroke="#000" stroke-width="2"/>',
+  );
+  await page.evaluate(() => window.__appIconic!.run('trim.tool'));
+  // paper.js is loaded once a piece of the free line lights up
+  await at(page, 400, 500);
+  await expect(page.getByTestId('trim-overlay').locator('path')).toHaveCount(1);
+  // on the locked line: no piece, and a click changes nothing
+  await at(page, 500, 400);
+  await expect(page.getByTestId('trim-overlay').locator('path')).toHaveCount(0);
+  await click(page, 500, 400);
+  expect(await shapes(page)).toEqual([
+    ['line', 200, 400, 400, 0],
+    ['line', 400, 200, 0, 400],
+  ]);
+  // the other line is cut at the locked one
+  await click(page, 400, 500);
+  expect(await shapes(page)).toEqual([
+    ['line', 200, 400, 400, 0],
+    ['path', 400, 200, 0, 200],
+  ]);
+});

@@ -5,6 +5,7 @@ import { isRendered, paintedRoots } from '../canvas/hit-test';
 import { IconDocument } from '../document/icon-document';
 import { ID_ATTR } from '../document/svg/node-ids';
 import { PathTarget, shapeSubpaths } from '../path-edit/path-edit.service';
+import { isLocked } from '../lock/lock';
 
 /** Most outlines Trim / Extend look at (huge imported icons). */
 export const MAX_SCENE = 5000;
@@ -13,6 +14,8 @@ export const MAX_SCENE = 5000;
 export interface SceneShape extends PathTarget {
   d: string;
   box: { x0: number; y0: number; x1: number; y1: number };
+  /** Locked (prompt 055): a boundary only, never cut / extended / rounded (prompt 064). */
+  locked: boolean;
 }
 
 /**
@@ -56,6 +59,7 @@ export function sceneShapes(
       out.push({
         ref,
         el,
+        locked: isLocked(el),
         toLocal,
         subpaths,
         d: fromSubpaths(subpaths),

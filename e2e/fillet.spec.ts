@@ -109,3 +109,19 @@ test('fillet.at for the AI', async ({ page }) => {
       ['path', 500, 200, 0, 250],
     ]);
 });
+
+test('a locked line cannot be filleted (prompt 064)', async ({ page }) => {
+  await setup(
+    page,
+    '<line x1="200" y1="500" x2="500" y2="500" stroke="#000" data-locked="true"/><line x1="500" y1="500" x2="500" y2="200" stroke="#000"/>',
+  );
+  await page.evaluate(() =>
+    window.__appIconic!.run('fillet.at', {
+      a: { x: 300, y: 500 },
+      b: { x: 500, y: 300 },
+      radius: 50,
+    }),
+  );
+  await page.waitForTimeout(300);
+  expect((await shapes(page)).map((s) => s[0])).toEqual(['line', 'line']);
+});

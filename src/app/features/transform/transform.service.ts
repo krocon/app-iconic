@@ -16,6 +16,7 @@ import { NodeRef } from '../document/icon-document';
 import { isDefinitionElement } from '../document/model/reorder-rules';
 import { FilesService } from '../files/files.service';
 import { deletableNodes } from '../hierarchy/edit-operations';
+import { editableRefs } from '../lock/lock';
 import { patternCommand } from '../pattern/pattern-copies';
 
 /** Where the change happens: a point (document units) or a reference point of the box(es). */
@@ -60,7 +61,10 @@ export class TransformService {
   private previewing: { refs: readonly NodeRef[]; plan: Plan | null } | null = null;
 
   refs(): readonly NodeRef[] {
-    return this.previewing?.refs ?? this.files.store()?.selection() ?? [];
+    if (this.previewing) return this.previewing.refs;
+    const store = this.files.store();
+    // locked nodes are never changed (prompt 064)
+    return store ? editableRefs(store.document(), store.selection()) : [];
   }
 
   canRun(): boolean {

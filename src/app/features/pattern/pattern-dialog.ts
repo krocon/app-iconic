@@ -16,6 +16,32 @@ import { PATTERN_TEXTS as T } from './pattern-texts';
 
 type Field = 'count' | 'angle' | 'columns' | 'rows' | 'dx' | 'dy';
 
+/**
+ * Valid values of the dialog. `count` (circular) and `columns × rows` count the original too, so
+ * both go up to MAX_PATTERN_COPIES + 1 – like the steppers and the AI's arguments (prompt 064: the
+ * circular check stopped at MAX_PATTERN_COPIES and disabled Apply at 1001).
+ */
+export function patternValid(
+  kind: 'circular' | 'rectangular',
+  v: Pick<Record<Field, number>, 'count' | 'angle' | 'columns' | 'rows'>,
+): boolean {
+  const whole = (x: number, min: number) => Number.isInteger(x) && x >= min;
+  if (kind === 'circular') {
+    return (
+      whole(v.count, 2) &&
+      v.count <= MAX_PATTERN_COPIES + 1 &&
+      v.angle !== 0 &&
+      Math.abs(v.angle) <= 360
+    );
+  }
+  return (
+    whole(v.columns, 1) &&
+    whole(v.rows, 1) &&
+    v.columns * v.rows >= 2 &&
+    v.columns * v.rows <= MAX_PATTERN_COPIES + 1
+  );
+}
+
 /** What − / + do per field. */
 const STEPS: Record<Field, { step: number; min?: number; max?: number; unit?: string }> = {
   count: { step: 1, min: 2, max: MAX_PATTERN_COPIES + 1 },
@@ -137,22 +163,7 @@ export class PatternDialog implements OnInit {
 
   protected readonly valid = computed(() => {
     const v = this.values();
-    if (!v) return false;
-    const whole = (x: number, min: number) => Number.isInteger(x) && x >= min;
-    if (this.state()?.kind === 'circular') {
-      return (
-        whole(v.count, 2) &&
-        v.count <= MAX_PATTERN_COPIES &&
-        v.angle !== 0 &&
-        Math.abs(v.angle) <= 360
-      );
-    }
-    return (
-      whole(v.columns, 1) &&
-      whole(v.rows, 1) &&
-      v.columns * v.rows >= 2 &&
-      v.columns * v.rows <= MAX_PATTERN_COPIES + 1
-    );
+    return !!v && patternValid(this.state()?.kind === 'circular' ? 'circular' : 'rectangular', v);
   });
 
   ngOnInit(): void {

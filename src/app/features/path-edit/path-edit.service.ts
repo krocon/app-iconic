@@ -1,3 +1,4 @@
+import { editableRefs } from '../lock/lock';
 import { inject, Injectable } from '@angular/core';
 import { nodeToDocument } from '../../shared/geometry/dom-geometry';
 import { apply, fromDom, invert, Matrix } from '../../shared/geometry/matrix';
@@ -118,7 +119,8 @@ export class PathEditService {
     const store = this.files.store();
     const host = this.view.host;
     if (!store || !host) return [];
-    return store.selection().flatMap((ref) => {
+    // locked nodes are never changed (prompt 064; the tree may still select them)
+    return editableRefs(store.document(), store.selection()).flatMap((ref) => {
       const el = store.document().node(ref);
       const sub = el ? shapeSubpaths(el) : null;
       const m = el instanceof SVGGraphicsElement ? nodeToDocument(host, el) : null;

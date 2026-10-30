@@ -1,7 +1,14 @@
 # Prompt 064: Fehler in vorhandenen Werkzeugen
 
-> Lies zuerst [000-arbeitsweise.md](000-arbeitsweise.md). Braucht: 010, 012, 049, 050, 051, 055 · Quelle:
-> [Analyse 30.10.2026](2026.10.30%20-%20analyse.md) §2.5 (P0, Aufwand S–M)
+> Lies zuerst [000-arbeitsweise.md](../000-arbeitsweise.md). Braucht: 010, 012, 049, 050, 051, 055 · Quelle:
+> [Analyse 30.10.2026](../2026.10.30%20-%20analyse.md) §2.5 (P0, Aufwand S–M)
+
+## Stand
+
+- ✅ 30.10.2026: 1. gesperrte Knoten nie Ziel (eine Hilfsfunktion `editableRefs`, `SceneShape.locked`); 2. nativer
+  Farbwähler mit P3 ↔ sRGB-Umrechnung und Hinweis „außerhalb sRGB“; 3. Pattern-Grenze einheitlich; 4. Blend-Modes:
+  resvg rendert sie – Befund der Analyse widerlegt, Rust-Test bleibt; 5. bei 033. Design:
+  [064-fehlerbehebungen.design.md](064-fehlerbehebungen.design.md).
 
 ## Ziel
 
@@ -24,7 +31,7 @@ Die konkreten Fehler aus der Analyse beheben – jeder zuerst mit rotem Test (CL
    behauptet, resvg ignoriere das. **Erst prüfen**: Rust-Test, der ein SVG mit `multiply`-Gruppe über resvg 0.48
    rendert und Pixel vergleicht. Wirkt es, nur den Test behalten; sonst eine resvg-taugliche Schreibweise wählen
    (Attribut oder `<feBlend>`). `plus-darker` folgt in 077.
-5. **Drag-Leistung bei großen SVGs mit `opacity`** gehört zu [033](033-haertung-folgen.md) – hier nicht bearbeiten.
+5. **Drag-Leistung bei großen SVGs mit `opacity`** gehört zu [033](../033-haertung-folgen.md) – hier nicht bearbeiten.
 
 ## Akzeptanz
 

@@ -1,3 +1,4 @@
+import { editableRefs } from '../lock/lock';
 import { inject, Injectable } from '@angular/core';
 import { CORNER_KINDS, CornerKind } from '../../shared/geometry/corners';
 import { CompositeCommand, DocCommand, ReplaceNode, SetAttributes } from '../document/commands';
@@ -40,7 +41,11 @@ export class CornersService {
     const store = this.files.store();
     if (!store || !(radius >= 0) || !CORNER_KINDS.includes(kind)) return false;
     const refs = store.selection();
-    const cmds = refs.map((r) => ({ r, c: this.command(r, radius, kind) }));
+    // locked nodes keep their corners (prompt 064)
+    const cmds = editableRefs(store.document(), refs).map((r) => ({
+      r,
+      c: this.command(r, radius, kind),
+    }));
     const ok = cmds.filter((x): x is { r: NodeRef; c: DocCommand } => x.c !== null);
     if (!ok.length) return false;
     store.execute(
@@ -61,7 +66,8 @@ export class CornersService {
   /** The selection has a node with corners. */
   canApply(): boolean {
     const store = this.files.store();
-    return !!store?.selection().some((r) => {
+    if (!store) return false;
+    return editableRefs(store.document(), store.selection()).some((r) => {
       const el = store.document().node(r);
       return !!el && !!cornerSource(el);
     });

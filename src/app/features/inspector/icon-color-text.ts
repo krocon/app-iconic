@@ -1,11 +1,19 @@
 import { parseHex, Rgba, toHex } from '../../shared/controls/color-value';
-import { cssColor, parseIconColor, shift } from '../canvas/icon-color';
+import {
+  cssColor,
+  p3ToSrgb,
+  parseIconColor,
+  shift,
+  srgbToP3,
+  svgColor,
+} from '../canvas/icon-color';
 
 /**
  * Colours of `icon.json` as text (design 010 E8, legacy §2): `<prefix>:<components>` with the
  * prefixes `srgb`, `extended-srgb`, `display-p3`, `extended-display-p3`, `gray`, `extended-gray`.
- * The inspector shows the channels as hex **in the colour space of the file** (no conversion) and
- * writes in the form it read: same prefix, same number of components, 5 decimals. Pure.
+ * The text field shows the channels as hex **in the colour space of the file** (no conversion) and
+ * writes in the form it read: same prefix, same number of components, 5 decimals. The native colour
+ * picker speaks sRGB: {@link srgbHexOf} / {@link withSrgbHex} convert Display P3 (prompt 064). Pure.
  */
 
 export interface ColorText {
@@ -54,6 +62,22 @@ export function hexOf(raw: unknown): string | null {
   return toHex(rgba);
 }
 
+/**
+ * The colour as sRGB `#rrggbb` for the native picker (prompt 064): Display P3 converted, clamped
+ * to the sRGB gamut; `null` if not a colour.
+ */
+export function srgbHexOf(raw: unknown): string | null {
+  const c = parseIconColor(raw);
+  return c ? svgColor(c).hex : null;
+}
+
+/** A Display P3 colour the sRGB picker cannot show exactly (a channel outside 0…1). */
+export function outsideSrgb(raw: unknown): boolean {
+  const c = parseIconColor(raw);
+  if (!c || c.space !== 'display-p3') return false;
+  return p3ToSrgb([c.r, c.g, c.b]).some((v) => v < -1e-4 || v > 1 + 1e-4);
+}
+
 /** The colour space shown next to the hex value. */
 export function spaceOf(raw: unknown): string {
   return readColor(raw)?.prefix ?? DEFAULT_PREFIX;
@@ -77,6 +101,18 @@ function write(prefix: string, values: number[]): string {
  * one. Without a readable `raw`: the default form. `null` if `hex` is not a hex colour.
  */
 export function withHex(raw: unknown, hex: string): string | null {
+  return channelsFromHex(raw, hex, false);
+}
+
+/**
+ * Like {@link withHex}, but `hex` is sRGB (the native picker, prompt 064): converted to Display P3
+ * when `raw` is a P3 colour (extended P3 keeps values outside 0…1, plain P3 is clamped).
+ */
+export function withSrgbHex(raw: unknown, hex: string): string | null {
+  return channelsFromHex(raw, hex, true);
+}
+
+function channelsFromHex(raw: unknown, hex: string, srgb: boolean): string | null {
   const h = parseHex(hex);
   if (!h) return null;
   const old = readColor(raw) ?? readColor(DEFAULT_COLOR)!;
@@ -84,11 +120,15 @@ export function withHex(raw: unknown, hex: string): string | null {
   const oldAlpha = old.gray ? old.values[1] : old.values[3];
   const a = hasAlphaIn ? h.a : (oldAlpha ?? 1);
   const writeAlpha = hasAlphaIn || oldAlpha !== undefined;
-  const [r, g, b] = [h.r / 255, h.g / 255, h.b / 255];
+  let [r, g, b] = [h.r / 255, h.g / 255, h.b / 255];
   if (old.gray && h.r === h.g && h.g === h.b) {
     return write(old.prefix, writeAlpha ? [r, a] : [r]);
   }
   const prefix = old.gray ? old.prefix.replace('gray', 'srgb') : old.prefix;
+  if (srgb && prefix.includes('display-p3')) {
+    const p3 = srgbToP3([r, g, b]);
+    [r, g, b] = prefix.startsWith('extended') ? p3 : p3.map((v) => Math.min(Math.max(v, 0), 1));
+  }
   return write(prefix, writeAlpha ? [r, g, b, a] : [r, g, b]);
 }
 

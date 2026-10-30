@@ -68,7 +68,26 @@ const P3_TO_SRGB = [
   [-0.042056954709688163, 1.0420569547096881, 0],
   [-0.019637554590334432, -0.07863604555063189, 1.0982736001409663],
 ];
+/** Linear sRGB → linear Display P3 (the inverse of {@link P3_TO_SRGB}). */
+const SRGB_TO_P3 = [
+  [0.8224619687143623, 0.17753803128563775, 0],
+  [0.033194198997956, 0.966805801002044, 0],
+  [0.017082630989468, 0.072397440702236, 0.9105199283082956],
+];
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
+const signed = (f: (v: number) => number) => (v: number) => Math.sign(v) * f(Math.abs(v));
+const mul = (m: number[][], v: number[]) =>
+  m.map((row) => row[0] * v[0] + row[1] * v[1] + row[2] * v[2]);
+
+/** Display P3 channels → sRGB channels, unclamped (outside 0…1 = out of the sRGB gamut; 064). */
+export function p3ToSrgb(rgb: readonly number[]): number[] {
+  return mul(P3_TO_SRGB, rgb.map(signed(toLinear))).map(signed(toGamma));
+}
+
+/** sRGB channels → Display P3 channels (prompt 064: the native picker speaks sRGB). */
+export function srgbToP3(rgb: readonly number[]): number[] {
+  return mul(SRGB_TO_P3, rgb.map(signed(toLinear))).map(signed(toGamma));
+}
 // rounded to 6 places first: a P3 grey must stay exactly that grey (no x.4999 → down)
 const hex2 = (v: number) =>
   Math.round(Math.round(clamp01(v) * 255e6) / 1e6)

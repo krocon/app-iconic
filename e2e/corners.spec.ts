@@ -90,3 +90,33 @@ test('a polygon: Alt-click cycles the kind; double-click opens Corners…', asyn
   expect(s!.attrs['d'].match(/L/g)!.length).toBe(5);
   expect(s!.attrs['fill']).toBe('#f80');
 });
+
+test('locked shapes keep their corners even when the tree selects them (prompt 064)', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await waitForCanvas(page);
+  await importSvg(
+    page,
+    'lk.svg',
+    '<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">' +
+      '<rect id="r" x="100" y="100" width="300" height="200" data-locked="true"/></svg>',
+  );
+  const ref = await page.evaluate(() => {
+    const root = window.__appIconic!.store()!.document().assets.get('lk.svg')!.svg!.root;
+    return root.querySelector('#r')!.getAttribute('data-ai-id')!;
+  });
+  await page.evaluate(
+    (id) => window.__appIconic!.run('edit.select', { nodes: [{ asset: 'lk.svg', id }] }),
+    ref,
+  );
+  expect(await page.evaluate(() => window.__appIconic!.run('corners.set', { radius: 20 }))).toBe(
+    false,
+  );
+  const tag = await page.evaluate(
+    () =>
+      window.__appIconic!.store()!.document().assets.get('lk.svg')!.svg!.root.querySelector('#r')!
+        .localName,
+  );
+  expect(tag).toBe('rect');
+});

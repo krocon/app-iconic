@@ -61,6 +61,7 @@
       ausblendend, nächster Kreuzungspunkt größer; keiner bei Zellen < 6 Bildschirm-px)
 - [x] Gesten = eine Undo-Gruppe (ein Command `setAttributes`), Esc bricht ab (007)
 - [x] Handles korrekt bei verschachtelten, transformierten Gruppen und Zoom 50/100/150 % (007, Playwright ± 0,5 px)
+- [x] Gesperrte Elemente sind für Trim/Extend/Fillet/Chamfer, Pfad-Werkzeuge, Pathfinder, Offset, Corners und Transform nur Begrenzung, nie Ziel _(neu)_ (064)
 
 ## 5. Elemente hinzufügen
 

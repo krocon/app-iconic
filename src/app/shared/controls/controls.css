@@ -62,6 +62,12 @@ select.input {
   color: var(--color-text-muted);
 }
 
+/* a warning next to a value (prompt 064: colour outside sRGB) */
+.unit.warn {
+  color: var(--color-warning);
+  cursor: help;
+}
+
 .slider {
   flex: 1.2;
   min-width: 0;

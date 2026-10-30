@@ -77,7 +77,7 @@ Code bestätigen (roter Test) – sie stammen aus einer Fremdanalyse und können
 | 061 | [061-auswahlwerkzeug.md](done/061-auswahlwerkzeug.md) | Auswahl `V` / Direktauswahl `A`, ein ToolStore, aktives Werkzeug sichtbar (`aria-pressed`, auch eingeklappt) | 005, 007, 008 | S | ✅ 30.10.2026 |
 | 062 | [062-bbox-inspektor.md](done/062-bbox-inspektor.md) | Transform-Kopf im Properties-Panel: X, Y, B, H, Drehung, Spiegeln, Bezugspunkt – für Pfade, Gruppen, Mehrfachauswahl | 007, 009, 053 | M | ✅ 30.10.2026 |
 | 063 | [063-z-reihenfolge-baum.md](done/063-z-reihenfolge-baum.md) | SVG-Kinder im Baum „oben = vorn“ wie Gruppen/Layer (Frage 006/1) | 006 | S–M | ✅ 30.10.2026 |
-| 064 | [064-fehlerbehebungen.md](064-fehlerbehebungen.md) | Gesperrte Objekte vor Trim & Co. schützen, Display-P3 ↔ sRGB, Pattern-Grenze, Blend-Modes im PNG-Export prüfen | 010, 012, 049–051, 055 | S–M | offen |
+| 064 | [064-fehlerbehebungen.md](done/064-fehlerbehebungen.md) | Gesperrte Objekte vor Trim & Co. schützen, Display-P3 ↔ sRGB, Pattern-Grenze, Blend-Modes im PNG-Export prüfen | 010, 012, 049–051, 055 | S–M | ✅ 30.10.2026 |
 | 065 | [065-abhaengigkeiten-robust.md](065-abhaengigkeiten-robust.md) | Constraints: Verletzung anzeigen, optional live lösen, Maße löschbar, Overlay über CTM, Liste im Panel, keine Waisen | 059, 060 | M | offen |
 | 066 | [066-hilfslinien-fuellungen-alltag.md](066-hilfslinien-fuellungen-alltag.md) | Hilfslinien vor ⌘A geschützt, Kennzeichnung im Baum, Live-Fill im Panel, eingefrorene Füllungen melden | 048, 055, 056, 060 | M | offen |
 | 067 | [067-kontextleiste.md](067-kontextleiste.md) | Einheitliche Kontextleiste je Werkzeug (Name, Optionen, Tipp, Fertig) statt Pillen/Banner/Statuszeile | 061 | M | offen |

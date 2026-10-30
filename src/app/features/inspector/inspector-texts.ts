@@ -3,6 +3,8 @@ import { translatable } from '../../core/i18n/i18n';
 /** Texts of the icon inspector (design 010). English is the source, German beside it (015). */
 const EN = {
   icon: 'Icon',
+  outsideSrgb: '⚠',
+  outsideSrgbHint: 'Outside sRGB – the colour picker shows the nearest sRGB colour.',
   group: (n: number) => `Group ${n}`,
   layer: 'Layer',
   appearance: 'Appearance',
@@ -94,6 +96,8 @@ const EN = {
 
 export const INSPECTOR_TEXTS = translatable('inspector', EN, {
   de: {
+    outsideSrgb: '⚠',
+    outsideSrgbHint: 'Außerhalb von sRGB – der Farbwähler zeigt die nächste sRGB-Farbe.',
     icon: 'Icon',
     group: (n: number) => `Gruppe ${n}`,
     layer: 'Ebene',
