@@ -80,5 +80,11 @@ export const COMMAND_ICONS: Record<string, string> = {
   // Measure and Dimension (prompt 048)
   'dimension.tool': 'M2 11h12 M2 8.5v5 M14 8.5v5 M4 9.5L2 11l2 1.5 M12 9.5l2 1.5-2 1.5 M6 6h4',
   'measure.tool': 'M2 10.5L10.5 2 14 5.5 5.5 14z M5 9l1.5 1.5 M7 7l1 1 M9 5l1.5 1.5',
+  // constraints (prompt 059): a parallel sign and a lock; solve: arrows round a dimension
+  'constraint.tool': 'M4 13L9 3 M8 13l5-10 M2.5 8h11',
+  'constraint.solve': 'M3 8a5 5 0 0 1 9-3 M13 8a5 5 0 0 1-9 3 M12 2v3H9 M4 14v-3h3',
+  // live fill (prompt 060): a paint bucket
+  'fill.tool':
+    'M3 8l5-5 5 5-5 5z M3 8h10 M13.5 10.5c.8 1.2 1 2 .3 2.6-.7.5-1.5 0-1.3-.9.1-.6.5-1.1 1-1.7z',
   'add.image': 'M2.5 3.5h11v9h-11z M5.5 6.5h0.01 M2.5 11l4-4 3 3 1.5-1.5 2.5 2.5',
 };

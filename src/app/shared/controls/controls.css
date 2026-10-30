@@ -39,9 +39,14 @@
   }
 }
 
+/* a text area spans the label and editor cells (prompt 009; Marc 30.10.2026: bigger, no label) */
+.editor.wide {
+  grid-column: 1 / span 2;
+}
+
 textarea.input {
   height: auto;
-  min-height: 4.5em;
+  min-height: 12em;
   padding: var(--space-1);
   font-family: var(--font-mono);
   resize: vertical;

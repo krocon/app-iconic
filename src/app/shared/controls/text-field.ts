@@ -9,12 +9,13 @@ import { DraftField } from './draft-field';
 @Component({
   selector: 'app-text-field',
   template: `
-    <label class="label" [for]="fieldId()">{{ label() }}</label>
-    <span class="editor">
+    <!-- the text area (path data, points) takes the whole row: its label is only for screen readers -->
+    <label class="label" [class.sr-only]="multiline()" [for]="fieldId()">{{ label() }}</label>
+    <span class="editor" [class.wide]="multiline()">
       @if (multiline()) {
         <textarea
           class="input"
-          rows="3"
+          rows="10"
           spellcheck="false"
           [id]="fieldId()"
           [value]="shown()"

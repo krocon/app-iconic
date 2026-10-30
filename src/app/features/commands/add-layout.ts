@@ -16,6 +16,7 @@ export type AddGroupKey =
   | 'combine'
   | 'pattern'
   | 'measure'
+  | 'constrain'
   | 'more';
 
 export type AddEntry =
@@ -94,8 +95,10 @@ export const ADD_LAYOUT: readonly AddSection[] = [
         'edit.cloneLinked',
       ]),
       group('measure', ['dimension.tool', 'measure.tool']),
+      group('constrain', ['constraint.tool', 'constraint.solve']),
       group('more', ['sketch.dragSpiral', 'sketch.dragRectGrid', 'sketch.dragPolarGrid']),
       act('add.freehand'),
+      act('fill.tool'),
     ],
   },
   { section: 'text', entries: [act('add.text'), act('add.textToPath')] },

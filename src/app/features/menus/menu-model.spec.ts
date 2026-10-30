@@ -60,6 +60,7 @@ describe('menu model (design 005 E5)', () => {
       'Combine & Cut',
       'Pattern & Mirror',
       'Measure & Dimension',
+      'Constraints',
       'Spiral & Grids',
     ]);
     const circle = add.items.find((i) => i.kind === 'submenu' && i.label === 'Circle')!;

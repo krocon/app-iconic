@@ -64,8 +64,10 @@ describe('CommandSidebar (design 008 E10)', () => {
       'combine',
       'pattern',
       'measure',
+      'constrain',
       'more',
       'add.freehand',
+      'fill.tool',
       'add.text',
       'add.textToPath',
       'add.symbol',
@@ -104,9 +106,9 @@ describe('CommandSidebar (design 008 E10)', () => {
     await type('zzz');
     expect(options()).toHaveLength(0);
     await key('Escape');
-    expect(options()).toHaveLength(20);
+    expect(options()).toHaveLength(22);
     await key('End');
-    expect(input.getAttribute('aria-activedescendant')).toBe('command-19');
+    expect(input.getAttribute('aria-activedescendant')).toBe('command-21');
   });
 
   it('keyboard: → opens the submenu, ↑/↓ move in it, ← closes, Enter runs', async () => {
@@ -173,7 +175,7 @@ describe('CommandSidebar (design 008 E10)', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('input')).toBeNull();
     const tools = Array.from(el.querySelectorAll<HTMLButtonElement>('[role="toolbar"] button'));
-    expect(tools).toHaveLength(20);
+    expect(tools).toHaveLength(22);
     expect(el.querySelectorAll('[role="separator"]')).toHaveLength(3);
     const circle = tools.find((b) => b.dataset['group'] === 'circle')!;
     expect(circle.getAttribute('aria-haspopup')).toBe('listbox');
