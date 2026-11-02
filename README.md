@@ -25,7 +25,8 @@ browser renders, parses and measures); Rust handles files, `.icon` bundles and Z
 SVG assets in a hierarchy; select, move, scale and edit points on the canvas with grid and magic snap; sketch tools
 like Fusion (lines, rectangles, circles and arcs with typed dimensions); properties of every SVG element and of the
 icon (fill, shadow, translucency, platforms, appearances); clip paths, freehand, text to path, Lucide symbols;
-“Edit SVG…” with a code editor; export to PNG (resvg) and SVG.
+“Edit SVG…” with a code editor; trace a picture (file, clipboard, PNG layer) into SVG shapes – rectangles, circles
+and gradients where it has them – over a template on the canvas; export to PNG (resvg) and SVG.
 
 The UI speaks English and German (switchable at runtime), light and dark. Settings (⌘, / Ctrl+,) are kept in
 `settings.json`, your own shortcuts in `keymap.json` – both in the app's config folder.

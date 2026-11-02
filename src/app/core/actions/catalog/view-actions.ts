@@ -95,6 +95,19 @@ export const VIEW_ACTIONS: readonly ActionDef[] = [
   ARRANGE('arrange.alignToPixels', 'Align to Pixel Grid'),
   // the icon in context (prompt 081): scenes with real sizes, PNG of a scene
   VIEW('view.mockups', 'In Context'),
+  // prompt 087: an image over the canvas to trace or rebuild (not part of the document)
+  VIEW('template.fromFile', 'Template from File…'),
+  VIEW('template.fromClipboard', 'Template from Clipboard'),
+  VIEW('template.fromLayer', 'Template from Selected Layer'),
+  VIEW('template.toggle', 'Show Template'),
+  // without `value` the next step (25, 50, 75, 100 %)
+  VIEW('template.opacity', 'Template Opacity', {
+    args: {
+      type: 'object',
+      properties: { value: { type: 'number', minimum: 0.05, maximum: 1 } },
+    },
+  }),
+  VIEW('template.clear', 'Remove Template'),
   VIEW('mockups.appearance', 'In Context: Appearance of a Scene', {
     palette: false,
     args: {

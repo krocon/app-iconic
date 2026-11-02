@@ -26,6 +26,9 @@ skrifa = { version = "=0.44.0", default-features = false, features = ["std"] }
 # 078 E3: App Store icons as RGB PNG without alpha channel (tiny-skia only writes RGBA) – the
 # encoder tiny-skia uses internally (same version, already in the tree)
 png = "=0.18.1"
+# 087 E3: tracing images into SVG – visioncortex is the engine of vtracer (colour clusters,
+# outlines, splines); used directly without vtracer's image/clap dependencies
+visioncortex = "=0.9.3"
 
 [dev-dependencies]
 tempfile = "3"

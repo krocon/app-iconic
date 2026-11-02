@@ -75,6 +75,8 @@
         }
         <div #layers class="layers" [class.clip-editing]="clipId() !== null"></div>
       </div>
+      <!-- the template to trace or rebuild, over the layers, not clipped (prompt 087) -->
+      <app-template-overlay />
       <svg
         #host
         class="host"

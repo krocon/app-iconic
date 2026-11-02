@@ -19,6 +19,9 @@ import { registerSettingsActions } from '../settings/settings-actions';
 import { SettingsStore } from '../settings/settings.store';
 import { McpStore } from './mcp.store';
 import { deniedReason } from './mcp-policy';
+import { fakePng } from '../../../testing/fake-trace-api';
+import { registerTraceActions } from '../trace/trace-actions';
+import { TraceService } from '../trace/trace.service';
 
 const a = (id: string) => ({ asset: 'a.svg', id });
 
@@ -299,5 +302,56 @@ describe('McpStore (design 018)', () => {
     // a document that is there stays
     expect(await call('ensure_document')).toMatchObject({ pristine: true });
     expect(files.store()).toBe(s);
+  });
+
+  it('shows a template the user allows, hands it over and traces it as one AI step (prompt 087)', async () => {
+    registerTraceActions(TestBed.inject(ActionService), TestBed.inject(TraceService));
+    backend.files.imageFiles.set('/pics/calc.png', {
+      name: 'calc.png',
+      mime: 'image/png',
+      dataUrl: fakePng(512, 512),
+      width: 512,
+      height: 512,
+    });
+    expect(await call('template_png')).toMatchObject({ error: { code: 'unavailable' } });
+    answers.push('deny');
+    expect(await call('set_template', { path: '/pics/calc.png' })).toMatchObject({
+      error: { code: 'denied' },
+    });
+    answers.push('allow');
+    const set = await call('set_template', { path: '/pics/calc.png', opacity: 0.3 });
+    expect(set).toMatchObject({
+      template: { name: 'calc.png', width: 512, placement: { x: 0, width: 1024 } },
+      opacity: 0.3,
+    });
+    expect(await call('template_png')).toMatchObject({
+      name: 'calc.png',
+      placement: { width: 1024 },
+    });
+    // the dialog-less trace is one undo step of the AI
+    const r = await call('run_action', {
+      action: 'trace.image',
+      args: { source: 'template', preset: 'shapes' },
+    });
+    expect(r).toMatchObject({ ran: true });
+    expect(store.document().asset('calc-traced.svg')).toBeTruthy();
+    expect(store.undoLabel()).toBe('Undo AI: Trace Image');
+    // no dialog, no clipboard, no file dialog for the AI
+    for (const [action, args] of [
+      ['trace.image', undefined],
+      ['trace.image', { source: 'clipboard' }],
+      ['trace.clipboard', undefined],
+      ['template.fromFile', undefined],
+    ] as const) {
+      expect(await call('run_action', { action, ...(args ? { args } : {}) })).toMatchObject({
+        error: { code: 'unavailable' },
+      });
+    }
+    const listed = (await call('list_actions'))['actions'] as { id: string }[];
+    expect(listed.some((x) => x.id === 'trace.image')).toBe(true);
+    expect(listed.some((x) => x.id === 'trace.clipboard' || x.id === 'template.fromFile')).toBe(
+      false,
+    );
+    expect(await call('set_template', { clear: true })).toMatchObject({ template: null });
   });
 });

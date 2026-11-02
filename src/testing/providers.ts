@@ -23,6 +23,8 @@ import { RecoveryApi } from '../app/core/recovery/recovery-api';
 import { FakeRecoveryApi } from './fake-recovery-api';
 import { SymbolLibraryApi } from '../app/core/symbols/symbol-library-api';
 import { FakeSymbolLibraryApi } from './fake-symbol-library-api';
+import { TraceApi } from '../app/core/trace/trace-api';
+import { FakeTraceApi } from './fake-trace-api';
 
 /** Every backend facade replaced by its fake (unit tests). */
 export function fakeBackend(): {
@@ -39,6 +41,7 @@ export function fakeBackend(): {
   drop: FakeDropApi;
   recovery: FakeRecoveryApi;
   symbols: FakeSymbolLibraryApi;
+  trace: FakeTraceApi;
 } {
   const files = new FakeIconFileApi();
   const window = new FakeWindowApi();
@@ -52,6 +55,7 @@ export function fakeBackend(): {
   const drop = new FakeDropApi();
   const recovery = new FakeRecoveryApi(files);
   const symbols = new FakeSymbolLibraryApi();
+  const trace = new FakeTraceApi();
   return {
     files,
     window,
@@ -65,6 +69,7 @@ export function fakeBackend(): {
     drop,
     recovery,
     symbols,
+    trace,
     providers: [
       { provide: AboutApi, useClass: FakeAboutApi },
       { provide: IconFileApi, useValue: files },
@@ -79,6 +84,7 @@ export function fakeBackend(): {
       { provide: DropApi, useValue: drop },
       { provide: RecoveryApi, useValue: recovery },
       { provide: SymbolLibraryApi, useValue: symbols },
+      { provide: TraceApi, useValue: trace },
     ],
   };
 }

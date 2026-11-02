@@ -22,7 +22,8 @@ export type DialogKind =
   | 'transform'
   | 'mockups'
   | 'recovery'
-  | 'aiHistory';
+  | 'aiHistory'
+  | 'trace';
 
 /**
  * Geometric fine tuning with a live preview (prompt 073 E3): a non-modal popover beside what opened

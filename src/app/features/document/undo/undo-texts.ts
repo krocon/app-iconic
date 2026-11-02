@@ -83,6 +83,8 @@ const EN = {
   importImageLayer: 'Import Image as Layer',
   replaceLayerImage: 'Replace Layer Image',
   moveLayerOnCanvas: 'Move Layer',
+  // prompt 087
+  traceImage: 'Trace Image',
   scaleLayer: 'Scale Layer',
   changeLayerFill: 'Change Layer Fill',
   renameGroup: 'Rename Group',
@@ -215,6 +217,7 @@ export const UNDO_TEXTS = translatable('undo', EN, {
     importImageLayer: 'Bild als Ebene importieren',
     replaceLayerImage: 'Bild der Ebene ersetzen',
     moveLayerOnCanvas: 'Ebene verschieben',
+    traceImage: 'Bild nachzeichnen',
     scaleLayer: 'Ebene skalieren',
     changeLayerFill: 'Füllung der Ebene ändern',
     renameGroup: 'Gruppe umbenennen',

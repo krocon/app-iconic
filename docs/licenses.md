@@ -7,25 +7,26 @@
 
 ## Rust crates (Cargo.lock)
 
-516 packages.
+522 packages.
 
 | Licence | Count |
 |---|---|
-| MIT OR Apache-2.0 | 228 |
+| MIT OR Apache-2.0 | 230 |
 | MIT | 123 |
 | Apache-2.0 OR MIT | 53 |
 | Unicode-3.0 | 18 |
 | Zlib OR Apache-2.0 OR MIT | 18 |
-| MIT/Apache-2.0 | 14 |
+| MIT/Apache-2.0 | 16 |
 | Unlicense OR MIT | 10 |
 | Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT | 5 |
 | MPL-2.0 | 5 |
+| Apache-2.0 | 4 |
 | BSD-3-Clause | 4 |
 | MIT OR Apache-2.0 OR Zlib | 4 |
-| Apache-2.0 | 3 |
 | Apache-2.0/MIT | 3 |
 | Zlib | 3 |
 | (MIT OR Apache-2.0) AND Unicode-3.0 | 2 |
+| BSD-2-Clause | 2 |
 | BSD-2-Clause OR Apache-2.0 OR MIT | 2 |
 | BSD-3-Clause OR Apache-2.0 | 2 |
 | BSD-3-Clause OR MIT OR Apache-2.0 | 2 |
@@ -37,7 +38,6 @@
 | Apache-2.0 / MIT | 1 |
 | Apache-2.0 AND MIT | 1 |
 | Apache-2.0 WITH LLVM-exception | 1 |
-| BSD-2-Clause | 1 |
 | BSD-3-Clause AND MIT | 1 |
 | BSD-3-Clause/MIT | 1 |
 | CC0-1.0 OR MIT-0 OR Apache-2.0 | 1 |

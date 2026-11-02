@@ -144,7 +144,7 @@ pub fn bound(tool: &str, a: &mut Map<String, Value>) -> Result<(), BridgeError> 
         "export_png" | "export_svg" | "export_package" => {
             absolute(a["dir"].as_str().unwrap_or(""))?;
         }
-        "save_document" => {
+        "save_document" | "set_template" => {
             if let Some(p) = a.get("path").and_then(Value::as_str) {
                 absolute(p)?;
             }
@@ -156,7 +156,8 @@ pub fn bound(tool: &str, a: &mut Map<String, Value>) -> Result<(), BridgeError> 
 
 pub fn timeout_of(tool: &str) -> Duration {
     match tool {
-        "save_document" | "export_png" | "export_svg" | "export_package" | "open" => FILE_TIMEOUT,
+        "save_document" | "export_png" | "export_svg" | "export_package" | "open"
+        | "set_template" => FILE_TIMEOUT,
         _ => CALL_TIMEOUT,
     }
 }
@@ -165,7 +166,7 @@ pub fn timeout_of(tool: &str) -> Duration {
 /// or save to, the export folder. The router grants them before the window runs the call.
 pub fn file_paths(tool: &str, a: &Map<String, Value>) -> Vec<String> {
     let key = match tool {
-        "open_document" | "save_document" => "path",
+        "open_document" | "save_document" | "set_template" => "path",
         "export_png" | "export_svg" | "export_package" => "dir",
         _ => return vec![],
     };
@@ -200,6 +201,13 @@ mod tests {
             vec!["/out"]
         );
         assert!(file_paths("get_tree", &a(json!({"path": "/x"}))).is_empty());
+        // prompt 087: the template image the AI shows
+        assert_eq!(
+            file_paths("set_template", &a(json!({"path": "/pic.png"}))),
+            vec!["/pic.png"]
+        );
+        let mut rel = check_args("set_template", &json!({"path": "pic.png"})).unwrap();
+        assert!(bound("set_template", &mut rel).is_err());
     }
 
     #[test]

@@ -16,6 +16,7 @@ import { FILES_TEXTS } from '../files/files-texts';
 import { FilesService } from '../files/files.service';
 import { SettingsStore } from '../settings/settings.store';
 import { SymbolService } from '../symbols/symbol.service';
+import { TemplateService } from '../template/template.service';
 import { deniedReason } from './mcp-policy';
 import {
   assetSvg,
@@ -57,6 +58,7 @@ export class McpTools {
   private readonly settings = inject(SettingsStore);
   private readonly ask = inject(AskService);
   private readonly symbols = inject(SymbolService);
+  private readonly template = inject(TemplateService);
 
   async run(tool: string, args: Args): Promise<unknown> {
     try {
@@ -146,7 +148,7 @@ export class McpTools {
         return {
           actions: this.actions
             .describe()
-            .filter((d) => deniedReason(d.id) === null)
+            .filter((d) => deniedReason(d.id, undefined, true) === null)
             .map(({ id, label, group, enabled, args }) => ({
               id,
               label,
@@ -169,9 +171,38 @@ export class McpTools {
       }
       case 'preview_svg':
         return this.previewSvg(a);
+      // prompt 087 E14: the canvas template the AI shows and looks at (Rust fits the image)
+      case 'set_template':
+        return this.setTemplate(a);
+      case 'template_png': {
+        const t = await this.template.forAi();
+        if (!t) throw mcpError('unavailable', 'there is no template – use set_template');
+        return t;
+      }
       default:
         throw mcpError('invalid_request', `unknown tool ${tool}`);
     }
+  }
+
+  /** `set_template`: opacity, remove, or an image file (the user decides, like opening). */
+  private async setTemplate(a: Args): Promise<unknown> {
+    const store = this.template.store;
+    if (typeof a['opacity'] === 'number') store.setOpacity(a['opacity']);
+    if (a['clear'] === true) store.clear();
+    else if (typeof a['path'] === 'string') {
+      const path = a['path'];
+      if (!(await this.allowed(T.askTemplate(path)))) {
+        throw mcpError('denied', 'the user did not allow reading this image');
+      }
+      await this.template.fromPath(path);
+    }
+    const img = store.image();
+    return {
+      template: img
+        ? { name: img.name, width: img.width, height: img.height, placement: store.placement() }
+        : null,
+      opacity: store.opacity(),
+    };
   }
 
   /**

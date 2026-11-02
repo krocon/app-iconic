@@ -1,4 +1,4 @@
-import { IconLayer } from '../../core/icon-file/icon-file.models';
+import { IconLayer, JsonValue } from '../../core/icon-file/icon-file.models';
 import {
   AddAsset,
   AddGroup,
@@ -9,6 +9,7 @@ import {
   ReplaceRasterAsset,
 } from '../document/commands';
 import { IconDocument } from '../document/icon-document';
+import { UndoLabel } from '../document/undo/undo-texts';
 import { groups, layerNames, layers, newGroup, newLayer } from '../document/model/icon-json';
 import { IconItem } from '../document/model/selection';
 import { layerNameFor, uniqueAssetName, uniqueLayerName } from '../document/model/unique-names';
@@ -36,6 +37,16 @@ export function assetBase(fileName: string, kind: LayerImage['kind']): string {
   return `${stem}.${kind}`;
 }
 
+/** Other uses of the plan (a traced image, prompt 087): undo label, asset stem, the layer's place. */
+export interface ImageLayerExtras {
+  /** Undo label (default `importImageLayer`). */
+  label?: UndoLabel;
+  /** Asset stem instead of the image's file name. */
+  stem?: string;
+  /** The new layer's `position` (Icon Composer) – a traced layer takes its source's. */
+  position?: JsonValue;
+}
+
 /**
  * "Import Image as Layer" (prompt 080 E1–E3): a new asset and in front of the active group a new
  * layer (directly in front of a selected layer); no groups → a new group on top. An image larger
@@ -45,14 +56,18 @@ export function imageLayerPlan(
   doc: IconDocument,
   image: LayerImage,
   sel: Selection,
+  extras: ImageLayerExtras = {},
 ): ImageLayerPlan {
-  const assetName = uniqueAssetName(assetBase(image.name, image.kind), [...doc.assets.keys()]);
+  const base = extras.stem ? `${extras.stem}.${image.kind}` : assetBase(image.name, image.kind);
+  const assetName = uniqueAssetName(base, [...doc.assets.keys()]);
   const layerName = uniqueLayerName(layerNameFor(assetName), layerNames(doc.iconJson));
   const layer: IconLayer = newLayer(assetName, layerName);
   if (image.kind === 'png') {
     const fit = fitScale(image.width, image.height);
     if (fit !== null) layer['position'] = positionValue(undefined, { scale: fit, tx: 0, ty: 0 });
   }
+  if (extras.position !== undefined) layer['position'] = structuredClone(extras.position);
+  const label = extras.label ?? 'importImageLayer';
   const add =
     image.kind === 'png'
       ? new AddRasterAsset(assetName, image.dataUrl)
@@ -60,7 +75,7 @@ export function imageLayerPlan(
   const group = currentGroupIndex(doc, sel);
   if (group === null) {
     return {
-      command: new CompositeCommand('importImageLayer', [add, new AddGroup(newGroup(layer), 0)]),
+      command: new CompositeCommand(label, [add, new AddGroup(newGroup(layer), 0)]),
       assetName,
       layerName,
       item: { kind: 'layer', group: 0, layer: 0 },
@@ -72,7 +87,7 @@ export function imageLayerPlan(
   const index =
     chosen && chosen.layer < layers(groups(doc.iconJson)[group]).length ? chosen.layer : 0;
   return {
-    command: new CompositeCommand('importImageLayer', [add, new AddLayer(group, layer, index)]),
+    command: new CompositeCommand(label, [add, new AddLayer(group, layer, index)]),
     assetName,
     layerName,
     item: { kind: 'layer', group, layer: index },

@@ -28,11 +28,24 @@ const DENIED = new Set([
   'symbols.delete',
   'symbols.import',
   'symbols.export',
+  // prompt 087: file dialogs and the system clipboard – the AI uses set_template with a path
+  'template.fromFile',
+  'template.fromClipboard',
+  'trace.clipboard',
 ]);
 
-/** `null` = allowed, else why not (for the AI's error message). */
-export function deniedReason(id: string, args?: unknown): string | null {
+/** Sources of `trace.image` the AI may use (no file dialog, no clipboard – prompt 087 E15). */
+const AI_TRACE_SOURCES = ['template', 'layer'];
+
+/**
+ * `null` = allowed, else why not (for the AI's error message). `listing`: only whether the action
+ * shows in `list_actions` (its arguments come later).
+ */
+export function deniedReason(id: string, args?: unknown, listing = false): string | null {
   if (DENIED.has(id) || DENIED_PREFIXES.some((p) => id.startsWith(p))) {
+    if (id.startsWith('template.from') || id === 'trace.clipboard') {
+      return 'use set_template with the image path, then trace.image {source: "template"}';
+    }
     if (id.startsWith('file.save') || id === 'file.saveAs') return 'use save_document';
     if (id.startsWith('file.export')) return 'use export_png / export_svg / export_package';
     if (id === 'file.new' || id === 'file.newWindow') return 'use new_document';
@@ -40,6 +53,14 @@ export function deniedReason(id: string, args?: unknown): string | null {
     if (id.startsWith('edit.') || id === 'icon.copyJson' || id === 'mockups.copyPng')
       return 'the system clipboard is not for the AI';
     return 'not available to the AI';
+  }
+  if (id === 'trace.image' && !listing) {
+    // without arguments it opens the dialog
+    const source = (args as { source?: unknown } | undefined)?.source;
+    if (args === undefined) return 'give arguments, e.g. {source: "template", preset: "shapes"}';
+    if (source !== undefined && !AI_TRACE_SOURCES.includes(source as string)) {
+      return 'source: "template" (set_template) or "layer" (a selected PNG layer)';
+    }
   }
   if (id === 'settings.set') {
     const key = (args as { key?: unknown } | undefined)?.key;

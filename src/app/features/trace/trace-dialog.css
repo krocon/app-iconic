@@ -1,0 +1,142 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.btn.on {
+  border-color: var(--color-accent);
+  background: var(--color-selection);
+}
+
+.presets {
+  gap: 0;
+
+  .preset {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: var(--control-height);
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    cursor: pointer;
+
+    &:first-child {
+      border-radius: var(--radius) 0 0 var(--radius);
+    }
+
+    &:last-child {
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+
+    & + .preset {
+      border-left: none;
+    }
+
+    &.on {
+      background: var(--color-selection);
+      border-color: var(--color-accent);
+    }
+
+    &:has(input:focus-visible) {
+      outline: 2px solid var(--color-focus);
+      outline-offset: 1px;
+    }
+
+    input {
+      margin: 0;
+    }
+  }
+}
+
+.note {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.previews {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+
+  figure {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin: 0;
+  }
+
+  /* both pictures fit beside the details on a small window */
+  figure > :first-child:not(figcaption) {
+    width: 100%;
+    height: min(20rem, 32vh);
+    object-fit: contain;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: repeating-conic-gradient(var(--ai-checker-a) 0% 25%, var(--ai-checker-b) 0% 50%) 0
+      0 / 16px 16px;
+  }
+
+  figcaption {
+    font-size: var(--font-size-small);
+    color: var(--color-text-muted);
+    text-align: center;
+  }
+}
+
+.stats {
+  min-height: 1.4em;
+  margin-top: var(--space-2);
+}
+
+.details {
+  margin-bottom: var(--space-2);
+
+  summary {
+    cursor: pointer;
+    font-size: var(--font-size-small);
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-4);
+  padding-top: var(--space-2);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-small);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--font-size-small);
+
+  output {
+    float: right;
+    color: var(--color-text-muted);
+  }
+}
+
+.error {
+  min-height: 1.4em;
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--font-size-small);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}

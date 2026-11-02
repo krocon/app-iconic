@@ -72,6 +72,7 @@ const WHEEL_ZOOM = 0.01;
  * (`LayerStack`), platform mask, the overlay host `<svg>` with the icon guides, cross cursor and
  * the status line with pointer position and zoom. Zoom/pan state in the `CanvasViewStore`.
  */
+import { TemplateOverlay } from '../template/template-overlay';
 @Component({
   selector: 'app-canvas-view',
   imports: [
@@ -91,6 +92,7 @@ const WHEEL_ZOOM = 0.01;
     LayerHandlesOverlay,
     ContextBar,
     CanvasContextMenu,
+    TemplateOverlay,
   ],
   templateUrl: './canvas-view.html',
   styleUrl: './canvas-view.css',

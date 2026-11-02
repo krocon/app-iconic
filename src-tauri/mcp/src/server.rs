@@ -15,7 +15,8 @@ pub const INSTRUCTIONS: &str = "Drives the running AppIconic, an editor for Appl
 (\"main\", \"doc-2\") – without id a tool works on the last active window. Start with list_documents or \
 new_document, read with get_document / get_tree (nodes are {asset, id} refs), change with run_action \
 (list_actions shows the actions and their arguments, e.g. add.circle {cx, cy, r, fill}), run_command \
-(document commands as JSON) or insert_svg, look at the result with render_preview. Every call is one \
+(document commands as JSON) or insert_svg, look at the result with render_preview. To rebuild a picture, show it with set_template and look at \
+it with get_template; trace it with run_action trace.image or draw it yourself, then compare. Every call is one \
 undo step. Coordinates are in the 1024 × 1024 icon canvas.";
 
 /// Whatever runs the tools – the bridge to the app, a fake in tests.

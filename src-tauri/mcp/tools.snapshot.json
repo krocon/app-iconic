@@ -583,6 +583,52 @@
     "name": "export_package"
   },
   {
+    "description": "Shows an image (absolute path of a PNG, JPEG or WebP) as the template of the canvas (prompt 087): fitted into the 1024 × 1024 canvas, half transparent above the layers, not part of the document or its export. Rebuild what it shows with insert_svg / run_action, or let the app trace it: run_action trace.image {source: \"template\", preset: \"shapes\"}. clear: true removes it.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "clear": {
+          "type": "boolean"
+        },
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        },
+        "opacity": {
+          "maximum": 1,
+          "minimum": 0.05,
+          "type": "number"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "name": "set_template"
+  },
+  {
+    "description": "The template image of the canvas (set_template, or the user's View › Template) as PNG, fitted into size (16…1024, default 512), with where it lies in the canvas (x, y, width, height in icon units) – compare it with render_preview.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "Document id = window label from list_documents (\"main\", \"doc-2\"); default: the last active window",
+          "type": "string"
+        },
+        "size": {
+          "maximum": 1024,
+          "minimum": 16,
+          "type": "integer"
+        }
+      },
+      "required": [],
+      "type": "object"
+    },
+    "name": "get_template"
+  },
+  {
     "description": "Renders the icon as a PNG image (the export path) so you can see the result: size 16…1024 (default 512), appearance light/dark/tinted, mask (default squircle).",
     "inputSchema": {
       "additionalProperties": false,

@@ -16,6 +16,7 @@
 //! - [`export`]        export: SVG files, PNG with resvg in a size set (prompt 012)
 //! - [`fonts`]         system fonts (once per process), font list, text to path (prompts 012, 013)
 //! - [`clipboard_image`] a clipboard image checked and encoded as PNG data URL (prompt 071)
+//! - [`trace`]         tracing a raster image into SVG shapes, gradients, curves (prompt 087)
 //! - [`user_paths`]    paths the user handed over (dropped files), kind of a dropped file (prompt 071)
 
 pub mod clipboard_image;
@@ -33,4 +34,5 @@ pub mod recovery;
 pub mod settings;
 pub mod symbols;
 pub mod thumbnails;
+pub mod trace;
 pub mod user_paths;

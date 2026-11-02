@@ -286,6 +286,30 @@ impl<H: WindowHost> Router<H> {
                 self.host.focus(&label);
                 self.describe(&label, CALL_TIMEOUT)
             }
+            "get_template" => {
+                // prompt 087 E14: the window hands over its template, Rust fits it into `size`
+                let label = self.label_of(&a)?;
+                let size = a
+                    .get("size")
+                    .and_then(Value::as_u64)
+                    .unwrap_or(tools::PREVIEW_DEFAULT) as u32;
+                let out = self
+                    .host
+                    .call(&label, "template_png", json!({}), CALL_TIMEOUT)?;
+                let url = out["dataUrl"]
+                    .as_str()
+                    .ok_or_else(|| err("io", "the window sent no image"))?;
+                let (data, width, height) = ai_core::trace::raster::fit_png_base64(url, size)
+                    .map_err(|e| err("invalid_image", e.message))?;
+                Ok(json!({
+                    "image": { "mimeType": "image/png", "data": data },
+                    "id": label,
+                    "name": out["name"],
+                    "width": width,
+                    "height": height,
+                    "placement": out["placement"],
+                }))
+            }
             "render_preview" => {
                 let label = self.label_of(&a)?;
                 let size = a
@@ -393,6 +417,12 @@ mod tests {
                     Ok(d.clone())
                 }
                 "open" if self.fail_open => Err(err("not_found", "no such file")),
+                "template_png" if d["template"].is_null() => Err(err("unavailable", "no template")),
+                "template_png" => Ok(json!({
+                    "dataUrl": d["template"],
+                    "name": "pic.png",
+                    "placement": {"x": 0, "y": 0, "width": 1024, "height": 1024}
+                })),
                 "preview_svg" => Ok(json!({
                     "svg": r##"<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024"><rect width="1024" height="1024" fill="#f00"/></svg>"##,
                     "revision": 3
@@ -624,6 +654,33 @@ mod tests {
         let log = r.host.log();
         assert!(log.contains(&"open_window:doc-1".to_string()));
         assert!(log.contains(&"doc-1:discard:{}".to_string()));
+    }
+
+    /// Prompt 087 E14: the window's template comes back as an image fitted into `size`.
+    #[test]
+    fn get_template_fits_the_window_image_in_rust() {
+        use ai_core::trace::raster::{Rgba, decode_png, encode_png, png_data_url};
+        let png = encode_png(&Rgba::new(200, 100)).unwrap();
+        let mut window = doc(None, false);
+        window["template"] = json!(png_data_url(&png));
+        let r = Router::new(Fake::with(&[("main", window), ("doc-1", doc(None, false))]));
+        let t = r.call("get_template", &json!({"size": 50})).unwrap();
+        assert_eq!(t["image"]["mimeType"], "image/png");
+        assert_eq!(
+            (t["width"].clone(), t["height"].clone()),
+            (json!(50), json!(25))
+        );
+        let url = format!(
+            "data:image/png;base64,{}",
+            t["image"]["data"].as_str().unwrap()
+        );
+        let bytes = ai_core::icon::save::decode_png_data_url(&url).unwrap();
+        assert_eq!(decode_png(&bytes).unwrap().width, 50);
+        assert_eq!(t["placement"]["width"], 1024);
+        // a window without template, a size out of range
+        let e = r.call("get_template", &json!({"id": "doc-1"})).unwrap_err();
+        assert_eq!(e.code, "unavailable");
+        assert!(r.call("get_template", &json!({"size": 5000})).is_err());
     }
 
     #[test]

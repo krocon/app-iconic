@@ -52,6 +52,7 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/core/recent/            RecentFilesApi („Open Recent“, 003)
   app/core/symbols/           SymbolLibraryApi (eigene Symbole, Zuletzt benutzt, Ordner), DTOs (084)
   app/core/recovery/          RecoveryApi (write/list/open/discard der Wiederherstellungs-Schnappschüsse), DTOs (083)
+  app/core/trace/             TraceApi (trace_image: Bild → SVG), DTOs TraceOptions/TraceResult + Grenzen (087)
   app/core/actions/           Aktionskatalog (+ action-catalog.de.ts: deutsche Namen, 015; Teile je Bereich in
                               catalog/ + action-def: Typen/Helfer, 033), Keymaps
                               (base/mac/other.json), ActionService (run(id, args?)),
@@ -163,6 +164,14 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/features/image-layer/   Bild als Ebene (080): image-layer (rein: Plan Import/Ersetzen, Asset-Namen), ImageLayerService
                               (Dialog, PNG/JPEG/WebP/SVG), RasterConverter (JPEG/WebP → PNG im Browser),
                               image-layer-actions (`file.importImageLayer`, `file.replaceLayerImage`), Texte
+  app/features/trace/         Bild nachzeichnen (087): trace-presets (rein: Stile, Optionen, Argumente der KI), trace-plan
+                              (rein: Quelle, Maßstab, neue Ebene mit `position`), TraceService (Quellen Ebene/Vorlage/
+                              Zwischenablage/Datei, Vorschau, Einfügen, `run` ohne Dialog), TraceDialog, trace-actions
+                              (`trace.image`, `trace.clipboard`), Texte
+  app/features/template/      Vorlage der Zeichenfläche (087): template (rein: Einpassen, Deckkraft), TemplateStore
+                              (Ansichtszustand je Fenster), TemplateService (Datei/Zwischenablage/Ebene/Pfad der KI,
+                              Bild für `get_template`), TemplateOverlay (über den Ebenen, im Artboard), template-actions
+                              (`template.*`), Texte
   app/features/layer-transform/  Layer auf dem Canvas (080): layer-position (rein: `position` lesen/schreiben,
                               Matrix, verschieben, um die Mitte skalieren), layer-frame (rein: Platzierung G·L,
                               positionCommand je Erscheinungsbild), LayerTransformService (Rahmen messen, Drag-Ops),
@@ -236,7 +245,8 @@ src/                          Angular 22 (zoneless, Signals, OnPush, Standalone)
   app/shared/ask/             AskService + AskDialog (Fragen als Promise, aus editlicious)
   testing/                    Fakes – nie im Produktivcode importieren (Fake*Api, providers.ts, documents.ts,
                               command-cases.ts, tree-documents.ts, fake-clipboard-api.ts, fake-export-api.ts,
-                              fake-font-api.ts (Kästchen-Schrift, gleiche Fehlercodes), fake-drop-api.ts, fake-settings-api.ts
+                              fake-font-api.ts (Kästchen-Schrift, gleiche Fehlercodes), fake-trace-api.ts (Rechteck +
+                              Kreis über dem Bild, `fakePng`, 087), fake-drop-api.ts, fake-settings-api.ts
                               (Regeln wie Rust, im Browser-Modus in localStorage), fake-recovery-api.ts (Regeln wie
                               Rust, im Browser-Modus in localStorage: Reload = Absturz), fake-symbol-library-api.ts (084),
                               browser-hook.ts = `window.__appIconic` für Playwright)
@@ -246,7 +256,7 @@ e2e/                          Playwright-Tests gegen den Dev-Server (hardening: 
                               Fokus, Dialoge – 031; composited-shadow: Schatten pixelgleich – 033; export-packages – 078;
                               export-android-web: Favicon hell/dunkel, sichere Zone – 079; png-layer – 080;
                               mockups: Szenen folgen dem Dokument, Dark-Szene – 081; start-screen – 082; recovery – 083;
-                              symbol-library – 084;
+                              symbol-library – 084; trace: Vorlage deckungsgleich, Dialog → Ebene – 087;
                               shortcut-editor – 085; mcp-history: Verlauf, Einrichten – 086)
 public/                       icon.svg (App-Icon), favicon.png
 src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
@@ -274,6 +284,7 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
   src/recovery_commands.rs    write_recovery, list_recovery, open_recovery, discard_recovery; RecoveryState (Instanz,
                               Angebot einmal je Prozess), release beim regulären Beenden (083)
   src/symbol_commands.rs      list/save/update/delete_symbol, record_symbol_use, import/export_symbols; SymbolLock (084)
+  src/trace_commands.rs       trace_image (Bild nachzeichnen, 087)
   src/drop_files.rs           DragDrop → `file-drop` ans Fenster, Drop-Pfade in UserPaths, `read_clipboard_image` (071),
                               `copy_png` (078), `copy_scene_png` (081)
   Info.plist, entitlements.plist  macOS: `.icon` als Package-Dokument (Alternate), Hardened-Runtime-Rechte (030)
@@ -306,6 +317,10 @@ src-tauri/                    Rust (Tauri 2), Crate `app-iconic`, Lib `ai_lib`
                               Alpha), appiconset (Contents.json im Xcode-Stil), containers (.icns/.ico schreiben/lesen);
                               079: android (Adaptive Icon, Legacy, Play), web (Favicons, PWA, Manifest), package_render
                               (Renderer der Pakete); 081: scene (Mockup-Szene als PNG im eigenen Seitenverhältnis)
+    src/trace/                Bild nachzeichnen (087): raster (PNG lesen/schreiben, Flächenmittel), regions (Farbregionen
+                              gestapelt wie vtracer, Schwarzweiß, Verlaufsbänder verschmelzen), gradient (Ausgleichsebene,
+                              linearGradient), outline (Umrisse, Pfaddaten), shapes (Rechteck/Ellipse erkennen, Kanten
+                              unter einem Pixel, Angleichen), tests (mit resvg zurückgerendert)
     src/fonts/                Schriften (012, 013): system (fontdb einmal je Prozess, generische Familien), FontCatalog
                               (Familien/Stile/Ids), outline (Text → Pfad: harfrust-Shaping, skrifa-Umrisse, BBox)
   mcp/                        Crate `ai-mcp` + Binary `app-iconic-mcp` (018, aus editlicious ed-mcp): server (MCP über

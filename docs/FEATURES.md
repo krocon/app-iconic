@@ -244,6 +244,19 @@
 - [x] Verbindung testen: Sidecar starten, MCP-Handshake, App erreichbar? _(neu)_ (086)
 - [x] KI-Verlauf am „AI“-Badge: letzte Aufrufe mit Zeit, Werkzeug, Ergebnis; „Widerrufen“ für den letzten KI-Schritt _(neu)_ (086)
 
+## 11b. Bild nachzeichnen _(neu, 087)_
+
+- [x] „Bild nachzeichnen…“ aus der gewählten PNG-Ebene, der Vorlage, der Zwischenablage oder einer Datei (PNG, JPEG,
+      WebP, SVG) → neue SVG-Ebene in einem Undo-Schritt; Dialog mit Original neben dem echten Ergebnis und
+      Zusammenfassung (087)
+- [x] Stufe A: Farbflächen und Umrisse (Kurven, gerade Kanten, Pixelstufen), Schwarzweiß, Hintergrund weglassen,
+      Farbgenauigkeit, Farbstufen, kleinste Fläche (Rust, visioncortex) (087)
+- [x] Stufe B „Wie von Hand“: Rechtecke, abgerundete Rechtecke, Ellipsen, Kreise als echte Elemente, Farbbänder als
+      `linearGradient`, gleiche Formen gleich groß und bündig, nahe Farben eine Farbe, Kanten unter einem Pixel (087)
+- [x] Vorlage über der Zeichenfläche (Ansicht › Vorlage: aus Datei, Zwischenablage oder Ebene, zeigen, Deckkraft,
+      entfernen) – nicht im Dokument, nicht im Export; Nachgezeichnetes liegt genau darauf (087)
+- [x] KI: `set_template`, `get_template`, `run_action trace.image` – die KI sieht die Vorlage und baut nach (087)
+
 ## 12. Undo/Redo
 
 - [x] Benannte Aktionen im Menü („Undo Move“ …), ⌘Z / ⇧⌘Z (003 Namen, 005 Menü und Kürzel)

@@ -23,6 +23,8 @@ import { FakeRecentFilesApi } from '../testing/fake-recent-files-api';
 import { FakeWindowApi } from '../testing/fake-window-api';
 import { FakeExportApi } from '../testing/fake-export-api';
 import { FakeFontApi } from '../testing/fake-font-api';
+import { FakeTraceApi } from '../testing/fake-trace-api';
+import { TauriTraceApi, TraceApi } from './core/trace/trace-api';
 import { installTestHook } from '../testing/browser-hook';
 import { SVG_FIXTURES } from '../testing/fixtures/svg-fixtures';
 
@@ -73,6 +75,7 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
       { provide: DropApi, useClass: TauriDropApi },
       { provide: RecoveryApi, useClass: TauriRecoveryApi },
       { provide: SymbolLibraryApi, useClass: TauriSymbolLibraryApi },
+      { provide: TraceApi, useClass: TauriTraceApi },
     ]
   : [
       // About keeps the real facade: it shows "desktop backend not available" (e2e/shell)
@@ -106,5 +109,7 @@ export const BACKEND_PROVIDERS: (Provider | EnvironmentProviders)[] = isTauri()
       },
       // the own symbols in memory (prompt 084)
       { provide: SymbolLibraryApi, useFactory: () => new FakeSymbolLibraryApi() },
+      // tracing (prompt 087): a rectangle and a circle over the image, no pixels read
+      { provide: TraceApi, useFactory: () => new FakeTraceApi() },
       provideAppInitializer(installTestHook),
     ];

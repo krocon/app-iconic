@@ -68,6 +68,10 @@ import { DialogService } from './shared/dialog/dialog.service';
 import { registerSvgSourceActions } from './features/svg-source/svg-source-actions';
 import { registerExportActions } from './features/export/export-actions';
 import { registerImageLayerActions } from './features/image-layer/image-layer-actions';
+import { registerTraceActions } from './features/trace/trace-actions';
+import { TraceService } from './features/trace/trace.service';
+import { registerTemplateActions } from './features/template/template-actions';
+import { TemplateService } from './features/template/template.service';
 import { ImageLayerService } from './features/image-layer/image-layer.service';
 import { ExportService } from './features/export/export.service';
 import { SvgSourceService } from './features/svg-source/svg-source.service';
@@ -345,6 +349,9 @@ export class App implements OnInit {
     registerExportActions(this.actions, inject(ExportService), this.destroyRef);
     // prompt 080: images as layers
     registerImageLayerActions(this.actions, inject(ImageLayerService), this.destroyRef);
+    // prompt 087: tracing images, the canvas template
+    registerTraceActions(this.actions, inject(TraceService), this.destroyRef);
+    registerTemplateActions(this.actions, inject(TemplateService), this.destroyRef);
     registerClipActions(this.actions, inject(ClipService), this.destroyRef);
     registerSettingsActions(
       this.actions,

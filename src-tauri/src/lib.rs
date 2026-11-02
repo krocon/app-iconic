@@ -24,6 +24,7 @@
 //! - [`recovery_commands`] recovery snapshots of unsaved documents: write, offer, restore (083)
 //! - [`symbol_commands`]   the own symbol library and the recently used symbols (084)
 //! - [`thumbnail_commands`] preview images of the recent files for the start screen (082)
+//! - [`trace_commands`] tracing an image into an SVG layer (087)
 //!
 //! The engine (icon documents, file I/O, export, fonts) lives in the Tauri-free crate
 //! `ai-core` (`src-tauri/core`); `error` is re-exported from there.
@@ -47,6 +48,7 @@ pub mod sessions;
 pub mod settings_commands;
 pub mod symbol_commands;
 pub mod thumbnail_commands;
+pub mod trace_commands;
 pub mod window_commands;
 pub mod windows;
 
@@ -182,6 +184,7 @@ pub fn run() {
             commands::third_party_notices,
             font_commands::list_fonts,
             font_commands::text_to_path,
+            trace_commands::trace_image,
             settings_commands::load_settings,
             settings_commands::save_settings,
             settings_commands::reset_settings,

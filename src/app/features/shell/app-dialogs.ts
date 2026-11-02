@@ -21,6 +21,7 @@ import { SettingsDialog } from '../../features/settings/settings-dialog';
 import { MockupsDialog } from '../../features/mockups/mockups-dialog';
 import { RecoveryDialog } from '../../features/recovery/recovery-dialog';
 import { McpHistoryPopover } from '../../features/mcp/mcp-history-popover';
+import { TraceDialog } from '../../features/trace/trace-dialog';
 
 /** The modal dialogs of the window, one at a time (`DialogService.open`). */
 @Component({
@@ -47,6 +48,7 @@ import { McpHistoryPopover } from '../../features/mcp/mcp-history-popover';
     MockupsDialog,
     RecoveryDialog,
     McpHistoryPopover,
+    TraceDialog,
   ],
   template: `
     @switch (dialogs.open()) {
@@ -112,6 +114,9 @@ import { McpHistoryPopover } from '../../features/mcp/mcp-history-popover';
       }
       @case ('aiHistory') {
         <app-mcp-history-popover />
+      }
+      @case ('trace') {
+        <app-trace-dialog />
       }
     }
   `,

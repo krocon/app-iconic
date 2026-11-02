@@ -1,5 +1,6 @@
 import { ActionDef, APP, FILE, MAX_RECENT_ACTIONS } from './action-def';
 import { COPY_PNG_ARGS, EXPORT_ARGS } from '../export-action-args';
+import { TRACE_ARGS } from '../../../features/trace/trace-presets';
 
 /** The actions of app, AI control, settings and file (split from `action-catalog.ts` in prompt 033). */
 export const APP_FILE_ACTIONS: readonly ActionDef[] = [
@@ -69,6 +70,9 @@ export const APP_FILE_ACTIONS: readonly ActionDef[] = [
   // prompt 080: a PNG (JPEG/WebP converted, SVG cleaned) as a new layer; new PNG for a layer
   FILE('file.importImageLayer', 'Import Image as Layer…'),
   FILE('file.replaceLayerImage', 'Replace Layer Image…'),
+  // prompt 087: an image as SVG shapes in a new layer; with arguments without the dialog (AI)
+  FILE('trace.image', 'Trace Image…', { args: TRACE_ARGS }),
+  FILE('trace.clipboard', 'Trace Image from Clipboard…'),
   // without arguments the export dialog; with them straight to the files (design 012 E14)
   FILE('file.exportSvg', 'Export SVG…', { args: EXPORT_ARGS }),
   FILE('file.exportPng', 'Export PNG…', { args: EXPORT_ARGS }),

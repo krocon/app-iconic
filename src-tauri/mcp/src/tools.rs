@@ -263,6 +263,26 @@ pub fn list() -> Vec<Value> {
             &["dir", "format"],
         ),
         tool(
+            "set_template",
+            "Shows an image (absolute path of a PNG, JPEG or WebP) as the template of the canvas (prompt 087): fitted into the 1024 × 1024 canvas, half transparent above the layers, not part of the document or its export. Rebuild what it shows with insert_svg / run_action, or let the app trace it: run_action trace.image {source: \"template\", preset: \"shapes\"}. clear: true removes it.",
+            json!({
+                "id": id(),
+                "path": {"type": "string"},
+                "opacity": {"type": "number", "minimum": 0.05, "maximum": 1},
+                "clear": {"type": "boolean"}
+            }),
+            &[],
+        ),
+        tool(
+            "get_template",
+            "The template image of the canvas (set_template, or the user's View › Template) as PNG, fitted into size (16…1024, default 512), with where it lies in the canvas (x, y, width, height in icon units) – compare it with render_preview.",
+            json!({
+                "id": id(),
+                "size": {"type": "integer", "minimum": PREVIEW_MIN, "maximum": PREVIEW_MAX}
+            }),
+            &[],
+        ),
+        tool(
             "render_preview",
             "Renders the icon as a PNG image (the export path) so you can see the result: size 16…1024 (default 512), appearance light/dark/tinted, mask (default squircle).",
             json!({
@@ -299,7 +319,7 @@ mod tests {
     #[test]
     fn every_tool_has_a_unique_name_a_description_and_an_object_schema() {
         let names = names();
-        assert_eq!(names.len(), 20);
+        assert_eq!(names.len(), 22);
         let mut sorted = names.clone();
         sorted.sort();
         sorted.dedup();
