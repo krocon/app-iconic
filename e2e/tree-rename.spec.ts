@@ -120,7 +120,7 @@ test('the filter finds circles in a big SVG quickly; all by keyboard', async ({ 
   const ms = Date.now() - t0;
   const rows = tree(page).getByRole('treeitem');
   // the circles carry ids: they match by their tag, their ancestors stay as context
-  expect(await rows.count()).toBeGreaterThan(3);
+  await expect.poll(() => rows.count()).toBeGreaterThan(3);
   console.log(`filter "circle" in big.svg: ${ms} ms`);
   expect(ms).toBeLessThan(5000);
   // Enter selects the first match and moves the focus there

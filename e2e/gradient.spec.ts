@@ -105,8 +105,8 @@ test('the panel creates a radial gradient, adds and removes a stop', async ({ pa
   expect(fill).toMatch(/^url\(#gradient-\d+\)$/);
   const bar = page.getByTestId('gradient-bar');
   await expect(bar.locator('[data-stop]')).toHaveCount(2);
-  const b = (await bar.boundingBox())!;
-  await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+  // a click in the middle of the bar adds a stop (locator click: waits until the bar is stable)
+  await bar.click();
   await expect(bar.locator('[data-stop]')).toHaveCount(3);
   await page.getByTestId('gradient-remove-stop').click();
   await expect(bar.locator('[data-stop]')).toHaveCount(2);

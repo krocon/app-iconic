@@ -189,7 +189,9 @@ mod tests {
     #[test]
     fn display_dirs() {
         let p = abs("Mein Icon.icon");
-        assert_eq!(display_dir(&p), std::env::temp_dir().to_string_lossy());
+        // via components: TMPDIR may end in a separator (macOS), `parent()` drops it
+        let tmp: std::path::PathBuf = std::env::temp_dir().components().collect();
+        assert_eq!(display_dir(&p), tmp.to_string_lossy());
         assert_eq!(display_dir("/"), "");
     }
 }

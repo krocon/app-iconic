@@ -158,8 +158,8 @@ impl LinearModel {
     /// length; `None` when nothing changes.
     pub fn direction(&self) -> Option<(f64, f64)> {
         let (mut a, mut b, mut c) = (0.0, 0.0, 0.0);
-        for k in 0..3 {
-            let (gx, gy) = (self.coef[k][1], self.coef[k][2]);
+        for row in &self.coef {
+            let (gx, gy) = (row[1], row[2]);
             a += gx * gx;
             b += gx * gy;
             c += gy * gy;

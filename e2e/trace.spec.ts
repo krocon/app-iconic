@@ -54,13 +54,19 @@ test('an image as template: fitted into the canvas, over the layers, not in the 
   const img = page.getByTestId('canvas-template');
   await expect(img).toBeVisible();
   // 300 × 150 fitted: 1024 × 512, centred → (0, 256)–(1024, 768) in icon units
-  const box = (await img.boundingBox())!;
-  const tl = await toClient(page, 0, 256);
-  const br = await toClient(page, 1024, 768);
-  expect(Math.abs(box.x - tl.clientX)).toBeLessThan(1.5);
-  expect(Math.abs(box.y - tl.clientY)).toBeLessThan(1.5);
-  expect(Math.abs(box.x + box.width - br.clientX)).toBeLessThan(1.5);
-  expect(Math.abs(box.y + box.height - br.clientY)).toBeLessThan(1.5);
+  // the fit follows the image's natural size a frame later: poll the largest corner offset
+  const offset = async () => {
+    const box = (await img.boundingBox())!;
+    const tl = await toClient(page, 0, 256);
+    const br = await toClient(page, 1024, 768);
+    return Math.max(
+      Math.abs(box.x - tl.clientX),
+      Math.abs(box.y - tl.clientY),
+      Math.abs(box.x + box.width - br.clientX),
+      Math.abs(box.y + box.height - br.clientY),
+    );
+  };
+  await expect.poll(offset).toBeLessThan(1.5);
   expect(await img.evaluate((e) => getComputedStyle(e).opacity)).toBe('0.5');
   expect(await img.evaluate((e) => getComputedStyle(e.parentElement!).pointerEvents)).toBe('none');
   // the template is no part of the document

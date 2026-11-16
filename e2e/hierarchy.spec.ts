@@ -48,6 +48,17 @@ const groupNames = (page: Page) =>
   );
 
 /** Drags the centre of row `from` to a fraction of the height of row `to` (0 = top, 1 = bottom). */
+/** `ids` in the order the tree shows them (rows of `g0/l0`, by `data-index`). */
+async function treeOrder(page: Page, ids: string[]): Promise<string[]> {
+  const at = await Promise.all(
+    ids.map(async (id) => Number(await row(page, `g0/l0/${id}`).getAttribute('data-index'))),
+  );
+  return ids
+    .map((id, i) => [id, at[i]] as const)
+    .sort((x, y) => x[1] - y[1])
+    .map(([id]) => id);
+}
+
 async function dragRow(page: Page, from: string, to: string, frac: number) {
   const a = (await row(page, from).boundingBox())!;
   const b = (await row(page, to).boundingBox())!;
@@ -323,7 +334,8 @@ test('front-most first (prompt 063): Bring to Front puts the node on top of the 
   await row(page, `g0/l0/${rect}`).click();
   await page.evaluate(() => window.__appIconic!.run('arrange.bringToFront'));
   expect(await ids(page, NESTED, ':scope > *')).toEqual([g1, rect]);
-  await expect.poll(() => index(rect)).toBeLessThan(await index(g1));
+  // the tree renders after the model (zoneless change detection): read both rows together
+  await expect.poll(async () => (await index(rect)) - (await index(g1))).toBeLessThan(0);
   // the AI's tree lists the same order, with the paint order
   const tree = (await page.evaluate(() => window.__appIconic!.mcp('get_tree'))) as {
     nodes: { ref?: { id: string }; z?: number }[];
@@ -351,6 +363,8 @@ test('dragging a node above another in the tree puts it in front (prompt 063)', 
   // the tree: c, b, a (front-most first); drag a above c → a paints on top
   await dragRow(page, `g0/l0/${a}`, `g0/l0/${c}`, 0.1);
   await expect.poll(() => ids(page, 'z.svg', ':scope > *')).toEqual([b, c, a]);
+  // the tree follows the model a frame later: wait for its rows before the next drag
+  await expect.poll(() => treeOrder(page, [a, b, c])).toEqual([a, c, b]);
   // and below b → between the back (nothing) and b: behind b
   await dragRow(page, `g0/l0/${c}`, `g0/l0/${b}`, 0.9);
   await expect.poll(() => ids(page, 'z.svg', ':scope > *')).toEqual([c, b, a]);
