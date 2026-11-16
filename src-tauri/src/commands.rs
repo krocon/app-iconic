@@ -376,6 +376,8 @@ mod path_rules {
                 &["import_symbols", "export_symbols"][..],
             ),
         ] {
+            // a Windows checkout may have CRLF line ends
+            let src = src.replace("\r\n", "\n");
             for name in names {
                 let at = src.find(&format!("pub async fn {name}(")).expect(name);
                 let body = &src[at..at + src[at..].find("\n}\n").expect(name)];
